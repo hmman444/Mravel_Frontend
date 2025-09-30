@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Poppins', 'ui-sans-serif', 'system-ui'],
+      },
       colors:{
         primary: "#07689F",
         secondary: "#A2D5F2",
