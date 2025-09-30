@@ -5,7 +5,7 @@ import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import HomePage from "./features/home/pages/HomePage";
-
+import SearchPage from "./features/search/pages/SearchPage";
 function App() {
   return (
     <Router>
@@ -16,6 +16,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
         <Route path="*" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
       </Routes>
     </Router>
   );
