@@ -26,7 +26,7 @@ export default function RegisterPage() {
   return (
     <AuthLayout>
       <a href="/" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Vào Trang chủ Mravel
+        ← Về Trang chủ Mravel
       </a>
 
       <AuthCard
