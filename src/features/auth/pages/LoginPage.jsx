@@ -18,7 +18,7 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <a href="/" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Vào Trang chủ Mravel
+        ← Về Trang chủ Mravel
       </a>
 
       <AuthCard title="Tận hưởng kỳ nghỉ của bạn" subtitle="Đăng nhập với email và mật khẩu">
