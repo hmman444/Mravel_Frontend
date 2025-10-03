@@ -6,6 +6,8 @@ import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import HomePage from "./features/home/pages/HomePage";
 import SearchPage from "./features/search/pages/SearchPage";
+import PlanListPage from "./features/plans/pages/PlanListPage";
+import PlanBoardPage from "./features/plans/pages/PlanBoardPage";
 function App() {
   return (
     <Router>
@@ -17,6 +19,8 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
         <Route path="*" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/plans" element={<PlanListPage />} />
+        <Route path="/plans/editor" element={<PlanBoardPage />} />
       </Routes>
     </Router>
   );
