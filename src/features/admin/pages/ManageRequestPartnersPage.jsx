@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import AdminLayout from "../components/AdminLayout";
+import { useTranslation } from "react-i18next";
 
-// Dữ liệu demo đơn đăng ký
 const partnerRequests = [
     {
         id: 101,
@@ -33,14 +33,16 @@ const partnerRequests = [
 
 export default function ManageRequestPartnersPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
+
     const [search, setSearch] = useState("");
-    const [filter, setFilter] = useState("Tất cả");
+    const [filter, setFilter] = useState(t("all"));
 
     const filteredRequests = partnerRequests.filter((req) => {
         const matchSearch =
         req.name.toLowerCase().includes(search.toLowerCase()) ||
         req.email.toLowerCase().includes(search.toLowerCase());
-        const matchFilter = filter === "Tất cả" || req.serviceType === filter;
+        const matchFilter = filter === t("all") || req.serviceType === filter;
         return matchSearch && matchFilter;
     });
 
@@ -54,7 +56,7 @@ export default function ManageRequestPartnersPage() {
             >
             <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
             </button>
-            <h1 className="text-2xl font-bold">Đơn đăng ký đối tác</h1>
+            <h1 className="text-2xl font-bold">{t("partner_requests")}</h1>
         </div>
 
         {/* Toolbar: Search + Filter */}
@@ -64,7 +66,7 @@ export default function ManageRequestPartnersPage() {
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
             <input
                 type="text"
-                placeholder="Tìm kiếm..."
+                placeholder={t("search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border rounded-md outline-none focus:ring focus:border-blue-500"
@@ -77,10 +79,10 @@ export default function ManageRequestPartnersPage() {
             onChange={(e) => setFilter(e.target.value)}
             className="px-4 py-2 border rounded-md text-sm w-40"
             >
-            <option>Tất cả</option>
+            <option>{t("all")}</option>
             <option>Tour</option>
-            <option>Khách sạn</option>
-            <option>Ẩm thực</option>
+            <option>{t("hotel")}</option>
+            <option>{t("food")}</option>
             </select>
         </div>
 
@@ -101,24 +103,22 @@ export default function ManageRequestPartnersPage() {
                     <div>
                     <h3 className="font-semibold text-lg">{req.name}</h3>
                     <p className="text-sm text-gray-500">{req.email}</p>
-                    <p className="text-sm text-gray-400 italic">
-                        {req.serviceType}
-                    </p>
+                    <p className="text-sm text-gray-400 italic">{req.serviceType}</p>
                     </div>
                 </div>
 
                 <div className="flex gap-3 mt-5">
                     <button className="flex-1 px-3 py-2 text-sm rounded-md border border-green-500 text-green-600 hover:bg-green-50">
-                    ✔ Chấp nhận
+                    ✔ {t("approve")}
                     </button>
                     <button className="flex-1 px-3 py-2 text-sm rounded-md border border-red-500 text-red-600 hover:bg-red-50">
-                    ✖ Từ chối
+                    ✖ {t("reject")}
                     </button>
                 </div>
                 </div>
             ))
             ) : (
-            <p className="text-gray-500">Không có đơn đăng ký nào phù hợp.</p>
+            <p className="text-gray-500">{t("no_matching_requests")}</p>
             )}
         </div>
         </AdminLayout>
