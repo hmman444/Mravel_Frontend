@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import DarkModeToggle from "../../../components/DarkModeToggle";
+import LanguageDropdown from "../../../components/LanguageDropdown";
 import { BellIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function AdminHeader() {
     const [scrolled, setScrolled] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -29,7 +32,7 @@ export default function AdminHeader() {
                 alt="Mravel Logo"
                 className="h-8 w-8 object-contain"
             />
-            Mravel Admin
+            {t("mravel_admin")}
             </Link>
 
             {/* Bên phải */}
@@ -48,12 +51,15 @@ export default function AdminHeader() {
                 className="w-9 h-9 rounded-full border"
                 />
                 <span className="font-medium text-gray-900 dark:text-gray-200 hidden md:block">
-                Admin
+                {t("admin")}
                 </span>
             </div>
 
             {/* Dark mode toggle */}
             <DarkModeToggle />
+
+            {/* Language dropdown */}
+            <LanguageDropdown />
             </div>
         </div>
         </header>
