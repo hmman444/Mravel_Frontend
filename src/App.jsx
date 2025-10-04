@@ -21,6 +21,8 @@ import ManageServicesPage from "./features/admin/pages/ManageServicesPage";
 import ManageLocationsPage from "./features/admin/pages/ManageLocationsPage";
 import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
+import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
+import PlaceDetailPage from "./features/admin/pages/PlaceDetailPage";
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
         <Route path="/admin/locations" element={<ManageLocationsPage />} />
         <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
         <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
+        <Route path="/admin/locations/:id" element={<LocationDetailPage />} />
+        <Route path="/admin/places/:placeId" element={<PlaceDetailPage />} />
 
         {/* Default: home */}
         <Route path="*" element={<HomePage />} />
