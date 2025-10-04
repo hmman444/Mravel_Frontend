@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { REACTIONS } from "../utils/reactionsMeta";
+import { REACTIONS } from "../../utils/reactionsMeta";
 
 export default function ReactionPicker({ onPick }) {
   const [open, setOpen] = useState(false);
