@@ -9,7 +9,9 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 
 // Home
 import HomePage from "./features/home/pages/HomePage";
-
+import SearchPage from "./features/search/pages/SearchPage";
+import PlanListPage from "./features/plans/pages/PlanListPage";
+import PlanBoardPage from "./features/plans/pages/PlanBoardPage";
 // Admin
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
@@ -47,6 +49,9 @@ function App() {
 
         {/* Default: home */}
         <Route path="*" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/plans" element={<PlanListPage />} />
+        <Route path="/plans/editor" element={<PlanBoardPage />} />
       </Routes>
     </Router>
   );
