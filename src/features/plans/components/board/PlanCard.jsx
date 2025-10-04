@@ -28,21 +28,32 @@ export default function PlanCard({
 
   return (
     <div
-      className="p-3 rounded-lg mb-2 shadow-sm bg-gray-100 dark:bg-gray-700 cursor-pointer"
+      className="p-3 rounded-lg mb-2 shadow-sm bg-gray-100 dark:bg-gray-700 cursor-pointer transition hover:shadow-md"
       onClick={() => {
         setActiveCard(card);
         setEditCard({ ...card });
       }}
     >
-      {card.label && (
-        <span
-          className={`px-2 py-1 text-xs text-white rounded ${card.label.color}`}
-        >
-          {card.label.text}
-        </span>
+      {/* nhãn */}
+      {card.labels && card.labels.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {card.labels.slice(0, 4).map((lbl, idx) => (
+            <span
+              key={idx}
+              className={`${lbl.color} text-[10px] text-white px-2 py-[2px] rounded-md leading-none`}
+            >
+              {lbl.text}
+            </span>
+          ))}
+          {card.labels.length > 4 && (
+            <span className="text-[10px] text-gray-500">+{card.labels.length - 4}</span>
+          )}
+        </div>
       )}
 
-      <div className="flex items-center gap-2 mt-1">
+      {/* Nội dung thẻ */}
+      <div className="flex items-center gap-2">
+        {/* Checkbox hoàn thành */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -54,11 +65,19 @@ export default function PlanCard({
               : "bg-white border-gray-400"
           }`}
         >
-          {card.done && <FaCheck />}
+          {card.done && <FaCheck className="text-xs" />}
         </button>
 
-        <span>{card.text}</span>
+        {/* Tiêu đề */}
+        <span
+          className={`flex-1 text-sm ${
+            card.done ? " text-gray-400" : "text-gray-800 dark:text-gray-100"
+          }`}
+        >
+          {card.text}
+        </span>
 
+        {/* Nút menu ... */}
         <div className="ml-auto">
           <button
             ref={btnRef}
@@ -66,13 +85,40 @@ export default function PlanCard({
               e.stopPropagation();
               setActiveMenu(activeMenu === card.id ? null : card.id);
             }}
-            className="text-gray-500 hover:text-gray-800"
+            className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
           >
             <FaEllipsisV />
           </button>
         </div>
       </div>
 
+      {/* Thời gian */}
+      {card.start && card.end && (
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+          <FaCalendarAlt /> {card.start} → {card.end}
+        </div>
+      )}
+
+      {card.priority && (
+        <div
+          className={`text-xs font-medium mt-2 inline-block px-2 py-[2px] rounded ${
+            card.priority === "high"
+              ? "bg-red-500 text-white"
+              : card.priority === "medium"
+              ? "bg-yellow-400 text-black"
+              : "bg-green-500 text-white"
+          }`}
+        >
+          Ưu tiên:{" "}
+          {card.priority === "high"
+            ? "Cao"
+            : card.priority === "medium"
+            ? "Trung bình"
+            : "Thấp"}
+        </div>
+      )}
+
+      {/* Menu context (portal) */}
       {activeMenu === card.id &&
         createPortal(
           <div
@@ -107,12 +153,6 @@ export default function PlanCard({
           </div>,
           document.body
         )}
-
-      {card.start && card.end && (
-        <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-          <FaCalendarAlt /> {card.start} → {card.end}
-        </div>
-      )}
     </div>
   );
 }

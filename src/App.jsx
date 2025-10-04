@@ -6,12 +6,13 @@ import RegisterPage from "./features/auth/pages/RegisterPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
-
 // Home
 import HomePage from "./features/home/pages/HomePage";
+// Search
 import SearchPage from "./features/search/pages/SearchPage";
+// Plans
 import PlanListPage from "./features/plans/pages/PlanListPage";
-import PlanBoardPage from "./features/plans/pages/PlanBoardPage";
+import PlanDashboardPage from "./features/plans/pages/PlanDashboardPage";
 // Admin
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
@@ -43,11 +44,14 @@ function App() {
         <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
         <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
 
-        {/* Default: home */}
-        <Route path="*" element={<HomePage />} />
-        <Route path="/search" element={<SearchPage />} />
+        {/* Plans routes */}
         <Route path="/plans" element={<PlanListPage />} />
-        <Route path="/plans/editor" element={<PlanBoardPage />} />
+        <Route path="/plans/:planId" element={<PlanDashboardPage />} />
+
+        {/* General routes */}
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="*" element={<HomePage />} />
       </Routes>
     </Router>
   );

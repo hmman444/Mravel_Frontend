@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { timeAgo } from "../utils/utils";
+import { timeAgo } from "../../utils/utils";
 
 export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
   const [text, setText] = useState("");
