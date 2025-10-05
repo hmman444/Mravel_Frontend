@@ -1,4 +1,4 @@
-import { reactionsMeta } from "../../utils/reactionsMeta";
+import { reactionsMeta } from "../utils/reactionsMeta";
 import ReactionPicker from "./ReactionPicker";
 import { ChatBubbleLeftRightIcon, ShareIcon } from "@heroicons/react/24/outline";
 

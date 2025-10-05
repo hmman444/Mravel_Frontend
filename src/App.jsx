@@ -11,8 +11,8 @@ import HomePage from "./features/home/pages/HomePage";
 // Search
 import SearchPage from "./features/search/pages/SearchPage";
 // Plans
-import PlanListPage from "./features/plans/pages/PlanListPage";
-import PlanDashboardPage from "./features/plans/pages/PlanDashboardPage";
+import PlanListPage from "./features/planFeed/pages/PlanListPage";
+import PlanDashboardPage from "./features/planBoard/pages/PlanDashboardPage";
 // Admin
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ManageUsersPage from "./features/admin/pages/ManageUsersPage";

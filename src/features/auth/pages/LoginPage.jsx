@@ -5,14 +5,16 @@ import AuthInput from "../components/AuthInput";
 import PasswordInput from "../components/PasswordInput";
 import SocialLogin from "../components/SocialLogin";
 import { UserIcon } from "@heroicons/react/24/outline";
+import { useLogin } from "../hooks/useLogin";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { handleLogin, loading, message } = useLogin();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, password });
+    await handleLogin(email, password);
   };
 
   return (
@@ -52,10 +54,25 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold"
+            disabled={loading}
+            className={`w-full py-3 rounded-full font-semibold text-white ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-600 to-blue-500"
+            }`}
           >
-            Đăng nhập
+            {loading ? "Đang xử lý..." : "Đăng nhập"}
           </button>
+
+          {message && (
+            <p
+              className={`text-center mt-3 font-medium ${
+                message.includes("thành công") ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </form>
 
         <SocialLogin />

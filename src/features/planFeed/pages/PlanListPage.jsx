@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import Button from "../../../components/Button";
-import PlanPostCard from "../components/feed/PlanPostCard";
-import PostSkeleton from "../components/feed/PostSkeleton";
+import PlanPostCard from "../components/PlanPostCard";
+import PostSkeleton from "../components/PostSkeleton";
 
 // mock “current user”
 const ME = {
