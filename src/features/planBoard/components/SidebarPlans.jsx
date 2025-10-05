@@ -13,7 +13,8 @@ export default function SidebarPlans({
   onSelectPlan,
   activePlanId,
   collapsed,
-  onAddToPlan, // ✅ callback khi click 1 lần
+  onAddToPlan,
+  onShowDetail,
 }) {
   const [openSections, setOpenSections] = useState({
     forYou: true,
@@ -87,17 +88,16 @@ export default function SidebarPlans({
     { id: "2", name: "Khám phá Hà Nội cuối tuần" },
   ];
 
-  // ✅ Hàm xử lý click 1 lần & 2 lần
   let clickTimer = null;
   const handleClickItem = (item) => {
     if (clickTimer) {
       clearTimeout(clickTimer);
       clickTimer = null;
-      setSelectedItem(item); // 👉 double click => mở chi tiết
+      onShowDetail?.(item);
     } else {
       clickTimer = setTimeout(() => {
         clickTimer = null;
-        onAddToPlan?.(item); // 👉 single click => thêm vào PlanList
+        onAddToPlan?.(item);
       }, 250);
     }
   };

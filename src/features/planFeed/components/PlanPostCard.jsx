@@ -3,7 +3,7 @@ import PlanHeader from "./PlanHeader";
 import PlanMedia from "./PlanMedia";
 import PlanActions from "./PlanActions";
 import PlanComments from "./PlanComments";
-import { truncate } from "../../utils/utils";
+import { truncate } from "../utils/utils";
 import { MapPinIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 
 /**

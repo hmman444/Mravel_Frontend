@@ -12,13 +12,13 @@ import {
 } from "react-icons/fa";
 
 import Navbar from "../../../components/Navbar";
-import SidebarPlans from "../components/board/SidebarPlans";
-import ShareModal from "../components/board/modals/ShareModal";
-import PlanList from "../components/board/PlanList";
-import PlanSummary from "../components/board/PlanSummary";
-import EditCardModal from "../components/board/modals/EditCardModal";
-import LabelModal from "../components/board/modals/LabelModal";
-import ConfirmDeleteModal from "../components/board/modals/ConfirmDeleteModal";
+import SidebarPlans from "../components/SidebarPlans";
+import ShareModal from "../components/modals/ShareModal";
+import PlanList from "../components/PlanList";
+import PlanSummary from "../components/PlanSummary";
+import EditCardModal from "../components/modals/EditCardModal";
+import LabelModal from "../components/modals/LabelModal";
+import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
 
 
 export default function PlanDashboardPage() {
@@ -40,7 +40,7 @@ export default function PlanDashboardPage() {
     []
   );
   const [currentPlan, setCurrentPlan] = useState(defaultPlan);
-
+  const [selectedItem, setSelectedItem] = useState(null);
   const [activeTab, setActiveTab] = useState("summary");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openShare, setOpenShare] = useState(false);
@@ -221,6 +221,31 @@ export default function PlanDashboardPage() {
     setEditCard(null);
   };
 
+  const handleAddFromSidebar = (item) => {
+    if (!lists.length) return;
+
+    const firstListId = lists[0].id;
+
+    const newCard = {
+      id: `c-${Date.now()}`,
+      text: item.name,
+      description: item.description,
+      done: false,
+      labels: [{ text: "Được gợi ý", color: "bg-blue-500" }],
+      start: "08:00",
+      end: "09:30",
+    };
+
+    setLists(
+      lists.map((list) =>
+        list.id === firstListId
+          ? { ...list, cards: [...list.cards, newCard] }
+          : list
+      )
+    );
+  };
+
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navbar cố định */}
@@ -236,6 +261,8 @@ export default function PlanDashboardPage() {
             onSelectPlan={(p) => setCurrentPlan(p)}
             activePlanId={currentPlan?.id}
             collapsed={sidebarCollapsed}
+            onAddToPlan={handleAddFromSidebar}
+            onShowDetail={(item) => setSelectedItem(item)}
           />
         </div>
 

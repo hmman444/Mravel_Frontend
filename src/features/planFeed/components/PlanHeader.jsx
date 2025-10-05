@@ -1,4 +1,4 @@
-import { timeAgo } from "../../utils/utils";
+import { timeAgo } from "../utils/utils";
 import { GlobeAltIcon, LockClosedIcon, UserGroupIcon, EyeIcon } from "@heroicons/react/24/outline";
 
 const visIcon = (v) => {
