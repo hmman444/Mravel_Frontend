@@ -5,22 +5,23 @@ import AuthInput from "../components/AuthInput";
 import PasswordInput from "../components/PasswordInput";
 import SocialLogin from "../components/SocialLogin";
 import { UserIcon } from "@heroicons/react/24/outline";
+import { useRegister } from "../hooks/useRegister";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
+  const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const { handleRegister, message, loading } = useRegister();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (password !== confirmPassword) {
       alert("Mật khẩu nhập lại không khớp!");
       return;
     }
-
-    console.log({ name, email, password });
+    handleRegister(fullname, email, password);
   };
 
   return (
@@ -29,17 +30,14 @@ export default function RegisterPage() {
         ← Về Trang chủ Mravel
       </a>
 
-      <AuthCard
-        title="Tạo tài khoản mới"
-        subtitle="Điền thông tin bên dưới để đăng ký"
-      >
+      <AuthCard title="Tạo tài khoản mới" subtitle="Điền thông tin bên dưới để đăng ký">
         <form onSubmit={handleSubmit} className="space-y-2">
           <AuthInput
             label="Họ và tên"
             icon={UserIcon}
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={fullname}
+            onChange={(e) => setFullname(e.target.value)}
             placeholder="Nhập họ và tên của bạn"
             required
           />
@@ -70,10 +68,13 @@ export default function RegisterPage() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold"
           >
-            Đăng ký
+            {loading ? "Đang xử lý..." : "Đăng ký"}
           </button>
+
+          {message && <p className="text-center text-green-600 mt-2">{message}</p>}
         </form>
 
         <SocialLogin />
