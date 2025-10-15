@@ -15,7 +15,7 @@ export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
   return (
     <div className="mt-3">
       {/* input */}
-      <form onSubmit={submit} className="flex gap-2">
+      <form noValidate onSubmit={submit} className="flex gap-2">
         <img src={me.avatar} className="w-9 h-9 rounded-full object-cover" />
         <input
           ref={inputRef}

@@ -5,20 +5,41 @@ import {
   verifyOtp,
   requestForgotPassword,
   resetPassword,
+  logout,
 } from "../services/authService";
+import { setTokens, getTokens, clearTokens } from "../../../utils/tokenManager";
+import { socialLogin } from "../services/authService";
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async ({ email, password }, { rejectWithValue }) => {
+  async ({ email, password, rememberMe }, { rejectWithValue }) => {
     const result = await login(email, password);
     if (result.success) {
-      localStorage.setItem("token", result.data.token);
+      const { accessToken, refreshToken } = result.data;
+      setTokens(accessToken, refreshToken, rememberMe);
       return result.data;
     } else {
       return rejectWithValue(result.message);
     }
   }
 );
+
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { refreshToken } = getTokens();
+      const result = await logout(refreshToken);
+      clearTokens();
+      if (result.success) return "Đăng xuất thành công";
+      return rejectWithValue(result.message);
+    } catch {
+      clearTokens();
+      return rejectWithValue("Lỗi khi đăng xuất");
+    }
+  }
+);
+const { accessToken, refreshToken } = getTokens();
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
@@ -56,22 +77,33 @@ export const resetPasswordAction = createAsyncThunk(
   }
 );
 
+export const socialLoginUser = createAsyncThunk(
+  "auth/socialLoginUser",
+  async ({ provider, token, rememberMe }, { rejectWithValue }) => {
+    const result = await socialLogin(provider, token);
+    if (result.success) {
+      const { accessToken, refreshToken } = result.data;
+      setTokens(accessToken, refreshToken, rememberMe);
+      return result.data;
+    } else {
+      return rejectWithValue(result.message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
-    token: localStorage.getItem("token") || null,
+    accessToken,
+    refreshToken,
     loading: false,
     error: null,
     message: null,
   },
   reducers: {
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.message = null;
-      state.error = null;
-      localStorage.removeItem("token");
+    setUser: (state, action) => {
+      state.user = action.payload;
     },
     clearMessage: (state) => {
       state.message = null;
@@ -83,15 +115,43 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.message = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
         state.message = "Đăng nhập thành công!";
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(socialLoginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(socialLoginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        state.message = "Đăng nhập mạng xã hội thành công!";
+      })
+      .addCase(socialLoginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(logoutUser.fulfilled, (state, action) => {
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.user = null;
+        state.message = action.payload;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.user = null;
         state.error = action.payload;
       })
 
@@ -149,5 +209,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearMessage } = authSlice.actions;
+export const { setUser, clearMessage } = authSlice.actions;
 export default authSlice.reducer;

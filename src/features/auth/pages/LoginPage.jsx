@@ -6,47 +6,85 @@ import PasswordInput from "../components/PasswordInput";
 import SocialLogin from "../components/SocialLogin";
 import { UserIcon } from "@heroicons/react/24/outline";
 import { useLogin } from "../hooks/useLogin";
+import { validateEmail, validatePassword } from "../../../utils/validators";
+import LoadingOverlay from "../../../components/LoadingOverlay";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { handleLogin, loading, message } = useLogin();
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState({});
+  const { handleLogin, loading, error } = useLogin();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleLogin(email, password);
+    const newErrors = {};
+
+    const emailError = validateEmail(email);
+    const passError = validatePassword(password);
+
+    if (emailError) newErrors.email = emailError;
+    if (passError) newErrors.password = passError;
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    await handleLogin(email, password, rememberMe); 
   };
 
   return (
     <AuthLayout>
-      <a href="/" className="text-base font-semibold text-white mb-2 inline-block">
+      <LoadingOverlay show={loading} text="Đang đăng nhập..." />
+
+      <a
+        href="/"
+        className="text-base font-semibold text-white mb-2 inline-block"
+      >
         ← Về Trang chủ Mravel
       </a>
 
-      <AuthCard title="Tận hưởng kỳ nghỉ của bạn" subtitle="Đăng nhập với email và mật khẩu">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <AuthInput
-            label="Email"
-            icon={UserIcon}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Nhập email của bạn"
-            required
-          />
+      <AuthCard
+        title="Tận hưởng kỳ nghỉ của bạn"
+        subtitle="Đăng nhập với email và mật khẩu"
+      >
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <div>
+            <AuthInput
+              label="Email"
+              icon={UserIcon}
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Nhập email của bạn"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
 
-          <PasswordInput
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Nhập mật khẩu của bạn"
-            required
-          />
+          <div>
+            <PasswordInput
+              label="Mật khẩu"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Nhập mật khẩu của bạn"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
 
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-gray-600">
-              <input type="checkbox" className="rounded" />
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                className="rounded accent-blue-600"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)} 
+              />
               Ghi nhớ đăng nhập
             </label>
+
             <a href="/forgot-password" className="text-sm text-blue-500">
               Quên mật khẩu?
             </a>
@@ -64,14 +102,8 @@ export default function LoginPage() {
             {loading ? "Đang xử lý..." : "Đăng nhập"}
           </button>
 
-          {message && (
-            <p
-              className={`text-center mt-3 font-medium ${
-                message.includes("thành công") ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {message}
-            </p>
+          {error && (
+            <p className="text-red-500 text-sm text-center mt-2">{error}</p>
           )}
         </form>
 
