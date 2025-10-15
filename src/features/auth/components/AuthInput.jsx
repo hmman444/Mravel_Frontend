@@ -1,8 +1,8 @@
 export default function AuthInput({ icon: Icon, ...props }) {
   return (
-    <label className="block">
+    <label className="block ">
       <span className="text-sm text-gray-600">{props.label}</span>
-      <div className="relative mt-1">
+      <div className="relative">
         {Icon && (
           <Icon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
         )}

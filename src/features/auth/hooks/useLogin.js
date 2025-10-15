@@ -9,8 +9,8 @@ export const useLogin = () => {
   const { loading, error } = useSelector((state) => state.auth);
   const [message, setMessage] = useState("");
 
-  const handleLogin = async (email, password) => {
-    const action = await dispatch(loginUser({ email, password }));
+  const handleLogin = async (email, password, rememberMe) => {
+    const action = await dispatch(loginUser({ email, password, rememberMe }));
     if (loginUser.fulfilled.match(action)) {
       setMessage("Đăng nhập thành công!");
       navigate("/");
