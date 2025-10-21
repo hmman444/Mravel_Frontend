@@ -16,6 +16,30 @@ export const login = async (email, password) => {
   }
 };
 
+export const getCurrentUser = async (accessToken) => {
+  try {
+    const response = await axios.get(`${API_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    // Kiểm tra nếu API trả về object user trực tiếp thì bọc lại
+    if (response.data && !response.data.success) {
+      return { success: true, data: response.data };
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ getCurrentUser error:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
+    if (error.response && error.response.data) return error.response.data;
+    return { success: false, message: "Lỗi kết nối đến server" };
+  }
+};
+
 export const socialLogin = async (provider, token) => {
   try {
     const res = await axios.post(`${API_URL}/auth/social-login`, {

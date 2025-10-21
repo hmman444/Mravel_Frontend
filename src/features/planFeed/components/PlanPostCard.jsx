@@ -5,7 +5,7 @@ import PlanActions from "./PlanActions";
 import PlanComments from "./PlanComments";
 import { truncate } from "../utils/utils";
 import { MapPinIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
-
+import { sendReaction } from "../services/planService"
 /**
  * plan:
  * {
@@ -19,16 +19,23 @@ import { MapPinIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
  */
 export default function PlanPostCard({ plan, me, onOpenDetail }) {
   const [reactions, setReactions] = useState(plan.reactions || {});
+  const [reactionUsers, setReactionUsers] = useState(plan.reactionUsers || []);
   const [comments, setComments] = useState(plan.comments || []);
   const [expanded, setExpanded] = useState(false);
   const commentInputFocusRef = useRef(null);
 
+  const react = async (key) => {
+    try {
+      const updated = await sendReaction(plan.id, key, me);
+      setReactions(updated.reactions); // summary
+      setReactionUsers(updated.reactionUsers); // new
+    } catch (err) {
+      console.error("Reaction failed", err);
+    }
+  };
+
   //const sumReactions = useMemo(() => Object.values(reactions).reduce((a,b)=>a+b,0), [reactions]);
   const desc = useMemo(() => truncate(plan.description || "", 200), [plan.description]);
-
-  const react = (key) => {
-    setReactions((prev) => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
-  };
 
   const addComment = (c) => setComments((prev) => [...prev, c]);
   const deleteComment = (id) => setComments((prev) => prev.filter(x => x.id !== id));
@@ -101,6 +108,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
       <div className="mt-3">
         <PlanActions
           reactions={reactions}
+          reactionUsers={reactionUsers}
           onReact={react}
           onCommentFocus={() => commentInputFocusRef.current?.focus()}
           onShare={share}
@@ -110,6 +118,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
       {/* Comments */}
       <PlanComments
         me={me}
+        planId={plan.id}
         comments={comments}
         onAdd={addComment}
         onDelete={deleteComment}

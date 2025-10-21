@@ -1,20 +1,44 @@
 import { useRef, useState } from "react";
 import { timeAgo } from "../utils/utils";
+import { sendComment } from "../services/planService";
 
-export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
+/**
+ * Props:
+ *  - me: user hiện tại
+ *  - planId: id của plan để gửi comment
+ *  - comments: danh sách comment
+ *  - onAdd: callback khi thêm comment mới
+ *  - onDelete: callback khi xóa comment
+ */
+export default function PlanComments({ me, planId, comments = [], onAdd, onDelete }) {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
-    onAdd({ id: Date.now().toString(), user: me, text, createdAt: new Date().toISOString() });
-    setText("");
+    if (!text.trim() || loading) return;
+    try {
+      setLoading(true);
+      const newC = await sendComment(planId, {
+        userId: me.id,
+        userName: me.name,
+        userAvatar: me.avatar,
+        text,
+      });
+      onAdd(newC);
+      setText("");
+    } catch (error) {
+      console.error("Comment failed:", error);
+      alert("Không thể gửi bình luận!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="mt-3">
-      {/* input */}
+      {/* Input */}
       <form noValidate onSubmit={submit} className="flex gap-2">
         <img src={me.avatar} className="w-9 h-9 rounded-full object-cover" />
         <input
@@ -26,7 +50,7 @@ export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
         />
       </form>
 
-      {/* list */}
+      {/* Comment list */}
       <div className="mt-3 space-y-3">
         {comments.map((c) => (
           <div key={c.id} className="flex gap-2">
@@ -39,7 +63,9 @@ export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
               <div className="text-xs text-gray-500 mt-1 flex gap-3">
                 <span>{timeAgo(c.createdAt)}</span>
                 {c.user.id === me.id && (
-                  <button className="hover:underline" onClick={() => onDelete(c.id)}>Xoá</button>
+                  <button className="hover:underline" onClick={() => onDelete(c.id)}>
+                    Xoá
+                  </button>
                 )}
               </div>
             </div>
