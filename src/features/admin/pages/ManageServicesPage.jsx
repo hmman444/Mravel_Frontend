@@ -67,7 +67,7 @@ const MOCK_SERVICES = [
 export default function ManageServicesPage() {
     const { t } = useTranslation();
 
-    // 🔹 Tabs lấy từ file dịch
+    // Tabs lấy từ file dịch
     const STATUS_TABS = useMemo(() => [
         { key: "all", label: t("all") },
         { key: "pending", label: t("pending") },
@@ -81,7 +81,7 @@ export default function ManageServicesPage() {
     const [typeFilter, setTypeFilter] = useState(t("all"));
     const [modal, setModal] = useState({ open: false, service: null, action: null, note: "" });
 
-    // 🔹 Lọc loại dịch vụ
+    // Lọc loại dịch vụ
     const types = useMemo(() => {
         const tps = Array.from(new Set(services.map((s) => s.type)));
         return [t("all"), ...tps];
@@ -96,7 +96,7 @@ export default function ManageServicesPage() {
         return matchTab && matchSearch && matchType;
     });
 
-    // 🔹 Hành động xử lý
+    // Hành động xử lý
     const approveService = (id) => {
         setServices((prev) => prev.map((s) => (s.id === id ? { ...s, status: "active" } : s)));
     };
@@ -128,7 +128,7 @@ export default function ManageServicesPage() {
             {/* Toolbar */}
             <div className="bg-white rounded-lg shadow p-4 mb-6">
                 <div className="flex flex-wrap items-center gap-3">
-                    {/* 🔹 Tabs dịch động */}
+                    {/* Tabs dịch động */}
                     <div className="flex gap-2">
                         {STATUS_TABS.map((tabItem) => (
                             <button

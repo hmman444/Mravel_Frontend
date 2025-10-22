@@ -1,23 +1,40 @@
 import { useRef, useState } from "react";
+import { usePlans } from "../hooks/usePlans";
 import { timeAgo } from "../utils/utils";
 
-export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
+export default function PlanComments({ me, planId, comments = [] }) {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
+  const { sendComment } = usePlans();
 
-  const submit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-    onAdd({ id: Date.now().toString(), user: me, text, createdAt: new Date().toISOString() });
-    setText("");
+    setLoading(true);
+    try {
+      const comment = {
+        userId: me.id,
+        userName: me.fullname || me.name,
+        userAvatar: me.avatar,
+        text,
+      };
+      await sendComment(planId, comment);
+      setText("");
+    } catch (err) {
+      console.error(err);
+      alert("Không thể gửi bình luận!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="mt-3">
-      {/* input */}
-      <form noValidate onSubmit={submit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <img src={me.avatar} className="w-9 h-9 rounded-full object-cover" />
         <input
+        disabled={loading}
           ref={inputRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -26,7 +43,6 @@ export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
         />
       </form>
 
-      {/* list */}
       <div className="mt-3 space-y-3">
         {comments.map((c) => (
           <div key={c.id} className="flex gap-2">
@@ -38,9 +54,6 @@ export default function PlanComments({ me, comments = [], onAdd, onDelete }) {
               </div>
               <div className="text-xs text-gray-500 mt-1 flex gap-3">
                 <span>{timeAgo(c.createdAt)}</span>
-                {c.user.id === me.id && (
-                  <button className="hover:underline" onClick={() => onDelete(c.id)}>Xoá</button>
-                )}
               </div>
             </div>
           </div>

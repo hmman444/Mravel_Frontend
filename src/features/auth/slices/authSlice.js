@@ -8,7 +8,7 @@ import {
   logout,
 } from "../services/authService";
 import { setTokens, getTokens, clearTokens } from "../../../utils/tokenManager";
-import { socialLogin } from "../services/authService";
+import { socialLogin, getCurrentUser } from "../services/authService";
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -19,6 +19,7 @@ export const loginUser = createAsyncThunk(
       setTokens(accessToken, refreshToken, rememberMe);
       return result.data;
     } else {
+      console.error("❌ Login failed:", result.message);
       return rejectWithValue(result.message);
     }
   }
@@ -86,6 +87,26 @@ export const socialLoginUser = createAsyncThunk(
       setTokens(accessToken, refreshToken, rememberMe);
       return result.data;
     } else {
+      return rejectWithValue(result.message);
+    }
+  }
+);
+
+export const fetchCurrentUser = createAsyncThunk(
+  "auth/fetchCurrentUser",
+  async (_, { getState, rejectWithValue }) => {
+    const token = getState().auth.accessToken;
+    if (!token) {
+      console.warn("⚠️ Không có token trong Redux state");
+      return rejectWithValue("Không có token");
+    }
+
+    const result = await getCurrentUser(token);
+
+    if (result.success) {
+      return result.data; // user info từ backend
+    } else {
+      console.error("❌ fetchCurrentUser failed:", result.message);
       return rejectWithValue(result.message);
     }
   }
@@ -205,7 +226,21 @@ const authSlice = createSlice({
       .addCase(resetPasswordAction.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // user info từ backend
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
+                console.error("❌ [Reducer] fetchCurrentUser.rejected:", action.payload);
+
+        state.loading = false;
+        state.error = action.payload;
       });
+
   },
 });
 

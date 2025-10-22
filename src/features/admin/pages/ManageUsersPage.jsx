@@ -19,7 +19,7 @@ export default function ManageUsersPage() {
     const [filter, setFilter] = useState("month");
     const [search, setSearch] = useState("");
 
-    // 🔹 Dữ liệu biểu đồ mẫu
+    // Dữ liệu biểu đồ mẫu
     const chartDataSets = {
         day: [
             { label: t("morning"), total: 120, current: 60, previous: 45 },
@@ -59,7 +59,7 @@ export default function ManageUsersPage() {
 
     const chartData = chartDataSets[filter];
 
-    // 🔹 Thống kê nhanh
+    // Thống kê nhanh
     const stats = [
         { label: t("new_users"), value: "2,455", color: "bg-pink-500" },
         { label: t("active_users"), value: "1,800", color: "bg-sky-500" },
@@ -67,7 +67,7 @@ export default function ManageUsersPage() {
         { label: t("banned_users"), value: "45", color: "bg-indigo-500" },
     ];
 
-    // 🔹 Danh sách người dùng
+    // Danh sách người dùng
     const users = [
         { id: 1, name: "John Smith", role: t("customer"), avatar: "https://i.pravatar.cc/40?img=1" },
         { id: 2, name: "Alice Johnson", role: t("customer"), avatar: "https://i.pravatar.cc/40?img=2" },

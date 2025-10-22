@@ -61,7 +61,7 @@ export default function Navbar() {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 >
                   <img
-                    src={user?.avatar || "/src/assets/default-avatar.png"}
+                    src={user?.avatar}
                     alt="avatar"
                     className="w-8 h-8 rounded-full border"
                   />
