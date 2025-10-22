@@ -1,52 +1,36 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useMemo } from "react";
 import PlanHeader from "./PlanHeader";
 import PlanMedia from "./PlanMedia";
 import PlanActions from "./PlanActions";
 import PlanComments from "./PlanComments";
-import { truncate } from "../utils/utils";
 import { MapPinIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { sendReaction } from "../services/planService"
-/**
- * plan:
- * {
- *  id, title, description, startDate, endDate, days, visibility, views,
- *  author: { id, name, avatar }, createdAt,
- *  images: [url],
- *  destinations: [{name, lat, lng}],
- *  reactions: { like:1, love:0, ... },
- *  comments: [{ id, user:{id,name,avatar}, text, createdAt }]
- * }
- */
+import { usePlans } from "../hooks/usePlans";
+import { truncate } from "../utils/utils";
+
 export default function PlanPostCard({ plan, me, onOpenDetail }) {
-  const [reactions, setReactions] = useState(plan.reactions || {});
-  const [reactionUsers, setReactionUsers] = useState(plan.reactionUsers || []);
-  const [comments, setComments] = useState(plan.comments || []);
-  const [expanded, setExpanded] = useState(false);
-  const commentInputFocusRef = useRef(null);
+  const { sendReact, sendComment } = usePlans();
+  const commentRef = useRef(null);
+  const desc = truncate(plan.description || "", 200);
 
-  const react = async (key) => {
-    try {
-      const updated = await sendReaction(plan.id, key, me);
-      setReactions(updated.reactions); // summary
-      setReactionUsers(updated.reactionUsers); // new
-    } catch (err) {
-      console.error("Reaction failed", err);
-    }
-  };
+  // Xác định reaction hiện tại của user (nếu có)
+  const myReaction = useMemo(() => {
+    if (!plan.reactionUsers || !me?.id) return null;
 
-  //const sumReactions = useMemo(() => Object.values(reactions).reduce((a,b)=>a+b,0), [reactions]);
-  const desc = useMemo(() => truncate(plan.description || "", 200), [plan.description]);
+    // ép kiểu ID để so sánh chính xác
+    const found = plan.reactionUsers.find(
+      (u) => Number(u.userId) === Number(me.id)
+    );
 
-  const addComment = (c) => setComments((prev) => [...prev, c]);
-  const deleteComment = (id) => setComments((prev) => prev.filter(x => x.id !== id));
+    return found ? found.type.toLowerCase() : null;
+  }, [plan.reactionUsers, me?.id]);
 
-  const share = () => {
-    const url = `${window.location.origin}/plans/${plan.id}`;
-    navigator.clipboard.writeText(url);
+  const handleReact = (type) => sendReact(plan.id, type, me);
+  const handleComment = (c) => sendComment(plan.id, c);
+  const handleShare = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/plans/${plan.id}`);
     alert("Đã sao chép liên kết!");
   };
 
-  
   return (
     <article className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
       {/* Header */}
@@ -56,7 +40,6 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         visibility={plan.visibility}
         views={plan.views || 0}
       />
-      
 
       {/* Title */}
       <h3
@@ -66,52 +49,39 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         {plan.title}
       </h3>
 
-      {/* Meta (time range, days, destinations count) */}
+      {/* Meta info */}
       <div className="text-sm text-gray-500 dark:text-gray-400 flex flex-wrap items-center gap-3 mb-2">
         <span className="flex items-center gap-1">
           <CalendarDaysIcon className="w-4 h-4" />
           {plan.startDate} – {plan.endDate} • {plan.days} ngày
         </span>
         <span className="flex items-center gap-1">
-          <MapPinIcon className="w-4 h-4" />
-          {plan.destinations?.length || 0} điểm đến
+          <MapPinIcon className="w-4 h-4" /> {plan.destinations?.length || 0} điểm đến
         </span>
       </div>
 
-      {/* Description (collapse) */}
+      {/* Description */}
       {!!plan.description && (
-        <div className="mb-3 text-sm">
-          {!expanded ? (
-            <>
-              {desc.short}{" "}
-              {desc.truncated && (
-                <button className="text-primary hover:underline" onClick={() => setExpanded(true)}>
-                  Xem thêm
-                </button>
-              )}
-            </>
-          ) : (
-            <>
-              {plan.description}{" "}
-              <button className="text-primary hover:underline" onClick={() => setExpanded(false)}>
-                Thu gọn
-              </button>
-            </>
+        <p className="mb-3 text-sm">
+          {desc.short}
+          {desc.truncated && (
+            <button className="text-primary hover:underline">Xem thêm</button>
           )}
-        </div>
+        </p>
       )}
 
-      {/* Album */}
+      {/* Media */}
       <PlanMedia images={plan.images} />
 
       {/* Actions */}
       <div className="mt-3">
         <PlanActions
-          reactions={reactions}
-          reactionUsers={reactionUsers}
-          onReact={react}
-          onCommentFocus={() => commentInputFocusRef.current?.focus()}
-          onShare={share}
+          reactions={plan.reactions}
+          reactionUsers={plan.reactionUsers}
+          myReaction={myReaction} // 👈 truyền reaction hiện tại
+          onReact={handleReact}
+          onCommentFocus={() => commentRef.current?.focus()}
+          onShare={handleShare}
         />
       </div>
 
@@ -119,9 +89,8 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
       <PlanComments
         me={me}
         planId={plan.id}
-        comments={comments}
-        onAdd={addComment}
-        onDelete={deleteComment}
+        comments={plan.comments}
+        onAdd={handleComment}
       />
     </article>
   );

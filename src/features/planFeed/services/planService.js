@@ -16,7 +16,7 @@ export async function sendReaction(planId, key, user) {
   const params = new URLSearchParams({
     key,
     userId: user.id,
-    userName: user.name,
+    userName: user.fullname,
     userAvatar: user.avatar,
   });
 

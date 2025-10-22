@@ -1,35 +1,28 @@
 import { useRef, useState } from "react";
+import { usePlans } from "../hooks/usePlans";
 import { timeAgo } from "../utils/utils";
-import { sendComment } from "../services/planService";
 
-/**
- * Props:
- *  - me: user hiện tại
- *  - planId: id của plan để gửi comment
- *  - comments: danh sách comment
- *  - onAdd: callback khi thêm comment mới
- *  - onDelete: callback khi xóa comment
- */
-export default function PlanComments({ me, planId, comments = [], onAdd, onDelete }) {
+export default function PlanComments({ me, planId, comments = [] }) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
+  const { sendComment } = usePlans();
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim() || loading) return;
+    if (!text.trim()) return;
+    setLoading(true);
     try {
-      setLoading(true);
-      const newC = await sendComment(planId, {
+      const comment = {
         userId: me.id,
-        userName: me.name,
+        userName: me.fullname || me.name,
         userAvatar: me.avatar,
         text,
-      });
-      onAdd(newC);
+      };
+      await sendComment(planId, comment);
       setText("");
-    } catch (error) {
-      console.error("Comment failed:", error);
+    } catch (err) {
+      console.error(err);
       alert("Không thể gửi bình luận!");
     } finally {
       setLoading(false);
@@ -38,10 +31,10 @@ export default function PlanComments({ me, planId, comments = [], onAdd, onDelet
 
   return (
     <div className="mt-3">
-      {/* Input */}
-      <form noValidate onSubmit={submit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <img src={me.avatar} className="w-9 h-9 rounded-full object-cover" />
         <input
+        disabled={loading}
           ref={inputRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -50,7 +43,6 @@ export default function PlanComments({ me, planId, comments = [], onAdd, onDelet
         />
       </form>
 
-      {/* Comment list */}
       <div className="mt-3 space-y-3">
         {comments.map((c) => (
           <div key={c.id} className="flex gap-2">
@@ -62,11 +54,6 @@ export default function PlanComments({ me, planId, comments = [], onAdd, onDelet
               </div>
               <div className="text-xs text-gray-500 mt-1 flex gap-3">
                 <span>{timeAgo(c.createdAt)}</span>
-                {c.user.id === me.id && (
-                  <button className="hover:underline" onClick={() => onDelete(c.id)}>
-                    Xoá
-                  </button>
-                )}
               </div>
             </div>
           </div>
