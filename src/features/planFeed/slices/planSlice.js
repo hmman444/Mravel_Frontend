@@ -77,7 +77,30 @@ const planSlice = createSlice({
       .addCase(commentPlan.fulfilled, (state, action) => {
         const { planId, data } = action.payload;
         const plan = state.items.find((p) => p.id === planId);
-        if (plan) plan.comments.push(data);
+        if (!plan) return;
+
+        if (data.parentId) {
+          // Là reply -> tìm comment cha
+          const findParent = (comments, parentId) => {
+            for (const c of comments) {
+              if (c.id === parentId) return c;
+              if (c.replies) {
+                const found = findParent(c.replies, parentId);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          const parent = findParent(plan.comments, data.parentId);
+          if (parent) {
+            parent.replies = parent.replies || [];
+            parent.replies.push(data);
+          }
+        } else {
+          // Bình luận gốc
+          plan.comments.push(data);
+        }
       });
   },
 });

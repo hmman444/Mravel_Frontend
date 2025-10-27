@@ -25,7 +25,6 @@ export default function SidebarPlans({
   const toggleSection = (key) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // ✅ Mock dữ liệu mẫu
   const hotelList = [
     {
       id: "h1",

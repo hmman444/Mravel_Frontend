@@ -78,7 +78,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         <PlanActions
           reactions={plan.reactions}
           reactionUsers={plan.reactionUsers}
-          myReaction={myReaction} // 👈 truyền reaction hiện tại
+          myReaction={myReaction} // truyền reaction hiện tại
           onReact={handleReact}
           onCommentFocus={() => commentRef.current?.focus()}
           onShare={handleShare}

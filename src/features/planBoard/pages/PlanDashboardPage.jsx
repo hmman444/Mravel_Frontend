@@ -1,281 +1,239 @@
-import { useMemo, useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import {
   FaChevronLeft,
   FaChevronRight,
-  FaChevronDown,
   FaShareAlt,
-  FaUserCircle,
   FaPlus,
-  FaTimes,
-  FaCheck,
+  FaUserCircle,
 } from "react-icons/fa";
-
+import { useDispatch } from "react-redux";
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "../components/SidebarPlans";
-import ShareModal from "../components/modals/ShareModal";
 import PlanList from "../components/PlanList";
-import PlanSummary from "../components/PlanSummary";
+import ShareModal from "../components/modals/ShareModal";
 import EditCardModal from "../components/modals/EditCardModal";
 import LabelModal from "../components/modals/LabelModal";
 import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
-
+import { addCard } from "../slices/planBoardSlice";
+import { usePlanBoard } from "../hooks/usePlanBoard";
+import { showSuccess, showError } from "../../../utils/toastUtils";
+import ConfirmModal from "../../../components/ConfirmModal";
 
 export default function PlanDashboardPage() {
-  const defaultPlan = useMemo(
-    () => ({
-      id: "1",
-      name: "Chuyến đi Đà Lạt 3N2Đ",
-      description:
-        "Hành trình khám phá Đà Lạt: Hồ Xuân Hương, chợ đêm, ẩm thực địa phương...",
-      startDate: "2025-10-05",
-      endDate: "2025-10-07",
-      visibility: "shared", // public | private | shared
-      inviteList: [
-        { email: "lan@example.com", role: "editor" },
-        { email: "nam@example.com", role: "viewer" },
-      ],
-      images: ["https://picsum.photos/300/200?dalat"],
-    }),
-    []
-  );
-  const [currentPlan, setCurrentPlan] = useState(defaultPlan);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [activeTab, setActiveTab] = useState("summary");
+  const planId = 1; // 🔧 tạm thời hardcode, sau lấy từ URL
+
+  // Lấy các hàm thao tác từ Redux hook
+  const {
+    board,
+    loading,
+    load,
+    createList,
+    renameList,
+    deleteList,
+    createCard,
+    updateCard,
+    deleteCard,
+    reorder,
+    upsertLabel,
+    invite,
+    localReorder,
+  } = usePlanBoard(planId);
+
+  const dispatch = useDispatch();
+  // State UI
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openShare, setOpenShare] = useState(false);
-
-  const [lists, setLists] = useState([
-    {
-      id: "day-1",
-      title: "Ngày 1",
-      cards: [
-        {
-          id: "c1",
-          text: "Tham quan Hồ Xuân Hương",
-          start: "08:00",
-          end: "09:30",
-          done: false,
-          labels: [{ text: "Tham quan", color: "bg-pink-600" }],
-        },
-      ],
-    },
-    {
-      id: "day-2",
-      title: "Ngày 2",
-      cards: [
-        {
-          id: "c2",
-          text: "Đi chợ đêm Đà Lạt",
-          start: "19:00",
-          end: "21:00",
-          done: true,
-          labels: [{ text: "Ăn uống", color: "bg-green-600" }],
-        },
-      ],
-    },
-  ]);
-
+  const [showLabelModal, setShowLabelModal] = useState(false);
+  const [editCard, setEditCard] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [editingListId, setEditingListId] = useState(null);
   const [newCardListId, setNewCardListId] = useState(null);
   const [newCardText, setNewCardText] = useState("");
-  const [activeCard, setActiveCard] = useState(null);
-  const [editCard, setEditCard] = useState(null);
-  const [activeMenu, setActiveMenu] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-  const [startDate, setStartDate] = useState(
-    currentPlan ? new Date(currentPlan.startDate) : new Date()
-  );
-  const [endDate, setEndDate] = useState(
-    currentPlan ? new Date(currentPlan.endDate) : new Date()
-  );
+  const [activeListMenu, setActiveListMenu] = useState(null);
+  const [activeCardMenu, setActiveCardMenu] = useState(null); 
+  const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
+  const [confirmDeleteList, setConfirmDeleteList] = useState(null);
+  
 
-  const [labels, setLabels] = useState([
-    { text: "Ăn uống", color: "bg-green-600" },
-    { text: "Tham quan", color: "bg-pink-600" },
-    { text: "Thể thao", color: "bg-blue-600" },
-    { text: "Mua sắm", color: "bg-yellow-600" },
-    { text: "Khác", color: "bg-purple-600" },
-  ]);
+  // 🧩 Load dữ liệu board từ server
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planId]);
 
-  const [showLabelModal, setShowLabelModal] = useState(false);
-
-  const colors = [
-    "bg-green-600",
-    "bg-yellow-600",
-    "bg-red-600",
-    "bg-purple-600",
-    "bg-blue-600",
-    "bg-pink-600",
-    "bg-orange-600",
-    "bg-gray-600",
-  ];
-
-  // Drag & drop
-  const handleDragEnd = (result) => {
+  // 🧩 Kéo thả list/card
+  const handleDragEnd = async (result) => {
     if (!result.destination) return;
     const { source, destination, type } = result;
 
-    if (type === "list") {
-      const newLists = Array.from(lists);
-      const [removed] = newLists.splice(source.index, 1);
-      newLists.splice(destination.index, 0, removed);
-      setLists(newLists);
-    } else {
-      const newLists = Array.from(lists);
-      const sourceList = newLists.find((l) => l.id === source.droppableId);
-      const destList = newLists.find((l) => l.id === destination.droppableId);
-      const [moved] = sourceList.cards.splice(source.index, 1);
-      destList.cards.splice(destination.index, 0, moved);
-      setLists(newLists);
+    const payload = {
+      type,
+      sourceListId: Number(source.droppableId),
+      destListId: Number(destination.droppableId),
+      sourceIndex: source.index,
+      destIndex: destination.index,
+    };
+    dispatch(localReorder(payload));
+    try {
+      await reorder(payload);
+    } catch {
+      showError("Kéo thả thất bại");
     }
   };
 
-  // CRUD list & card
-  const addList = () => {
-    const newId = `day-${lists.length + 1}`;
-    setLists([
-      ...lists,
-      { id: newId, title: `Ngày ${lists.length + 1}`, cards: [] },
-    ]);
+  // 🧩 CRUD qua API
+  const handleAddList = async () => {
+    try {
+      await createList({ title: `Ngày ${board?.lists?.length + 1}` });
+      showSuccess("Đã thêm danh sách mới");
+    } catch {
+      showError("Không thể thêm danh sách");
+    }
   };
 
-  const confirmAddCard = (listId) => {
+  const confirmAddCard = async (listId) => {
     if (!newCardText.trim()) return;
-    setLists(
-      lists.map((list) =>
-        list.id === listId
-          ? {
-              ...list,
-              cards: [
-                ...list.cards,
-                {
-                  id: `c-${Date.now()}`,
-                  text: newCardText,
-                  done: false,
-                  label: null,
-                },
-              ],
-            }
-          : list
-      )
-    );
-    setNewCardListId(null);
-    setNewCardText("");
+    try {
+      await createCard(listId, { text: newCardText });
+      setNewCardListId(null);
+      setNewCardText("");
+      showSuccess("Đã thêm thẻ mới");
+    } catch {
+      showError("Không thể thêm thẻ");
+    }
   };
 
-  const toggleDone = (listId, cardId) => {
-    setLists(
-      lists.map((l) =>
-        l.id === listId
-          ? {
-              ...l,
-              cards: l.cards.map((c) =>
-                c.id === cardId ? { ...c, done: !c.done } : c
-              ),
-            }
-          : l
-      )
-    );
+  const handleUpdateCard = async (listId, cardId, data) => {
+    try {
+      // đúng format backend yêu cầu
+      const payload = {
+        text: data.text,
+        description: data.description,
+        priority: data.priority,
+        start: data.start,
+        end: data.end,
+        done: data.done,
+        labelIds: (data.labels || []).map((l) => l.id),
+      };
+
+      await updateCard(listId, cardId, payload).unwrap();
+      showSuccess("Đã cập nhật thẻ");
+      setEditCard(null);
+    } catch (err) {
+      console.error(err);
+      showError("Không thể cập nhật thẻ");
+    }
   };
 
-  const duplicateCard = (card) => {
-    setLists(
-      lists.map((l) =>
-        l.cards.find((c) => c.id === card.id)
-          ? { ...l, cards: [...l.cards, { ...card, id: `c-${Date.now()}` }] }
-          : l
-      )
-    );
+  const handleDeleteCard = async (listId, cardId) => {
+    try {
+      await deleteCard(listId, cardId);
+      showSuccess("Đã xóa thẻ");
+    } catch {
+      showError("Không thể xóa thẻ");
+    }
   };
 
-  const deleteCard = (card) => {
-    setLists(
-      lists.map((l) => ({ ...l, cards: l.cards.filter((c) => c.id !== card.id) }))
-    );
+  const duplicateCard = async (card, listId) => {
+    try {
+      const payload = {
+        text: card.text + " (Copy)",
+        description: card.description,
+        priority: card.priority,
+        start: card.start,
+        end: card.end,
+        done: false,
+        labelIds: card.labels?.map(l => l.id) || [],
+      };
+      await dispatch(addCard({ planId, listId, payload })).unwrap();
+    } catch (err) {
+      console.error("❌ Lỗi khi tạo bản sao:", err);
+    }
   };
 
-  const duplicateList = (list) => {
-    const newCards = list.cards.map((c) => ({
-      ...c,
-      id: `c-${Date.now()}-${Math.random()}`,
-    }));
-    setLists([
-      ...lists,
-      { ...list, id: `day-${Date.now()}`, title: list.title + " (copy)", cards: newCards },
-    ]);
+  const handleInvite = async (payload) => {
+    try {
+      await invite(payload);
+      showSuccess("Đã gửi lời mời");
+      setOpenShare(false);
+    } catch {
+      showError("Không thể gửi lời mời");
+    }
   };
 
-  const deleteList = (list) => {
-    setLists(lists.filter((l) => l.id !== list.id));
+  const duplicateList = async (list) => {
+    try {
+      const newTitle = list.title + " (Copy)";
+      const newList = await createList({ title: newTitle }).unwrap();
+
+      for (const card of list.cards || []) {
+        const payload = {
+          text: card.text,
+          description: card.description,
+          priority: card.priority,
+          start: card.start,
+          end: card.end,
+          done: false,
+          labelIds: card.labels?.map(l => l.id) || [],
+        };
+        await createCard(newList.id, payload);
+      }
+
+      showSuccess("Đã tạo bản sao danh sách");
+    } catch (err) {
+      console.error("❌ Lỗi khi tạo bản sao danh sách:", err);
+      showError("Không thể tạo bản sao danh sách");
+    }
   };
 
-  const saveCard = () => {
-    setLists(
-      lists.map((l) => ({
-        ...l,
-        cards: l.cards.map((c) => (c.id === editCard.id ? editCard : c)),
-      }))
-    );
-    setActiveCard(null);
-    setEditCard(null);
+  const toggleDone = async (listId, cardId) => {
+    try {
+      // Đảo trạng thái done
+      const card = board.lists
+        ?.find((l) => l.id === listId)
+        ?.cards.find((c) => c.id === cardId);
+
+      if (!card) return;
+
+      const updated = { ...card, done: !card.done };
+      await updateCard(listId, cardId, updated);
+    } catch (err) {
+      console.error("❌ Lỗi khi toggleDone:", err);
+    }
   };
 
-  const handleAddFromSidebar = (item) => {
-    if (!lists.length) return;
-
-    const firstListId = lists[0].id;
-
-    const newCard = {
-      id: `c-${Date.now()}`,
-      text: item.name,
-      description: item.description,
-      done: false,
-      labels: [{ text: "Được gợi ý", color: "bg-blue-500" }],
-      start: "08:00",
-      end: "09:30",
-    };
-
-    setLists(
-      lists.map((list) =>
-        list.id === firstListId
-          ? { ...list, cards: [...list.cards, newCard] }
-          : list
-      )
-    );
-  };
-
+  if (loading || !board)
+    return <div className="p-8 text-center text-gray-500">Đang tải bảng...</div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Navbar cố định */}
       <Navbar fixedWhite />
-
       <div className="flex flex-1 mt-16 overflow-hidden relative">
+        {/* SIDEBAR */}
         <div
           className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-transform duration-300 ease-in-out z-30 ${
             sidebarCollapsed ? "-translate-x-full" : "translate-x-0"
           }`}
         >
           <SidebarPlans
-            onSelectPlan={(p) => setCurrentPlan(p)}
-            activePlanId={currentPlan?.id}
+            onSelectPlan={() => {}}
+            activePlanId={planId}
             collapsed={sidebarCollapsed}
-            onAddToPlan={handleAddFromSidebar}
-            onShowDetail={(item) => setSelectedItem(item)}
+            onAddToPlan={() => {}}
           />
         </div>
 
+        {/* TOGGLE SIDEBAR BUTTON */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="fixed z-40 flex items-center justify-center w-8 h-8 rounded-full bg-white border shadow-md hover:bg-gray-100 dark:bg-gray-800 transition"
           style={{
-            top: "50%", // luôn giữa theo chiều cao viewport
-            left: sidebarCollapsed ? "10px" : "280px", // 280px = width sidebar
+            top: "50%",
+            left: sidebarCollapsed ? "10px" : "280px",
             transform: "translateY(-50%)",
-            transition: "left 0.3s ease-in-out, background 0.3s",
           }}
-          aria-label="Toggle sidebar"
         >
           {sidebarCollapsed ? (
             <FaChevronRight className="text-gray-600" size={14} />
@@ -284,156 +242,128 @@ export default function PlanDashboardPage() {
           )}
         </button>
 
+        {/* MAIN */}
         <div
-          className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
             sidebarCollapsed ? "ml-0" : "ml-72"
           }`}
         >
-          {/* Topbar */}
-          <div className=" bg-white dark:bg-gray-800 px-4 sm:px-6 py-3 flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                {currentPlan?.name}
-              </h1>
-
-            </div>
-
+          {/* HEADER */}
+          <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center gap-3 border-b">
+            <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              {board.planTitle}
+            </h1>
             <div className="ml-auto flex items-center -space-x-2">
-              {[...Array(3)].map((_, i) => (
+              {board.invites?.slice(0, 3).map((inv, i) => (
                 <span
                   key={i}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white dark:border-gray-800 bg-gray-200"
-                  title={`Member ${i + 1}`}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 text-xs"
+                  title={inv.email}
                 >
                   <FaUserCircle className="text-gray-500" />
                 </span>
               ))}
             </div>
-
             <button
               onClick={() => setOpenShare(true)}
-              className="ml-3 inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition"
+              className="ml-3 inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200"
             >
               <FaShareAlt /> Chia sẻ
             </button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-6 border-b bg-white dark:bg-gray-800 px-4 sm:px-6">
-            {["summary", "board", "timeline", "members"].map((tab) => (
+          {/* CONTENT */}
+          <div className="flex-1 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Lịch trình chi tiết</h2>
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`capitalize pb-2 border-b-2 -mb-px transition ${
-                  activeTab === tab
-                    ? "border-primary text-primary font-semibold"
-                    : "border-transparent text-gray-500 hover:text-primary"
-                }`}
+                onClick={handleAddList}
+                className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2"
               >
-                {tab}
+                <FaPlus /> Thêm ngày
               </button>
-            ))}
-          </div>
+            </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 bg-gray-50 dark:bg-gray-900">
-            {activeTab === "summary" && (
-              <PlanSummary
-                plan={currentPlan}
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                visibility={currentPlan.visibility}
-                setVisibility={(v) =>
-                  setCurrentPlan((p) => ({ ...p, visibility: v }))
-                }
-                images={currentPlan.images}
-                setImages={(imgs) =>
-                  setCurrentPlan((p) => ({ ...p, images: imgs }))
-                }
-                description={currentPlan.description}
-                setDescription={(desc) =>
-                  setCurrentPlan((p) => ({ ...p, description: desc }))
-                }
-              />
-            )}
-            {activeTab === "board" && (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Lịch trình chi tiết</h2>
-                  <button
-                    onClick={addList}
-                    className="px-4 py-2 bg-primary text-white rounded-lg"
+            <DragDropContext 
+              onBeforeDragStart={() => {
+                  setActiveListMenu(null);
+                  setActiveCardMenu(null);
+                }}
+              onDragEnd={handleDragEnd}>
+              <Droppable
+                droppableId="all-lists"
+                direction="horizontal"
+                type="list"
+              >
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="flex gap-6 items-start overflow-x-auto pb-4"
                   >
-                    <FaPlus className="inline mr-2" />
-                    Thêm ngày
-                  </button>
-                </div>
-
-                <DragDropContext onDragEnd={handleDragEnd} >
-                  <Droppable droppableId="all-lists" direction="horizontal" type="list">
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="flex gap-6 items-start overflow-x-auto pb-4"
-                      >
-                        {lists.map((list, idx) => (
-                          <PlanList
-                            key={list.id}
-                            list={list}
-                            index={idx}
-                            editingListId={editingListId}
-                            setEditingListId={setEditingListId}
-                            lists={lists}
-                            setLists={setLists}
-                            newCardListId={newCardListId}
-                            setNewCardListId={setNewCardListId}
-                            newCardText={newCardText}
-                            setNewCardText={setNewCardText}
-                            confirmAddCard={confirmAddCard}
-                            toggleDone={toggleDone}
-                            setActiveCard={setActiveCard}
-                            setEditCard={setEditCard}
-                            duplicateCard={duplicateCard}
-                            deleteCard={deleteCard}
-                            activeMenu={activeMenu}
-                            setActiveMenu={setActiveMenu}
-                            duplicateList={duplicateList}
-                            deleteList={deleteList}
-                          />
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </>
-            )}
+                    {board.lists?.map((list, idx) => (
+                      <PlanList
+                        key={list.id}
+                        list={list}
+                        index={idx}
+                        editingListId={editingListId}
+                        setEditingListId={setEditingListId}
+                        newCardListId={newCardListId}
+                        setNewCardListId={setNewCardListId}
+                        newCardText={newCardText}
+                        setNewCardText={setNewCardText}
+                        confirmAddCard={confirmAddCard}
+                        setActiveCard={() => {}}
+                        setEditCard={setEditCard}
+                        deleteList={deleteList}
+                        deleteCard={handleDeleteCard}
+                        duplicateCard={duplicateCard} 
+                        activeListMenu={activeListMenu}
+                        setActiveListMenu={setActiveListMenu}
+                        activeCardMenu={activeCardMenu}
+                        setActiveCardMenu={setActiveCardMenu}
+                        toggleDone={toggleDone}
+                        setConfirmDeleteCard={setConfirmDeleteCard}
+                        setConfirmDeleteList={setConfirmDeleteList}
+                        renameList={renameList}
+                        duplicateList={duplicateList}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         </div>
       </div>
 
       {/* MODALS */}
-
-      {activeCard && editCard && (
+      {editCard && (
         <EditCardModal
           editCard={editCard}
-          setEditCard={setEditCard}
-          saveCard={saveCard}
-          labels={labels}
+          setEditCard={(data) => setEditCard({ ...data, listId: editCard.listId })}
+          saveCard={() =>
+            handleUpdateCard(editCard.listId, editCard.id, editCard)
+          }
+          labels={board.labels || []}
           setShowLabelModal={setShowLabelModal}
-          setActiveCard={setActiveCard}
-        />
+          onClose={() => setEditCard(null)}        />
       )}
 
       {showLabelModal && (
         <LabelModal
-          colors={colors}
+          planId={planId}
+          colors={[
+            "bg-red-500",
+            "bg-green-600",
+            "bg-blue-500",
+            "bg-yellow-400",
+            "bg-purple-600",
+            "bg-pink-500",
+          ]}
           editCard={editCard}
           setEditCard={setEditCard}
-          setLabels={setLabels}
           onClose={() => setShowLabelModal(false)}
         />
       )}
@@ -443,32 +373,51 @@ export default function PlanDashboardPage() {
           card={showDeleteConfirm}
           onCancel={() => setShowDeleteConfirm(null)}
           onConfirm={() => {
-            deleteCard(showDeleteConfirm);
+            handleDeleteCard(showDeleteConfirm.listId, showDeleteConfirm.id);
             setShowDeleteConfirm(null);
           }}
         />
       )}
 
-
-      {/* Share modal */}
       <ShareModal
         isOpen={openShare}
         onClose={() => setOpenShare(false)}
-        planName={currentPlan?.name}
-        onInvite={(payload) => {
-          if (payload?.emails?.length) {
-            const newInvites = payload.emails.map((email) => ({
-              email,
-              role: payload.role,
-            }));
-            setCurrentPlan((p) => ({
-              ...p,
-              inviteList: [...(p?.inviteList || []), ...newInvites],
-            }));
-          }
-          setOpenShare(false);
-        }}
+        planName={board.planTitle}
+        onInvite={handleInvite}
       />
+      {/* 🔥 Confirm xóa thẻ */}
+      {confirmDeleteCard && (
+        <ConfirmModal
+          open={true}
+          title="Xóa thẻ"
+          message={`Bạn có chắc muốn xóa thẻ "${confirmDeleteCard.card.text}"?`}
+          confirmText="Xóa"
+          cancelText="Hủy"
+          onClose={() => setConfirmDeleteCard(null)}
+          onConfirm={() => {
+            handleDeleteCard(confirmDeleteCard.listId, confirmDeleteCard.card.id);
+            setConfirmDeleteCard(null);
+          }}
+        />
+      )}
+
+      {/* 🔥 Confirm xóa danh sách */}
+      {confirmDeleteList && (
+        <ConfirmModal
+          open={true}
+          title="Xóa danh sách"
+          message={`Bạn có chắc muốn xóa danh sách "${confirmDeleteList.title}" và tất cả thẻ bên trong?`}
+          confirmText="Xóa"
+          cancelText="Hủy"
+          onClose={() => setConfirmDeleteList(null)}
+          onConfirm={() => {
+            deleteList(confirmDeleteList.id);
+            setConfirmDeleteList(null);
+          }}
+        />
+      )}
+
     </div>
+    
   );
 }

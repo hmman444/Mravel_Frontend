@@ -1,31 +1,68 @@
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { showError, showSuccess } from "../../../../utils/toastUtils";
+import { usePlanBoard } from "../../hooks/usePlanBoard";
 
+/**
+ * Modal tạo nhãn mới (Label)
+ * - Gọi API upsertLabel(planId, payload)
+ * - Cập nhật lại editCard.labels và board.labels
+ */
 export default function LabelModal({
-  colors,
+  planId,
+  colors = [],
   editCard,
   setEditCard,
-  setLabels,
   onClose,
 }) {
+  const { upsertLabel } = usePlanBoard(planId);
+
   const [newLabel, setNewLabel] = useState({
     text: "Nhãn mới",
     color: "bg-green-600",
   });
 
+  const handleCreate = async () => {
+    if (!newLabel.text.trim()) {
+      showError("Tên nhãn không được để trống");
+      return;
+    }
+
+    try {
+      // tạo hoặc cập nhật nhãn
+      const label = await upsertLabel(newLabel).unwrap();
+
+      // cập nhật local card
+      const updatedLabels = editCard?.labels
+        ? [...editCard.labels, label]
+        : [label];
+      setEditCard({ ...editCard, labels: updatedLabels });
+
+      showSuccess("Đã tạo nhãn mới");
+      onClose();
+    } catch (err) {
+      showError("Không thể tạo nhãn");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[400px] relative">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[400px] relative shadow-xl">
+        {/* Đóng modal */}
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
         >
           <FaTimes />
         </button>
+
         <h3 className="text-lg font-bold mb-3">Tạo nhãn mới</h3>
 
         {/* Xem trước */}
-        <div className={`px-3 py-2 rounded mb-3 text-white ${newLabel.color}`}>
+        <div
+          className={`px-3 py-2 rounded mb-3 text-white text-sm text-center ${newLabel.color}`}
+        >
           {newLabel.text}
         </div>
 
@@ -33,10 +70,9 @@ export default function LabelModal({
         <label className="text-sm block mb-1">Tiêu đề</label>
         <input
           value={newLabel.text}
-          onChange={(e) =>
-            setNewLabel({ ...newLabel, text: e.target.value })
-          }
-          className="w-full border rounded-lg px-2 py-1 mb-3"
+          onChange={(e) => setNewLabel({ ...newLabel, text: e.target.value })}
+          className="w-full border rounded-lg px-2 py-1 mb-3 dark:bg-gray-700 dark:text-white"
+          placeholder="Nhập tên nhãn..."
         />
 
         {/* Chọn màu */}
@@ -47,7 +83,7 @@ export default function LabelModal({
               key={c}
               onClick={() => setNewLabel({ ...newLabel, color: c })}
               className={`w-8 h-8 rounded ${c} border-2 ${
-                newLabel.color === c ? "border-black" : "border-transparent"
+                newLabel.color === c ? "border-black dark:border-white" : "border-transparent"
               }`}
             />
           ))}
@@ -60,16 +96,9 @@ export default function LabelModal({
           Gỡ bỏ màu
         </button>
 
+        {/* Tạo mới */}
         <button
-          onClick={() => {
-            if (!newLabel.text.trim()) return;
-            setLabels((prev) => [...prev, newLabel]);
-            const updated = editCard?.labels
-              ? [...editCard.labels, newLabel]
-              : [newLabel];
-            setEditCard({ ...editCard, labels: updated });
-            onClose();
-          }}
+          onClick={handleCreate}
           className="px-4 py-2 bg-primary text-white rounded-lg w-full"
         >
           Tạo mới
