@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { forgotPassword } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
 
 export const useForgotPassword = () => {
   const dispatch = useDispatch();
@@ -25,14 +24,12 @@ export const useForgotPassword = () => {
     if (cooldown > 0) return;
     const action = await dispatch(forgotPassword({ email }));
     if (forgotPassword.fulfilled.match(action)) {
-      toast.success("Mã OTP đã được gửi tới email của bạn!");
       localStorage.setItem("last_fp_email", email.trim().toLowerCase());
       setCooldown(30); 
       setTimeout(() => {
         navigate(`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`);
       }, 1000);
     } else {
-      toast.error(action.payload || "Không thể gửi OTP, vui lòng thử lại.");
       setMessage(action.payload || "Không thể gửi OTP, vui lòng thử lại.");
     }
   };

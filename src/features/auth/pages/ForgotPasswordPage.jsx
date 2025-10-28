@@ -5,28 +5,23 @@ import AuthInput from "../components/AuthInput";
 import { EnvelopeIcon } from "@heroicons/react/24/outline";
 import { useForgotPassword } from "../hooks/useForgotPassword";
 import LoadingOverlay from "../../../components/LoadingOverlay";
+import { validateEmail } from "../../../utils/validators";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState({});
   const { handleForgot, message, loading, error, cooldown } = useForgotPassword();
-
-  const [inputError, setInputError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
 
-    if (!email.trim()) {
-      setInputError("Email không được để trống");
-      return;
-    }
-    
-    const emailRegex = /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/;
-    if (!emailRegex.test(email)) {
-      setInputError("Địa chỉ email không hợp lệ");
-      return;
-    }
+    const emailError = validateEmail(email);
+    if (emailError) newErrors.email = emailError;
 
-    setInputError("");
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     handleForgot(email);
   };
 
@@ -39,17 +34,18 @@ export default function ForgotPasswordPage() {
       </a>
 
       <AuthCard title="Quên mật khẩu" subtitle="Nhập email để nhận mã OTP đặt lại mật khẩu">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <AuthInput
-            label="Email"
-            type="email"
-            icon={EnvelopeIcon}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Nhập email của bạn"
-            required
-          />
-          {inputError && <p className="text-red-500 text-sm">{inputError}</p>}
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <div>
+            <AuthInput
+              label="Email"
+              type="text"
+              icon={EnvelopeIcon}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Nhập email của bạn"
+            />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          </div>
 
           <button
             type="submit"
@@ -59,7 +55,7 @@ export default function ForgotPasswordPage() {
             {cooldown > 0 ? `Gửi lại OTP sau ${cooldown}s` : "Gửi mã OTP"}
           </button>
 
-          {error && !inputError && (
+          {error && !errors.email && (
             <p className="text-red-500 text-sm text-center mt-2">{error}</p>
           )}
           {message && !error && (

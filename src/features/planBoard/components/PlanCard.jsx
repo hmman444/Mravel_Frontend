@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { FaCalendarAlt, FaCheck, FaEllipsisV } from "react-icons/fa";
+import { FaCalendarAlt, FaCheck, FaEllipsisV, FaCopy, FaTimes } from "react-icons/fa";
 
 export default function PlanCard({
   card,
@@ -9,13 +9,15 @@ export default function PlanCard({
   setActiveCard,
   setEditCard,
   duplicateCard,
-  deleteCard,
   activeMenu,
   setActiveMenu,
+  setConfirmDeleteCard,
 }) {
   const btnRef = useRef(null);
+  const menuRef = useRef(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
 
+  // 📍 Cập nhật vị trí menu theo nút ...
   useEffect(() => {
     if (activeMenu === card.id && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
@@ -26,15 +28,32 @@ export default function PlanCard({
     }
   }, [activeMenu, card.id]);
 
+  // 📍 Đóng menu khi click ra ngoài
+  useEffect(() => {
+    if (activeMenu !== card.id) return;
+    const handleClickOutside = (e) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        btnRef.current &&
+        !btnRef.current.contains(e.target)
+      ) {
+        setActiveMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [activeMenu, card.id, setActiveMenu]);
+
   return (
     <div
       className="p-3 rounded-lg mb-2 shadow-sm bg-gray-100 dark:bg-gray-700 cursor-pointer transition hover:shadow-md"
       onClick={() => {
         setActiveCard(card);
-        setEditCard({ ...card });
+        setEditCard({ ...card, listId });
       }}
     >
-      {/* nhãn */}
+      {/* 🔹 Nhãn */}
       {card.labels && card.labels.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
           {card.labels.slice(0, 4).map((lbl, idx) => (
@@ -46,14 +65,15 @@ export default function PlanCard({
             </span>
           ))}
           {card.labels.length > 4 && (
-            <span className="text-[10px] text-gray-500">+{card.labels.length - 4}</span>
+            <span className="text-[10px] text-gray-500">
+              +{card.labels.length - 4}
+            </span>
           )}
         </div>
       )}
 
-      {/* Nội dung thẻ */}
+      {/* 🔹 Nội dung thẻ */}
       <div className="flex items-center gap-2">
-        {/* Checkbox hoàn thành */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -68,16 +88,14 @@ export default function PlanCard({
           {card.done && <FaCheck className="text-xs" />}
         </button>
 
-        {/* Tiêu đề */}
         <span
           className={`flex-1 text-sm ${
-            card.done ? " text-gray-400" : "text-gray-800 dark:text-gray-100"
+            card.done ? "text-gray-400" : "text-gray-800 dark:text-gray-100"
           }`}
         >
           {card.text}
         </span>
 
-        {/* Nút menu ... */}
         <div className="ml-auto">
           <button
             ref={btnRef}
@@ -92,13 +110,14 @@ export default function PlanCard({
         </div>
       </div>
 
-      {/* Thời gian */}
+      {/* 🔹 Thời gian */}
       {card.start && card.end && (
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
           <FaCalendarAlt /> {card.start} → {card.end}
         </div>
       )}
 
+      {/* 🔹 Mức ưu tiên */}
       {card.priority && (
         <div
           className={`text-xs font-medium mt-2 inline-block px-2 py-[2px] rounded ${
@@ -118,10 +137,11 @@ export default function PlanCard({
         </div>
       )}
 
-      {/* Menu context (portal) */}
+      {/* 🔹 Menu context */}
       {activeMenu === card.id &&
         createPortal(
           <div
+            ref={menuRef}
             className="absolute bg-white dark:bg-gray-700 shadow-md rounded-md w-32 z-[9999]"
             style={{
               position: "absolute",
@@ -133,22 +153,22 @@ export default function PlanCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                duplicateCard(card);
+                duplicateCard(card, listId);
                 setActiveMenu(null);
               }}
-              className="block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 gap-2"
             >
-              Tạo bản sao
+              <FaCopy className="text-gray-500" /> Tạo bản sao
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                deleteCard(card);
                 setActiveMenu(null);
+                setConfirmDeleteCard({ listId, card });
               }}
-              className="block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500"
+              className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-700 gap-2"
             >
-              Xóa
+              <FaTimes className="text-red-500" /> Xóa
             </button>
           </div>,
           document.body

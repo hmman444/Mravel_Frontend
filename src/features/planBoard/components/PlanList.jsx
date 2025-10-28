@@ -1,109 +1,123 @@
 import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { FaPlus, FaEllipsisV, FaCheck, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEllipsisV, FaCheck, FaTimes, FaCopy } from "react-icons/fa";
 import PlanCard from "./PlanCard";
-
+import { useState } from "react";
 export default function PlanList({
   list,
   index,
   editingListId,
   setEditingListId,
-  lists,
-  setLists,
+  renameList,
   newCardListId,
   setNewCardListId,
   newCardText,
   setNewCardText,
   confirmAddCard,
-  toggleDone,
   setActiveCard,
   setEditCard,
-  duplicateCard,
   deleteCard,
-  activeMenu,
-  setActiveMenu,
+  duplicateCard,
+  activeListMenu,
+  setActiveListMenu,
+  activeCardMenu,
+  setActiveCardMenu,
+  toggleDone,
+  setConfirmDeleteCard,
+  setConfirmDeleteList,
   duplicateList,
-  deleteList,
 }) {
+  const [tempTitle, setTempTitle] = useState(list.title);
   return (
-    <Draggable draggableId={list.id} index={index}>
+    <Draggable draggableId={String(list.id)} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className="bg-white dark:bg-gray-800 rounded-lg p-4 w-64 flex-shrink-0 shadow-md"
+          className="bg-white dark:bg-gray-800 rounded-lg p-4 w-64 flex-shrink-0 shadow-md border border-transparent hover:border-blue-400 hover:shadow-lg transition-all duration-200"
         >
+          {/* HEADER */}
           <div
             className="flex justify-between items-center mb-3"
             {...provided.dragHandleProps}
           >
             {editingListId === list.id ? (
               <input
-                defaultValue={list.title}
-                onBlur={(e) => {
-                  setLists(
-                    lists.map((l) =>
-                      l.id === list.id ? { ...l, title: e.target.value } : l
-                    )
-                  );
-                  setEditingListId(null);
+                value={tempTitle}
+                onChange={(e) => setTempTitle(e.target.value)}
+                onBlur={async () => {
+                  try {
+                    if (tempTitle.trim() && tempTitle !== list.title) {
+                      await renameList(list.id, { title: tempTitle }).unwrap();
+                    }
+                  } catch (err) {
+                    console.error("❌ Lỗi đổi tên danh sách:", err);
+                  } finally {
+                    setEditingListId(null);
+                  }
                 }}
                 autoFocus
                 className="font-semibold w-full bg-transparent outline-none"
               />
             ) : (
               <h3
-                onClick={() => setEditingListId(list.id)}
+                onClick={() => {
+                  setEditingListId(list.id);
+                  setTempTitle(list.title);
+                }}
                 className="font-semibold cursor-pointer hover:underline"
               >
                 {list.title}
               </h3>
             )}
+
             <div className="relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveMenu(activeMenu === list.id ? null : list.id);
+                  setActiveListMenu(activeListMenu === list.id ? null : list.id);
                 }}
               >
                 <FaEllipsisV />
               </button>
-              {activeMenu === list.id && (
+              {activeListMenu === list.id && (
                 <div
-                  className="absolute right-0 mt-1 bg-white dark:bg-gray-700 shadow-md rounded-md w-32 z-50"
+                  className="absolute right-0 mt-1 bg-white dark:bg-gray-700 shadow-lg rounded-lg w-40 z-50 animate-fadeIn"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     onClick={() => {
                       duplicateList(list);
-                      setActiveMenu(null);
+                      setActiveListMenu(null);
                     }}
-                    className="block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 gap-2"
                   >
-                    Tạo bản sao
+                    <FaCopy className="text-gray-500" /> Tạo bản sao
                   </button>
                   <button
                     onClick={() => {
-                      deleteList(list);
-                      setActiveMenu(null);
+                      setActiveListMenu(null);
+                      setConfirmDeleteList(list);
                     }}
-                    className="block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500"
+                    className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-700 gap-2"
                   >
-                    Xóa
+                    <FaTimes className="text-red-500" /> Xóa
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          <Droppable droppableId={list.id} type="card">
+          {/* CARDS */}
+          <Droppable droppableId={String(list.id)} type="card">
             {(provided) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="space-y-2 min-h-[1px] max-h-[560px] overflow-y-auto"
+                // ⚠️ bỏ overflow-y-auto để tránh nested scroll
+                className="space-y-2 min-h-[1px] pb-1"
               >
-                {list.cards.map((card, idx) => (
-                  <Draggable key={card.id} draggableId={card.id} index={idx}>
+                {list.cards?.map((card, idx) => (
+                  <Draggable key={`${list.id}-${card.id || idx}`} draggableId={String(card.id)} index={idx}>
                     {(provided) => (
                       <div
                         ref={provided.innerRef}
@@ -116,10 +130,11 @@ export default function PlanList({
                           toggleDone={toggleDone}
                           setActiveCard={setActiveCard}
                           setEditCard={setEditCard}
-                          duplicateCard={duplicateCard}
                           deleteCard={deleteCard}
-                          activeMenu={activeMenu}
-                          setActiveMenu={setActiveMenu}
+                          duplicateCard={duplicateCard}
+                          activeMenu={activeCardMenu}
+                          setActiveMenu={setActiveCardMenu} 
+                          setConfirmDeleteCard={setConfirmDeleteCard}
                         />
                       </div>
                     )}
@@ -130,6 +145,7 @@ export default function PlanList({
             )}
           </Droppable>
 
+          {/* ADD CARD */}
           {newCardListId === list.id ? (
             <div className="mt-2">
               <textarea

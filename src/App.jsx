@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useLoadUser } from "./features/auth/hooks/useLoadUser";
 
 // Auth
 import LoginPage from "./features/auth/pages/LoginPage";
@@ -31,6 +32,7 @@ import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 
 function App() {
+  useLoadUser();
   return (
     <Router>
       <Routes>

@@ -38,7 +38,7 @@ export default function ShareModal({ isOpen, onClose, planName }) {
 
   if (!isOpen) return null;
 
-  // ✅ Thêm email mời
+  // thêm email mời
   const handleAddEmail = () => {
     const trimmed = emailInput.trim();
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
@@ -50,7 +50,7 @@ export default function ShareModal({ isOpen, onClose, planName }) {
     setTimeout(() => setPhase("invite"), 150);
   };
 
-  // ✅ Gửi lời mời
+  // gửi lời mời
   const handleSend = () => {
     if (!emailInput.trim()) return;
     const newPerson = {
@@ -73,7 +73,7 @@ export default function ShareModal({ isOpen, onClose, planName }) {
     setNotify(true);
   };
 
-  // ✅ Copy link
+  // copy link
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -84,7 +84,7 @@ export default function ShareModal({ isOpen, onClose, planName }) {
     }
   };
 
-  // ✅ Đổi quyền
+  // đổi quyền
   const handleChangeRole = (email, newRole) => {
     setAccessList((prev) =>
       prev.map((u) => (u.email === email ? { ...u, role: newRole } : u))
@@ -92,12 +92,12 @@ export default function ShareModal({ isOpen, onClose, planName }) {
     setActiveMenu(null);
   };
 
-  // ✅ Xóa quyền truy cập
+  // xóa quyền truy cập
   const handleRemoveUser = (email) => {
     setAccessList((prev) => prev.filter((u) => u.email !== email));
   };
 
-  // ✅ Chuyển quyền sở hữu
+  // chuyển quyền sở hữu
   const handleTransferOwnership = (email) => {
     setAccessList((prev) =>
       prev.map((u) => ({
@@ -114,7 +114,7 @@ export default function ShareModal({ isOpen, onClose, planName }) {
     setActiveMenu(null);
   };
 
-  // ✅ Thêm ngày hết hạn (demo)
+  // thêm ngày hết hạn (demo)
   const handleAddExpiry = (email) => {
     alert(`Chức năng thêm ngày hết hạn cho ${email} (demo)`);
     setActiveMenu(null);
@@ -131,7 +131,6 @@ export default function ShareModal({ isOpen, onClose, planName }) {
           <FaTimes />
         </button>
 
-        {/* ======== Giao diện mặc định ======== */}
         <div
           className={`transition-all duration-300 ease-in-out ${
             phase === "default"
@@ -252,7 +251,6 @@ export default function ShareModal({ isOpen, onClose, planName }) {
           </div>
         </div>
 
-        {/* ======== Giao diện mời ======== */}
         <div
           className={`transition-all duration-300 ease-in-out ${
             phase === "invite"

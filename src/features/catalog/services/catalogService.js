@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const PREFIX = `${API_URL}/api/catalog/places`;
+const PREFIX = `${API_URL}/catalog/places`;
 
 const normalizePage = (data) => ({
   items: data?.content ?? [],
