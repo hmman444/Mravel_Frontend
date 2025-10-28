@@ -14,6 +14,11 @@ import SearchPage from "./features/search/pages/SearchPage";
 // Plans
 import PlanListPage from "./features/planFeed/pages/PlanListPage";
 import PlanDashboardPage from "./features/planBoard/pages/PlanDashboardPage";
+//Catalog
+import HotelResultsPage from "./features/catalog/pages/HotelResultsPage";
+import RestaurantResultsPage from "./features/catalog/pages/RestaurantResultsPage";
+import PlaceResultsPage from "./features/catalog/pages/PlaceResultsPage";
+import PlaceDetailPage from "./features/catalog/pages/PlaceDetailPage";
 // Admin
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
@@ -24,7 +29,7 @@ import ManageLocationsPage from "./features/admin/pages/ManageLocationsPage";
 import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
 import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
-import PlaceDetailPage from "./features/admin/pages/PlaceDetailPage";
+import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 
 function App() {
   useLoadUser();
@@ -48,11 +53,17 @@ function App() {
         <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
         <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
         <Route path="/admin/locations/:id" element={<LocationDetailPage />} />
-        <Route path="/admin/places/:placeId" element={<PlaceDetailPage />} />
+        <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
 
         {/* Plans routes */}
         <Route path="/plans" element={<PlanListPage />} />
         <Route path="/plans/:planId" element={<PlanDashboardPage />} />
+
+        {/* Catalog routes */}       
+        <Route path="/search/hotels" element={<HotelResultsPage />} />
+        <Route path="/search/restaurants" element={<RestaurantResultsPage />} />
+        <Route path="/search/places" element={<PlaceResultsPage />} />
+        <Route path="/place/:slug" element={<PlaceDetailPage />} />
 
         {/* General routes */}
         <Route path="/search" element={<SearchPage />} />
