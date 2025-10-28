@@ -68,4 +68,3 @@ export async function sendInvite(planId, payload) {
   const res = await api.post(`${BASE}/${planId}/board/invites`, payload);
   return res.data;
 }
-

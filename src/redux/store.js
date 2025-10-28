@@ -7,8 +7,14 @@ const store = configureStore({
   reducer: {
     auth: authReducer,
     plan: planReducer,
-    planBoard: planBoardReducer
+    planBoard: planBoardReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+      thunk: true,
+    }),
+  devTools: import.meta.env.MODE !== "production",
 });
 
 export default store;

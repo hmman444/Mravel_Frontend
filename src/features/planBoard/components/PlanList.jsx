@@ -1,8 +1,7 @@
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { FaPlus, FaEllipsisV, FaCheck, FaTimes, FaCopy } from "react-icons/fa";
 import PlanCard from "./PlanCard";
-import { useState, useRef, useEffect } from "react";
-
+import { useState } from "react";
 export default function PlanList({
   list,
   index,
@@ -28,25 +27,6 @@ export default function PlanList({
   duplicateList,
 }) {
   const [tempTitle, setTempTitle] = useState(list.title);
-  const menuRef = useRef(null);
-  const buttonRef = useRef(null);
-
-  // ✅ Đóng menu khi click ra ngoài, nhưng KHÔNG khi click nút menu
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(e.target)
-      ) {
-        setActiveListMenu(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [setActiveListMenu]);
-
   return (
     <Draggable draggableId={String(list.id)} index={index}>
       {(provided) => (
@@ -65,10 +45,15 @@ export default function PlanList({
                 value={tempTitle}
                 onChange={(e) => setTempTitle(e.target.value)}
                 onBlur={async () => {
-                  if (tempTitle.trim() && tempTitle !== list.title) {
-                    await renameList(list.id, { title: tempTitle });
+                  try {
+                    if (tempTitle.trim() && tempTitle !== list.title) {
+                      await renameList(list.id, { title: tempTitle }).unwrap();
+                    }
+                  } catch (err) {
+                    console.error("❌ Lỗi đổi tên danh sách:", err);
+                  } finally {
+                    setEditingListId(null);
                   }
-                  setEditingListId(null);
                 }}
                 autoFocus
                 className="font-semibold w-full bg-transparent outline-none"
@@ -85,22 +70,17 @@ export default function PlanList({
               </h3>
             )}
 
-            {/* ⋮ Nút menu */}
             <div className="relative">
               <button
-                ref={buttonRef}
                 onClick={(e) => {
                   e.stopPropagation();
-                  // toggle menu chính xác
-                  setActiveListMenu((prev) => (prev === list.id ? null : list.id));
+                  setActiveListMenu(activeListMenu === list.id ? null : list.id);
                 }}
               >
                 <FaEllipsisV />
               </button>
-
               {activeListMenu === list.id && (
                 <div
-                  ref={menuRef}
                   className="absolute right-0 mt-1 bg-white dark:bg-gray-700 shadow-lg rounded-lg w-40 z-50 animate-fadeIn"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -133,38 +113,33 @@ export default function PlanList({
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="space-y-2 min-h-[20px] pb-1"
+                // ⚠️ bỏ overflow-y-auto để tránh nested scroll
+                className="space-y-2 min-h-[1px] pb-1"
               >
-                {Array.isArray(list.cards) && list.cards.length > 0 ? (
-                  list.cards.map((card, idx) => (
-                    <Draggable key={String(card.id)} draggableId={String(card.id)} index={idx}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <PlanCard
-                            card={card}
-                            listId={list.id}
-                            toggleDone={toggleDone}
-                            setActiveCard={setActiveCard}
-                            setEditCard={setEditCard}
-                            deleteCard={deleteCard}
-                            duplicateCard={duplicateCard}
-                            activeMenu={activeCardMenu}
-                            setActiveMenu={setActiveCardMenu}
-                            setConfirmDeleteCard={setConfirmDeleteCard}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))
-                ) : (
-                  <div className="text-gray-400 italic text-sm select-none">
-                    Chưa có thẻ
-                  </div>
-                )}
+                {list.cards?.map((card, idx) => (
+                  <Draggable key={`${list.id}-${card.id || idx}`} draggableId={String(card.id)} index={idx}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <PlanCard
+                          card={card}
+                          listId={list.id}
+                          toggleDone={toggleDone}
+                          setActiveCard={setActiveCard}
+                          setEditCard={setEditCard}
+                          deleteCard={deleteCard}
+                          duplicateCard={duplicateCard}
+                          activeMenu={activeCardMenu}
+                          setActiveMenu={setActiveCardMenu} 
+                          setConfirmDeleteCard={setConfirmDeleteCard}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
                 {provided.placeholder}
               </div>
             )}

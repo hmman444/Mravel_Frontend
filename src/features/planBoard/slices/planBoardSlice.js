@@ -13,7 +13,7 @@ import {
   sendInvite,
   duplicateCard,
 } from "../services/planBoardService";
-
+import cloneDeep from "lodash.clonedeep";
 const initialState = {
   board: null,
   loading: false,
@@ -107,47 +107,26 @@ const planBoardSlice = createSlice({
     },
 
     localReorder(state, action) {
-      const board = state.board;
+      const board = cloneDeep(state.board);
       if (!board || !board.lists) return;
 
       const { type, sourceListId, destListId, sourceIndex, destIndex } = action.payload;
-
-      // helper – tìm list theo id (id có thể là string/number)
-      const findListById = (id) =>
-        board.lists.find((l) => String(l.id) === String(id));
+      const findListById = (id) => board.lists.find((l) => String(l.id) === String(id));
 
       if (type === "list") {
-        // Reorder column
-        const lists = board.lists;
-        if (
-          sourceIndex < 0 || sourceIndex >= lists.length ||
-          destIndex < 0 || destIndex >= lists.length
-        ) {
-          return;
-        }
-        const [moved] = lists.splice(sourceIndex, 1);
-        lists.splice(destIndex, 0, moved);
+        const [moved] = board.lists.splice(sourceIndex, 1);
+        board.lists.splice(destIndex, 0, moved);
+        state.board = board;
         return;
       }
 
-      // type === "card"
       const sourceList = findListById(sourceListId);
       const destList = findListById(destListId);
       if (!sourceList || !destList) return;
-      if (!sourceList.cards) sourceList.cards = [];
-      if (!destList.cards) destList.cards = [];
-
-      if (
-        sourceIndex < 0 || sourceIndex >= sourceList.cards.length ||
-        destIndex < 0 || destIndex > destList.cards.length
-      ) {
-        return;
-      }
 
       const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
-      // cập nhật listId cho card khi sang list khác
-      const moved = { ...movedCard, listId: destList.id };
-      destList.cards.splice(destIndex, 0, moved);
+      destList.cards.splice(destIndex, 0, { ...movedCard, listId: destList.id });
+      state.board = board;
     },
   },
   extraReducers: (builder) => {
@@ -168,6 +147,14 @@ const planBoardSlice = createSlice({
       // Add list
       .addCase(addList.fulfilled, (s, a) => {
         s.board?.lists.push(a.payload);
+      })
+      .addCase(editListTitle.fulfilled, (s, a) => {
+        const { listId } = a.meta.arg;
+        const updated = a.payload;
+        const list = s.board?.lists.find((l) => String(l.id) === String(listId));
+        if (list) {
+          list.title = updated.title;
+        }
       })
 
       // Remove list
@@ -211,9 +198,7 @@ const planBoardSlice = createSlice({
       })
 
       .addCase(reorder.fulfilled, (s, a) => {
-        if (a.payload && a.payload.lists) {
-          s.board = a.payload;
-        }
+        s.error = null;
       })
 
       .addCase(reorder.rejected, (s, a) => {

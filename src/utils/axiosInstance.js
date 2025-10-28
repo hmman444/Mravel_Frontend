@@ -30,11 +30,24 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const message = error.response?.data?.message || "";
+    // Nếu lỗi 401 (hết hạn access token)
     if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isRefreshing
+      (status === 401 || 
+      (status === 400 && message.includes("JWT expired"))) &&
+      !originalRequest._retry
     ) {
+      if (isRefreshing) {
+        // Đang refresh => đợi
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
       originalRequest._retry = true;
       isRefreshing = true;
 
@@ -48,30 +61,23 @@ api.interceptors.response.use(
         );
 
         const { accessToken, refreshToken: newRefresh } = res.data.data;
+
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", newRefresh);
 
         onRefreshed(accessToken);
-        isRefreshing = false;
 
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        isRefreshing = false;
         return api(originalRequest);
       } catch (err) {
-        console.error("Refresh token failed:", err);
+        console.error("❌ Refresh token failed:", err);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         window.location.href = "/login";
         return Promise.reject(err);
       }
-    }
-
-    // Nếu đang refresh thì xếp hàng chờ
-    if (error.response?.status === 401 && isRefreshing) {
-      return new Promise((resolve) => {
-        subscribeTokenRefresh((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          resolve(api(originalRequest));
-        });
-      });
     }
 
     return Promise.reject(error);

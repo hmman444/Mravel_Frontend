@@ -38,7 +38,7 @@ export default function PlanDashboardPage() {
     reorder,
     upsertLabel,
     invite,
-    localReorder,
+    localReorder
   } = usePlanBoard(planId);
 
   const dispatch = useDispatch();
@@ -56,17 +56,22 @@ export default function PlanDashboardPage() {
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
   
-
-  // 🧩 Load dữ liệu board từ server
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planId]);
 
-  // 🧩 Kéo thả list/card
   const handleDragEnd = async (result) => {
-    if (!result.destination) return;
     const { source, destination, type } = result;
+
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
 
     const payload = {
       type,
@@ -75,15 +80,24 @@ export default function PlanDashboardPage() {
       sourceIndex: source.index,
       destIndex: destination.index,
     };
+
     dispatch(localReorder(payload));
+
     try {
-      await reorder(payload);
-    } catch {
-      showError("Kéo thả thất bại");
+      await reorder(payload).unwrap();
+      setTimeout(() => {
+        load();
+      }, 100);
+    } catch (err) {
+      console.error("❌ Lỗi reorder:", err);
+      showError("Cập nhật vị trí thất bại");
+
+      setTimeout(() => {
+        load();
+      }, 100);
     }
   };
 
-  // 🧩 CRUD qua API
   const handleAddList = async () => {
     try {
       await createList({ title: `Ngày ${board?.lists?.length + 1}` });
@@ -284,12 +298,7 @@ export default function PlanDashboardPage() {
               </button>
             </div>
 
-            <DragDropContext 
-              onBeforeDragStart={() => {
-                  setActiveListMenu(null);
-                  setActiveCardMenu(null);
-                }}
-              onDragEnd={handleDragEnd}>
+            <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable
                 droppableId="all-lists"
                 direction="horizontal"
@@ -303,7 +312,7 @@ export default function PlanDashboardPage() {
                   >
                     {board.lists?.map((list, idx) => (
                       <PlanList
-                        key={list.id}
+                        key={list.id || idx}
                         list={list}
                         index={idx}
                         editingListId={editingListId}
@@ -385,7 +394,6 @@ export default function PlanDashboardPage() {
         planName={board.planTitle}
         onInvite={handleInvite}
       />
-      {/* 🔥 Confirm xóa thẻ */}
       {confirmDeleteCard && (
         <ConfirmModal
           open={true}
@@ -401,7 +409,6 @@ export default function PlanDashboardPage() {
         />
       )}
 
-      {/* 🔥 Confirm xóa danh sách */}
       {confirmDeleteList && (
         <ConfirmModal
           open={true}
