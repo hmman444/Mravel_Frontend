@@ -68,3 +68,18 @@ export async function sendInvite(planId, payload) {
   const res = await api.post(`${BASE}/${planId}/board/invites`, payload);
   return res.data;
 }
+
+/* ===== SHARE / VISIBILITY ===== */
+export async function updateVisibility(planId, visibility) {
+  const res = await api.patch(`${BASE}/${planId}/visibility`, null, {
+    params: { visibility },
+  });
+  return res.data;
+}
+
+export async function removeInvite(planId, email) {
+  const res = await api.delete(`${BASE}/${planId}/board/invites`, {
+    data: { email },
+  });
+  return res.data;
+}

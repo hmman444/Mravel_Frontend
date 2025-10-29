@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import {
   FaChevronLeft,
@@ -16,15 +17,17 @@ import ShareModal from "../components/modals/ShareModal";
 import EditCardModal from "../components/modals/EditCardModal";
 import LabelModal from "../components/modals/LabelModal";
 import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
-import { addCard } from "../slices/planBoardSlice";
-import { usePlanBoard } from "../hooks/usePlanBoard";
-import { showSuccess, showError } from "../../../utils/toastUtils";
 import ConfirmModal from "../../../components/ConfirmModal";
+import PlanSummary from "../components/PlanSummary";
+import { usePlanBoard } from "../hooks/usePlanBoard";
+import { addCard } from "../slices/planBoardSlice";
+import { showSuccess, showError } from "../../../utils/toastUtils";
 
 export default function PlanDashboardPage() {
-  const planId = 1; // 🔧 tạm thời hardcode, sau lấy từ URL
+  const { planId } = useParams(); // ✅ lấy id từ URL
+  const dispatch = useDispatch();
 
-  // Lấy các hàm thao tác từ Redux hook
+  // Hook Redux kết nối board thật
   const {
     board,
     loading,
@@ -38,40 +41,38 @@ export default function PlanDashboardPage() {
     reorder,
     upsertLabel,
     invite,
-    localReorder
+    localReorder,
   } = usePlanBoard(planId);
 
-  const dispatch = useDispatch();
-  // State UI
+  // UI state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openShare, setOpenShare] = useState(false);
+  const [activeTab, setActiveTab] = useState("summary");
   const [showLabelModal, setShowLabelModal] = useState(false);
   const [editCard, setEditCard] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [editingListId, setEditingListId] = useState(null);
   const [newCardListId, setNewCardListId] = useState(null);
   const [newCardText, setNewCardText] = useState("");
   const [activeListMenu, setActiveListMenu] = useState(null);
-  const [activeCardMenu, setActiveCardMenu] = useState(null); 
+  const [activeCardMenu, setActiveCardMenu] = useState(null);
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
-  
+  const [activeCard, setActiveCard] = useState(null);
+  // Load dữ liệu khi mở trang
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (planId) load();
   }, [planId]);
 
+  /* ---------------------- DND logic ---------------------- */
   const handleDragEnd = async (result) => {
     const { source, destination, type } = result;
-
     if (!destination) return;
 
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
-    ) {
+    )
       return;
-    }
 
     const payload = {
       type,
@@ -82,22 +83,17 @@ export default function PlanDashboardPage() {
     };
 
     dispatch(localReorder(payload));
-
     try {
       await reorder(payload).unwrap();
-      setTimeout(() => {
-        load();
-      }, 100);
+      setTimeout(() => load(), 200);
     } catch (err) {
       console.error("❌ Lỗi reorder:", err);
       showError("Cập nhật vị trí thất bại");
-
-      setTimeout(() => {
-        load();
-      }, 100);
+      setTimeout(() => load(), 200);
     }
   };
 
+  /* ---------------------- CRUD list & card ---------------------- */
   const handleAddList = async () => {
     try {
       await createList({ title: `Ngày ${board?.lists?.length + 1}` });
@@ -121,7 +117,6 @@ export default function PlanDashboardPage() {
 
   const handleUpdateCard = async (listId, cardId, data) => {
     try {
-      // đúng format backend yêu cầu
       const payload = {
         text: data.text,
         description: data.description,
@@ -131,7 +126,6 @@ export default function PlanDashboardPage() {
         done: data.done,
         labelIds: (data.labels || []).map((l) => l.id),
       };
-
       await updateCard(listId, cardId, payload).unwrap();
       showSuccess("Đã cập nhật thẻ");
       setEditCard(null);
@@ -159,11 +153,47 @@ export default function PlanDashboardPage() {
         start: card.start,
         end: card.end,
         done: false,
-        labelIds: card.labels?.map(l => l.id) || [],
+        labelIds: card.labels?.map((l) => l.id) || [],
       };
       await dispatch(addCard({ planId, listId, payload })).unwrap();
+      showSuccess("Đã sao chép thẻ");
     } catch (err) {
-      console.error("❌ Lỗi khi tạo bản sao:", err);
+      console.error("❌ Lỗi copy:", err);
+    }
+  };
+
+  const duplicateList = async (list) => {
+    try {
+      const newTitle = list.title + " (Copy)";
+      const newList = await createList({ title: newTitle }).unwrap();
+      for (const card of list.cards || []) {
+        const payload = {
+          text: card.text,
+          description: card.description,
+          priority: card.priority,
+          start: card.start,
+          end: card.end,
+          done: false,
+          labelIds: card.labels?.map((l) => l.id) || [],
+        };
+        await createCard(newList.id, payload);
+      }
+      showSuccess("Đã sao chép danh sách");
+    } catch {
+      showError("Không thể sao chép danh sách");
+    }
+  };
+
+  const toggleDone = async (listId, cardId) => {
+    const card = board.lists
+      ?.find((l) => l.id === listId)
+      ?.cards.find((c) => c.id === cardId);
+    if (!card) return;
+    try {
+      const updated = { ...card, done: !card.done };
+      await updateCard(listId, cardId, updated);
+    } catch (err) {
+      console.error("❌ Lỗi toggle done:", err);
     }
   };
 
@@ -177,55 +207,18 @@ export default function PlanDashboardPage() {
     }
   };
 
-  const duplicateList = async (list) => {
-    try {
-      const newTitle = list.title + " (Copy)";
-      const newList = await createList({ title: newTitle }).unwrap();
-
-      for (const card of list.cards || []) {
-        const payload = {
-          text: card.text,
-          description: card.description,
-          priority: card.priority,
-          start: card.start,
-          end: card.end,
-          done: false,
-          labelIds: card.labels?.map(l => l.id) || [],
-        };
-        await createCard(newList.id, payload);
-      }
-
-      showSuccess("Đã tạo bản sao danh sách");
-    } catch (err) {
-      console.error("❌ Lỗi khi tạo bản sao danh sách:", err);
-      showError("Không thể tạo bản sao danh sách");
-    }
-  };
-
-  const toggleDone = async (listId, cardId) => {
-    try {
-      // Đảo trạng thái done
-      const card = board.lists
-        ?.find((l) => l.id === listId)
-        ?.cards.find((c) => c.id === cardId);
-
-      if (!card) return;
-
-      const updated = { ...card, done: !card.done };
-      await updateCard(listId, cardId, updated);
-    } catch (err) {
-      console.error("❌ Lỗi khi toggleDone:", err);
-    }
-  };
-
   if (loading || !board)
-    return <div className="p-8 text-center text-gray-500">Đang tải bảng...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500">Đang tải lịch trình...</div>
+    );
 
+  /* ---------------------- RENDER ---------------------- */
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar fixedWhite />
+
       <div className="flex flex-1 mt-16 overflow-hidden relative">
-        {/* SIDEBAR */}
+        {/* Sidebar */}
         <div
           className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-transform duration-300 ease-in-out z-30 ${
             sidebarCollapsed ? "-translate-x-full" : "translate-x-0"
@@ -239,7 +232,7 @@ export default function PlanDashboardPage() {
           />
         </div>
 
-        {/* TOGGLE SIDEBAR BUTTON */}
+        {/* Nút toggle sidebar */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="fixed z-40 flex items-center justify-center w-8 h-8 rounded-full bg-white border shadow-md hover:bg-gray-100 dark:bg-gray-800 transition"
@@ -256,13 +249,13 @@ export default function PlanDashboardPage() {
           )}
         </button>
 
-        {/* MAIN */}
+        {/* Main */}
         <div
           className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
             sidebarCollapsed ? "ml-0" : "ml-72"
           }`}
         >
-          {/* HEADER */}
+          {/* Header */}
           <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center gap-3 border-b">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
               {board.planTitle}
@@ -286,63 +279,108 @@ export default function PlanDashboardPage() {
             </button>
           </div>
 
-          {/* CONTENT */}
-          <div className="flex-1 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Lịch trình chi tiết</h2>
+          {/* Tabs */}
+          <div className="flex gap-6 border-b bg-white dark:bg-gray-800 px-4 sm:px-6">
+            {["summary", "board", "timeline", "members"].map((tab) => (
               <button
-                onClick={handleAddList}
-                className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2"
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`capitalize pb-2 border-b-2 -mb-px transition ${
+                  activeTab === tab
+                    ? "border-primary text-primary font-semibold"
+                    : "border-transparent text-gray-500 hover:text-primary"
+                }`}
               >
-                <FaPlus /> Thêm ngày
+                {tab}
               </button>
-            </div>
+            ))}
+          </div>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable
-                droppableId="all-lists"
-                direction="horizontal"
-                type="list"
-              >
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="flex gap-6 items-start overflow-x-auto pb-4"
+          {/* Nội dung tab */}
+          <div className="flex-1 p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+            {activeTab === "summary" && (
+              <PlanSummary
+                plan={board}
+                startDate={board.startDate}
+                endDate={board.endDate}
+                visibility={board.visibility}
+                setVisibility={() => {}}
+                images={board.images}
+                description={board.description}
+              />
+            )}
+
+            {activeTab === "board" && (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Lịch trình chi tiết</h2>
+                  <button
+                    onClick={handleAddList}
+                    className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2"
                   >
-                    {board.lists?.map((list, idx) => (
-                      <PlanList
-                        key={list.id || idx}
-                        list={list}
-                        index={idx}
-                        editingListId={editingListId}
-                        setEditingListId={setEditingListId}
-                        newCardListId={newCardListId}
-                        setNewCardListId={setNewCardListId}
-                        newCardText={newCardText}
-                        setNewCardText={setNewCardText}
-                        confirmAddCard={confirmAddCard}
-                        setActiveCard={() => {}}
-                        setEditCard={setEditCard}
-                        deleteList={deleteList}
-                        deleteCard={handleDeleteCard}
-                        duplicateCard={duplicateCard} 
-                        activeListMenu={activeListMenu}
-                        setActiveListMenu={setActiveListMenu}
-                        activeCardMenu={activeCardMenu}
-                        setActiveCardMenu={setActiveCardMenu}
-                        toggleDone={toggleDone}
-                        setConfirmDeleteCard={setConfirmDeleteCard}
-                        setConfirmDeleteList={setConfirmDeleteList}
-                        renameList={renameList}
-                        duplicateList={duplicateList}
-                      />
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                    <FaPlus /> Thêm ngày
+                  </button>
+                </div>
+
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable
+                    droppableId="all-lists"
+                    direction="horizontal"
+                    type="list"
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="flex gap-6 items-start overflow-x-auto pb-4"
+                      >
+                        {board.lists?.map((list, idx) => (
+                          <PlanList
+                            key={list.id || idx}
+                            list={list}
+                            index={idx}
+                            editingListId={editingListId}
+                            setEditingListId={setEditingListId}
+                            newCardListId={newCardListId}
+                            setNewCardListId={setNewCardListId}
+                            newCardText={newCardText}
+                            setNewCardText={setNewCardText}
+                            confirmAddCard={confirmAddCard}
+                            setActiveCard={setActiveCard} 
+                            setEditCard={setEditCard}
+                            deleteList={deleteList}
+                            deleteCard={handleDeleteCard}
+                            duplicateCard={duplicateCard}
+                            activeListMenu={activeListMenu}
+                            setActiveListMenu={setActiveListMenu}
+                            activeCardMenu={activeCardMenu}
+                            setActiveCardMenu={setActiveCardMenu}
+                            toggleDone={toggleDone}
+                            setConfirmDeleteCard={setConfirmDeleteCard}
+                            setConfirmDeleteList={setConfirmDeleteList}
+                            renameList={renameList}
+                            duplicateList={duplicateList}
+                          />
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </>
+            )}
+
+            {activeTab === "timeline" && (
+              <div className="text-gray-600 dark:text-gray-300 text-center p-6">
+                🕓 Biểu đồ thời gian (đang phát triển)
+              </div>
+            )}
+
+            {activeTab === "members" && (
+              <div className="text-gray-600 dark:text-gray-300 text-center p-6">
+                👥 Danh sách thành viên (đang phát triển)
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -351,13 +389,16 @@ export default function PlanDashboardPage() {
       {editCard && (
         <EditCardModal
           editCard={editCard}
-          setEditCard={(data) => setEditCard({ ...data, listId: editCard.listId })}
+          setEditCard={(data) =>
+            setEditCard({ ...data, listId: editCard.listId })
+          }
           saveCard={() =>
             handleUpdateCard(editCard.listId, editCard.id, editCard)
           }
           labels={board.labels || []}
           setShowLabelModal={setShowLabelModal}
-          onClose={() => setEditCard(null)}        />
+          onClose={() => setEditCard(null)}
+        />
       )}
 
       {showLabelModal && (
@@ -377,23 +418,14 @@ export default function PlanDashboardPage() {
         />
       )}
 
-      {showDeleteConfirm && (
-        <ConfirmDeleteModal
-          card={showDeleteConfirm}
-          onCancel={() => setShowDeleteConfirm(null)}
-          onConfirm={() => {
-            handleDeleteCard(showDeleteConfirm.listId, showDeleteConfirm.id);
-            setShowDeleteConfirm(null);
-          }}
-        />
-      )}
-
       <ShareModal
         isOpen={openShare}
+        planId={planId}
         onClose={() => setOpenShare(false)}
         planName={board.planTitle}
         onInvite={handleInvite}
       />
+
       {confirmDeleteCard && (
         <ConfirmModal
           open={true}
@@ -403,7 +435,10 @@ export default function PlanDashboardPage() {
           cancelText="Hủy"
           onClose={() => setConfirmDeleteCard(null)}
           onConfirm={() => {
-            handleDeleteCard(confirmDeleteCard.listId, confirmDeleteCard.card.id);
+            handleDeleteCard(
+              confirmDeleteCard.listId,
+              confirmDeleteCard.card.id
+            );
             setConfirmDeleteCard(null);
           }}
         />
@@ -423,8 +458,6 @@ export default function PlanDashboardPage() {
           }}
         />
       )}
-
     </div>
-    
   );
 }

@@ -1,3 +1,4 @@
+// src/features/planBoard/hooks/usePlanBoard.js
 import { useDispatch, useSelector } from "react-redux";
 import {
   loadBoard,
@@ -13,7 +14,8 @@ import {
   inviteMembers,
   localReorder,
 } from "../slices/planBoardSlice";
-
+import { updateVisibility, removeInvite } from "../services/planBoardService";
+import { showSuccess, showError } from "../../../utils/toastUtils";
 export function usePlanBoard(planId) {
   const dispatch = useDispatch();
   const { board, loading, error } = useSelector((s) => s.planBoard);
@@ -45,7 +47,27 @@ export function usePlanBoard(planId) {
     upsertLabel: (payload) => dispatch(saveLabel({ planId, payload })),
     deleteLabel: (labelId) => dispatch(removeLabel({ planId, labelId })),
 
-    // Invites
+    // Invites (chia sẻ)
     invite: (payload) => dispatch(inviteMembers({ planId, payload })),
+
+    updateVisibility: async (visibility) => {
+      try {
+        await updateVisibility(planId, visibility);
+        showSuccess("Đã cập nhật chế độ hiển thị");
+      } catch (err) {
+        console.error("Visibility update failed", err);
+        showError("Không thể cập nhật hiển thị");
+      }
+    },
+
+    removeInvite: async (email) => {
+      try {
+        await removeInvite(planId, email);
+        showSuccess("Đã xóa quyền truy cập");
+      } catch (err) {
+        console.error("Remove invite failed", err);
+        showError("Không thể xóa người này");
+      }
+    },
   };
 }
