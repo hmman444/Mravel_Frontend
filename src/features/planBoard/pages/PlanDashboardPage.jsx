@@ -57,6 +57,10 @@ export default function PlanDashboardPage() {
   const [activeCardMenu, setActiveCardMenu] = useState(null);
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
+  const [description, setDescription] = useState(board?.description || "");
+  const [startDate, setStartDate] = useState(board?.startDate ? new Date(board.startDate) : null);
+  const [endDate, setEndDate] = useState(board?.endDate ? new Date(board.endDate) : null);
+  const [images, setImages] = useState(board?.images || []);
   const [activeCard, setActiveCard] = useState(null);
   // Load dữ liệu khi mở trang
   useEffect(() => {
@@ -303,10 +307,14 @@ export default function PlanDashboardPage() {
                 plan={board}
                 startDate={board.startDate}
                 endDate={board.endDate}
+                setStartDate={setStartDate}
+                setEndDate={setEndDate}
                 visibility={board.visibility}
                 setVisibility={() => {}}
                 images={board.images}
+                setImages={setImages}
                 description={board.description}
+                setDescription={setDescription}
               />
             )}
 

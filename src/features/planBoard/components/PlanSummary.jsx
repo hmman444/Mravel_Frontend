@@ -18,44 +18,76 @@ import {
 } from "recharts";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useMemo } from "react";
+export default function PlanSummary({ 
+  plan, images, setImages, description, setDescription, 
+  startDate, endDate, setStartDate, setEndDate }) {
 
-export default function PlanSummary({
-  plan,
-  startDate,
-  endDate,
-  setStartDate,
-  setEndDate,
-  images,
-  setImages,
-  description,
-  setDescription,
-}) {
-  // Demo: thống kê trạng thái các ngày
-  const statusData = [
-    { name: "Hoàn thành", value: 2 },
-    { name: "Đang diễn ra", value: 1 },
-  ];
+  const lists = plan?.lists || [];
 
-  // Demo: độ ưu tiên của các hoạt động trong ngày
-  const priorityData = [
-    { name: "Cao", value: 3 },
-    { name: "Trung bình", value: 5 },
-    { name: "Thấp", value: 2 },
-  ];
+  const statusData = useMemo(() => {
+    let doneDays = 0;
+    let activeDays = 0;
 
-  // Demo: loại hoạt động (types of work)
-  const typeData = [
-    { type: "Tham quan", percent: 40 },
-    { type: "Ăn uống", percent: 30 },
-    { type: "Nghỉ ngơi", percent: 30 },
-  ];
+    lists.forEach((list) => {
+      const cards = list.cards || [];
+      const total = cards.length;
+      const done = cards.filter((c) => c.done).length;
+      if (total > 0 && done === total) doneDays++;
+      else if (done > 0) activeDays++;
+    });
 
-  // Demo: workload của từng người
-  const teamWork = [
-    { name: "Luân Đỗ Phú", percent: 60 },
-    { name: "Văn A", percent: 25 },
-    { name: "Minh Mẫn", percent: 15 },
-  ];
+    return [
+      { name: "Hoàn thành", value: doneDays },
+      { name: "Đang diễn ra", value: activeDays },
+    ];
+  }, [lists]);
+
+  const priorityData = useMemo(() => {
+    const map = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+    lists.forEach((list) => {
+      list.cards?.forEach((c) => {
+        if (c.priority === "HIGH") map.HIGH++;
+        else if (c.priority === "MEDIUM") map.MEDIUM++;
+        else map.LOW++;
+      });
+    });
+    return [
+      { name: "Cao", value: map.HIGH },
+      { name: "Trung bình", value: map.MEDIUM },
+      { name: "Thấp", value: map.LOW },
+    ];
+  }, [lists]);
+
+  const typeData = useMemo(() => {
+    const map = {};
+    lists.forEach((list) => {
+      list.cards?.forEach((c) => {
+        const type = c.type || "Khác";
+        map[type] = (map[type] || 0) + 1;
+      });
+    });
+    const total = Object.values(map).reduce((a, b) => a + b, 0);
+    return Object.entries(map).map(([type, count]) => ({
+      type,
+      percent: Math.round((count / total) * 100),
+    }));
+  }, [lists]);
+
+  const teamWork = useMemo(() => {
+    const map = {};
+    lists.forEach((list) => {
+      list.cards?.forEach((c) => {
+        const name = c.assigneeName || "Chưa gán";
+        map[name] = (map[name] || 0) + 1;
+      });
+    });
+    const total = Object.values(map).reduce((a, b) => a + b, 0);
+    return Object.entries(map).map(([name, count]) => ({
+      name,
+      percent: Math.round((count / total) * 100),
+    }));
+  }, [lists]);
 
   const COLORS = ["#4F46E5", "#22C55E", "#FACC15", "#F97316"];
 
