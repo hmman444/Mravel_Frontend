@@ -1,4 +1,3 @@
-// src/features/user/components/AccountSidebar.jsx
 import { useSelector } from "react-redux";
 import { useLogout } from "../../auth/hooks/useLogout";
 import {
@@ -18,35 +17,62 @@ function getInitials(name) {
   return letters.slice(-2).toUpperCase();
 }
 
+const TIER_LABEL = {
+  BRONZE: "Bronze Priority",
+  SILVER: "Silver Priority",
+  GOLD: "Gold Priority",
+  PLATINUM: "Platinum Priority",
+};
+
+const TIER_EMOJI = {
+  BRONZE: "🥉",
+  SILVER: "🥈",
+  GOLD: "🥇",
+  PLATINUM: "🏆",
+};
+
 export default function AccountSidebar() {
   const { user } = useSelector((state) => state.auth);
   const { handleLogout } = useLogout();
 
   const initials = getInitials(user?.fullname || "User");
+  const tier = user?.membershipTier || "BRONZE";
+  const tierLabel = TIER_LABEL[tier] || "Bronze Priority";
+  const tierEmoji = TIER_EMOJI[tier] || "🥉";
+  const avatarUrl = user?.avatar;
 
   return (
     <aside className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       {/* Avatar + tên */}
       <div className="px-4 py-4 flex items-center gap-3 border-b border-slate-200 dark:border-slate-700">
-        <div className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center text-lg font-semibold">
-          {initials}
-        </div>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={user?.fullname || "Avatar"}
+            className="w-12 h-12 rounded-full object-cover border border-white shadow-sm"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center text-lg font-semibold">
+            {initials}
+          </div>
+        )}
+
         <div>
           <p className="font-semibold text-sm text-slate-900 dark:text-slate-50 line-clamp-1">
             {user?.fullname || "Người dùng Mravel"}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Tài khoản Mravel
+            {user?.email || "Tài khoản Mravel"}
           </p>
         </div>
       </div>
 
-      {/* Bronze Priority giống traveloka */}
+      {/* Membership dynamic */}
       <div className="bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 flex items-center gap-2">
-        <span className="text-lg">🥉</span>
+        <span className="text-lg">{tierEmoji}</span>
         <div className="text-xs text-white">
           <p>Bạn là thành viên</p>
-          <p className="font-semibold">Bronze Priority</p>
+          <p className="font-semibold">{tierLabel}</p>
         </div>
       </div>
 
