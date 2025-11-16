@@ -16,7 +16,7 @@ export default function ManageReportsPage() {
     const MOCK_REPORTS = [
         {
         id: 1,
-        reporter: "Nguyễn An",
+        reporter: "Nguyễn Bình An",
         content: t("report_service_incorrect"),
         date: "01/10/2025",
         type: t("service"),
