@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaTimes,
   FaCopy,
@@ -8,13 +8,16 @@ import {
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 import AccessRow from "./AccessRow";
 import { usePlanBoard } from "../../hooks/usePlanBoard";
+
 export default function ShareModal({
   isOpen,
   onClose,
   planName,
   planId,
   initialVisibility = "PRIVATE",
+  invites = [], 
 }) {
+  
   const [phase, setPhase] = useState("default");
   const [emailInput, setEmailInput] = useState("");
   const [emailValid, setEmailValid] = useState(true);
@@ -26,15 +29,44 @@ export default function ShareModal({
   const [showDropdown, setShowDropdown] = useState(false);
   const [visibility, setVisibility] = useState(initialVisibility);
   const [activeMenu, setActiveMenu] = useState(null);
-  const [accessList, setAccessList] = useState([
-    {
+  const buildAccessListFromInvites = () => {
+    const ownerRow = {
       name: "Bạn (Owner)",
       email: "you@example.com",
       role: "Chủ sở hữu",
       owner: true,
-    },
-  ]);
+    };
+
+    const inviteRows = (invites || []).map((inv) => ({
+      name: inv.email,
+      email: inv.email,
+      role:
+        inv.role === "EDITOR"
+          ? "Người chỉnh sửa"
+          : inv.role === "VIEWER"
+          ? "Người xem"
+          : inv.role, // fallback
+      owner: false,
+    }));
+
+    return [ownerRow, ...inviteRows];
+  };
+
+  const [accessList, setAccessList] = useState(buildAccessListFromInvites);
+
+  useEffect(() => {
+    if (isOpen) {
+      setAccessList(buildAccessListFromInvites());
+    }
+  }, [isOpen, invites]);
+
   const { invite, updateVisibility, removeInvite } = usePlanBoard(planId);
+
+  useEffect(() => {
+    if (isOpen) {
+      setVisibility(initialVisibility);
+    }
+  }, [isOpen, initialVisibility]);
 
   if (!isOpen) return null;
 
@@ -59,21 +91,6 @@ export default function ShareModal({
         role: role.toUpperCase(),
       };
       await invite(payload);
-
-      setAccessList((prev) => [
-        ...prev,
-        {
-          name: emailInput,
-          email: emailInput,
-          role:
-            role === "editor"
-              ? "Người chỉnh sửa"
-              : role === "commenter"
-              ? "Người nhận xét"
-              : "Người xem",
-          owner: false,
-        },
-      ]);
 
       showSuccess("✅ Đã gửi lời mời chia sẻ!");
       setPhase("default");

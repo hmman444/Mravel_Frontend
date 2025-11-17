@@ -18,7 +18,9 @@ import { updateVisibility, removeInvite } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 export function usePlanBoard(planId) {
   const dispatch = useDispatch();
-  const { board, loading, error } = useSelector((s) => s.planBoard);
+  const board = useSelector((s) => s.planBoard.board);
+  const loading = useSelector((s) => s.planBoard.loading);
+  const error = useSelector((s) => s.planBoard.error);
 
   return {
     board,

@@ -77,6 +77,13 @@ export async function updateVisibility(planId, visibility) {
   return res.data;
 }
 
+export async function acceptInvite(token) {
+  const res = await api.post(`/plans/join`, null, {
+    params: { token },
+  });
+  return res.data;
+}
+
 export async function removeInvite(planId, email) {
   const res = await api.delete(`${BASE}/${planId}/board/invites`, {
     data: { email },

@@ -30,7 +30,7 @@ import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
 import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
-
+import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 function App() {
   useLoadUser();
   return (
@@ -58,6 +58,7 @@ function App() {
         {/* Plans routes */}
         <Route path="/plans" element={<PlanListPage />} />
         <Route path="/plans/:planId" element={<PlanDashboardPage />} />
+        <Route path="/plans/join" element={<JoinPlanPage />} />
 
         {/* Catalog routes */}       
         <Route path="/search/hotels" element={<HotelResultsPage />} />

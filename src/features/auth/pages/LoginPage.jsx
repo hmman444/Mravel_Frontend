@@ -8,6 +8,7 @@ import { UserIcon } from "@heroicons/react/24/outline";
 import { useLogin } from "../hooks/useLogin";
 import { validateEmail, validatePassword } from "../../../utils/validators";
 import LoadingOverlay from "../../../components/LoadingOverlay";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,9 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const { handleLogin, loading, error } = useLogin();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const redirectParam = new URLSearchParams(location.search).get("redirect");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +33,16 @@ export default function LoginPage() {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    await handleLogin(email, password, rememberMe); 
+    const success = await handleLogin(email, password, rememberMe);
+
+    if (success) {
+      if (redirectParam) {
+        const redirectPath = decodeURIComponent(redirectParam);
+        navigate(redirectPath);
+        return;
+      }
+      navigate("/");
+    }
   };
 
   return (

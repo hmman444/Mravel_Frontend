@@ -28,7 +28,7 @@ export default function PlanList({
 }) {
   const [tempTitle, setTempTitle] = useState(list.title);
   return (
-    <Draggable draggableId={String(list.id)} index={index}>
+    <Draggable draggableId={`list-${list.id}`} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
@@ -114,10 +114,13 @@ export default function PlanList({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 // ⚠️ bỏ overflow-y-auto để tránh nested scroll
-                className="space-y-2 min-h-[1px] pb-1"
+                className="min-h-[1px] pb-1"
               >
                 {list.cards?.map((card, idx) => (
-                  <Draggable key={`${list.id}-${card.id || idx}`} draggableId={String(card.id)} index={idx}>
+                  <Draggable 
+                    key={`card-${card.id}`}
+                    draggableId={`card-${card.id}`}
+                    index={idx}>
                     {(provided) => (
                       <div
                         ref={provided.innerRef}

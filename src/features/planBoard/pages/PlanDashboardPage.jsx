@@ -66,9 +66,13 @@ export default function PlanDashboardPage() {
   useEffect(() => {
     if (planId) load();
   }, [planId]);
+  
 
   /* ---------------------- DND logic ---------------------- */
   const handleDragEnd = async (result) => {
+    if (!result?.destination) return;
+    if (result.reason === "CANCEL") return;
+
     const { source, destination, type } = result;
     if (!destination) return;
 
@@ -85,15 +89,31 @@ export default function PlanDashboardPage() {
       sourceIndex: source.index,
       destIndex: destination.index,
     };
-
+console.log("Before reorder local", 
+  board.lists.map(l => ({ id: l.id, cards: l.cards.map(c => c.id) }))
+);
     dispatch(localReorder(payload));
+    setTimeout(() => {
+      console.log("After reorder local (delayed)",
+        JSON.parse(JSON.stringify(board.lists.map(l => ({
+          id: l.id,
+          cards: l.cards.map(c => c.id)
+        }))))
+      );
+    }, 300);
+
+        console.log("DnD =>", {
+  sourceListId: source.droppableId,
+  destListId: destination.droppableId,
+  sourceIndex: source.index,
+  destIndex: destination.index,
+});
     try {
       await reorder(payload).unwrap();
-      setTimeout(() => load(), 200);
     } catch (err) {
       console.error("❌ Lỗi reorder:", err);
       showError("Cập nhật vị trí thất bại");
-      setTimeout(() => load(), 200);
+      await load();
     }
   };
 
@@ -301,7 +321,7 @@ export default function PlanDashboardPage() {
           </div>
 
           {/* Nội dung tab */}
-          <div className="flex-1 p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+          <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
             {activeTab === "summary" && (
               <PlanSummary
                 plan={board}
@@ -338,13 +358,14 @@ export default function PlanDashboardPage() {
                   >
                     {(provided) => (
                       <div
+                        key="plan-lists-container"
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className="flex gap-6 items-start overflow-x-auto pb-4"
                       >
                         {board.lists?.map((list, idx) => (
                           <PlanList
-                            key={list.id || idx}
+                            key= {`list-${list.id}`}
                             list={list}
                             index={idx}
                             editingListId={editingListId}
@@ -431,7 +452,8 @@ export default function PlanDashboardPage() {
         planId={planId}
         onClose={() => setOpenShare(false)}
         planName={board.planTitle}
-        onInvite={handleInvite}
+        initialVisibility={board.visibility} 
+        invites={board.invites || []}
       />
 
       {confirmDeleteCard && (
