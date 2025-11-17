@@ -54,7 +54,7 @@ const handleDragEnd = (result) => {
       const [removed] = newLists.splice(source.index, 1);
       newLists.splice(destination.index, 0, removed);
 
-      // 🔹 Re-index để tránh lỗi non-consecutive index
+      // Re-index để tránh lỗi non-consecutive index
       return newLists.map((l, i) => ({ ...l, position: i }));
     }
 
@@ -66,7 +66,7 @@ const handleDragEnd = (result) => {
     const [moved] = sourceList.cards.splice(source.index, 1);
     destList.cards.splice(destination.index, 0, moved);
 
-    // 🔹 Cập nhật vị trí card để giữ animation ổn định
+    // Cập nhật vị trí card để giữ animation ổn định
     sourceList.cards.forEach((c, i) => (c.position = i));
     if (sourceList.id !== destList.id) {
       destList.cards.forEach((c, i) => (c.position = i));

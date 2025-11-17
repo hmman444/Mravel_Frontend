@@ -12,12 +12,19 @@ import {
   deleteLabel,
   sendInvite,
   duplicateCard,
+  fetchShareInfo,
+  updateMemberRole,
+  removeMember,
+  requestAccess,
+  fetchRequests,
+  handleRequest
 } from "../services/planBoardService";
-import cloneDeep from "lodash.clonedeep";
 const initialState = {
   board: null,
+  share: null,
   loading: false,
   error: null,
+  requests: [],
 };
 
 
@@ -94,6 +101,50 @@ export const inviteMembers = createAsyncThunk(
   "planBoard/inviteMembers",
   async ({ planId, payload }) => {
     return await sendInvite(planId, payload);
+  }
+);
+
+export const loadShareInfo = createAsyncThunk(
+  "planBoard/loadShareInfo",
+  async (planId) => {
+    return await fetchShareInfo(planId);
+  }
+);
+
+export const changeMemberRole = createAsyncThunk(
+  "planBoard/changeMemberRole",
+  async ({ planId, userId, role }) => {
+    await updateMemberRole(planId, { userId, role });
+    return { userId, role };
+  }
+);
+
+export const deleteMember = createAsyncThunk(
+  "planBoard/deleteMember",
+  async ({ planId, userId }) => {
+    await removeMember(planId, userId);
+    return { userId };
+  }
+);
+
+export const sendAccessRequest = createAsyncThunk(
+  "planBoard/sendAccessRequest",
+  async ({ planId, type }) => {
+    return await requestAccess(planId, { type });
+  }
+);
+
+export const loadRequests = createAsyncThunk(
+  "planBoard/loadRequests",
+  async (planId) => {
+    return await fetchRequests(planId);
+  }
+);
+
+export const decideRequest = createAsyncThunk(
+  "planBoard/decideRequest",
+  async ({ planId, reqId, action }) => {
+    return await handleRequest(planId, reqId, { action });
   }
 );
 
@@ -259,6 +310,34 @@ localReorder(state, action) {
         const newInvites = a.payload || [];
         // append, tránh mất invites cũ
         s.board.invites = [...s.board.invites, ...newInvites];
+      })
+      .addCase(loadShareInfo.fulfilled, (s, a) => {
+        s.share = a.payload;
+      })
+      .addCase(changeMemberRole.fulfilled, (state, action) => {
+        if (!state.board?.members) return;
+
+        const { userId, role } = action.payload;
+
+        const member = state.board.members.find((m) => m.userId === userId);
+        if (member) {
+          member.role = role;
+        }
+      })
+      .addCase(deleteMember.fulfilled, (state, action) => {
+        if (!state.board?.members) return;
+
+        const { userId } = action.payload;
+        state.board.members = state.board.members.filter(
+          (m) => m.userId !== userId
+        );
+      })
+      .addCase(loadRequests.fulfilled, (state, action) => {
+        state.requests = action.payload;
+      })
+      .addCase(decideRequest.fulfilled, (state, action) => {
+        const { reqId } = action.meta.arg;
+        state.requests = state.requests.filter((r) => r.id !== reqId);
       });
   },
 });

@@ -1,14 +1,17 @@
 import axios from "axios";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
+import { showError } from "./toastUtils";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use(
   (config) => {
-    const { accessToken } = getTokens(); 
+    const { accessToken } = getTokens();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -20,14 +23,12 @@ api.interceptors.request.use(
 let isRefreshing = false;
 let refreshSubscribers = [];
 
-function subscribeTokenRefresh(cb) {
-  refreshSubscribers.push(cb);
-}
+const subscribeTokenRefresh = (cb) => refreshSubscribers.push(cb);
 
-function onRefreshed(token) {
+const onRefreshed = (token) => {
   refreshSubscribers.forEach((cb) => cb(token));
   refreshSubscribers = [];
-}
+};
 
 api.interceptors.response.use(
   (response) => response,
@@ -54,13 +55,12 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { refreshToken } = getTokens(); 
+        const { refreshToken } = getTokens();
         if (!refreshToken) throw new Error("No refresh token found");
 
-        const res = await axios.post(
-          `${import.meta.env.VITE_API_URL || "http://localhost:8080/api"}/auth/refresh`,
-          { refreshToken }
-        );
+        const res = await axios.post(`${BASE_URL}/auth/refresh`, {
+          refreshToken,
+        });
 
         const { accessToken, refreshToken: newRefresh } = res.data.data;
 
@@ -79,6 +79,66 @@ api.interceptors.response.use(
         return Promise.reject(err);
       }
     }
+
+    if (message.includes("Plan not found")) {
+      window.location.href = "/plans/not-found";
+      return Promise.reject(error);
+    }
+
+    if (message.includes("You don't have permission to view this board")) {
+      window.location.href = "/plans/no-access";
+      return Promise.reject(error);
+    }
+
+    if (message.includes("You are not invited to this plan")) {
+      showError("Bạn chưa được mời vào lịch trình này.");
+      return Promise.reject(error);
+    }
+
+    if (message.includes("You don't have permission to edit")) {
+      showError("Bạn không có quyền chỉnh sửa lịch trình này.");
+      return Promise.reject(error);
+    }
+
+    if (message.includes("Cannot remove the owner")) {
+      showError("Không thể xoá chủ sở hữu.");
+      return Promise.reject(error);
+    }
+
+    if (message.includes("Owner cannot remove themselves")) {
+      showError("Bạn không thể xoá chính mình.");
+      return Promise.reject(error);
+    }
+
+    if (message.includes("Cannot change role of the owner")) {
+      showError("Không thể đổi quyền của chủ sở hữu.");
+      return Promise.reject(error);
+    }
+
+    // invite
+    if (message.includes("Invalid token")) {
+      window.location.href = "/plans/join-invalid";
+      return Promise.reject(error);
+    }
+
+    if (message.includes("Invite expired")) {
+      window.location.href = "/plans/join-expired";
+      return Promise.reject(error);
+    }
+
+    // access requests
+    if (message.includes("Bạn đã gửi yêu cầu trước đó")) {
+      showError("Bạn đã gửi yêu cầu trước đó.");
+      return Promise.reject(error);
+    }
+
+    if (message.includes("Bạn đã có quyền truy cập")) {
+      showError("Bạn đã có quyền truy cập.");
+      return Promise.reject(error);
+    }
+
+    // fallback
+    showError(message || "Đã xảy ra lỗi. Vui lòng thử lại.");
 
     return Promise.reject(error);
   }

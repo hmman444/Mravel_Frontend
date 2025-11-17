@@ -84,9 +84,34 @@ export async function acceptInvite(token) {
   return res.data;
 }
 
-export async function removeInvite(planId, email) {
-  const res = await api.delete(`${BASE}/${planId}/board/invites`, {
-    data: { email },
+export async function fetchShareInfo(planId) {
+  const res = await api.get(`/plans/${planId}/board/share`);
+  return res.data;
+}
+
+export async function updateMemberRole(planId, payload) {
+  const res = await api.patch(`/plans/${planId}/board/members/role`, payload);
+  return res.data;
+}
+
+export async function removeMember(planId, userId) {
+  const res = await api.delete(`/plans/${planId}/board/members`, {
+    data: { userId },
   });
+  return res.data;
+}
+
+export async function requestAccess(planId, payload) {
+  const res = await api.post(`/plans/${planId}/board/requests`, payload);
+  return res.data;
+}
+
+export async function fetchRequests(planId) {
+  const res = await api.get(`/plans/${planId}/board/requests`);
+  return res.data;
+}
+
+export async function handleRequest(planId, reqId, payload) {
+  const res = await api.patch(`/plans/${planId}/board/requests/${reqId}`, payload);
   return res.data;
 }

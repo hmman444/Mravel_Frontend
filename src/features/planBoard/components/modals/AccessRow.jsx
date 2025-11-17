@@ -1,105 +1,202 @@
-import { useEffect, useRef } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   FaUserCircle,
   FaChevronDown,
-  FaCalendarAlt,
-  FaCrown,
   FaTrashAlt,
 } from "react-icons/fa";
 
-function AccessRow({
+export default function AccessRow({
   user,
   activeMenu,
   setActiveMenu,
   onChangeRole,
-  onRemoveUser,
-  onTransferOwnership,
-  onAddExpiry,
+  onRemoveUser
 }) {
+  const isOwner = user.owner;
   const open = activeMenu === user.email;
-  const roles = ["Người xem", "Người nhận xét", "Người chỉnh sửa"];
-  const ref = useRef(null);
-  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+
+  const rowRef = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [posReady, setPosReady] = useState(false); 
 
   useEffect(() => {
-    if (open && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 4, left: rect.right - 224, width: 224 }); // 224px ~ w-56
+    if (open && rowRef.current) {
+      const rect = rowRef.current.getBoundingClientRect();
+      const dropdownWidth = 224;
+
+      setPos({
+        top: rect.bottom + 4,
+        left: rect.right - dropdownWidth,
+      });
+
+      requestAnimationFrame(() => setPosReady(true));
+    } else {
+      setPosReady(false); 
     }
   }, [open]);
 
-  const dropdown = open
+ // click outside
+  useEffect(() => {
+    if (!open) return;
+
+    const close = (e) => {
+      if (rowRef.current && !rowRef.current.contains(e.target)) {
+        setActiveMenu(null);
+      }
+    };
+
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const handleToggleMenu = () => {
+    if (isOwner) return;
+    setActiveMenu(open ? null : user.email);
+  };
+
+  const handleSelectRole = (role) => {
+    onChangeRole(role);
+    setActiveMenu(null);
+  };
+
+  const handleRemove = () => {
+    onRemoveUser(user);
+    setActiveMenu(null);
+  };
+
+  //dropdown portal
+  const dropdown =
+  open && posReady
     ? createPortal(
         <div
-          className="fixed z-[9999] bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-lg w-56 py-2"
+          className="
+            fixed z-[99999]
+            bg-white dark:bg-gray-900
+            border border-gray-200 dark:border-gray-700
+            w-56 rounded-xl shadow-lg
+            origin-top-right
+            transition-all duration-150 ease-out
+            opacity-100 scale-100
+          "
           style={{ top: pos.top, left: pos.left }}
+          onMouseDown={(e) => e.stopPropagation()} 
+          onClick={(e) => e.stopPropagation()}      
         >
-          {roles.map((r) => (
-            <div
-              key={r}
-              onClick={() => onChangeRole(user.email, r)}
-              className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                user.role === r ? "text-blue-600 font-medium" : "text-gray-700"
-              }`}
-            >
-              {r}
-            </div>
-          ))}
+          <div className="py-1">
+            {["Người xem", "Người chỉnh sửa"].map((r) => (
+              <button
+                key={r}
+                onClick={() => handleSelectRole(r)}
+                className={`
+                  w-full text-left px-3 py-1.5 text-sm
+                  hover:bg-gray-100 dark:hover:bg-gray-800 transition
+                  ${
+                    user.role === r
+                      ? "text-blue-600 font-semibold"
+                      : "text-gray-700 dark:text-gray-200"
+                  }
+                `}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
 
-          {!user.owner && (
-            <>
-              <hr className="my-1 border-gray-200 dark:border-gray-700" />
-              <div
-                onClick={() => onAddExpiry(user.email)}
-                className="px-3 py-1.5 text-sm flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700"
-              >
-                <FaCalendarAlt size={12} /> Thêm ngày hết hạn
-              </div>
-              <div
-                onClick={() => onTransferOwnership(user.email)}
-                className="px-3 py-1.5 text-sm flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700"
-              >
-                <FaCrown size={12} /> Chuyển quyền sở hữu
-              </div>
-              <div
-                onClick={() => onRemoveUser(user.email)}
-                className="px-3 py-1.5 text-sm flex items-center gap-2 cursor-pointer hover:bg-red-50 dark:hover:bg-gray-700 text-red-600"
-              >
-                <FaTrashAlt size={12} /> Xóa quyền truy cập
-              </div>
-            </>
-          )}
+          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+
+          <button
+            onClick={handleRemove}
+            className="
+              w-full text-left px-3 py-1.5 text-sm
+              text-red-600 hover:bg-red-50 dark:hover:bg-gray-800
+              flex items-center gap-2 transition
+            "
+          >
+            <FaTrashAlt size={12} />
+            Xóa quyền truy cập
+          </button>
         </div>,
         document.body
       )
     : null;
 
+
   return (
-    <div
-      ref={ref}
-      className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer relative"
-      onClick={() => setActiveMenu(open ? null : user.email)}
-    >
-      <div className="flex items-center gap-3">
-        <FaUserCircle className="text-3xl text-gray-400" />
+    <>
+      {/* ROW */}
+      <div
+        ref={rowRef}
+        className="
+          flex items-center justify-between
+          px-3 py-2 rounded-lg
+          hover:bg-gray-50 dark:hover:bg-gray-800
+          transition
+        "
+      >
+        {/* Left */}
+        <div className="flex items-center gap-3">
+          {user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.name}
+              className="w-9 h-9 rounded-full object-cover"
+            />
+          ) : (
+            <FaUserCircle className="text-3xl text-gray-400" />
+          )}
+
+          <div>
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+              {user.name}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {user.email}
+            </p>
+
+            {user.pending && (
+              <p className="text-[11px] mt-0.5 text-amber-600 dark:text-amber-300">
+                Đã gửi lời mời
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Right */}
         <div>
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-            {user.name}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {user.email}
-          </p>
+          {isOwner ? (
+            <span className="
+              px-3 py-1 rounded-full text-xs font-semibold
+              bg-amber-100 text-amber-700
+              dark:bg-amber-500/10 dark:text-amber-300
+            ">
+              Chủ sở hữu
+            </span>
+          ) : (
+            <button
+              onClick={handleToggleMenu}
+              className="
+                flex items-center gap-1.5 px-2.5 py-1
+                rounded-full border border-gray-300 dark:border-gray-700
+                text-xs text-gray-700 dark:text-gray-200
+                bg-white dark:bg-gray-900
+                hover:bg-gray-100 dark:hover:bg-gray-800
+                transition
+              "
+            >
+              {user.role}
+              <FaChevronDown
+                className={`
+                  text-[10px] transition-transform
+                  ${open ? "rotate-180" : ""}
+                `}
+              />
+            </button>
+          )}
         </div>
       </div>
-      <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-        {user.role}
-        <FaChevronDown className="text-gray-400" />
-      </div>
+
       {dropdown}
-    </div>
+    </>
   );
 }
-
-export default AccessRow;

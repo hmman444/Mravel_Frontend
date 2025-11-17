@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
@@ -10,24 +11,23 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 import { useDispatch } from "react-redux";
+
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "../components/SidebarPlans";
 import PlanList from "../components/PlanList";
 import ShareModal from "../components/modals/ShareModal";
 import EditCardModal from "../components/modals/EditCardModal";
 import LabelModal from "../components/modals/LabelModal";
-import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
 import ConfirmModal from "../../../components/ConfirmModal";
 import PlanSummary from "../components/PlanSummary";
+
 import { usePlanBoard } from "../hooks/usePlanBoard";
-import { addCard } from "../slices/planBoardSlice";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
 export default function PlanDashboardPage() {
-  const { planId } = useParams(); // ✅ lấy id từ URL
+  const { planId } = useParams();
   const dispatch = useDispatch();
 
-  // Hook Redux kết nối board thật
   const {
     board,
     loading,
@@ -39,46 +39,42 @@ export default function PlanDashboardPage() {
     updateCard,
     deleteCard,
     reorder,
-    upsertLabel,
-    invite,
     localReorder,
   } = usePlanBoard(planId);
 
-  // UI state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openShare, setOpenShare] = useState(false);
   const [activeTab, setActiveTab] = useState("summary");
-  const [showLabelModal, setShowLabelModal] = useState(false);
-  const [editCard, setEditCard] = useState(null);
+
   const [editingListId, setEditingListId] = useState(null);
-  const [newCardListId, setNewCardListId] = useState(null);
-  const [newCardText, setNewCardText] = useState("");
   const [activeListMenu, setActiveListMenu] = useState(null);
   const [activeCardMenu, setActiveCardMenu] = useState(null);
+
+  const [editCard, setEditCard] = useState(null);
+  const [showLabelModal, setShowLabelModal] = useState(false);
+
+  const [newCardListId, setNewCardListId] = useState(null);
+  const [newCardText, setNewCardText] = useState("");
+
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
-  const [description, setDescription] = useState(board?.description || "");
-  const [startDate, setStartDate] = useState(board?.startDate ? new Date(board.startDate) : null);
-  const [endDate, setEndDate] = useState(board?.endDate ? new Date(board.endDate) : null);
-  const [images, setImages] = useState(board?.images || []);
+
   const [activeCard, setActiveCard] = useState(null);
-  // Load dữ liệu khi mở trang
+
+  // đổi plan
   useEffect(() => {
     if (planId) load();
   }, [planId]);
-  
 
-  /* ---------------------- DND logic ---------------------- */
+  // drag drop
   const handleDragEnd = async (result) => {
-    if (!result?.destination) return;
-    if (result.reason === "CANCEL") return;
+    if (!result.destination) return;
 
     const { source, destination, type } = result;
-    if (!destination) return;
 
     if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
     )
       return;
 
@@ -89,54 +85,38 @@ export default function PlanDashboardPage() {
       sourceIndex: source.index,
       destIndex: destination.index,
     };
-console.log("Before reorder local", 
-  board.lists.map(l => ({ id: l.id, cards: l.cards.map(c => c.id) }))
-);
-    dispatch(localReorder(payload));
-    setTimeout(() => {
-      console.log("After reorder local (delayed)",
-        JSON.parse(JSON.stringify(board.lists.map(l => ({
-          id: l.id,
-          cards: l.cards.map(c => c.id)
-        }))))
-      );
-    }, 300);
 
-        console.log("DnD =>", {
-  sourceListId: source.droppableId,
-  destListId: destination.droppableId,
-  sourceIndex: source.index,
-  destIndex: destination.index,
-});
+    localReorder(payload);
+
     try {
-      await reorder(payload).unwrap();
+      await reorder(payload);
     } catch (err) {
-      console.error("❌ Lỗi reorder:", err);
-      showError("Cập nhật vị trí thất bại");
-      await load();
+      console.error("❌ Reorder failed:", err);
+      // rollback lại từ server nếu có lỗi
+      load();
     }
   };
 
-  /* ---------------------- CRUD list & card ---------------------- */
+  // crud list card
   const handleAddList = async () => {
     try {
       await createList({ title: `Ngày ${board?.lists?.length + 1}` });
-      showSuccess("Đã thêm danh sách mới");
+      showSuccess("Đã thêm danh sách");
     } catch {
       showError("Không thể thêm danh sách");
     }
   };
 
-  const confirmAddCard = async (listId) => {
+  const handleAddCard = async (listId) => {
     if (!newCardText.trim()) return;
     try {
       await createCard(listId, { text: newCardText });
-      setNewCardListId(null);
-      setNewCardText("");
-      showSuccess("Đã thêm thẻ mới");
+      showSuccess("Đã thêm thẻ");
     } catch {
-      showError("Không thể thêm thẻ");
+      showError("Không thêm được thẻ");
     }
+    setNewCardListId(null);
+    setNewCardText("");
   };
 
   const handleUpdateCard = async (listId, cardId, data) => {
@@ -150,24 +130,40 @@ console.log("Before reorder local",
         done: data.done,
         labelIds: (data.labels || []).map((l) => l.id),
       };
-      await updateCard(listId, cardId, payload).unwrap();
-      showSuccess("Đã cập nhật thẻ");
+
+      await updateCard(listId, cardId, payload);
+      showSuccess("Đã cập nhật");
       setEditCard(null);
-    } catch (err) {
-      console.error(err);
-      showError("Không thể cập nhật thẻ");
+    } catch {
+      showError("Không thể cập nhật");
     }
   };
 
-  const handleDeleteCard = async (listId, cardId) => {
+  const handleRemoveCard = async ({ listId, cardId }) => {
     try {
       await deleteCard(listId, cardId);
-      showSuccess("Đã xóa thẻ");
+      showSuccess("Đã xoá thẻ");
     } catch {
-      showError("Không thể xóa thẻ");
+      showError("Không thể xoá thẻ");
     }
   };
 
+  // toggleDone
+  const toggleDone = async (listId, cardId) => {
+    const card = board.lists
+      ?.find((l) => l.id === listId)
+      ?.cards.find((c) => c.id === cardId);
+    if (!card) return;
+
+    try {
+      const updated = { ...card, done: !card.done };
+      await updateCard(listId, cardId, updated);
+    } catch (err) {
+      console.error("❌ Lỗi toggle done:", err);
+    }
+  };
+
+  // duplicate
   const duplicateCard = async (card, listId) => {
     try {
       const payload = {
@@ -177,19 +173,22 @@ console.log("Before reorder local",
         start: card.start,
         end: card.end,
         done: false,
-        labelIds: card.labels?.map((l) => l.id) || [],
+        labelIds: (card.labels || []).map((l) => l.id),
       };
-      await dispatch(addCard({ planId, listId, payload })).unwrap();
+
+      await createCard(listId, payload);
       showSuccess("Đã sao chép thẻ");
-    } catch (err) {
-      console.error("❌ Lỗi copy:", err);
+    } catch {
+      showError("Không thể sao chép thẻ");
     }
   };
 
   const duplicateList = async (list) => {
     try {
-      const newTitle = list.title + " (Copy)";
-      const newList = await createList({ title: newTitle }).unwrap();
+      const newList = await createList({
+        title: list.title + " (Copy)",
+      }).unwrap();
+
       for (const card of list.cards || []) {
         const payload = {
           text: card.text,
@@ -198,65 +197,41 @@ console.log("Before reorder local",
           start: card.start,
           end: card.end,
           done: false,
-          labelIds: card.labels?.map((l) => l.id) || [],
+          labelIds: (card.labels || []).map((l) => l.id),
         };
         await createCard(newList.id, payload);
       }
+
       showSuccess("Đã sao chép danh sách");
     } catch {
       showError("Không thể sao chép danh sách");
     }
   };
 
-  const toggleDone = async (listId, cardId) => {
-    const card = board.lists
-      ?.find((l) => l.id === listId)
-      ?.cards.find((c) => c.id === cardId);
-    if (!card) return;
-    try {
-      const updated = { ...card, done: !card.done };
-      await updateCard(listId, cardId, updated);
-    } catch (err) {
-      console.error("❌ Lỗi toggle done:", err);
-    }
-  };
-
-  const handleInvite = async (payload) => {
-    try {
-      await invite(payload);
-      showSuccess("Đã gửi lời mời");
-      setOpenShare(false);
-    } catch {
-      showError("Không thể gửi lời mời");
-    }
-  };
-
+  // render loading
   if (loading || !board)
     return (
-      <div className="p-8 text-center text-gray-500">Đang tải lịch trình...</div>
+      <div className="p-8 text-center text-gray-500">
+        Đang tải lịch trình...
+      </div>
     );
 
-  /* ---------------------- RENDER ---------------------- */
+  // render page
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar fixedWhite />
 
       <div className="flex flex-1 mt-16 overflow-hidden relative">
-        {/* Sidebar */}
+        {/* sidebar */}
         <div
-          className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-transform duration-300 ease-in-out z-30 ${
+          className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-transform duration-300 z-30 ${
             sidebarCollapsed ? "-translate-x-full" : "translate-x-0"
           }`}
         >
-          <SidebarPlans
-            onSelectPlan={() => {}}
-            activePlanId={planId}
-            collapsed={sidebarCollapsed}
-            onAddToPlan={() => {}}
-          />
+          <SidebarPlans activePlanId={planId} collapsed={sidebarCollapsed} />
         </div>
 
-        {/* Nút toggle sidebar */}
+        {/* toggle sidebar */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="fixed z-40 flex items-center justify-center w-8 h-8 rounded-full bg-white border shadow-md hover:bg-gray-100 dark:bg-gray-800 transition"
@@ -267,34 +242,36 @@ console.log("Before reorder local",
           }}
         >
           {sidebarCollapsed ? (
-            <FaChevronRight className="text-gray-600" size={14} />
+            <FaChevronRight size={14} className="text-gray-600" />
           ) : (
-            <FaChevronLeft className="text-gray-600" size={14} />
+            <FaChevronLeft size={14} className="text-gray-600" />
           )}
         </button>
 
-        {/* Main */}
+        {/* main*/}
         <div
           className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
             sidebarCollapsed ? "ml-0" : "ml-72"
           }`}
         >
-          {/* Header */}
+          {/* header */}
           <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center gap-3 border-b">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
               {board.planTitle}
             </h1>
+
             <div className="ml-auto flex items-center -space-x-2">
-              {board.invites?.slice(0, 3).map((inv, i) => (
+              {(board.invites || []).slice(0, 3).map((inv, i) => (
                 <span
                   key={i}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 text-xs"
                   title={inv.email}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white dark:border-gray-800 bg-gray-200"
                 >
                   <FaUserCircle className="text-gray-500" />
                 </span>
               ))}
             </div>
+
             <button
               onClick={() => setOpenShare(true)}
               className="ml-3 inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200"
@@ -303,8 +280,8 @@ console.log("Before reorder local",
             </button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-6 border-b bg-white dark:bg-gray-800 px-4 sm:px-6">
+          {/* tab */}
+          <div className="flex gap-6 border-b bg-white dark:bg-gray-800 px-4">
             {["summary", "board", "timeline", "members"].map((tab) => (
               <button
                 key={tab}
@@ -320,23 +297,9 @@ console.log("Before reorder local",
             ))}
           </div>
 
-          {/* Nội dung tab */}
+          {/* tab content */}
           <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
-            {activeTab === "summary" && (
-              <PlanSummary
-                plan={board}
-                startDate={board.startDate}
-                endDate={board.endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                visibility={board.visibility}
-                setVisibility={() => {}}
-                images={board.images}
-                setImages={setImages}
-                description={board.description}
-                setDescription={setDescription}
-              />
-            )}
+            {activeTab === "summary" && <PlanSummary plan={board} />}
 
             {activeTab === "board" && (
               <>
@@ -358,14 +321,13 @@ console.log("Before reorder local",
                   >
                     {(provided) => (
                       <div
-                        key="plan-lists-container"
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className="flex gap-6 items-start overflow-x-auto pb-4"
                       >
                         {board.lists?.map((list, idx) => (
                           <PlanList
-                            key= {`list-${list.id}`}
+                            key={`list-${list.id}`}
                             list={list}
                             index={idx}
                             editingListId={editingListId}
@@ -374,11 +336,11 @@ console.log("Before reorder local",
                             setNewCardListId={setNewCardListId}
                             newCardText={newCardText}
                             setNewCardText={setNewCardText}
-                            confirmAddCard={confirmAddCard}
-                            setActiveCard={setActiveCard} 
+                            handleAddCard={handleAddCard}
+                            setActiveCard={setActiveCard}
                             setEditCard={setEditCard}
                             deleteList={deleteList}
-                            deleteCard={handleDeleteCard}
+                            deleteCard={setConfirmDeleteCard}
                             duplicateCard={duplicateCard}
                             activeListMenu={activeListMenu}
                             setActiveListMenu={setActiveListMenu}
@@ -391,6 +353,7 @@ console.log("Before reorder local",
                             duplicateList={duplicateList}
                           />
                         ))}
+
                         {provided.placeholder}
                       </div>
                     )}
@@ -400,27 +363,33 @@ console.log("Before reorder local",
             )}
 
             {activeTab === "timeline" && (
-              <div className="text-gray-600 dark:text-gray-300 text-center p-6">
-                🕓 Biểu đồ thời gian (đang phát triển)
+              <div className="text-center text-gray-500 py-10">
+                🕓 Biểu đồ thời gian – đang phát triển
               </div>
             )}
 
             {activeTab === "members" && (
-              <div className="text-gray-600 dark:text-gray-300 text-center p-6">
-                👥 Danh sách thành viên (đang phát triển)
+              <div className="text-center text-gray-500 py-10">
+                👥 Thành viên – đang phát triển
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* MODALS */}
+      {/* modals */}
+      <ShareModal
+        isOpen={openShare}
+        planId={planId}
+        onClose={() => setOpenShare(false)}
+        planName={board.planTitle}
+        initialVisibility={board.visibility}
+      />
+
       {editCard && (
         <EditCardModal
           editCard={editCard}
-          setEditCard={(data) =>
-            setEditCard({ ...data, listId: editCard.listId })
-          }
+          setEditCard={setEditCard}
           saveCard={() =>
             handleUpdateCard(editCard.listId, editCard.id, editCard)
           }
@@ -433,42 +402,23 @@ console.log("Before reorder local",
       {showLabelModal && (
         <LabelModal
           planId={planId}
-          colors={[
-            "bg-red-500",
-            "bg-green-600",
-            "bg-blue-500",
-            "bg-yellow-400",
-            "bg-purple-600",
-            "bg-pink-500",
-          ]}
           editCard={editCard}
           setEditCard={setEditCard}
           onClose={() => setShowLabelModal(false)}
         />
       )}
 
-      <ShareModal
-        isOpen={openShare}
-        planId={planId}
-        onClose={() => setOpenShare(false)}
-        planName={board.planTitle}
-        initialVisibility={board.visibility} 
-        invites={board.invites || []}
-      />
-
+      {/* Delete Card Confirm */}
       {confirmDeleteCard && (
         <ConfirmModal
           open={true}
-          title="Xóa thẻ"
-          message={`Bạn có chắc muốn xóa thẻ "${confirmDeleteCard.card.text}"?`}
-          confirmText="Xóa"
+          title="Xoá thẻ"
+          message={`Xoá thẻ "${confirmDeleteCard.card.text}"?`}
+          confirmText="Xoá"
           cancelText="Hủy"
           onClose={() => setConfirmDeleteCard(null)}
           onConfirm={() => {
-            handleDeleteCard(
-              confirmDeleteCard.listId,
-              confirmDeleteCard.card.id
-            );
+            handleRemoveCard(confirmDeleteCard);
             setConfirmDeleteCard(null);
           }}
         />
@@ -477,9 +427,9 @@ console.log("Before reorder local",
       {confirmDeleteList && (
         <ConfirmModal
           open={true}
-          title="Xóa danh sách"
-          message={`Bạn có chắc muốn xóa danh sách "${confirmDeleteList.title}" và tất cả thẻ bên trong?`}
-          confirmText="Xóa"
+          title="Xoá danh sách"
+          message={`Xoá "${confirmDeleteList.title}" và toàn bộ thẻ?`}
+          confirmText="Xoá"
           cancelText="Hủy"
           onClose={() => setConfirmDeleteList(null)}
           onConfirm={() => {

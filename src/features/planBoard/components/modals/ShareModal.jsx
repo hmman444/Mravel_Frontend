@@ -1,360 +1,463 @@
 import { useEffect, useState } from "react";
-import {
-  FaTimes,
-  FaCopy,
-  FaChevronDown,
-  FaChevronUp,
-} from "react-icons/fa";
+import { FaTimes, FaCopy } from "react-icons/fa";
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 import AccessRow from "./AccessRow";
+import ConfirmModal from "../../../../components/ConfirmModal";
 import { usePlanBoard } from "../../hooks/usePlanBoard";
+import VisibilityDropdown from "../VisibilityDropdown"
 
-export default function ShareModal({
-  isOpen,
-  onClose,
-  planName,
-  planId,
-  initialVisibility = "PRIVATE",
-  invites = [], 
-}) {
-  
+export default function ShareModal({ isOpen, onClose, planName, planId }) {
+  const {
+    share,
+    loadShare,
+    invite,
+    updateVisibility,
+    updateMemberRole,
+    removeMember,
+    requests,
+    loadRequests,
+    decideRequest,
+  } = usePlanBoard(planId);
+
+  // UI state
   const [phase, setPhase] = useState("default");
   const [emailInput, setEmailInput] = useState("");
   const [emailValid, setEmailValid] = useState(true);
-  const [role, setRole] = useState("editor");
-  const [message, setMessage] = useState("");
-  const [notify, setNotify] = useState(true);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [linkRole, setLinkRole] = useState("Người xem");
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [visibility, setVisibility] = useState(initialVisibility);
+  const [inviteRole, setInviteRole] = useState("editor");
+
+  const [visibility, setVisibility] = useState("PRIVATE");
+  const [accessList, setAccessList] = useState([]);
   const [activeMenu, setActiveMenu] = useState(null);
-  const buildAccessListFromInvites = () => {
-    const ownerRow = {
-      name: "Bạn (Owner)",
-      email: "you@example.com",
-      role: "Chủ sở hữu",
-      owner: true,
+
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState("members");
+
+  // animation flag khi modal vừa mở
+  const [mounted, setMounted] = useState(false);
+
+  // Confirm remove
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [userToRemove, setUserToRemove] = useState(null);
+
+  /* -------------------- Load share + requests -------------------- */
+  useEffect(() => {
+    if (isOpen) {
+      loadShare();
+      loadRequests();
+      setPhase("default");
+      setActiveMenu(null);
+      setMounted(true);
+    } else {
+      setMounted(false);
+    }
+  }, [isOpen]);
+
+  /* -------------------- Build member list -------------------- */
+  useEffect(() => {
+    if (!share) return;
+
+    setVisibility(share.visibility);
+
+    const ROLE_UI = {
+      OWNER: "Chủ sở hữu",
+      EDITOR: "Người chỉnh sửa",
+      VIEWER: "Người xem",
     };
 
-    const inviteRows = (invites || []).map((inv) => ({
+    const members = share.members || [];
+    const invites = share.invites || [];
+
+    const owner = members.find((m) => m.role === "OWNER");
+
+    const ownerRow = owner
+      ? {
+          userId: owner.userId,
+          name: owner.fullname || owner.email,
+          email: owner.email,
+          avatar: owner.avatar,
+          role: "Chủ sở hữu",
+          backendRole: "OWNER",
+          owner: true,
+          pending: false,
+        }
+      : null;
+
+    const memberRows = members
+      .filter((m) => m.role !== "OWNER")
+      .map((m) => ({
+        userId: m.userId,
+        name: m.fullname || m.email,
+        email: m.email,
+        avatar: m.avatar,
+        role: ROLE_UI[m.role],
+        backendRole: m.role,
+        owner: false,
+        pending: false,
+      }));
+
+    const inviteRows = invites.map((inv) => ({
+      userId: null,
       name: inv.email,
       email: inv.email,
-      role:
-        inv.role === "EDITOR"
-          ? "Người chỉnh sửa"
-          : inv.role === "VIEWER"
-          ? "Người xem"
-          : inv.role, // fallback
+      avatar: null,
+      role: ROLE_UI[inv.role],
+      backendRole: inv.role,
       owner: false,
+      pending: true,
     }));
 
-    return [ownerRow, ...inviteRows];
-  };
-
-  const [accessList, setAccessList] = useState(buildAccessListFromInvites);
-
-  useEffect(() => {
-    if (isOpen) {
-      setAccessList(buildAccessListFromInvites());
-    }
-  }, [isOpen, invites]);
-
-  const { invite, updateVisibility, removeInvite } = usePlanBoard(planId);
-
-  useEffect(() => {
-    if (isOpen) {
-      setVisibility(initialVisibility);
-    }
-  }, [isOpen, initialVisibility]);
+    setAccessList([ownerRow, ...memberRows, ...inviteRows].filter(Boolean));
+  }, [share]);
 
   if (!isOpen) return null;
 
-  /* ---------------------- Xử lý gửi lời mời ---------------------- */
+  /* ---------------------- Invite email ---------------------- */
   const handleAddEmail = () => {
-    const trimmed = emailInput.trim();
-    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-    if (!valid) {
-      setEmailValid(false);
-      return;
-    }
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.trim());
+    if (!valid) return setEmailValid(false);
     setEmailValid(true);
     setPhase("invite");
   };
 
-  const handleSend = async () => {
-    if (!emailInput.trim()) return;
-
+  const handleSendInvite = async () => {
     try {
-      const payload = {
-        emails: [emailInput],
-        role: role.toUpperCase(),
-      };
-      await invite(payload);
-
-      showSuccess("✅ Đã gửi lời mời chia sẻ!");
-      setPhase("default");
+      await invite({ emails: [emailInput], role: inviteRole.toUpperCase() });
+      showSuccess("Đã gửi lời mời!");
       setEmailInput("");
-      setRole("editor");
-      setMessage("");
-      setNotify(true);
-    } catch (err) {
-      console.error("❌ Invite error:", err);
+      setInviteRole("editor");
+      setPhase("default");
+      loadShare();
+    } catch {
       showError("Không gửi được lời mời");
     }
   };
 
-  /* ---------------------- Cập nhật hiển thị ---------------------- */
-  const handleVisibilityChange = async (value) => {
+  /* ---------------------- Update role ---------------------- */
+  const handleChangeRole = async (user, newRoleDisplay) => {
+    if (user.pending || user.owner) return;
+
+    const MAP = {
+      "Người xem": "VIEWER",
+      "Người chỉnh sửa": "EDITOR",
+    };
+
+    const backend = MAP[newRoleDisplay];
+    if (!backend) return;
+
     try {
-      setVisibility(value);
-      await updateVisibility(value);
-    } catch (err) {
-      console.error("❌ Visibility update failed:", err);
-      showError("Không thể cập nhật hiển thị");
+      await updateMemberRole(user.userId, backend);
+
+      setAccessList((prev) =>
+        prev.map((u) =>
+          u.email === user.email
+            ? { ...u, role: newRoleDisplay, backendRole: backend }
+            : u
+        )
+      );
+
+      showSuccess("Đã cập nhật quyền");
+    } catch {
+      showError("Không thể cập nhật");
     }
   };
 
-  /* ---------------------- Sao chép liên kết ---------------------- */
+  /* ---------------------- Remove member ---------------------- */
+  const openRemoveDialog = (u) => {
+    setUserToRemove(u);
+    setConfirmOpen(true);
+  };
+
+  const confirmRemove = async () => {
+    try {
+      // nếu là invite (userId null) tuỳ backend, ở đây vẫn dùng userId
+      await removeMember(userToRemove.userId);
+      setAccessList((prev) =>
+        prev.filter((u) => u.email !== userToRemove.email)
+      );
+      showSuccess("Đã xoá người này");
+      setConfirmOpen(false);
+    } catch {
+      showError("Không thể xoá");
+    }
+  };
+
+  /* ---------------------- Copy link ---------------------- */
   const handleCopyLink = async () => {
     try {
-      const link = `${window.location.origin}/plans/${planId}`;
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/plans/${planId}`
+      );
       setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error("Copy failed", err);
+      setTimeout(() => setCopySuccess(false), 1500);
+    } catch {
+      // ignore
     }
   };
 
-  /* ---------------------- Quản lý quyền ---------------------- */
-  const handleChangeRole = (email, newRole) => {
-    setAccessList((prev) =>
-      prev.map((u) => (u.email === email ? { ...u, role: newRole } : u))
-    );
-    setActiveMenu(null);
-  };
-
-  const handleRemoveUser = async (email) => {
+  /* ---------------------- Visibility change ---------------------- */
+  const handleVisibilityChange = async (value) => {
+    setVisibility(value); // cho UI phản hồi nhanh + transition
     try {
-      await removeInvite(email);
-      setAccessList((prev) => prev.filter((u) => u.email !== email));
-      showSuccess("Đã xóa quyền truy cập");
+      await updateVisibility(value);
+      showSuccess("Đã cập nhật chế độ hiển thị");
     } catch {
-      showError("Không thể xóa người này");
+      showError("Không thể cập nhật hiển thị");
+      // rollback nếu lỗi
+      setVisibility(share?.visibility || "PRIVATE");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-[480px] max-w-[90vw] max-h-[90vh] flex flex-col relative transition-all duration-500 ease-in-out">
-        <div className="overflow-y-auto p-6">
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-white transition"
-          >
-            <FaTimes />
-          </button>
+    <>
+      {/* OVERLAY + MODAL */}
+      <div className="fixed inset-0 z-[2000] flex items-center justify-center">
+        {/* overlay */}
+        <div
+          className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200 ${
+            mounted ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={onClose}
+        />
 
-          {/* ----------- PHASE DEFAULT ----------- */}
-          {phase === "default" && (
-            <>
-              <h2 className="text-xl font-semibold mb-4">
-                Chia sẻ “{planName}”
-              </h2>
+        {/* modal */}
+        <div
+          className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-[520px] max-w-[90vw] transform transition-all duration-200 ${
+            mounted
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-2 scale-95"
+          }`}
+        >
+          <div className="p-6 max-h-[75vh] overflow-y-auto">
+            {/* Close */}
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
+            >
+              <FaTimes />
+            </button>
 
-              {/* Hiển thị */}
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Hiển thị:
-                </span>
-                <select
-                  value={visibility}
-                  onChange={(e) => handleVisibilityChange(e.target.value)}
-                  className="border rounded-md px-2 py-1 dark:bg-gray-800 dark:text-white"
-                >
-                  <option value="PRIVATE">Riêng tư</option>
-                  <option value="FRIENDS">Bạn bè</option>
-                  <option value="PUBLIC">Công khai</option>
-                </select>
-              </div>
-
-              {/* Nhập email */}
-              <input
-                type="text"
-                value={emailInput}
-                onChange={(e) => {
-                  setEmailInput(e.target.value);
-                  setEmailValid(true);
-                }}
-                onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
-                placeholder="Thêm người hoặc nhóm"
-                className={`w-full border rounded-md px-3 py-2 mb-4 focus:outline-none ${
-                  emailValid
-                    ? "focus:ring-2 focus:ring-blue-400"
-                    : "border-red-500 focus:ring-red-500"
-                }`}
-              />
-              {!emailValid && (
-                <p className="text-sm text-red-500 mb-3">
-                  Email không hợp lệ. Vui lòng nhập lại.
-                </p>
-              )}
-
-              {/* Danh sách quyền truy cập */}
-              <h3 className="font-medium text-gray-800 dark:text-gray-100 mb-2">
-                Những người có quyền truy cập
-              </h3>
-              <div className="space-y-2 mb-5">
-                {accessList.map((user, idx) => (
-                  <AccessRow
-                    key={idx}
-                    user={user}
-                    activeMenu={activeMenu}
-                    setActiveMenu={setActiveMenu}
-                    onChangeRole={handleChangeRole}
-                    onRemoveUser={handleRemoveUser}
-                  />
-                ))}
-              </div>
-
-              {/* Quyền qua liên kết */}
-              {visibility !== "PRIVATE" && (
-                <>
-                  <h3 className="font-medium text-gray-800 dark:text-gray-100 mb-2">
-                    Quyền truy cập qua liên kết
-                  </h3>
-
-                  <div className="relative border rounded-lg p-3 mb-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    <div
-                      className="flex items-start justify-between"
-                      onClick={() => setShowDropdown(!showDropdown)}
-                    >
-                      <div>
-                        <p className="font-medium text-gray-700 dark:text-gray-200">
-                          Bất kỳ ai có liên kết
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Ai có liên kết đều có thể {linkRole.toLowerCase()}
-                        </p>
-                      </div>
-                      {showDropdown ? (
-                        <FaChevronUp className="text-gray-500 mt-1" />
-                      ) : (
-                        <FaChevronDown className="text-gray-500 mt-1" />
-                      )}
-                    </div>
-
-                    {showDropdown && (
-                      <div className="mt-3 border-t pt-2 space-y-2">
-                        {["Người xem", "Người chỉnh sửa"].map((r) => (
-                          <div
-                            key={r}
-                            className={`px-3 py-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                              linkRole === r
-                                ? "bg-blue-50 text-blue-600 font-medium"
-                                : "text-gray-700 dark:text-gray-300"
-                            }`}
-                            onClick={() => {
-                              setLinkRole(r);
-                              setShowDropdown(false);
-                            }}
-                          >
-                            {r}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Buttons */}
-              <div className="flex justify-end items-center gap-3 mt-4">
-                <button
-                  onClick={handleCopyLink}
-                  className="flex items-center gap-2 border rounded-full px-4 py-2 text-blue-600 hover:bg-blue-50 transition"
-                >
-                  <FaCopy />
-                  {copySuccess ? "Đã sao chép!" : "Sao chép liên kết"}
-                </button>
-
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
-                >
-                  Xong
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* ----------- PHASE INVITE ----------- */}
-          {phase === "invite" && (
-            <div>
-              <button
-                onClick={() => setPhase("default")}
-                className="text-blue-600 text-sm mb-3 hover:underline"
-              >
-                ← Quay lại
-              </button>
-
-              <h2 className="text-xl font-semibold mb-3">
-                Mời chia sẻ “{planName}”
-              </h2>
-
-              <div className="flex items-center gap-3 mb-4">
-                <input
-                  type="text"
-                  readOnly
-                  value={emailInput}
-                  className="flex-1 border rounded-md px-3 py-2 bg-gray-50 text-gray-700"
-                />
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="border rounded-md px-2 py-2 text-sm cursor-pointer"
-                >
-                  <option value="viewer">Người xem</option>
-                  <option value="commenter">Người nhận xét</option>
-                  <option value="editor">Người chỉnh sửa</option>
-                </select>
-              </div>
-
-              <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
-                <input
-                  type="checkbox"
-                  checked={notify}
-                  onChange={(e) => setNotify(e.target.checked)}
-                />
-                Gửi thông báo cho người này
-              </label>
-
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Lời nhắn (tuỳ chọn)"
-                className="w-full border rounded-md px-3 py-2 mb-5 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              />
-
-              <div className="flex justify-end gap-2">
+            {/* ----------------------------- INVITE PHASE ----------------------------- */}
+            {phase === "invite" && (
+              <>
                 <button
                   onClick={() => setPhase("default")}
-                  className="px-4 py-2 rounded-full border text-gray-700 hover:bg-gray-100 transition"
+                  className="text-blue-600 text-sm mb-3 hover:underline"
                 >
-                  Hủy
+                  ← Quay lại
                 </button>
-                <button
-                  onClick={handleSend}
-                  className="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition"
-                >
-                  Gửi
-                </button>
-              </div>
-            </div>
-          )}
+
+                <h2 className="text-xl font-semibold mb-4">
+                  Mời chia sẻ “{planName}”
+                </h2>
+
+                <div className="flex gap-3 mb-5">
+                  <input
+                    readOnly
+                    value={emailInput}
+                    className="flex-1 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-800 text-sm"
+                  />
+                  <select
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value)}
+                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-2 text-sm dark:bg-gray-900"
+                  >
+                    <option value="viewer">Người xem</option>
+                    <option value="editor">Người chỉnh sửa</option>
+                  </select>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setPhase("default")}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-full text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={handleSendInvite}
+                    className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+                  >
+                    Gửi lời mời
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* ----------------------------- DEFAULT PHASE ----------------------------- */}
+            {phase === "default" && (
+              <>
+                <h2 className="text-xl font-semibold mb-4">
+                  Chia sẻ “{planName}”
+                </h2>
+
+                {/* Visibility */}
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-medium text-sm">Hiển thị:</span>
+                  <VisibilityDropdown
+                    value={visibility}
+                    onChange={handleVisibilityChange}
+                  />
+                </div>
+
+                {/* Invite email */}
+                <div className="mb-2">
+                  <input
+                    value={emailInput}
+                    onChange={(e) => {
+                      setEmailInput(e.target.value);
+                      setEmailValid(true);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
+                    placeholder="Nhập email để mời"
+                    className={`w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700 transition-colors ${
+                      emailValid ? "" : "border-red-500"
+                    }`}
+                  />
+                  {!emailValid && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Email không hợp lệ.
+                    </p>
+                  )}
+                </div>
+
+                {/* TABS */}
+                <div className="flex gap-6 border-b border-gray-200 dark:border-gray-800 mb-4">
+                  <button
+                    className={`pb-2 text-sm font-medium relative transition-colors duration-150 ${
+                      activeTab === "members"
+                        ? "text-blue-600"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                    onClick={() => setActiveTab("members")}
+                  >
+                    Thành viên lịch trình
+                    <span
+                      className={`absolute left-0 -bottom-[1px] h-[2px] rounded-full transition-all duration-200 ${
+                        activeTab === "members"
+                          ? "w-full bg-blue-600"
+                          : "w-0 bg-transparent"
+                      }`}
+                    />
+                  </button>
+
+                  <button
+                    className={`pb-2 text-sm font-medium relative transition-colors duration-150 ${
+                      activeTab === "requests"
+                        ? "text-blue-600"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                    onClick={() => setActiveTab("requests")}
+                  >
+                    Yêu cầu tham gia ({requests?.length || 0})
+                    <span
+                      className={`absolute left-0 -bottom-[1px] h-[2px] rounded-full transition-all duration-200 ${
+                        activeTab === "requests"
+                          ? "w-full bg-blue-600"
+                          : "w-0 bg-transparent"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* MEMBERS */}
+                {activeTab === "members" && (
+                  <div className="space-y-1.5 mb-5 transition-opacity duration-150">
+                    {accessList.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Chưa có thành viên nào.
+                      </p>
+                    )}
+
+                    {accessList.map((u, idx) => (
+                      <AccessRow
+                        key={idx}
+                        user={u}
+                        activeMenu={activeMenu}
+                        setActiveMenu={setActiveMenu}
+                        onChangeRole={(role) => handleChangeRole(u, role)}
+                        onRemoveUser={openRemoveDialog}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* REQUESTS */}
+                {activeTab === "requests" && (
+                  <div className="space-y-3 mb-5 transition-opacity duration-150">
+                    {requests?.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Không có yêu cầu nào.
+                      </p>
+                    )}
+
+                    {requests?.map((r) => (
+                      <div
+                        key={r.id}
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+                      >
+                        <p className="font-medium mb-1 text-sm">
+                          User ID: {r.userId}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Loại:{" "}
+                          {r.type === "EDIT"
+                            ? "Quyền chỉnh sửa"
+                            : "Quyền xem"}
+                        </p>
+
+                        <div className="flex justify-end gap-2 mt-3">
+                          <button
+                            onClick={() => decideRequest(r.id, "REJECT")}
+                            className="px-3 py-1.5 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md transition-colors"
+                          >
+                            Từ chối
+                          </button>
+                          <button
+                            onClick={() => decideRequest(r.id, "APPROVE")}
+                            className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                          >
+                            Chấp nhận
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Copy link + Done */}
+                <div className="flex justify-end gap-3 mt-4">
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-2 border border-gray-300 dark:border-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <FaCopy />
+                    {copySuccess ? "Đã sao chép!" : "Sao chép liên kết"}
+                  </button>
+
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition-colors"
+                  >
+                    Xong
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* CONFIRM MODAL */}
+      {confirmOpen && (
+        <ConfirmModal
+          open={confirmOpen}
+          title="Xoá thành viên"
+          message={`Bạn có chắc muốn xoá ${userToRemove?.name}?`}
+          confirmText="Xoá"
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={confirmRemove}
+        />
+      )}
+    </>
   );
 }
