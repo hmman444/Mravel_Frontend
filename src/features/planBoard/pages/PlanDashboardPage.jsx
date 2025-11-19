@@ -10,7 +10,6 @@ import {
   FaPlus,
   FaUserCircle,
 } from "react-icons/fa";
-import { useDispatch } from "react-redux";
 
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "../components/SidebarPlans";
@@ -20,17 +19,18 @@ import EditCardModal from "../components/modals/EditCardModal";
 import LabelModal from "../components/modals/LabelModal";
 import ConfirmModal from "../../../components/ConfirmModal";
 import PlanSummary from "../components/PlanSummary";
+import AccessRequestModal from "../components/modals/AccessRequestModal"; 
 
 import { usePlanBoard } from "../hooks/usePlanBoard";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
 export default function PlanDashboardPage() {
   const { planId } = useParams();
-  const dispatch = useDispatch();
 
   const {
     board,
     loading,
+    error,
     load,
     createList,
     renameList,
@@ -40,6 +40,7 @@ export default function PlanDashboardPage() {
     deleteCard,
     reorder,
     localReorder,
+    requestAccess,
   } = usePlanBoard(planId);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -59,12 +60,29 @@ export default function PlanDashboardPage() {
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
 
-  const [activeCard, setActiveCard] = useState(null);
+  const [setActiveCard] = useState(null);
+
+  const [showAccessModal, setShowAccessModal] = useState(false);
+  const [accessLoadingType, setAccessLoadingType] = useState(null);
 
   // đổi plan
   useEffect(() => {
-    if (planId) load();
+    if (!planId) return;
+    load();
   }, [planId]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      !board &&
+      typeof error === "string" &&
+      error.includes("You don't have permission to view this board")
+    ) {
+      setShowAccessModal(true);
+    } else {
+      setShowAccessModal(false);
+    }
+  }, [loading, board, error]);
 
   // drag drop
   const handleDragEnd = async (result) => {
@@ -100,7 +118,7 @@ export default function PlanDashboardPage() {
   // crud list card
   const handleAddList = async () => {
     try {
-      await createList({ title: `Ngày ${board?.lists?.length + 1}` });
+      await createList({ title: `Ngày ${(board?.lists?.length || 0) + 1}` });
       showSuccess("Đã thêm danh sách");
     } catch {
       showError("Không thể thêm danh sách");
@@ -150,7 +168,7 @@ export default function PlanDashboardPage() {
 
   // toggleDone
   const toggleDone = async (listId, cardId) => {
-    const card = board.lists
+    const card = board?.lists
       ?.find((l) => l.id === listId)
       ?.cards.find((c) => c.id === cardId);
     if (!card) return;
@@ -185,9 +203,10 @@ export default function PlanDashboardPage() {
 
   const duplicateList = async (list) => {
     try {
-      const newList = await createList({
+      const newListAction = await createList({
         title: list.title + " (Copy)",
-      }).unwrap();
+      });
+      const newList = newListAction.payload || newListAction; // tuỳ thunk trả gì
 
       for (const card of list.cards || []) {
         const payload = {
@@ -208,15 +227,42 @@ export default function PlanDashboardPage() {
     }
   };
 
-  // render loading
-  if (loading || !board)
+  const handleRequestView = async () => {
+    try {
+      setAccessLoadingType("VIEW");
+      await requestAccess("VIEW"); // backend: PlanRequestType.VIEW
+      showSuccess("Đã gửi yêu cầu quyền xem đến chủ sở hữu.");
+      setShowAccessModal(false);
+    } catch (err) {
+      console.error(err);
+      // tryCall trong hook đã showError rồi
+    } finally {
+      setAccessLoadingType(null);
+    }
+  };
+
+  const handleRequestEdit = async () => {
+    try {
+      setAccessLoadingType("EDIT");
+      await requestAccess("EDIT"); 
+      showSuccess("Đã gửi yêu cầu quyền chỉnh sửa đến chủ sở hữu.");
+      setShowAccessModal(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAccessLoadingType(null);
+    }
+  };
+
+  // render loading lần đầu
+  if (loading && !board) {
     return (
       <div className="p-8 text-center text-gray-500">
         Đang tải lịch trình...
       </div>
     );
+  }
 
-  // render page
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar fixedWhite />
@@ -248,7 +294,7 @@ export default function PlanDashboardPage() {
           )}
         </button>
 
-        {/* main*/}
+        {/* main */}
         <div
           className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
             sidebarCollapsed ? "ml-0" : "ml-72"
@@ -257,11 +303,11 @@ export default function PlanDashboardPage() {
           {/* header */}
           <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center gap-3 border-b">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-              {board.planTitle}
+              {board?.planTitle || "Lịch trình"}
             </h1>
 
             <div className="ml-auto flex items-center -space-x-2">
-              {(board.invites || []).slice(0, 3).map((inv, i) => (
+              {(board?.invites || []).slice(0, 3).map((inv, i) => (
                 <span
                   key={i}
                   title={inv.email}
@@ -272,12 +318,14 @@ export default function PlanDashboardPage() {
               ))}
             </div>
 
-            <button
-              onClick={() => setOpenShare(true)}
-              className="ml-3 inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200"
-            >
-              <FaShareAlt /> Chia sẻ
-            </button>
+            {board && (
+              <button
+                onClick={() => setOpenShare(true)}
+                className="ml-3 inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200"
+              >
+                <FaShareAlt /> Chia sẻ
+              </button>
+            )}
           </div>
 
           {/* tab */}
@@ -299,9 +347,9 @@ export default function PlanDashboardPage() {
 
           {/* tab content */}
           <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
-            {activeTab === "summary" && <PlanSummary plan={board} />}
+            {activeTab === "summary" && board && <PlanSummary plan={board} />}
 
-            {activeTab === "board" && (
+            {activeTab === "board" && board && (
               <>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Lịch trình chi tiết</h2>
@@ -373,20 +421,37 @@ export default function PlanDashboardPage() {
                 👥 Thành viên – đang phát triển
               </div>
             )}
+
+            {/* Nếu không có board (ví dụ không có quyền), show hint nhỏ */}
+            {!board && !loading && (
+              <div className="mt-8 text-center text-gray-500 text-sm">
+                <p className="mb-3">
+                  Bạn chưa có quyền truy cập đầy đủ vào lịch trình này.
+                </p>
+                <button
+                  onClick={() => setShowAccessModal(true)}
+                  className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                >
+                  Yêu cầu quyền truy cập
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* modals */}
-      <ShareModal
-        isOpen={openShare}
-        planId={planId}
-        onClose={() => setOpenShare(false)}
-        planName={board.planTitle}
-        initialVisibility={board.visibility}
-      />
+      {board && (
+        <ShareModal
+          isOpen={openShare}
+          planId={planId}
+          onClose={() => setOpenShare(false)}
+          planName={board.planTitle}
+          initialVisibility={board.visibility}
+        />
+      )}
 
-      {editCard && (
+      {editCard && board && (
         <EditCardModal
           editCard={editCard}
           setEditCard={setEditCard}
@@ -438,6 +503,15 @@ export default function PlanDashboardPage() {
           }}
         />
       )}
+
+      <AccessRequestModal
+        isOpen={showAccessModal}
+        onClose={() => setShowAccessModal(false)}
+        visibility={board?.visibility || "PRIVATE"}
+        onRequestView={handleRequestView}
+        onRequestEdit={handleRequestEdit}
+        loadingType={accessLoadingType}
+      />
     </div>
   );
 }

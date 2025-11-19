@@ -137,8 +137,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // fallback
-    showError(message || "Đã xảy ra lỗi. Vui lòng thử lại.");
+
 
     return Promise.reject(error);
   }

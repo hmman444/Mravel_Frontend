@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useLoadUser } from "./features/auth/hooks/useLoadUser";
-
+import Toast from "./components/Toast";
 // Auth
 import LoginPage from "./features/auth/pages/LoginPage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
@@ -34,6 +34,7 @@ import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 function App() {
   useLoadUser();
   return (
+    <>
     <Router>
       <Routes>
         {/* Auth routes */}
@@ -72,6 +73,8 @@ function App() {
         <Route path="*" element={<HomePage />} />
       </Routes>
     </Router>
+    <Toast position="top-center" autoClose={2000} />
+    </>
   );
 }
 

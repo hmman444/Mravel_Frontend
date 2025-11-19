@@ -23,6 +23,7 @@ const initialState = {
   board: null,
   share: null,
   loading: false,
+  actionLoading: false,
   error: null,
   requests: [],
 };
@@ -129,8 +130,17 @@ export const deleteMember = createAsyncThunk(
 
 export const sendAccessRequest = createAsyncThunk(
   "planBoard/sendAccessRequest",
-  async ({ planId, type }) => {
-    return await requestAccess(planId, { type });
+  async ({ planId, type }, { rejectWithValue }) => {
+    try {
+      return await requestAccess(planId, { type });
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Không thể gửi yêu cầu truy cập";
+
+      return rejectWithValue(message);
+    }
   }
 );
 
@@ -143,8 +153,8 @@ export const loadRequests = createAsyncThunk(
 
 export const decideRequest = createAsyncThunk(
   "planBoard/decideRequest",
-  async ({ planId, reqId, action }) => {
-    return await handleRequest(planId, reqId, { action });
+  async ({ planId, reqId, action, role }) => {
+    return await handleRequest(planId, reqId, { action, role });
   }
 );
 
@@ -193,13 +203,12 @@ localReorder(state, action) {
     }
   }
 
-  // 🚀 Cực kỳ quan trọng: ép tạo object mới hoàn toàn
   state.board = JSON.parse(JSON.stringify({
     ...state.board,
     lists
   }));
 
-  console.log("✅ After local reorder:", state.board.lists.map(l => ({
+  console.log("After local reorder:", state.board.lists.map(l => ({
     id: l.id,
     cards: l.cards.map(c => c.id)
   })));
@@ -274,7 +283,7 @@ localReorder(state, action) {
         }
       })
 
-      .addCase(reorder.fulfilled, (s, a) => {
+      .addCase(reorder.fulfilled, (s) => {
         s.error = null;
       })
 
@@ -338,7 +347,25 @@ localReorder(state, action) {
       .addCase(decideRequest.fulfilled, (state, action) => {
         const { reqId } = action.meta.arg;
         state.requests = state.requests.filter((r) => r.id !== reqId);
-      });
+      })
+      .addMatcher(
+        (action) =>
+          action.type.startsWith("planBoard/") &&
+          !action.type.startsWith("planBoard/loadBoard") &&
+          action.type.endsWith("/pending"),
+        (state) => {
+          state.actionLoading = true;
+        }
+      )
+      .addMatcher(
+        (action) =>
+          action.type.startsWith("planBoard/") &&
+          !action.type.startsWith("planBoard/loadBoard") &&
+          (action.type.endsWith("/fulfilled") || action.type.endsWith("/rejected")),
+        (state) => {
+          state.actionLoading = false;
+        }
+      );
   },
 });
 

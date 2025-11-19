@@ -17,8 +17,8 @@ import {
   changeMemberRole,
   deleteMember,
   sendAccessRequest,
-  loadRequests,
-  decideRequest,
+  loadRequests as loadRequestsThunk,
+  decideRequest as decideRequestThunk,
 } from "../slices/planBoardSlice";
 import { updateVisibility } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
@@ -30,7 +30,7 @@ async function tryCall(promise, fallbackMessage) {
     return res;
   } catch (err) {
     console.error("❌ API Error:", err);
-    showError(fallbackMessage);
+    if (fallbackMessage) showError(fallbackMessage);
     throw err;
   }
 }
@@ -38,47 +38,45 @@ async function tryCall(promise, fallbackMessage) {
 // hook
 export function usePlanBoard(planId) {
   const dispatch = useDispatch();
-
-  const board = useSelector((s) => s.planBoard.board);
-  const share = useSelector((s) => s.planBoard.share);
-  const loading = useSelector((s) => s.planBoard.loading);
-  const error = useSelector((s) => s.planBoard.error);
-  const requests = useSelector((s) => s.planBoard.requests);
+  const { board, loading, actionLoading, error, share, requests } = useSelector(
+    (state) => state.planBoard
+  );
 
   // role helpers
-  const myRole = (() => {
-    if (!board?.members) return null;
-    const me = board.members.find((m) => m.isCurrentUser);
-    return me?.role || null;
-  })();
-
+  const myRole = board?.myRole || null;
   const isOwner = myRole === "OWNER";
   const isEditor = myRole === "EDITOR";
   const isViewer = myRole === "VIEWER";
 
-  const canEdit = isOwner || isEditor;
-  const canView = !!board; // vì backend đã filter permission
-
+  const canEditBoard = isOwner || isEditor;   // add list/card, drag/drop
+  const canInvite = isOwner || isEditor;      // mời thêm người
+  const canChangeVisibility = isOwner;        // PRIVATE/PUBLIC
+  const canSeeRequests = isOwner;             // tab "Yêu cầu tham gia"
+  const canManageMembers = isOwner;           // đổi role, xoá thành viên
 
   return {
     board,
     share,
     loading,
+    actionLoading,
     error,
     requests,
 
     // load data
     load: () => dispatch(loadBoard(planId)),
     loadShare: () => dispatch(loadShareInfo(planId)),
-    loadRequests: () => dispatch(loadRequests(planId)),
+    loadRequests: () => dispatch(loadRequestsThunk(planId)),
 
     // role info
     myRole,
     isOwner,
     isEditor,
     isViewer,
-    canEdit,
-    canView,
+    canEditBoard,
+    canInvite,
+    canChangeVisibility,
+    canSeeRequests,
+    canManageMembers,
 
     // lists
     createList: (payload) =>
@@ -167,16 +165,36 @@ export function usePlanBoard(planId) {
         "Không thể xoá thành viên"
       ),
 
-    // request access
-    requestAccess: (type) =>
-      tryCall(
-        dispatch(sendAccessRequest({ planId, type })),
-        "Không thể gửi yêu cầu truy cập"
-      ),
+    // request access (người khác xin quyền)
+    requestAccess: async (type) => {
+      try {
+        const result = await dispatch(
+          sendAccessRequest({ planId, type })
+        ).unwrap();
+        return result;
+      } catch (err) {
+        console.log(err);
+        // Toast thông báo lỗi
+        showError("Bạn đã gửi yêu cầu trước đó, vui lòng đợi xác nhận!");
+        return null;
+      }
+    },
 
-    decideRequest: (reqId, action) =>
+    // owner xử lý yêu cầu
+    decideRequest: (reqId, action, role) =>
       tryCall(
-        dispatch(decideRequest({ planId, reqId, action })),
+        (async () => {
+          await dispatch(
+            decideRequestThunk({ planId, reqId, action, role })
+          ).unwrap();
+
+          if (action === "APPROVE") {
+            // load lại share để cập nhật danh sách member
+            dispatch(loadShareInfo(planId));
+          } else {
+            showSuccess("Đã từ chối yêu cầu truy cập");
+          }
+        })(),
         "Không thể xử lý yêu cầu"
       ),
   };

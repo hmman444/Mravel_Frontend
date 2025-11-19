@@ -1,25 +1,27 @@
+// src/features/planBoard/components/modals/AccessRow.jsx
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  FaUserCircle,
-  FaChevronDown,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaUserCircle, FaChevronDown, FaTrashAlt } from "react-icons/fa";
 
 export default function AccessRow({
   user,
   activeMenu,
   setActiveMenu,
   onChangeRole,
-  onRemoveUser
+  onRemoveUser,
+  canChangeRole,
+  canRemove,
 }) {
-  const isOwner = user.owner;
+  // row chủ
+  const isOwnerRow = user.owner;
+  const hasMenu = (canChangeRole || canRemove) && !isOwnerRow;
   const open = activeMenu === user.email;
 
   const rowRef = useRef(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
-  const [posReady, setPosReady] = useState(false); 
+  const [posReady, setPosReady] = useState(false);
 
+  // tính vị trí dropdown
   useEffect(() => {
     if (open && rowRef.current) {
       const rect = rowRef.current.getBoundingClientRect();
@@ -32,11 +34,11 @@ export default function AccessRow({
 
       requestAnimationFrame(() => setPosReady(true));
     } else {
-      setPosReady(false); 
+      setPosReady(false);
     }
   }, [open]);
 
- // click outside
+  // click outside để đóng dropdown
   useEffect(() => {
     if (!open) return;
 
@@ -48,83 +50,94 @@ export default function AccessRow({
 
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
-  }, [open]);
+  }, [open, setActiveMenu]);
 
   const handleToggleMenu = () => {
-    if (isOwner) return;
+    if (!hasMenu) return; // không có quyền gì thì không mở menu
     setActiveMenu(open ? null : user.email);
   };
 
   const handleSelectRole = (role) => {
-    onChangeRole(role);
+    // Không đổi role nếu không có quyền hoặc user là pending invite
+    if (!canChangeRole || user.pending) return;
+    if (onChangeRole) onChangeRole(role);
     setActiveMenu(null);
   };
 
   const handleRemove = () => {
-    onRemoveUser(user);
+    if (!canRemove) return;
+    if (onRemoveUser) onRemoveUser(user);
     setActiveMenu(null);
   };
 
-  //dropdown portal
+  // dropdown qua portal
   const dropdown =
-  open && posReady
-    ? createPortal(
-        <div
-          className="
-            fixed z-[99999]
-            bg-white dark:bg-gray-900
-            border border-gray-200 dark:border-gray-700
-            w-56 rounded-xl shadow-lg
-            origin-top-right
-            transition-all duration-150 ease-out
-            opacity-100 scale-100
-          "
-          style={{ top: pos.top, left: pos.left }}
-          onMouseDown={(e) => e.stopPropagation()} 
-          onClick={(e) => e.stopPropagation()}      
-        >
-          <div className="py-1">
-            {["Người xem", "Người chỉnh sửa"].map((r) => (
-              <button
-                key={r}
-                onClick={() => handleSelectRole(r)}
-                className={`
-                  w-full text-left px-3 py-1.5 text-sm
-                  hover:bg-gray-100 dark:hover:bg-gray-800 transition
-                  ${
-                    user.role === r
-                      ? "text-blue-600 font-semibold"
-                      : "text-gray-700 dark:text-gray-200"
-                  }
-                `}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
-
-          <button
-            onClick={handleRemove}
+    open && posReady
+      ? createPortal(
+          <div
             className="
-              w-full text-left px-3 py-1.5 text-sm
-              text-red-600 hover:bg-red-50 dark:hover:bg-gray-800
-              flex items-center gap-2 transition
+              fixed z-[99999]
+              bg-white dark:bg-gray-900
+              border border-gray-200 dark:border-gray-700
+              w-56 rounded-xl shadow-lg
+              origin-top-right
+              transition-all duration-150 ease-out
+              opacity-100 scale-100
             "
+            style={{ top: pos.top, left: pos.left }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
-            <FaTrashAlt size={12} />
-            Xóa quyền truy cập
-          </button>
-        </div>,
-        document.body
-      )
-    : null;
+            <div className="py-1">
+              {/* Chỉ render các option đổi role nếu có quyền đổi và user không pending */}
+              {["Người xem", "Người chỉnh sửa"].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => handleSelectRole(r)}
+                  disabled={!canChangeRole || user.pending}
+                  className={`
+                    w-full text-left px-3 py-1.5 text-sm
+                    hover:bg-gray-100 dark:hover:bg-gray-800 transition
+                    ${
+                      user.role === r
+                        ? "text-blue-600 font-semibold"
+                        : "text-gray-700 dark:text-gray-200"
+                    }
+                    ${
+                      !canChangeRole || user.pending
+                        ? "opacity-60 cursor-not-allowed"
+                        : ""
+                    }
+                  `}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
 
+            {canRemove && (
+              <>
+                <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                <button
+                  onClick={handleRemove}
+                  className="
+                    w-full text-left px-3 py-1.5 text-sm
+                    text-red-600 hover:bg-red-50 dark:hover:bg-gray-800
+                    flex items-center gap-2 transition
+                  "
+                >
+                  <FaTrashAlt size={12} />
+                  Xóa quyền truy cập
+                </button>
+              </>
+            )}
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <>
-      {/* ROW */}
       <div
         ref={rowRef}
         className="
@@ -134,7 +147,7 @@ export default function AccessRow({
           transition
         "
       >
-        {/* Left */}
+        {/* info */}
         <div className="flex items-center gap-3">
           {user.avatar ? (
             <img
@@ -162,17 +175,37 @@ export default function AccessRow({
           </div>
         </div>
 
-        {/* Right */}
+        {/* role */}
         <div>
-          {isOwner ? (
-            <span className="
-              px-3 py-1 rounded-full text-xs font-semibold
-              bg-amber-100 text-amber-700
-              dark:bg-amber-500/10 dark:text-amber-300
-            ">
+          {/* chủ */}
+          {isOwnerRow && (
+            <span
+              className="
+                px-3 py-1 rounded-full text-xs font-semibold
+                bg-amber-100 text-amber-700
+                dark:bg-amber-500/10 dark:text-amber-300
+              "
+            >
               Chủ sở hữu
             </span>
-          ) : (
+          )}
+
+          {/* k đổi đc role thì là label */}
+          {!isOwnerRow && !canChangeRole && (
+            <span
+              className="
+                px-3 py-1 rounded-full text-xs font-medium
+                bg-gray-100 text-gray-600
+                dark:bg-gray-800 dark:text-gray-300
+                select-none
+              "
+            >
+              {user.role}
+            </span>
+          )}
+
+          {/* có quyền đổi role (owner) - dropdown */}
+          {!isOwnerRow && canChangeRole && (
             <button
               onClick={handleToggleMenu}
               className="
@@ -186,17 +219,17 @@ export default function AccessRow({
             >
               {user.role}
               <FaChevronDown
-                className={`
-                  text-[10px] transition-transform
-                  ${open ? "rotate-180" : ""}
-                `}
+                className={`text-[10px] transition-transform ${
+                  open ? "rotate-180" : ""
+                }`}
               />
             </button>
           )}
         </div>
-      </div>
 
-      {dropdown}
-    </>
-  );
-}
+              </div>
+
+              {dropdown}
+            </>
+          );
+        }
