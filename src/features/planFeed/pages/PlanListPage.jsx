@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState} from "react";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import Button from "../../../components/Button";
@@ -6,14 +6,18 @@ import PlanPostCard from "../components/PlanPostCard";
 import PostSkeleton from "../components/PostSkeleton";
 import { usePlans } from "../hooks/usePlans";
 import { useSelector } from "react-redux";
-
+import NewPlanModal from "../components/NewPlanModal";
 export default function PlanListPage() {
+  const [openNew, setOpenNew] = useState(false);
   const { user } = useSelector((s) => s.auth);
   const { items, loading, hasMore, fetchNext, reload } = usePlans();
 
   useEffect(() => {
-    reload();
-  }, []);
+    console.log("👤 user in PlanListPage:", user);
+    if (user) {
+      reload();
+    }
+  }, [user]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -24,7 +28,7 @@ export default function PlanListPage() {
             <div className="flex items-center gap-3">
               <img src={user.avatar} className="w-10 h-10 rounded-full" />
               <button
-                onClick={() => (window.location.href = "/plans/new")}
+                onClick={() => setOpenNew(true)}
                 className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-left px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600"
               >
                 Tạo lịch trình của bạn…
@@ -52,6 +56,11 @@ export default function PlanListPage() {
           )}
         </div>
       </main>
+      <NewPlanModal
+        open={openNew}
+        onClose={() => setOpenNew(false)}
+        onCreated={() => reload()}
+      />
       <Footer />
     </div>
   );
