@@ -20,7 +20,8 @@ export default function SidebarPlans({
     forYou: true,
     plans: true,
   });
-  const [selectedItem, setSelectedItem] = useState(null); // ✅ hiển thị modal chi tiết
+
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const toggleSection = (key) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -103,12 +104,14 @@ export default function SidebarPlans({
 
   return (
     <aside
-      className={`border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 transition-[width] duration-300 ease-in-out overflow-hidden ${
-        collapsed ? "w-16" : "w-72"
-      }`}
+      className={`
+        bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 
+        transition-all duration-300 ease-in-out overflow-hidden shadow-sm
+        ${collapsed ? "w-16" : "w-72"}
+      `}
     >
-      <div className="h-full overflow-y-auto px-2 py-3 scrollbar-thin">
-        {/* For you */}
+      <div className="h-full overflow-y-auto px-3 py-4 sidebar-scroll">
+
         <Section
           title="For you"
           icon={<FaRegSmile />}
@@ -136,7 +139,6 @@ export default function SidebarPlans({
           />
         </Section>
 
-        {/* Plans */}
         <Section
           title="Plans"
           icon={<FaFolderOpen />}
@@ -145,7 +147,7 @@ export default function SidebarPlans({
           collapsed={collapsed}
           action={
             !collapsed && (
-              <button className="text-gray-400 hover:text-primary text-xs flex items-center gap-1">
+              <button className="text-gray-400 hover:text-blue-600 text-xs flex items-center gap-1 transition">
                 <FaPlus /> New
               </button>
             )
@@ -166,26 +168,41 @@ export default function SidebarPlans({
         </Section>
       </div>
 
-      {/* Modal chi tiết */}
       {selectedItem && (
         <ItemDetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
       )}
+
+      <style>{`
+        .sidebar-scroll::-webkit-scrollbar { width: 6px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.15); border-radius: 999px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(0,0,0,0.25);
+        }
+      `}</style>
     </aside>
   );
 }
 
-/* ==== CÁC COMPONENT PHỤ ==== */
 function Section({ title, icon, open, toggle, collapsed, children, action }) {
   return (
-    <div className="mb-2">
+    <div className="mb-3">
       <div
-        className="w-full flex items-center justify-between px-2 py-2 text-sm font-semibold rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+        className="
+          w-full flex items-center justify-between px-2 py-2 rounded-xl
+          cursor-pointer transition-all
+          bg-gray-50/60 dark:bg-gray-800/40
+          hover:bg-gray-100 dark:hover:bg-gray-800 shadow-sm
+        "
         onClick={toggle}
       >
-        <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+        <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
           {icon}
           {!collapsed && <span>{title}</span>}
         </span>
+
         {!collapsed && (
           <span className="flex items-center gap-2">
             {action}
@@ -199,12 +216,14 @@ function Section({ title, icon, open, toggle, collapsed, children, action }) {
           </span>
         )}
       </div>
+
       <div
-        className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          open ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`
+          transition-all duration-300 ease-in-out overflow-hidden
+          ${open ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}
+        `}
       >
-        {open && <div className="pt-1">{children}</div>}
+        {open && <div className="pt-2">{children}</div>}
       </div>
     </div>
   );
@@ -214,13 +233,16 @@ function SidebarItem({ icon, label, active, collapsed, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`cursor-pointer flex items-center gap-2 rounded-md px-2 py-2 text-sm transition ${
-        active
-          ? "bg-primary text-white"
-          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-      }`}
+      className={`
+        cursor-pointer flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all
+        ${
+          active
+            ? "bg-blue-600 text-white shadow-md"
+            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+        }
+      `}
     >
-      <span className="text-gray-500">{icon}</span>
+      <span className={active ? "text-white" : "text-gray-500"}>{icon}</span>
       {!collapsed && <span>{label}</span>}
     </div>
   );
@@ -228,10 +250,16 @@ function SidebarItem({ icon, label, active, collapsed, onClick }) {
 
 function SidebarCategory({ icon, label, items, onItemClick }) {
   const [open, setOpen] = useState(false);
+
   return (
     <div className="mb-2">
       <div
-        className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer"
+        className="
+          flex items-center gap-2 px-2 py-2 text-sm rounded-xl
+          text-gray-700 dark:text-gray-300
+          hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer
+          transition-all
+        "
         onClick={() => setOpen(!open)}
       >
         <span className="text-gray-400">{icon}</span>
@@ -239,17 +267,21 @@ function SidebarCategory({ icon, label, items, onItemClick }) {
       </div>
 
       {open && (
-        <div className="ml-6 mt-1 space-y-2">
+        <div className="ml-6 mt-2 space-y-3 animate-[fadeDown_0.25s_ease]">
           {items.map((item) => (
             <div
               key={item.id}
               onClick={() => onItemClick(item)}
-              className="bg-gray-50 dark:bg-gray-700 p-2 rounded-md shadow-sm cursor-pointer hover:shadow-md transition"
+              className="
+                bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl shadow-sm
+                cursor-pointer hover:shadow-md hover:bg-white/60 dark:hover:bg-gray-700
+                transition-all
+              "
             >
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-full h-20 object-cover rounded-md mb-1"
+                className="w-full h-20 object-cover rounded-md mb-2"
               />
               <p className="text-xs font-semibold">{item.name}</p>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -263,31 +295,64 @@ function SidebarCategory({ icon, label, items, onItemClick }) {
   );
 }
 
-/* ==== Modal chi tiết ==== */
 function ItemDetailModal({ item, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-[420px] max-w-[90vw] p-5 relative">
+    <div
+      className="
+        fixed inset-0 bg-black/40 backdrop-blur-[2px]
+        flex items-center justify-center z-50
+        animate-[fadeBg_0.25s_ease]
+      "
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="
+          bg-white dark:bg-gray-900 rounded-2xl shadow-2xl
+          w-[420px] max-w-[90vw] p-5 relative animate-[popup_0.25s_ease]
+        "
+      >
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
         >
           ✕
         </button>
+
         <img
           src={item.image}
           alt={item.name}
-          className="w-full h-48 object-cover rounded-lg mb-3"
+          className="w-full h-48 object-cover rounded-lg mb-4"
         />
-        <h3 className="text-lg font-semibold mb-1 text-gray-800 dark:text-gray-100">
+
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
           {item.name}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{item.description}</p>
+
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+          {item.description}
+        </p>
+
         <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
           <p>📍 {item.address}</p>
           <p>💰 {item.price}</p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes popup {
+          from { opacity: 0; transform: scale(0.92) translateY(8px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes fadeBg {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fadeDown {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

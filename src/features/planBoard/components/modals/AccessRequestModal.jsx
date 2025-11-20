@@ -4,19 +4,15 @@ import { FaTimes, FaLock, FaEye, FaEdit } from "react-icons/fa";
 export default function AccessRequestModal({
   isOpen,
   onClose,
-  visibility = "PRIVATE",     
-  onRequestView,              
-  onRequestEdit,              
-  loadingType = null,        
+  visibility = "PRIVATE",
+  onRequestView,
+  onRequestEdit,
+  loadingType = null,
 }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setMounted(true);
-    } else {
-      setMounted(false);
-    }
+    setMounted(isOpen);
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -30,34 +26,39 @@ export default function AccessRequestModal({
 
   return (
     <div className="fixed inset-0 z-[2100] flex items-center justify-center">
-      {/* overlay */}
       <div
-        className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200 ${
+        className={`absolute inset-0 bg-black/40 backdrop-blur-[3px] transition-opacity duration-200 ${
           mounted ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
       />
 
-      {/* modal */}
       <div
-        className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-[420px] max-w-[90vw] transform transition-all duration-200 ${
-          mounted
-            ? "opacity-100 translate-y-0 scale-100"
-            : "opacity-0 translate-y-2 scale-95"
-        }`}
+        className={`
+          relative w-[420px] max-w-[90vw]
+          bg-white/95 dark:bg-gray-900/95
+          rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.18)]
+          border border-gray-200/60 dark:border-gray-700/60
+          backdrop-blur-xl
+          transform transition-all duration-200
+          ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-3 scale-95"}
+        `}
       >
-        {/* close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
+          className="
+            absolute top-3 right-3 p-2 rounded-full
+            bg-gray-200/70 dark:bg-gray-700/70
+            text-gray-600 dark:text-gray-300
+            hover:bg-red-500 hover:text-white transition
+          "
         >
-          <FaTimes />
+          <FaTimes size={14} />
         </button>
 
         <div className="p-6">
-          {/* icon */}
-          <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-3">
-            <FaLock />
+          <div className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-3 shadow-inner">
+            <FaLock className="text-xl" />
           </div>
 
           <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
@@ -69,23 +70,27 @@ export default function AccessRequestModal({
           </p>
 
           {!isPublic && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-              • <span className="font-semibold">Quyền xem</span>: chỉ xem lịch trình, không chỉnh sửa. <br />
-              • <span className="font-semibold">Quyền chỉnh sửa</span>: có thể thêm, sửa, xóa thẻ và danh sách.
-            </p>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 space-y-1">
+              <p>• <span className="font-semibold">Quyền xem</span>: chỉ xem lịch trình.</p>
+              <p>• <span className="font-semibold">Quyền chỉnh sửa</span>: có thể thêm, sửa, xóa nội dung.</p>
+            </div>
           )}
 
-          {/* buttons */}
-          <div className="flex justify-end gap-2 mt-2">
+          <div className="flex justify-end gap-3 mt-4">
+
             {!isPublic && (
               <button
                 onClick={onRequestView}
                 disabled={loadingType === "VIEW"}
-                className={`px-4 py-2 rounded-full text-sm flex items-center gap-2 border border-gray-300 dark:border-gray-700 transition-colors ${
-                  loadingType === "VIEW"
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`
+                  px-4 py-2 rounded-xl text-sm flex items-center gap-2
+                  transition-all border
+                  ${
+                    loadingType === "VIEW"
+                      ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                      : "bg-white/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 shadow-sm"
+                  }
+                `}
               >
                 <FaEye className="text-gray-500" />
                 {loadingType === "VIEW" ? "Đang gửi..." : "Yêu cầu quyền xem"}
@@ -95,24 +100,24 @@ export default function AccessRequestModal({
             <button
               onClick={onRequestEdit}
               disabled={loadingType === "EDIT"}
-              className={`px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-colors ${
-                loadingType === "EDIT"
-                  ? "bg-blue-300 text-white cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
+              className={`
+                px-4 py-2 rounded-xl text-sm flex items-center gap-2
+                transition-all shadow
+                ${
+                  loadingType === "EDIT"
+                    ? "bg-blue-300 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:brightness-110"
+                }
+              `}
             >
               <FaEdit />
-              {loadingType === "EDIT"
-                ? "Đang gửi..."
-                : isPublic
-                ? "Yêu cầu quyền chỉnh sửa"
-                : "Yêu cầu quyền chỉnh sửa"}
+              {loadingType === "EDIT" ? "Đang gửi..." : "Yêu cầu quyền chỉnh sửa"}
             </button>
+
           </div>
 
-          <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-400">
-            Yêu cầu của bạn sẽ được gửi đến chủ sở hữu lịch trình. Bạn sẽ được
-            thông báo khi được chấp nhận.
+          <p className="mt-4 text-[11px] text-gray-500 dark:text-gray-400">
+            Yêu cầu của bạn sẽ được gửi đến chủ sở hữu. Bạn sẽ được thông báo khi có phản hồi.
           </p>
         </div>
       </div>

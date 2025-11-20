@@ -29,3 +29,36 @@ body {
     transform: translateY(0) scale(1);
   }
 }
+.no-transform {
+  transform: none !important;
+}
+.no-blur {
+  backdrop-filter: none !important;
+}
+.no-shadow {
+  box-shadow: none !important;
+}
+.drag-card-wrapper * {
+  transform: none !important;
+}
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dropdownSlide {
+  animation: dropdownSlide 0.18s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+

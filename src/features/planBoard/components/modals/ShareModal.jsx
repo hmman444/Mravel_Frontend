@@ -7,6 +7,7 @@ import ConfirmModal from "../../../../components/ConfirmModal";
 import VisibilityDropdown from "../VisibilityDropdown";
 import { usePlanBoard } from "../../hooks/usePlanBoard";
 import LoadingOverlay from "../../../../components/LoadingOverlay";
+
 export default function ShareModal({ isOpen, onClose, planName, planId }) {
   const {
     share,
@@ -23,17 +24,17 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     isEditor,
     isViewer,
     loading,
-    actionLoading 
+    actionLoading,
   } = usePlanBoard(planId);
 
-  const canInvite = isOwner;            // chỉ Owner
-  const canChangeVisibility = isOwner;  // chỉ Owner
-  const canSeeRequests = isOwner;       // chỉ Owner xem/xử lý request
+  const canInvite = isOwner;
+  const canChangeVisibility = isOwner;
+  const canSeeRequests = isOwner;
 
   const currentUserId =
     share?.members?.find((m) => m.isCurrentUser)?.userId ?? null;
 
-  const [phase, setPhase] = useState("default"); // "default" | "invite"
+  const [phase, setPhase] = useState("default");
   const [mounted, setMounted] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [activeTab, setActiveTab] = useState("members");
@@ -55,7 +56,6 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
 
   useEffect(() => {
     if (!isOpen) return;
-
     loadShare();
     setPhase("default");
     setActiveMenu(null);
@@ -79,51 +79,37 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       VIEWER: "Người xem",
     };
 
-    const members = share.members || [];
-    const invites = share.invites || [];
+    const buildName = (m) =>
+      m.isCurrentUser ? `${m.fullname || m.email} (Bạn)` : m.fullname || m.email;
 
-    const buildDisplayName = (m) => {
-      const base = m.fullname || m.email;
-      return m.isCurrentUser ? `${base} (Bạn)` : base;
-    };
-
-    const owner = members.find((m) => m.role === "OWNER");
+    const owner = share.members.find((m) => m.role === "OWNER");
 
     const ownerRow = owner
       ? {
-          userId: owner.userId,
-          name: buildDisplayName(owner),
-          email: owner.email,
-          avatar: owner.avatar,
+          ...owner,
+          name: buildName(owner),
           role: ROLE_UI[owner.role],
-          backendRole: owner.role,
           owner: true,
           pending: false,
         }
       : null;
 
-    const memberRows = members
+    const memberRows = share.members
       .filter((m) => m.role !== "OWNER")
       .map((m) => ({
-        userId: m.userId,
-        name: buildDisplayName(m),
-        email: m.email,
-        avatar: m.avatar,
+        ...m,
+        name: buildName(m),
         role: ROLE_UI[m.role],
-        backendRole: m.role,
         owner: false,
         pending: false,
       }));
 
-    const inviteRows = invites.map((inv) => ({
-      userId: null,
-      name: inv.email,
-      email: inv.email,
-      avatar: null,
-      role: ROLE_UI[inv.role],
-      backendRole: inv.role,
-      owner: false,
+    const inviteRows = share.invites.map((i) => ({
+      ...i,
+      name: i.email,
       pending: true,
+      owner: false,
+      role: ROLE_UI[i.role],
     }));
 
     setAccessList([ownerRow, ...memberRows, ...inviteRows].filter(Boolean));
@@ -132,15 +118,12 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   if (!isOpen) return null;
 
   const handleAddEmail = () => {
-    if (!canInvite) return;
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.trim());
     if (!valid) return setEmailValid(false);
-    setEmailValid(true);
     setPhase("invite");
   };
 
   const handleSendInvite = async () => {
-    if (!canInvite) return;
     try {
       await invite({ emails: [emailInput], role: inviteRole.toUpperCase() });
       showSuccess("Đã gửi lời mời!");
@@ -154,33 +137,21 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   };
 
   const handleChangeRole = async (user, newDisplayRole) => {
-    if (user.pending || user.owner) return; // không đổi owner & pending
+    if (user.pending || user.owner) return;
 
-    const map = {
-      "Người xem": "VIEWER",
-      "Người chỉnh sửa": "EDITOR",
-    };
+    const map = { "Người xem": "VIEWER", "Người chỉnh sửa": "EDITOR" };
     const backend = map[newDisplayRole];
     if (!backend) return;
 
-    const isSelf = user.userId && currentUserId && user.userId === currentUserId;
-
-    // viewer k có quyền gì
     if (isViewer) return;
 
-    if (isEditor) {
-      if (!isSelf) return;
-    }
+    if (isEditor && user.userId !== currentUserId) return;
 
-    // owner
     try {
       await updateMemberRole(user.userId, backend);
-
       setAccessList((prev) =>
         prev.map((u) =>
-          u.email === user.email
-            ? { ...u, backendRole: backend, role: newDisplayRole }
-            : u
+          u.email === user.email ? { ...u, role: newDisplayRole } : u
         )
       );
       showSuccess("Đã cập nhật quyền");
@@ -189,20 +160,15 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     }
   };
 
-  // remove member
   const openRemoveDialog = (u) => {
     setUserToRemove(u);
     setConfirmRemoveOpen(true);
   };
 
   const confirmRemove = async () => {
-    if (!userToRemove) return;
-
     try {
       await removeMember(userToRemove.userId);
-      setAccessList((prev) =>
-        prev.filter((m) => m.email !== userToRemove.email)
-      );
+      setAccessList((x) => x.filter((u) => u.email !== userToRemove.email));
       showSuccess("Đã xoá thành viên");
       setConfirmRemoveOpen(false);
     } catch {
@@ -210,14 +176,12 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     }
   };
 
-  // visibitity plan
-  const handleVisibilityChange = async (value) => {
-    if (!canChangeVisibility) return;
-    setVisibility(value);
+  const handleVisibilityChange = async (v) => {
+    setVisibility(v);
     try {
-      await updateVisibility(value);
+      await updateVisibility(v);
     } catch {
-      setVisibility(share?.visibility || "PRIVATE");
+      setVisibility(share.visibility);
       showError("Không thể cập nhật hiển thị");
     }
   };
@@ -228,9 +192,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
         `${window.location.origin}/plans/${planId}`
       );
       showSuccess("Đã sao chép liên kết!");
-    } catch {
-      // ignore
-    }
+    } catch {}
   };
 
   const handleRequestEdit = async () => {
@@ -239,44 +201,50 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       showSuccess("Đã gửi yêu cầu quyền chỉnh sửa");
       onClose();
     } catch {
-      showError("Lỗi khi gửi yêu cầu quyền chỉnh sửa")
+      showError("Lỗi khi gửi yêu cầu");
     }
   };
 
   return (
     <>
-      {/* overlay */}
       <div className="fixed inset-0 z-[2000] flex items-center justify-center">
         <div
           className={`
-            absolute inset-0 bg-black/40 backdrop-blur-[2px]
+            absolute inset-0 bg-black/40 backdrop-blur-[3px]
             transition-opacity duration-200
             ${mounted ? "opacity-100" : "opacity-0"}
           `}
           onClick={onClose}
         />
 
-        {/* modal */}
         <div
           className={`
-            relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl
+            relative rounded-2xl bg-white/95 dark:bg-gray-900/95
+            shadow-[0_15px_45px_rgba(0,0,0,0.18)]
+            border border-gray-200/60 dark:border-gray-700/60
+            backdrop-blur-xl
             w-[520px] max-w-[90vw]
             transform transition-all duration-200
-            ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
+            ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-3 scale-95"}
           `}
         >
-          <LoadingOverlay open={actionLoading} message="Đang xử lý, vui lòng chờ..." />
+          <LoadingOverlay open={actionLoading} message="Đang xử lý..." />
 
-          <div className="p-6 max-h-[75vh] overflow-y-auto">
+          <div className="p-6 max-h-[76vh] overflow-y-auto">
+
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-900"
+              className="
+                absolute top-3 right-3 p-2 rounded-full
+                bg-gray-200/70 dark:bg-gray-700/70
+                text-gray-600 dark:text-gray-300
+                hover:bg-red-500 hover:text-white transition
+              "
             >
-              <FaTimes />
+              <FaTimes size={14} />
             </button>
 
-            {/* invite */}
-            {phase === "invite" && canInvite && (
+            {phase === "invite" && (
               <>
                 <button
                   onClick={() => setPhase("default")}
@@ -294,16 +262,17 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                     readOnly
                     value={emailInput}
                     className="
-                      flex-1 border rounded-lg px-3 py-2
-                      bg-gray-50 dark:bg-gray-800 text-sm
+                      flex-1 border rounded-xl px-3 py-2
+                      bg-gray-50 dark:bg-gray-800 shadow-sm text-sm
                     "
                   />
+
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value)}
                     className="
-                      border rounded-lg px-2 py-2 text-sm
-                      dark:bg-gray-900
+                      border rounded-xl px-3 py-2 text-sm
+                      bg-white/80 dark:bg-gray-900/80 shadow-sm
                     "
                   >
                     <option value="viewer">Người xem</option>
@@ -311,19 +280,24 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   </select>
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-3">
                   <button
                     onClick={() => setPhase("default")}
                     className="
-                      px-4 py-2 border rounded-full text-sm
+                      px-4 py-2 rounded-xl text-sm border
                       hover:bg-gray-50 dark:hover:bg-gray-800
                     "
                   >
                     Hủy
                   </button>
+
                   <button
                     onClick={handleSendInvite}
-                    className="px-4 py-2 rounded-full bg-blue-600 text-white text-sm"
+                    className="
+                      px-4 py-2 rounded-xl text-sm
+                      bg-gradient-to-r from-blue-500 to-indigo-500
+                      text-white shadow hover:brightness-110
+                    "
                   >
                     Gửi lời mời
                   </button>
@@ -331,23 +305,18 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
               </>
             )}
 
-            {/* default */}
             {phase === "default" && (
               <>
                 <h2 className="text-xl font-semibold mb-4">
                   Chia sẻ “{planName}”
                 </h2>
 
-                {/* visibitity */}
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-medium text-sm">Hiển thị:</span>
-                  <div
-                    className={
-                      !canChangeVisibility
-                        ? "opacity-80 pointer-events-none"
-                        : ""
-                    }
-                  >
+                  <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                    Hiển thị:
+                  </span>
+
+                  <div className={!canChangeVisibility ? "opacity-60" : ""}>
                     <VisibilityDropdown
                       value={visibility}
                       onChange={handleVisibilityChange}
@@ -355,9 +324,8 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   </div>
                 </div>
 
-                {/* invite email */}
                 {canInvite && (
-                  <div className="mb-2">
+                  <div className="mb-3">
                     <input
                       value={emailInput}
                       onChange={(e) => {
@@ -367,29 +335,35 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
                       placeholder="Nhập email để mời"
                       className={`
-                        w-full border rounded-lg px-3 py-2 text-sm
-                        dark:bg-gray-900 dark:border-gray-700
-                        ${emailValid ? "" : "border-red-500"}
+                        w-full px-4 py-2 rounded-xl shadow-sm text-sm
+                        bg-white/80 dark:bg-gray-900/80 border
+                        ${
+                          emailValid
+                            ? "border-gray-300 dark:border-gray-700"
+                            : "border-red-500"
+                        }
                       `}
                     />
+
                     {!emailValid && (
-                      <p className="text-xs text-red-500">Email không hợp lệ</p>
+                      <p className="text-xs text-red-500 mt-1">
+                        Email không hợp lệ
+                      </p>
                     )}
                   </div>
                 )}
 
-                {/* tab */}
                 <div className="flex gap-6 border-b mb-4">
                   <button
+                    onClick={() => setActiveTab("members")}
                     className={`
-                      pb-2 text-sm font-medium relative
+                      pb-3 text-sm font-medium relative
                       ${
                         activeTab === "members"
                           ? "text-blue-600"
-                          : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                          : "text-gray-500 hover:text-gray-700"
                       }
                     `}
-                    onClick={() => setActiveTab("members")}
                   >
                     Thành viên lịch trình
                     {activeTab === "members" && (
@@ -399,17 +373,17 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
 
                   {canSeeRequests && (
                     <button
+                      onClick={() => setActiveTab("requests")}
                       className={`
-                        pb-2 text-sm font-medium relative
+                        pb-3 text-sm font-medium relative
                         ${
                           activeTab === "requests"
                             ? "text-blue-600"
-                            : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                            : "text-gray-500 hover:text-gray-700"
                         }
                       `}
-                      onClick={() => setActiveTab("requests")}
                     >
-                      Yêu cầu tham gia ({requests?.length || 0})
+                      Yêu cầu ({requests?.length || 0})
                       {activeTab === "requests" && (
                         <span className="absolute left-0 -bottom-[1px] w-full h-[2px] bg-blue-600" />
                       )}
@@ -417,10 +391,9 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   )}
                 </div>
 
-                {/* member */}
                 {activeTab === "members" && (
-                  <div className="space-y-1.5 mb-5">
-                    {accessList.map((u, idx) => {
+                  <div className="space-y-2 mb-5">
+                    {accessList.map((u, i) => {
                       const isSelf =
                         u.userId && currentUserId && u.userId === currentUserId;
 
@@ -433,24 +406,14 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                           canRemoveRow = true;
                         }
                       } else if (isEditor) {
-                        if (u.owner) {
-                          canChangeRoleRow = false;
-                          canRemoveRow = false;
-                        } else if (isSelf) {
-                          canChangeRoleRow = false;
-                          canRemoveRow = false;
-                        } else {
-                          canChangeRoleRow = false;
+                        if (!u.owner && !isSelf) {
                           canRemoveRow = !u.pending;
                         }
-                      } else if (isViewer) {
-                        canChangeRoleRow = false;
-                        canRemoveRow = false;
                       }
 
                       return (
                         <AccessRow
-                          key={idx}
+                          key={i}
                           user={u}
                           activeMenu={activeMenu}
                           setActiveMenu={setActiveMenu}
@@ -464,129 +427,69 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   </div>
                 )}
 
-                {/* request */}
-                {canSeeRequests && activeTab === "requests" && (
-                  <div className="space-y-3 mt-3">
+                {activeTab === "requests" && (
+                  <div className="space-y-3 mt-2">
                     {requests?.length === 0 && (
-                      <p className="text-sm text-gray-500">
-                        Không có yêu cầu nào.
-                      </p>
+                      <p className="text-sm text-gray-500">Không có yêu cầu nào.</p>
                     )}
 
                     {requests?.map((r) => (
                       <div
                         key={r.id}
                         className="
-                          group relative
-                          p-4 border border-gray-200 dark:border-gray-700
-                          rounded-xl bg-gray-50 dark:bg-gray-800/40
-                          hover:bg-white dark:hover:bg-gray-800
-                          hover:shadow-md transition-all
+                          p-4 rounded-xl border shadow-sm
+                          bg-white/80 dark:bg-gray-800/60
+                          border-gray-200 dark:border-gray-700
                           flex items-start gap-4
+                          hover:shadow-md hover:bg-white dark:hover:bg-gray-800
+                          transition-all
                         "
                       >
-                        {/* avt */}
                         <div className="pt-1">
                           {r.avatar ? (
                             <img
                               src={r.avatar}
-                              className="w-11 h-11 rounded-full shadow-sm object-cover"
+                              className="w-11 h-11 rounded-full shadow object-cover"
                             />
                           ) : (
                             <FaUserCircle className="text-5xl text-gray-400" />
                           )}
                         </div>
 
-                        {/* info */}
                         <div className="flex-1">
-                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                             {r.fullname || r.email}
                           </p>
-
                           <p className="text-xs text-gray-500">{r.email}</p>
-
-                          <p className="mt-1 text-[11px] font-medium text-blue-600 dark:text-blue-400">
-                            • Yêu cầu quyền{" "}
-                            {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
+                          <p className="mt-1 text-[11px] text-blue-600 font-medium">
+                            • Yêu cầu quyền {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
                           </p>
                         </div>
 
-                        {/* action */}
-                        <div className="flex flex-col items-end gap-2 min-w-[140px]">
-                          <DropdownRoleRequest
-                            requestId={r.id}
-                            defaultRole={
-                              r.type === "EDIT" ? "EDITOR" : "VIEWER"
-                            }
-                            selectedRole={requestRoles[r.id]}
-                            onChange={(role) =>
-                              setRequestRoles((prev) => ({
-                                ...prev,
-                                [r.id]: role,
-                              }))
-                            }
-                          />
-
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                setConfirmRequest(r);
-                                setConfirmAction("REJECT");
-                              }}
-                              className="
-                                px-3 py-1.5 rounded-lg text-xs font-medium
-                                bg-gray-200 dark:bg-gray-700
-                                hover:bg-gray-300 dark:hover:bg-gray-600
-                                transition
-                              "
-                            >
-                              Từ chối
-                            </button>
-
-                            <button
-                              onClick={async () => {
-                                const role =
-                                  requestRoles[r.id] ||
-                                  (r.type === "EDIT" ? "EDITOR" : "VIEWER");
-
-                                try {
-                                  await decideRequest(r.id, "APPROVE", role);
-                                  showSuccess(
-                                    "Đã chấp nhận yêu cầu truy cập"
-                                  );
-                                  loadRequests();
-                                } catch {
-                                  showError("Không thể chấp nhận yêu cầu");
-                                }
-                              }}
-                              className="
-                                px-3 py-1.5 rounded-lg text-xs font-medium
-                                bg-blue-600 text-white
-                                hover:bg-blue-700 transition
-                                shadow-sm
-                              "
-                            >
-                              Chấp nhận
-                            </button>
-                          </div>
-                        </div>
+                        <RequestAction
+                          request={r}
+                          requestRoles={requestRoles}
+                          setRequestRoles={setRequestRoles}
+                          decideRequest={decideRequest}
+                          loadRequests={loadRequests}
+                          setConfirmRequest={setConfirmRequest}
+                          setConfirmAction={setConfirmAction}
+                        />
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* footer */}
-                <div className="flex justify-end gap-3 mt-4">
+                <div className="flex justify-end gap-3 mt-5">
                   {isViewer && (
                     <button
                       onClick={handleRequestEdit}
+                      disabled={loading}
                       className="
-                        mr-auto px-4 py-2 rounded-full text-sm
+                        mr-auto px-4 py-2 rounded-xl text-sm
                         border border-blue-500 text-blue-600
                         hover:bg-blue-50 dark:hover:bg-blue-900/20
-                        disabled:opacity-60 disabled:cursor-not-allowed
                       "
-                      disabled={loading}
                     >
                       {loading ? "Đang gửi yêu cầu..." : "Yêu cầu quyền chỉnh sửa"}
                     </button>
@@ -595,7 +498,9 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   <button
                     onClick={handleCopyLink}
                     className="
-                      flex items-center gap-2 border rounded-full px-4 py-2 text-sm
+                      px-4 py-2 rounded-xl text-sm border
+                      flex items-center gap-2 shadow-sm
+                      bg-white/80 dark:bg-gray-900/80
                       hover:bg-gray-50 dark:hover:bg-gray-800
                     "
                   >
@@ -605,18 +510,22 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
 
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 bg-blue-600 rounded-full text-white text-sm"
+                    className="
+                      px-4 py-2 rounded-xl text-sm
+                      bg-gradient-to-r from-blue-500 to-indigo-500
+                      text-white shadow hover:brightness-110
+                    "
                   >
                     Xong
                   </button>
                 </div>
               </>
             )}
+
           </div>
         </div>
       </div>
 
-      {/* remove member */}
       {confirmRemoveOpen && (
         <ConfirmModal
           open={confirmRemoveOpen}
@@ -628,12 +537,11 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
         />
       )}
 
-      {/* remove request */}
       {confirmRequest && confirmAction === "REJECT" && (
         <ConfirmModal
-          open={true}
+          open
           title="Từ chối yêu cầu"
-          message={`Bạn có chắc muốn TỪ CHỐI yêu cầu ${
+          message={`Từ chối yêu cầu ${
             confirmRequest.type === "EDIT" ? "quyền chỉnh sửa" : "quyền xem"
           } của ${confirmRequest.fullname || confirmRequest.email}?`}
           confirmText="Từ chối"
@@ -653,68 +561,65 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
           }}
         />
       )}
-
     </>
   );
 }
 
-function DropdownRoleRequest({ defaultRole, selectedRole, onChange }) {
-  const [open, setOpen] = useState(false);
+function RequestAction({
+  request,
+  requestRoles,
+  setRequestRoles,
+  decideRequest,
+  loadRequests,
+  setConfirmRequest,
+  setConfirmAction,
+}) {
+  const [roleOpen, setRoleOpen] = useState(false);
 
-  const role = selectedRole || defaultRole;
+  const currentRole =
+    requestRoles[request.id] ||
+    (request.type === "EDIT" ? "EDITOR" : "VIEWER");
 
-  const LABEL = {
+  const ROLE_LABEL = {
     VIEWER: "Quyền xem",
     EDITOR: "Quyền chỉnh sửa",
   };
 
   return (
-    <div className="relative">
+    <div className="flex flex-col items-end gap-2 min-w-[150px] relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => setRoleOpen(!roleOpen)}
         className="
-          flex items-center justify-between gap-2
-          px-3 py-1.5 text-xs font-medium
-          rounded-full border border-gray-300 dark:border-gray-700
-          bg-white dark:bg-gray-900
-          text-gray-700 dark:text-gray-200
-          hover:bg-gray-100 dark:hover:bg-gray-800
-          transition-all
-          min-w-[130px]
+          px-3 py-1.5 rounded-xl text-xs font-medium w-full
+          bg-white/80 dark:bg-gray-900/80
+          border border-gray-300 dark:border-gray-700
+          shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800
+          flex items-center justify-between
         "
       >
-        {LABEL[role]}
-
-        <span
-          className={`text-[10px] transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        >
-          ▼
-        </span>
+        {ROLE_LABEL[currentRole]}
+        <span className={`text-[10px] ${roleOpen ? "rotate-180" : ""}`}>▼</span>
       </button>
 
-      {open && (
+      {roleOpen && (
         <div
           className="
-            absolute right-0 mt-2 w-40 z-[9999]
+            absolute right-0 mt-2 w-full z-[9999]
             bg-white dark:bg-gray-900
             border border-gray-200 dark:border-gray-700
             rounded-xl shadow-lg
             animate-[fadeDown_0.18s_ease-out]
-            origin-top
           "
         >
           <button
             onClick={() => {
-              onChange("VIEWER");
-              setOpen(false);
+              setRequestRoles((x) => ({ ...x, [request.id]: "VIEWER" }));
+              setRoleOpen(false);
             }}
             className={`
-              w-full text-left px-4 py-2 text-sm
+              w-full text-left px-4 py-2 text-sm rounded-t-xl
               hover:bg-gray-100 dark:hover:bg-gray-800
-              transition
-              ${role === "VIEWER" ? "text-blue-600 font-semibold" : ""}
+              ${currentRole === "VIEWER" ? "text-blue-600 font-semibold" : ""}
             `}
           >
             Quyền xem
@@ -722,20 +627,54 @@ function DropdownRoleRequest({ defaultRole, selectedRole, onChange }) {
 
           <button
             onClick={() => {
-              onChange("EDITOR");
-              setOpen(false);
+              setRequestRoles((x) => ({ ...x, [request.id]: "EDITOR" }));
+              setRoleOpen(false);
             }}
             className={`
-              w-full text-left px-4 py-2 text-sm
+              w-full text-left px-4 py-2 text-sm rounded-b-xl
               hover:bg-gray-100 dark:hover:bg-gray-800
-              transition
-              ${role === "EDITOR" ? "text-blue-600 font-semibold" : ""}
+              ${currentRole === "EDITOR" ? "text-blue-600 font-semibold" : ""}
             `}
           >
             Quyền chỉnh sửa
           </button>
         </div>
       )}
+
+      <div className="flex gap-2 w-full justify-end">
+        <button
+          onClick={() => {
+            setConfirmRequest(request);
+            setConfirmAction("REJECT");
+          }}
+          className="
+            px-3 py-1.5 rounded-xl text-xs font-medium
+            bg-gray-200/80 dark:bg-gray-700/70
+            hover:bg-gray-300 dark:hover:bg-gray-600
+          "
+        >
+          Từ chối
+        </button>
+
+        <button
+          onClick={async () => {
+            try {
+              await decideRequest(request.id, "APPROVE", currentRole);
+              showSuccess("Đã chấp nhận yêu cầu");
+              loadRequests();
+            } catch {
+              showError("Không thể chấp nhận yêu cầu");
+            }
+          }}
+          className="
+            px-3 py-1.5 rounded-xl text-xs font-medium
+            bg-gradient-to-r from-blue-500 to-indigo-500
+            text-white shadow hover:brightness-110
+          "
+        >
+          Chấp nhận
+        </button>
+      </div>
     </div>
   );
 }

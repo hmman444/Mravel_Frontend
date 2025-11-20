@@ -19,39 +19,47 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useMemo } from "react";
-export default function PlanSummary({ 
-  plan, images, setImages, description, setDescription, 
-  startDate, endDate, setStartDate, setEndDate }) {
+import PlanDateInputs from "./PlanDateInputs";
 
+export default function PlanSummary({
+  plan,
+  images,
+  setImages,
+  description,
+  setDescription,
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
+}) {
   const lists = plan?.lists || [];
 
   const statusData = useMemo(() => {
-    let doneDays = 0;
-    let activeDays = 0;
-
-    lists.forEach((list) => {
-      const cards = list.cards || [];
+    let done = 0;
+    let active = 0;
+    lists.forEach((l) => {
+      const cards = l.cards || [];
       const total = cards.length;
-      const done = cards.filter((c) => c.done).length;
-      if (total > 0 && done === total) doneDays++;
-      else if (done > 0) activeDays++;
+      const finished = cards.filter((c) => c.done).length;
+      if (total > 0 && finished === total) done++;
+      else if (finished > 0) active++;
     });
-
     return [
-      { name: "Hoàn thành", value: doneDays },
-      { name: "Đang diễn ra", value: activeDays },
+      { name: "Hoàn thành", value: done },
+      { name: "Đang diễn ra", value: active },
     ];
   }, [lists]);
 
   const priorityData = useMemo(() => {
     const map = { HIGH: 0, MEDIUM: 0, LOW: 0 };
-    lists.forEach((list) => {
-      list.cards?.forEach((c) => {
+    lists.forEach((l) => {
+      l.cards?.forEach((c) => {
         if (c.priority === "HIGH") map.HIGH++;
         else if (c.priority === "MEDIUM") map.MEDIUM++;
         else map.LOW++;
       });
     });
+
     return [
       { name: "Cao", value: map.HIGH },
       { name: "Trung bình", value: map.MEDIUM },
@@ -61,23 +69,23 @@ export default function PlanSummary({
 
   const typeData = useMemo(() => {
     const map = {};
-    lists.forEach((list) => {
-      list.cards?.forEach((c) => {
-        const type = c.type || "Khác";
-        map[type] = (map[type] || 0) + 1;
+    lists.forEach((l) => {
+      l.cards?.forEach((c) => {
+        const t = c.type || "Khác";
+        map[t] = (map[t] || 0) + 1;
       });
     });
     const total = Object.values(map).reduce((a, b) => a + b, 0);
     return Object.entries(map).map(([type, count]) => ({
       type,
-      percent: Math.round((count / total) * 100),
+      percent: total === 0 ? 0 : Math.round((count / total) * 100),
     }));
   }, [lists]);
 
   const teamWork = useMemo(() => {
     const map = {};
-    lists.forEach((list) => {
-      list.cards?.forEach((c) => {
+    lists.forEach((l) => {
+      l.cards?.forEach((c) => {
         const name = c.assigneeName || "Chưa gán";
         map[name] = (map[name] || 0) + 1;
       });
@@ -85,11 +93,11 @@ export default function PlanSummary({
     const total = Object.values(map).reduce((a, b) => a + b, 0);
     return Object.entries(map).map(([name, count]) => ({
       name,
-      percent: Math.round((count / total) * 100),
+      percent: total === 0 ? 0 : Math.round((count / total) * 100),
     }));
   }, [lists]);
 
-  const COLORS = ["#4F46E5", "#22C55E", "#FACC15", "#F97316"];
+  const COLORS = ["#6366F1", "#22C55E", "#FACC15", "#F97316"];
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -102,131 +110,91 @@ export default function PlanSummary({
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-gray-50 dark:bg-gray-900 p-6 rounded-xl">
-      {/* === Hàng trên: Thống kê tổng quan === */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Biểu đồ trạng thái */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Status overview
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+    <div className="flex flex-col gap-8 p-6 bg-transparent">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div className="rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/60 dark:border-gray-800 transition hover:shadow-xl">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Status overview</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Tổng quan trạng thái các ngày trong kế hoạch.
           </p>
 
-          <div className="h-56">
+          <div className="h-60 mt-4">
             <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={statusData}
                   dataKey="value"
                   nameKey="name"
-                  outerRadius={80}
-                  innerRadius={50}
+                  outerRadius={90}
+                  innerRadius={55}
                   label
                 >
-                  {statusData.map((entry, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  {statusData.map((e, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-center text-sm mt-3 text-gray-600 dark:text-gray-400">
+
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-3">
             Tổng số ngày: {statusData.reduce((a, b) => a + b.value, 0)}
           </p>
         </div>
 
-        {/* Thông tin mô tả */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Plan information
-          </h3>
+        <div className="rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/60 dark:border-gray-800 transition hover:shadow-xl">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Plan information</h3>
+
           <textarea
-            value={description || ""}
+            value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Mô tả ngắn gọn về kế hoạch..."
-            className="w-full bg-transparent outline-none text-gray-700 dark:text-gray-300 mb-4 border rounded p-2 resize-y overflow-y-auto"
+            className="w-full mt-3 p-3 rounded-lg border bg-white/60 dark:bg-gray-800/50 dark:border-gray-700 shadow-inner text-sm focus:ring-2 focus:ring-blue-400 outline-none"
             rows={4}
           />
-          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center border rounded-lg px-3 py-2 dark:border-gray-700">
-              <FaCalendarAlt className="mr-2 text-blue-500" />
-              <span>Từ:</span>
-              <DatePicker
-                selected={startDate}
-                onChange={setStartDate}
-                dateFormat="dd/MM/yyyy"
-                className="ml-2 outline-none bg-transparent text-gray-800 dark:text-gray-200"
-              />
-            </div>
-            <div className="flex items-center border rounded-lg px-3 py-2 dark:border-gray-700">
-              <FaCalendarAlt className="mr-2 text-blue-500" />
-              <span>Đến:</span>
-              <DatePicker
-                selected={endDate}
-                onChange={setEndDate}
-                minDate={startDate}
-                dateFormat="dd/MM/yyyy"
-                className="ml-2 outline-none bg-transparent text-gray-800 dark:text-gray-200"
-              />
-            </div>
-          </div>
+
+          <PlanDateInputs
+            startDate={startDate}
+            endDate={endDate}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+          />
         </div>
       </div>
 
-      {/* === Hàng giữa: Priority breakdown & Type of work === */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Priority breakdown */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Priority breakdown
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-            Phân tích mức độ ưu tiên trong kế hoạch.
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          <div className="h-56">
+        <div className="rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/60 dark:border-gray-800 transition hover:shadow-xl">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Priority breakdown</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Phân tích mức độ ưu tiên.</p>
+
+          <div className="h-60 mt-4">
             <ResponsiveContainer>
               <BarChart data={priorityData}>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#6366F1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="#6366F1" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Types of work */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Types of activities
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-            Phân loại các hoạt động trong kế hoạch của bạn.
-          </p>
+        <div className="rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/60 dark:border-gray-800 transition hover:shadow-xl">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Types of activities</h3>
 
-          <div className="space-y-3">
+          <div className="space-y-4 mt-4">
             {typeData.map((item, i) => (
               <div key={i}>
                 <div className="flex justify-between text-sm">
-                  <span className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                    {i === 0 ? (
-                      <FaWalking className="text-pink-500" />
-                    ) : i === 1 ? (
-                      <FaUtensils className="text-amber-500" />
-                    ) : (
-                      <FaBed className="text-blue-500" />
-                    )}
-                    {item.type}
-                  </span>
+                  <span>{item.type}</span>
                   <span>{item.percent}%</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
+                <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className="h-2 bg-gray-600 rounded-full"
+                    className="h-full bg-blue-500 rounded-full transition"
                     style={{ width: `${item.percent}%` }}
                   />
                 </div>
@@ -236,28 +204,20 @@ export default function PlanSummary({
         </div>
       </div>
 
-      {/* === Hàng dưới: Team workload === */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-          Team workload
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-          Phân bố khối lượng công việc giữa các thành viên.
-        </p>
+      <div className="rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/60 dark:border-gray-800 transition hover:shadow-xl">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Team workload</h3>
 
-        <div className="space-y-4">
-          {teamWork.map((member, i) => (
+        <div className="mt-4 space-y-4">
+          {teamWork.map((m, i) => (
             <div key={i}>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium text-gray-700 dark:text-gray-200">
-                  {member.name}
-                </span>
-                <span>{member.percent}%</span>
+              <div className="flex justify-between text-sm">
+                <span>{m.name}</span>
+                <span>{m.percent}%</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
                 <div
-                  className="h-2 bg-blue-500 rounded-full"
-                  style={{ width: `${member.percent}%` }}
+                  className="h-full bg-indigo-500 rounded-full"
+                  style={{ width: `${m.percent}%` }}
                 />
               </div>
             </div>
@@ -265,37 +225,33 @@ export default function PlanSummary({
         </div>
       </div>
 
-      {/* === Hình ảnh / video === */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">
-          Media
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
-          {images?.length > 0 ? (
+      <div className="rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/60 dark:border-gray-800 transition hover:shadow-xl">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Media</h3>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          {images?.length ? (
             images.map((url, i) => (
               <div key={i} className="relative group">
                 <img
                   src={url}
-                  className="rounded-lg object-cover h-32 w-full transition-transform duration-200 group-hover:scale-105"
-                  alt="plan-media"
+                  className="h-32 w-full rounded-lg object-cover shadow transition group-hover:scale-105"
                 />
                 <button
                   onClick={() => removeImage(url)}
-                  className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                  className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition"
                 >
                   ×
                 </button>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 italic">
-              Chưa có ảnh hoặc video nào.
-            </p>
+            <p className="text-gray-500 italic">Chưa có nội dung.</p>
           )}
         </div>
-        <label className="inline-block px-4 py-2 border rounded-lg text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+
+        <label className="inline-block px-4 py-2 mt-4 border rounded-xl bg-white/50 dark:bg-gray-800/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm">
           + Thêm ảnh / video
-          <input type="file" multiple hidden onChange={handleImageUpload} />
+          <input hidden type="file" multiple onChange={handleImageUpload} />
         </label>
       </div>
     </div>
