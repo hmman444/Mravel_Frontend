@@ -15,10 +15,12 @@ import SearchPage from "./features/search/pages/SearchPage";
 import PlanListPage from "./features/planFeed/pages/PlanListPage";
 import PlanDashboardPage from "./features/planBoard/pages/PlanDashboardPage";
 //Catalog
-import HotelResultsPage from "./features/catalog/pages/HotelResultsPage";
-import RestaurantResultsPage from "./features/catalog/pages/RestaurantResultsPage";
-import PlaceResultsPage from "./features/catalog/pages/PlaceResultsPage";
 import PlaceDetailPage from "./features/catalog/pages/PlaceDetailPage";
+import LocationResultsPage from "./features/catalog/pages/LocationResultsPage";
+import HotelsHomePage from "./features/catalog/pages/HotelsHomePage";
+import RestaurantsHomePage from "./features/catalog/pages/RestaurantsHomePage";
+//User
+import AccountProfilePage from "./features/user/pages/AccountProfilePage";
 // Admin
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
@@ -62,10 +64,13 @@ function App() {
         <Route path="/plans/join" element={<JoinPlanPage />} />
 
         {/* Catalog routes */}       
-        <Route path="/search/hotels" element={<HotelResultsPage />} />
-        <Route path="/search/restaurants" element={<RestaurantResultsPage />} />
-        <Route path="/search/places" element={<PlaceResultsPage />} />
         <Route path="/place/:slug" element={<PlaceDetailPage />} />
+        <Route path="/locations/search" element={<LocationResultsPage />} />
+        <Route path="/hotels" element={<HotelsHomePage />} />
+        <Route path="/restaurants" element={<RestaurantsHomePage />} />
+
+        {/* User routes */}
+        <Route path="/account/profile" element={<AccountProfilePage />} />
 
         {/* General routes */}
         <Route path="/search" element={<SearchPage />} />

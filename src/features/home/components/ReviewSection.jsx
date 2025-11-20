@@ -1,6 +1,6 @@
 export default function ReviewSection() {
   const reviews = [
-    { id: 1, user: "Nguyễn An", comment: "Dịch vụ khách sạn tuyệt vời!", rating: 5 },
+    { id: 1, user: "Nguyễn Bình An", comment: "Dịch vụ khách sạn tuyệt vời!", rating: 5 },
     { id: 2, user: "Trần Bình", comment: "Tour du lịch chuyên nghiệp, hướng dẫn viên nhiệt tình.", rating: 4 },
   ];
 
