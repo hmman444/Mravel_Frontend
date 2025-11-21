@@ -15,9 +15,6 @@ export default function VisibilityDropdown({ value, onChange }) {
 
   const buttonRef = useRef(null);
 
-  /* -----------------------------------
-     TÍNH VỊ TRÍ DROPDOWN
-  -------------------------------------*/
   useEffect(() => {
     if (open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
@@ -34,9 +31,7 @@ export default function VisibilityDropdown({ value, onChange }) {
     }
   }, [open]);
 
-  /* -----------------------------------
-     CLICK OUTSIDE
-  -------------------------------------*/
+
   useEffect(() => {
     if (!open) return;
 
@@ -56,9 +51,6 @@ export default function VisibilityDropdown({ value, onChange }) {
     setOpen(false);
   };
 
-  /* -----------------------------------
-     PORTAL DROPDOWN
-  -------------------------------------*/
   const dropdown =
     open && posReady
       ? createPortal(
