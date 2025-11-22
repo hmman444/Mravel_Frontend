@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import Navbar from "../../../components/Navbar";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "../../../components/Footer";
+import Navbar from "../../../components/Navbar";
+import { makePlaceDisplay } from "../../../utils/makePlaceDisplay";
 import { usePlaceDetail } from "../hooks/usePlaceDetail";
 import { getChildren } from "../services/catalogService";
-import { makePlaceDisplay } from "../../../utils/makePlaceDisplay";
 
 /* components */
-import TopSearchBar from "../components/TopSearchBar";
-import FilterSidebar from "../components/FilterSidebar";
-import ControlBar from "../components/ControlBar";
-import ResultList from "../components/ResultList";
-import ResultGrid from "../components/ResultGrid";
-import SuggestedDestinations from "../components/SuggestedDestinations";
 import FadeInSection from "../../../components/FadeInSection"; // <-- thêm
+import ControlBar from "../components/place/ControlBar";
+import FilterSidebar from "../components/place/FilterSidebar";
+import SuggestedDestinations from "../components/place/SuggestedDestinations";
+import TopSearchBar from "../components/place/TopSearchBar";
+import ResultGrid from "../components/ResultGrid";
+import ResultList from "../components/ResultList";
 
 export default function LocationResultsPage() {
   const [sp] = useSearchParams();

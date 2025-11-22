@@ -1,4 +1,4 @@
-// src/features/restaurants/components/RestaurantPopularSection.jsx
+// src/features/restaurants/components/restaurant/RestaurantPopularSection.jsx
 export default function RestaurantPopularSection() {
   return (
     <section className="max-w-7xl mx-auto px-6 pt-10 pb-10 w-full">

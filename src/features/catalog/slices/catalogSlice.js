@@ -1,13 +1,21 @@
 // src/features/catalog/slices/catalogSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getHotels, getPlaces, getRestaurants, getPlaceDetail, suggestPlaces as apiSuggest } from "../services/catalogService";
+import {
+  getHotels,
+  getPlaces,
+  getRestaurants,
+  getPlaceDetail,
+  getHotelDetail,
+  suggestPlaces as apiSuggest,
+} from "../services/catalogService";
 
-// ===== Thunks =====
+/* ====================== THUNKS ====================== */
+
 export const searchHotels = createAsyncThunk(
   "catalog/searchHotels",
   async (params, { rejectWithValue }) => {
-    const res = await getHotels(params);              // { success, data, message }
-    if (res.success) return { data: res.data, params }; // <-- unwrap data
+    const res = await getHotels(params); // { success, data, message }
+    if (res.success) return { data: res.data, params };
     return rejectWithValue(res.message || "Lỗi tải danh sách khách sạn");
   }
 );
@@ -30,12 +38,23 @@ export const searchPlaces = createAsyncThunk(
   }
 );
 
+// Detail cho POI (giữ nguyên)
 export const fetchPlaceDetail = createAsyncThunk(
   "catalog/fetchPlaceDetail",
   async (slug, { rejectWithValue }) => {
     const res = await getPlaceDetail(slug);
     if (res.success) return res.data;
     return rejectWithValue(res.message || "Không tìm thấy địa điểm");
+  }
+);
+
+// Detail cho HOTEL (API mới)
+export const fetchHotelDetail = createAsyncThunk(
+  "catalog/fetchHotelDetail",
+  async (slug, { rejectWithValue }) => {
+    const res = await getHotelDetail(slug);
+    if (res.success) return res.data;
+    return rejectWithValue(res.message || "Không tìm thấy khách sạn");
   }
 );
 
@@ -49,7 +68,8 @@ export const suggestPlaces = createAsyncThunk(
   }
 );
 
-// ===== Slice =====
+/* ====================== STATE ====================== */
+
 const initialListState = {
   items: [],
   page: 0,
@@ -65,13 +85,22 @@ const initialState = {
   hotels: { ...initialListState },
   restaurants: { ...initialListState },
   poi: { ...initialListState },
+  // detail cho POI / place
   detail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  // detail cho HOTEL
+  hotelDetail: {
     data: null,
     loading: false,
     error: null,
   },
   suggest: { items: [], loading: false, error: null, q: "" },
 };
+
+/* ====================== SLICE ====================== */
 
 const catalogSlice = createSlice({
   name: "catalog",
@@ -82,14 +111,15 @@ const catalogSlice = createSlice({
       state.restaurants.error = null;
       state.poi.error = null;
       state.detail.error = null;
+      state.hotelDetail.error = null;
       state.suggest.error = null;
     },
     clearSuggest(state) {
       state.suggest = { items: [], loading: false, error: null, q: "" };
-    }
+    },
   },
   extraReducers: (builder) => {
-    // Hotels
+    /* ---------- Hotels search ---------- */
     builder
       .addCase(searchHotels.pending, (state) => {
         state.hotels.loading = true;
@@ -111,7 +141,7 @@ const catalogSlice = createSlice({
         state.hotels.items = state.hotels.items ?? [];
       });
 
-    // Restaurants
+    /* ---------- Restaurants ---------- */
     builder
       .addCase(searchRestaurants.pending, (state) => {
         state.restaurants.loading = true;
@@ -133,7 +163,7 @@ const catalogSlice = createSlice({
         state.restaurants.items = state.restaurants.items ?? [];
       });
 
-    // POI
+    /* ---------- POI ---------- */
     builder
       .addCase(searchPlaces.pending, (state) => {
         state.poi.loading = true;
@@ -155,7 +185,7 @@ const catalogSlice = createSlice({
         state.poi.items = state.poi.items ?? [];
       });
 
-    // Detail
+    /* ---------- Place detail ---------- */
     builder
       .addCase(fetchPlaceDetail.pending, (state) => {
         state.detail.loading = true;
@@ -171,7 +201,23 @@ const catalogSlice = createSlice({
         state.detail.error = action.payload || "Không tìm thấy địa điểm";
       });
 
-      // Suggest
+    /* ---------- Hotel detail ---------- */
+    builder
+      .addCase(fetchHotelDetail.pending, (state) => {
+        state.hotelDetail.loading = true;
+        state.hotelDetail.error = null;
+        state.hotelDetail.data = null;
+      })
+      .addCase(fetchHotelDetail.fulfilled, (state, action) => {
+        state.hotelDetail.loading = false;
+        state.hotelDetail.data = action.payload || null;
+      })
+      .addCase(fetchHotelDetail.rejected, (state, action) => {
+        state.hotelDetail.loading = false;
+        state.hotelDetail.error = action.payload || "Không tìm thấy khách sạn";
+      });
+
+    /* ---------- Suggest ---------- */
     builder
       .addCase(suggestPlaces.pending, (state) => {
         state.suggest.loading = true;
@@ -189,5 +235,5 @@ const catalogSlice = createSlice({
   },
 });
 
-export const { clearCatalogErrors, clearSuggest  } = catalogSlice.actions;
+export const { clearCatalogErrors, clearSuggest } = catalogSlice.actions;
 export default catalogSlice.reducer;

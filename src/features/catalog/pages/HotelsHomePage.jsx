@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
-import HotelHero from "../components/HotelHero";
-import HotelSearchCard from "../components/HotelSearchCard";
-import HotelWhyUs from "../components/HotelWhyUs";
-import HotelIntroSection from "../components/HotelIntroSection";
+import HotelHero from "../components/hotel/HotelHero";
+import HotelSearchCard from "../components/hotel/HotelSearchCard";
+import HotelWhyUs from "../components/hotel/HotelWhyUs";
+import HotelIntroSection from "../components/hotel/HotelIntroSection";
 import FadeInSection from "../../../components/FadeInSection";
-import HotelBrandPartners from "../components/HotelBrandPartners";
+import HotelBrandPartners from "../components/hotel/HotelBrandPartners";
 import PaymentPartners from "../components/PaymentPartners";
+import WeekendNearbyHotels from "../components/hotel/WeekendNearbyHotels";
 
 export default function HotelsHomePage() {
   const navigate = useNavigate();
@@ -46,40 +47,17 @@ export default function HotelsHomePage() {
       </FadeInSection>
 
       {/* SEARCH CARD */}
-      <FadeInSection delay={80}>
-        <div className="relative max-w-7xl mx-auto px-6 -mt-8 z-10">
+      <FadeInSection delay={80} className="relative z-20">
+        <div className="relative max-w-7xl mx-auto px-6 -mt-8">
           <HotelSearchCard onSubmit={goSearch} />
         </div>
       </FadeInSection>
 
       {/* Nội dung phía dưới */}
-            <main className="flex-1 w-full">
-        {/* Khách sạn phổ biến */}
+      <main className="flex-1 w-full">
+        {/* Chơi cuối tuần gần nhà (thay cho Khách sạn phổ biến) */}
         <FadeInSection className="max-w-7xl mx-auto px-6 pt-10 pb-10">
-          <h2 className="mt-4 mb-4 text-xl font-semibold">
-            Khách sạn phổ biến
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl overflow-hidden border dark:border-white/10 bg-white dark:bg-gray-900"
-              >
-                <div className="h-44 bg-gray-200" />
-                <div className="p-4">
-                  <div className="font-semibold line-clamp-1">
-                    Khách sạn Demo {idx + 1}
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Quận 1, TP.HCM
-                  </div>
-                  <div className="mt-2 text-orange-600 font-semibold">
-                    từ 799.000 VND/đêm
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <WeekendNearbyHotels />
         </FadeInSection>
 
         {/* Đối tác khách sạn */}

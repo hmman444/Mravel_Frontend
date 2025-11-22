@@ -1,6 +1,7 @@
 // HotelSearchCard.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import DatePicker from "react-datepicker";
+import MravelDatePicker from "../../../../components/MravelDatePicker";
+import "../../../../styles/datepicker.css";
 import "react-datepicker/dist/react-datepicker.css";
 import {
   FaCalendarAlt,
@@ -11,8 +12,8 @@ import {
   FaMinus,
   FaPlus,
 } from "react-icons/fa";
-import Button from "../../../components/Button";
-import DestinationTypeahead from "../../../components/DestinationTypeahead";
+import Button from "../../../../components/Button";
+import DestinationTypeahead from "../../../../components/DestinationTypeahead";
 
 /* ───────── Small helpers ───────── */
 function RowField({ label, children, onClick, refBox, className = "" }) {
@@ -150,13 +151,9 @@ export default function HotelSearchCard({ onSubmit }) {
           <div className="col-span-12 md:col-span-4">
             <RowField label="Nhận phòng:">
               <FaCalendarAlt className="text-gray-400 mr-2" />
-              <DatePicker
+              <MravelDatePicker
                 selected={checkIn}
-                onChange={(d) => setCheckIn(d || new Date())}
-                minDate={new Date()}
-                placeholderText="Chọn ngày"
-                className="w-full outline-none bg-transparent"
-                dateFormat="EEE, dd MMM yyyy"
+                onChange={setCheckIn}
               />
             </RowField>
           </div>
