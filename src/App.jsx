@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useLoadUser } from "./features/auth/hooks/useLoadUser";
+import { useAuthSync } from "./features/auth/hooks/useAuthSync";
 import Toast from "./components/Toast";
 // Auth
 import LoginPage from "./features/auth/pages/LoginPage";
@@ -7,6 +8,7 @@ import RegisterPage from "./features/auth/pages/RegisterPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
+
 // Home
 import HomePage from "./features/home/pages/HomePage";
 // Search
@@ -37,6 +39,7 @@ import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 function App() {
   useLoadUser();
+  useAuthSync();
   return (
     <>
     <Router>

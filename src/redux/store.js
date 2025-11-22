@@ -6,7 +6,10 @@ import planBoardReducer from "../features/planBoard/slices/planBoardSlice";
 import userProfileReducer from "../features/user/slices/userProfileSlice";
 import planListReducer from "../features/planBoard/slices/planListSlice";
 import planGeneralReducer from "../features/planBoard/slices/planGeneralSlice";
-const store = configureStore({
+
+import { injectStore } from "./storeInjector";
+
+export const store = configureStore({
   reducer: {
     auth: authReducer,
     catalog: catalogReducer,
@@ -23,5 +26,5 @@ const store = configureStore({
     }),
   devTools: import.meta.env.MODE !== "production",
 });
-
+injectStore(store);
 export default store;

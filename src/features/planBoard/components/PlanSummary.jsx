@@ -368,7 +368,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
           className="
             rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur
             p-5 shadow-lg border border-gray-200/60 dark:border-gray-800
-            transition-all hover:shadow-xl hover:-translate-y-0.5
+            transition-all hover:shadow-xl 
           "
         >
           <div className="flex flex-col lg:flex-row gap-4">
@@ -590,7 +590,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
           className="
             rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur
             p-5 shadow-lg border border-gray-200/60 dark:border-gray-800
-            transition-all hover:shadow-xl hover:-translate-y-0.5
+            transition-all hover:shadow-xl 
           "
         >
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -635,7 +635,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
           className="
             rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur
             p-5 shadow-lg border border-gray-200/60 dark:border-gray-800
-            transition-all hover:shadow-xl hover:-translate-y-0.5
+            transition-all hover:shadow-xl 
           "
         >
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -661,7 +661,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
           className="
             rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur
             p-5 shadow-lg border border-gray-200/60 dark:border-gray-800
-            transition-all hover:shadow-xl hover:-translate-y-0.5
+            transition-all hover:shadow-xl 
           "
         >
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -705,7 +705,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
         className="
           rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur
           p-5 shadow-lg border border-gray-200/60 dark:border-gray-800
-          transition-all hover:shadow-xl hover:-translate-y-0.5
+          transition-all hover:shadow-xl 
         "
       >
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -748,7 +748,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
         className="
           rounded-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur
           p-5 shadow-lg border border-gray-200/60 dark:border-gray-800
-          transition-all hover:shadow-xl hover:-translate-y-0.5
+          transition-all hover:shadow-xl 
         "
       >
         <div className="flex items-center justify-between gap-3">

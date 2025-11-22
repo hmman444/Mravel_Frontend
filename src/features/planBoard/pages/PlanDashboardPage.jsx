@@ -8,8 +8,6 @@ import PlanSummary from "../components/PlanSummary";
 import PlanBoard from "../components/PlanBoard";
 
 import ShareModal from "../components/modals/ShareModal";
-import EditCardModal from "../components/modals/EditCardModal";
-import LabelModal from "../components/modals/LabelModal";
 import ConfirmModal from "../../../components/ConfirmModal";
 import AccessRequestModal from "../components/modals/AccessRequestModal";
 
@@ -52,16 +50,8 @@ export default function PlanDashboardPage() {
   const [activeListMenu, setActiveListMenu] = useState(null);
   const [activeCardMenu, setActiveCardMenu] = useState(null);
 
-  const [editCard, setEditCard] = useState(null);
-  const [showLabelModal, setShowLabelModal] = useState(false);
-
-  const [newCardListId, setNewCardListId] = useState(null);
-  const [newCardText, setNewCardText] = useState("");
-
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
-
-  const [, setActiveCard] = useState(null);
 
   const [showAccessModal, setShowAccessModal] = useState(false);
   const [accessLoadingType, setAccessLoadingType] = useState(null);
@@ -133,35 +123,68 @@ export default function PlanDashboardPage() {
     }
   };
 
-  const handleAddCard = async (listId) => {
-    if (!newCardText.trim()) return;
-    try {
-      await createCard(listId, { text: newCardText });
-      showSuccess("Đã thêm thẻ");
-    } catch {
-      showError("Không thêm được thẻ");
-    }
-    setNewCardListId(null);
-    setNewCardText("");
+  /**
+   * Chuẩn hoá payload gửi lên BE từ activityPayload của modal
+   * activity = {
+   *   type: "TRANSPORT" | "FOOD" | ...,
+   *   title, startTime, endTime, estimatedCost, actualCost, note, ...
+   * }
+   */
+  const buildCardPayloadFromActivity = (activity) => {
+    if (!activity) return {};
+
+    const {
+      type,
+      title,
+      startTime,
+      endTime,
+      estimatedCost,
+      actualCost,
+      note,
+      ...rest
+    } = activity;
+
+    return {
+      text: title || "Hoạt động",
+      description: note || "",
+      start: startTime || null,
+      end: endTime || null,
+      activityType: type || "OTHER",
+      activityDataJson: JSON.stringify({
+        ...rest,
+        type: type || "OTHER",
+        title,
+        note,
+        startTime,
+        endTime,
+        estimatedCost,
+        actualCost,
+      }),
+      estimatedCost:
+        typeof estimatedCost === "number" ? estimatedCost : null,
+      actualCost: typeof actualCost === "number" ? actualCost : null,
+    };
   };
 
-  const handleUpdateCard = async (listId, cardId, data) => {
+  const createActivityCard = async (listId, activityPayload) => {
     try {
-      const payload = {
-        text: data.text,
-        description: data.description,
-        priority: data.priority,
-        start: data.start,
-        end: data.end,
-        done: data.done,
-        labelIds: (data.labels || []).map((l) => l.id),
-      };
+      const payload = buildCardPayloadFromActivity(activityPayload);
+      await createCard(listId, payload);
+      showSuccess("Đã thêm hoạt động");
+    } catch (e) {
+      console.error(e);
+      showError("Không thêm được hoạt động");
+    }
+  };
 
+  const updateActivityCard = async (listId, cardId, activityPayload) => {
+    try {
+      const payload = buildCardPayloadFromActivity(activityPayload);
       await updateCard(listId, cardId, payload);
-      showSuccess("Đã cập nhật");
-      setEditCard(null);
-    } catch {
-      showError("Không thể cập nhật");
+      showSuccess("Đã cập nhật hoạt động");
+    } catch (e) {
+      console.error(e);
+      showError("Không thể cập nhật hoạt động");
     }
   };
 
@@ -182,7 +205,7 @@ export default function PlanDashboardPage() {
     if (!card) return;
 
     try {
-      await updateCard(listId, cardId, { ...card, done: !card.done });
+      await updateCard(listId, cardId, { done: !card.done });
     } catch {
       console.error("Toggle done failed");
     }
@@ -191,13 +214,15 @@ export default function PlanDashboardPage() {
   const duplicateCard = async (card, listId) => {
     try {
       const payload = {
-        text: card.text + " (Copy)",
+        text: (card.text || "") + " (Copy)",
         description: card.description,
-        priority: card.priority,
-        start: card.start,
-        end: card.end,
+        start: card.startTime,
+        end: card.endTime,
         done: false,
-        labelIds: (card.labels || []).map((l) => l.id),
+        activityType: card.activityType,
+        activityDataJson: card.activityDataJson,
+        estimatedCost: card.estimatedCost,
+        actualCost: card.actualCost,
       };
       await createCard(listId, payload);
       showSuccess("Đã sao chép thẻ");
@@ -208,7 +233,7 @@ export default function PlanDashboardPage() {
 
   const handleAddList = async () => {
     try {
-      await createList({ title: `Ngày ${(board?.lists?.length || 0) + 1}` });
+      await createList({ title: null });
       showSuccess("Đã thêm danh sách");
     } catch {
       showError("Không thể thêm danh sách");
@@ -226,11 +251,13 @@ export default function PlanDashboardPage() {
         await createCard(newList.id, {
           text: card.text,
           description: card.description,
-          priority: card.priority,
-          start: card.start,
-          end: card.end,
+          start: card.startTime,
+          end: card.endTime,
           done: false,
-          labelIds: card.labels?.map((l) => l.id) || [],
+          activityType: card.activityType,
+          activityDataJson: card.activityDataJson,
+          estimatedCost: card.estimatedCost,
+          actualCost: card.actualCost,
         });
       }
       showSuccess("Đã sao chép danh sách");
@@ -374,19 +401,27 @@ export default function PlanDashboardPage() {
           <PlanBoard
             board={board}
             isViewer={isViewer}
+
             handleAddList={handleAddList}
             renameList={renameList}
             deleteList={deleteList}
             duplicateList={duplicateList}
-            newCardListId={newCardListId}
-            setNewCardListId={setNewCardListId}
-            newCardText={newCardText}
-            setNewCardText={setNewCardText}
-            handleAddCard={handleAddCard}
+
+            // ACTIVITY
+            createActivityCard={createActivityCard}
+            updateActivityCard={updateActivityCard}
+
+            // CARD actions
+            handleAddCard={createCard}
+            updateCard={updateCard}
             toggleDone={toggleDone}
             duplicateCard={duplicateCard}
-            deleteCard={setConfirmDeleteCard}
+            deleteCard={deleteCard}
+
+            // DRAG
             handleDragEnd={handleDragEnd}
+
+            // UI
             editingListId={editingListId}
             setEditingListId={setEditingListId}
             activeListMenu={activeListMenu}
@@ -395,8 +430,6 @@ export default function PlanDashboardPage() {
             setActiveCardMenu={setActiveCardMenu}
             setConfirmDeleteCard={setConfirmDeleteCard}
             setConfirmDeleteList={setConfirmDeleteList}
-            setEditCard={setEditCard}
-            setActiveCard={setActiveCard}
           />
         )}
 
@@ -422,28 +455,6 @@ export default function PlanDashboardPage() {
         />
       )}
 
-      {editCard && (
-        <EditCardModal
-          editCard={editCard}
-          setEditCard={setEditCard}
-          saveCard={() =>
-            handleUpdateCard(editCard.listId, editCard.id, editCard)
-          }
-          labels={board.labels || []}
-          setShowLabelModal={setShowLabelModal}
-          onClose={() => setEditCard(null)}
-        />
-      )}
-
-      {showLabelModal && (
-        <LabelModal
-          planId={planId}
-          editCard={editCard}
-          setEditCard={setEditCard}
-          onClose={() => setShowLabelModal(false)}
-        />
-      )}
-
       {confirmDeleteCard && (
         <ConfirmModal
           open={true}
@@ -462,7 +473,7 @@ export default function PlanDashboardPage() {
         <ConfirmModal
           open={true}
           title="Xoá danh sách"
-          message={`Xoá "${confirmDeleteList.title}" và toàn bộ thẻ?`}
+          message={`Xác nhận xóa "${confirmDeleteList.title}"? Các thẻ của danh sách sẽ được chuyển vào thùng rác!`}
           confirmText="Xoá"
           onClose={() => setConfirmDeleteList(null)}
           onConfirm={() => {

@@ -123,6 +123,10 @@ const authSlice = createSlice({
     message: null,
   },
   reducers: {
+    setTokensRedux: (state, action) => {
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
+    },
     setUser: (state, action) => {
       state.user = action.payload;
     },
@@ -244,5 +248,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, clearMessage } = authSlice.actions;
+export const { setTokensRedux, setUser, clearMessage } = authSlice.actions;
 export default authSlice.reducer;

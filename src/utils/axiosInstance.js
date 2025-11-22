@@ -1,6 +1,9 @@
 import axios from "axios";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
 import { showError } from "./toastUtils";
+import { getStore } from "../redux/storeInjector";
+
+import { setTokensRedux, setUser } from "../features/auth/slices/authSlice";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
@@ -65,7 +68,14 @@ api.interceptors.response.use(
         const { accessToken, refreshToken: newRefresh } = res.data.data;
 
         const rememberMe = !!localStorage.getItem("accessToken");
+
         setTokens(accessToken, newRefresh, rememberMe);
+        const store = getStore();
+        store.dispatch(setTokensRedux({ accessToken, refreshToken: newRefresh }));
+
+        const me = await api.get("/auth/me");
+
+        store.dispatch(setUser(me.data.data));
 
         onRefreshed(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;

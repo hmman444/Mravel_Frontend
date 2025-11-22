@@ -235,11 +235,12 @@ localReorder(state, action) {
         s.board?.lists.push(a.payload);
       })
       .addCase(editListTitle.fulfilled, (s, a) => {
-        const { listId } = a.meta.arg;
-        const updated = a.payload;
-        const list = s.board?.lists.find((l) => String(l.id) === String(listId));
-        if (list) {
-          list.title = updated.title;
+        const { listId, payload } = a.meta.arg; 
+        const list = s.board?.lists?.find(
+          (l) => String(l.id) === String(listId)
+        );
+        if (list && payload?.title) {
+          list.title = payload.title;
         }
       })
 
