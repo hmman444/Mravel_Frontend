@@ -11,6 +11,7 @@ export default function SocialLogin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const redirectParam = new URLSearchParams(location.search).get("redirect");
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -24,7 +25,13 @@ export default function SocialLogin() {
             rememberMe: true,
           })
         );
-        if (socialLoginUser.fulfilled.match(action)) navigate("/");
+        if (socialLoginUser.fulfilled.match(action)){
+          if (redirectParam) {
+            navigate(decodeURIComponent(redirectParam));
+          } else {
+            navigate("/");
+          }
+        }
       } catch (err) {
         console.error("Google login error:", err);
       } finally {

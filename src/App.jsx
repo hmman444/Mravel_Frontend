@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useLoadUser } from "./features/auth/hooks/useLoadUser";
-
+import Toast from "./components/Toast";
 // Auth
 import LoginPage from "./features/auth/pages/LoginPage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
@@ -33,10 +33,11 @@ import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
 import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
-
+import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 function App() {
   useLoadUser();
   return (
+    <>
     <Router>
       <Routes>
         {/* Auth routes */}
@@ -61,6 +62,7 @@ function App() {
         {/* Plans routes */}
         <Route path="/plans" element={<PlanListPage />} />
         <Route path="/plans/:planId" element={<PlanDashboardPage />} />
+        <Route path="/plans/join" element={<JoinPlanPage />} />
 
         {/* Catalog routes */}       
         <Route path="/place/:slug" element={<PlaceDetailPage />} />
@@ -78,6 +80,8 @@ function App() {
         <Route path="*" element={<HomePage />} />
       </Routes>
     </Router>
+    <Toast position="top-center" autoClose={2000} />
+    </>
   );
 }
 
