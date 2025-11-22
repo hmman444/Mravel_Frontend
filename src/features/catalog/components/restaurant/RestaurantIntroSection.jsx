@@ -1,4 +1,4 @@
-// src/features/restaurants/components/RestaurantIntroSection.jsx
+// src/features/restaurants/components/restaurant/RestaurantIntroSection.jsx
 import { useState } from "react";
 
 export default function RestaurantIntroSection() {

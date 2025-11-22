@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import RestaurantHero from "../components/RestaurantHero";
-import RestaurantSearchCard from "../components/RestaurantSearchCard";
-import RestaurantPopularSection from "../components/RestaurantPopularSection";
 import FadeInSection from "../../../components/FadeInSection";
-import RestaurantPartners from "../components/RestaurantPartners";
+import Footer from "../../../components/Footer";
+import Navbar from "../../../components/Navbar";
 import PaymentPartners from "../components/PaymentPartners";
-import RestaurantWhyUs from "../components/RestaurantWhyUs";
-import RestaurantBookingGuide from "../components/RestaurantBookingGuide";
-import RestaurantIntroSection from "../components/RestaurantIntroSection";
+import RestaurantBookingGuide from "../components/restaurant/RestaurantBookingGuide";
+import RestaurantHero from "../components/restaurant/RestaurantHero";
+import RestaurantIntroSection from "../components/restaurant/RestaurantIntroSection";
+import RestaurantPartners from "../components/restaurant/RestaurantPartners";
+import RestaurantPopularSection from "../components/restaurant/RestaurantPopularSection";
+import RestaurantSearchCard from "../components/restaurant/RestaurantSearchCard";
+import RestaurantWhyUs from "../components/restaurant/RestaurantWhyUs";
 
 export default function RestaurantsHomePage() {
   const navigate = useNavigate();
@@ -48,8 +48,8 @@ export default function RestaurantsHomePage() {
       </FadeInSection>
 
       {/* SEARCH CARD – nổi lên dưới chân hero giống Traveloka */}
-      <FadeInSection delay={80}>
-        <div className="relative max-w-7xl mx-auto px-6 -mt-10 md:-mt-12 z-10">
+      <FadeInSection delay={80} className="relative z-20">
+        <div className="relative max-w-7xl mx-auto px-6 -mt-10 md:-mt-12">
           <RestaurantSearchCard onSubmit={goSearch} />
         </div>
       </FadeInSection>

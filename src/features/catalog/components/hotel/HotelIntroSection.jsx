@@ -1,4 +1,4 @@
-// src/features/hotels/components/HotelIntroSection.jsx
+// src/features/components/hotel/HotelIntroSection.jsx
 import { useState } from "react";
 
 export default function HotelIntroSection() {

@@ -1,4 +1,4 @@
-// src/features/catalog/components/DetailThumbStripPeek.jsx
+// src/features/catalog/components/place/DetailThumbStripPeek.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function DetailThumbStripPeek({

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
-import Button from "../../../components/Button";
-import { usePlaceTypeahead } from "../hooks/usePlaceTypeahead";
-import { makePlaceDisplay } from "../../../utils/makePlaceDisplay";
+import Button from "../../../../components/Button";
+import { usePlaceTypeahead } from "../../hooks/usePlaceTypeahead";
+import { makePlaceDisplay } from "../../../../utils/makePlaceDisplay";
 
 export default function TopSearchBar({ initialLabel, onSubmit }) {
   const [q, setQ] = useState(initialLabel || "");

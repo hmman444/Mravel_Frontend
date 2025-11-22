@@ -1,0 +1,76 @@
+/* ===== WRAPPER ===== */
+.react-datepicker {
+  border: 1px solid #e5e7eb;             /* gray-200 */
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18); /* giống shadow card search */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+}
+
+/* Header */
+.react-datepicker__header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding-top: 8px;
+}
+
+.react-datepicker__current-month {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+}
+
+/* Thanh thứ trong tuần */
+.react-datepicker__day-name {
+  width: 32px;
+  line-height: 32px;
+  color: #6b7280; /* gray-500 */
+}
+
+/* Ngày thường */
+.react-datepicker__day {
+  width: 32px;
+  line-height: 32px;
+  border-radius: 999px;
+  color: #111827;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e0f2fe; /* sky-100 */
+}
+
+/* Hôm nay */
+.react-datepicker__day--today {
+  font-weight: 600;
+  background-color: rgba(56, 189, 248, 0.12); /* sky-400/12 */
+}
+
+/* Ngày được chọn */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #0ea5e9; /* sky-500 */
+  color: #ffffff;
+}
+
+.react-datepicker__day--selected:hover,
+.react-datepicker__day--keyboard-selected:hover {
+  background-color: #0284c7; /* sky-600 */
+}
+
+/* Navigation arrows */
+.react-datepicker__navigation {
+  top: 10px;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #6b7280;
+}
+
+/* Range (nếu xài selectsRange ở chỗ khác) */
+.react-datepicker__day--in-range {
+  background-color: rgba(56, 189, 248, 0.12);
+}
+
+.react-datepicker__day--in-selecting-range {
+  background-color: rgba(56, 189, 248, 0.18);
+}

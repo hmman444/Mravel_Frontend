@@ -1,0 +1,293 @@
+/* ====== WRAPPER CHUNG ====== */
+.mravel-calendar.react-datepicker {
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+
+  min-width: 620px;          /* đủ rộng cho 2 tháng */
+  padding: 6px 16px 8px;     /* giảm padding trên / dưới / 2 bên */
+
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  transform-origin: top center;
+  animation: mravel-calendar-drop-in 180ms ease-out forwards;
+}
+
+/* Popper – để không dính sát mép trái màn hình */
+.react-datepicker-popper.mravel-calendar-popper {
+  z-index: 60;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+/* Calendar mở phía dưới input, cách ra một chút, không che ô kết quả */
+.react-datepicker-popper.mravel-calendar-popper[data-placement^="bottom"] {
+  margin-top: 50px;
+}
+
+/* ====== 2 CỘT THÁNG ====== */
+.mravel-calendar .react-datepicker__month-container {
+  float: left;
+  width: 50%;
+  box-sizing: border-box;
+}
+
+.mravel-calendar .react-datepicker__month-container:first-child {
+  border-right: 1px solid #e5e7eb; /* đường kẻ chia 2 tháng */
+}
+
+/* ====== HEADER THÁNG ====== */
+.mravel-calendar .react-datepicker__header {
+  background-color: #ffffff;
+  border-bottom: none;
+  padding-top: 2px;
+  padding-bottom: 0;
+}
+
+/* Hàng chứa tiêu đề + mũi tên */
+.mravel-calendar__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* "Tháng 11 2025" */
+.mravel-calendar__header-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Nút mũi tên – to hơn, dễ bấm hơn */
+.mravel-calendar__nav-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mravel-calendar__nav-btn:hover:not([disabled]) {
+  background: #f3f4f6;
+}
+
+.mravel-calendar__nav-btn[disabled] {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ====== HÀNG TÊN THỨ + GẠCH NGĂN CÁCH VỚI SỐ ====== */
+.mravel-calendar .react-datepicker__day-names {
+  margin-top: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+
+  display: grid;
+  grid-template-columns: repeat(7, 36px);  /* tăng width ô thứ */
+  justify-content: center;
+  column-gap: 4px;                         /* thêm chút khoảng cách ngang */
+}
+
+.mravel-calendar .react-datepicker__day-name {
+  width: 36px;
+  line-height: 24px;
+  margin: 0;
+  text-align: center;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* ====== GRID NGÀY & FIX CAO 6 HÀNG ====== */
+.mravel-calendar .react-datepicker__month {
+  padding: 0.35rem 0.7rem 0.4rem;  /* giảm padding trong mỗi tháng */
+  height: 220px;                   /* cố định ~6 hàng */
+  box-sizing: border-box;
+}
+
+.mravel-calendar .react-datepicker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 36px); /* tăng width ô ngày */
+  justify-content: center;
+  column-gap: 4px;                         /* khoảng cách ngang giữa ngày */
+  row-gap: 12px;                            /* khoảng cách dọc giữa ngày */
+  margin: 0;
+}
+
+/* ====== NGÀY THƯỜNG ====== */
+.mravel-calendar__day.react-datepicker__day {
+  width: 36px;               /* lớn hơn 32px */
+  line-height: 36px;
+  margin: 0;
+  text-align: center;
+  border-radius: 999px;
+  color: #111827;
+  position: relative;
+  font-weight: 400;
+}
+
+/* Không cho ngày ngoài tháng hiện số (chỉ giữ ô trống để căn lề) */
+.mravel-calendar .react-datepicker__day--outside-month {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Hover */
+.mravel-calendar__day.react-datepicker__day:hover {
+  background-color: #e0f2fe;
+}
+
+/* Ngày disabled (trước hôm nay) */
+.mravel-calendar__day--before-today.react-datepicker__day,
+.mravel-calendar__day.react-datepicker__day--disabled {
+  color: #9ca3af;
+  cursor: default;
+  background-color: transparent;
+}
+
+/* Chủ nhật đỏ */
+.mravel-calendar__day--sunday.react-datepicker__day {
+  color: #dc2626;
+}
+
+/* ====== NGÀY ĐƯỢC CHỌN THỰC SỰ ====== */
+.mravel-calendar .react-datepicker__day--selected {
+  background-color: #0ea5e9;
+  color: #ffffff;
+}
+
+.mravel-calendar .react-datepicker__day--selected:hover {
+  background-color: #0284c7;
+}
+
+/* Ngày chỉ đang được focus bằng phím (keyboard-selected)
+   => để y như ngày thường, không tô xanh */
+.mravel-calendar
+  .react-datepicker__day--keyboard-selected:not(.react-datepicker__day--selected) {
+  background-color: transparent;
+  color: inherit;
+}
+
+/* ====== HÔM NAY ====== */
+.mravel-calendar .react-datepicker__day--today {
+  border-radius: 999px;
+  border: 1px solid #0ea5e9;
+  font-weight: 600;
+}
+
+/* "Hôm nay" sát ngay phía trên số */
+.mravel-calendar .react-datepicker__day--today::before {
+  content: "Hôm nay";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: -10px;
+  font-size: 0.65rem;
+  color: #0ea5e9;
+  white-space: nowrap;
+}
+
+/* Không dùng pseudo dưới nữa */
+.mravel-calendar .react-datepicker__day--today::after {
+  content: none;
+}
+
+/* Bỏ outline xanh khi focus */
+.mravel-calendar .react-datepicker__day:focus {
+  outline: none;
+}
+
+/* Keyframes cho hiệu ứng */
+@keyframes mravel-calendar-drop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ====== OVERRIDE RIÊNG CHO SEARCH RESTAURANT ====== */
+
+/* Popper dùng trong RestaurantSearchCard (có class thêm) */
+.react-datepicker-popper.mravel-calendar-popper--restaurant {
+  z-index: 80; /* cao hơn mọi thứ bên dưới, kể cả các section khác */
+}
+
+/* Cho restaurant: khoảng cách nhỏ hơn để khỏi đụng "Quán ăn phổ biến" */
+.react-datepicker-popper.mravel-calendar-popper--restaurant[data-placement^="bottom"] {
+  margin-top: 8px !important;  /* ưu tiên hơn rule 50px ở trên */
+}
+
+/* Time picker cho Restaurant – gọn hơn calendar ngày */
+.mravel-timepicker.react-datepicker {
+  min-width: auto;
+  width: 180px;
+  padding: 8px 10px;
+}
+
+.mravel-timepicker .react-datepicker__time-container {
+  border-left: none;
+}
+
+.mravel-timepicker .react-datepicker__time-box {
+  width: 100%;
+}
+
+.mravel-timepicker .react-datepicker__time-list-item {
+  font-size: 13px;
+  padding: 6px 8px;
+}
+
+.mravel-timepicker .react-datepicker__time-list-item--selected {
+  background-color: #0ea5e9;
+  color: #fff;
+}
+
+/* popup giờ cho Restaurant */
+.react-datepicker-popper.mravel-timepicker-popper {
+  z-index: 80; /* cao hơn card + section bên dưới */
+}
+
+.react-datepicker-popper.mravel-timepicker-popper[data-placement^="bottom"] {
+  margin-top: 8px !important;  /* nhỏ thôi, ngay dưới ô "Giờ" */
+}
+
+/* Time picker gọn gàng */
+.mravel-timepicker.react-datepicker {
+  min-width: auto;
+  width: 180px;
+  padding: 8px 10px;
+}
+
+.mravel-timepicker .react-datepicker__time-container {
+  border-left: none;
+}
+
+.mravel-timepicker .react-datepicker__time-box {
+  width: 100%;
+}
+
+.mravel-timepicker .react-datepicker__time-list-item {
+  font-size: 13px;
+  padding: 6px 8px;
+}
+
+.mravel-timepicker .react-datepicker__time-list-item--selected {
+  background-color: #0ea5e9;
+  color: #fff;
+}

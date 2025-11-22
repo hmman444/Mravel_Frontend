@@ -19,6 +19,7 @@ import PlaceDetailPage from "./features/catalog/pages/PlaceDetailPage";
 import LocationResultsPage from "./features/catalog/pages/LocationResultsPage";
 import HotelsHomePage from "./features/catalog/pages/HotelsHomePage";
 import RestaurantsHomePage from "./features/catalog/pages/RestaurantsHomePage";
+import HotelDetailPage from "./features/catalog/pages/HotelDetailPage";
 //User
 import AccountProfilePage from "./features/user/pages/AccountProfilePage";
 // Admin
@@ -65,6 +66,7 @@ function App() {
         <Route path="/place/:slug" element={<PlaceDetailPage />} />
         <Route path="/locations/search" element={<LocationResultsPage />} />
         <Route path="/hotels" element={<HotelsHomePage />} />
+        <Route path="/hotels/:slug" element={<HotelDetailPage />} />
         <Route path="/restaurants" element={<RestaurantsHomePage />} />
 
         {/* User routes */}

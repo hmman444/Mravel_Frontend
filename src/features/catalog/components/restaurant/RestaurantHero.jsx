@@ -1,4 +1,4 @@
-// src/features/restaurants/components/RestaurantHero.jsx
+// src/features/restaurants/components/restaurant/RestaurantHero.jsx
 export default function RestaurantHero() {
   const banner =
     "https://ik.imagekit.io/tvlk/image/imageResource/2025/05/22/1747889814840-c3994b87577ea07541413dace0a20193.jpeg?tr=h-329,q-75,w-1305";
