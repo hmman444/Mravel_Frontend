@@ -1,4 +1,4 @@
-// src/components/HotelBrandPartners.jsx
+// src/components/hotel/HotelBrandPartners.jsx
 const hotelPartners = [
   "https://upload.wikimedia.org/wikipedia/vi/thumb/7/72/AccorHotels_logo.svg/1200px-AccorHotels_logo.svg.png",
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbkmFAbt4Lm8mr77tSlRhNjK3bVNm_FSeqvg&s",

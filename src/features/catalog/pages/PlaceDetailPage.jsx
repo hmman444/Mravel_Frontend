@@ -2,8 +2,8 @@ import { useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { usePlaceDetail } from "../hooks/usePlaceDetail";
-import PlaceContentRenderer from "../components/PlaceContentRenderer";
-import DetailThumbStripPeek from "../components/DetailThumbStripPeek";
+import PlaceContentRenderer from "../components/place/PlaceContentRenderer";
+import DetailThumbStripPeek from "../components/place/DetailThumbStripPeek";
 
 export default function PlaceDetailPage() {
   const { slug } = useParams();
