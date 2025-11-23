@@ -2,12 +2,27 @@ export default function Button({ children, className = "", ...props }) {
   return (
     <button
       {...props}
-      className={`px-6 py-2 rounded-lg font-semibold transition-colors 
-                  bg-primary text-white hover:bg-primaryHover 
-                  dark:bg-secondary dark:text-gray-900 dark:hover:bg-secondaryDark
-                  ${className}`}
+      className={`
+        inline-flex items-center justify-center
+        text-[14px] px-3 py-1 rounded-full
+        font-medium tracking-wide
+
+        bg-gradient-to-r from-sky-500 to-blue-600
+        text-white
+
+        shadow-sm hover:shadow-md
+        hover:-translate-y-0.5 active:translate-y-0
+
+        transition-all duration-200 ease-out
+
+        focus:outline-none focus:ring-2 focus:ring-sky-400/60
+
+        disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0
+
+        ${className}
+      `}
     >
-      {children}
+       {children}
     </button>
   );
 }

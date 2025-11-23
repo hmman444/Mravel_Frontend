@@ -17,7 +17,8 @@ import {
   removeMember,
   requestAccess,
   fetchRequests,
-  handleRequest
+  handleRequest,
+  clearTrash
 } from "../services/planBoardService";
 const initialState = {
   board: null,
@@ -45,6 +46,7 @@ export const editListTitle = createAsyncThunk(
 );
 
 export const removeList = createAsyncThunk("planBoard/removeList", async ({ planId, listId }) => {
+  console.log("DELETE LIST:", planId, listId);
   return await deleteList(planId, listId);
 });
 
@@ -66,6 +68,13 @@ export const removeCard = createAsyncThunk(
   "planBoard/removeCard",
   async ({ planId, listId, cardId }) => {
     return await deleteCard(planId, listId, cardId);
+  }
+);
+
+export const clearTrashThunk = createAsyncThunk(
+  "planBoard/clearTrash",
+  async (planId) => {
+    return await clearTrash(planId);
   }
 );
 
@@ -282,6 +291,12 @@ localReorder(state, action) {
         if (list && list.cards) {
           list.cards = list.cards.filter((c) => String(c.id) !== String(cardId));
         }
+      })
+      .addCase(clearTrashThunk.fulfilled, (state) => {
+        if (!state.board?.lists) return;
+
+        const trash = state.board.lists.find((l) => l.type === "TRASH");
+        if (trash) trash.cards = []; 
       })
 
       .addCase(reorder.fulfilled, (s) => {

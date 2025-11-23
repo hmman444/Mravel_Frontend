@@ -19,6 +19,7 @@ import {
   sendAccessRequest,
   loadRequests as loadRequestsThunk,
   decideRequest as decideRequestThunk,
+  clearTrashThunk
 } from "../slices/planBoardSlice";
 import { updateVisibility } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
@@ -114,6 +115,12 @@ export function usePlanBoard(planId) {
       tryCall(
         dispatch(removeCard({ planId, listId, cardId })),
         "Không thể xoá thẻ"
+      ),
+
+    clearTrash: () =>
+      tryCall(
+        dispatch(clearTrashThunk(planId)),
+        "Không thể xoá toàn bộ thùng rác"
       ),
 
     // drag drop

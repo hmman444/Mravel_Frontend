@@ -1,6 +1,9 @@
 import { useState, useMemo } from "react";
 import { reactionsMeta } from "../utils/reactionsMeta";
-import { ChatBubbleLeftRightIcon, ShareIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleLeftRightIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 import ReactionPicker from "./ReactionPicker";
 
 export default function PlanActions({
@@ -13,13 +16,11 @@ export default function PlanActions({
 }) {
   const [showPopup, setShowPopup] = useState(false);
 
-  // Tổng số reaction
   const total = useMemo(
     () => Object.values(reactions).reduce((a, b) => a + b, 0),
     [reactions]
   );
 
-  // Top 3 emoji phổ biến
   const top3 = useMemo(() => {
     const merged = { ...reactions };
     if (myReaction && !merged[myReaction]) merged[myReaction] = 1;
@@ -35,10 +36,12 @@ export default function PlanActions({
 
   return (
     <div className="relative">
-      {/* Tổng reaction */}
       {total > 0 && (
         <div
-          className="text-sm text-gray-500 dark:text-gray-400 mb-2 inline-flex items-center gap-1 cursor-pointer"
+          className="
+            text-xs text-gray-500 dark:text-gray-400 mb-1.5
+            inline-flex items-center gap-1 cursor-pointer
+          "
           onMouseEnter={() => setShowPopup(true)}
           onMouseLeave={() => setShowPopup(false)}
         >
@@ -47,9 +50,14 @@ export default function PlanActions({
         </div>
       )}
 
-      {/* Popup danh sách người đã react */}
       {showPopup && reactionUsers.length > 0 && (
-        <div className="absolute z-20 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 border dark:border-gray-700 w-64 transition-all duration-200">
+        <div
+          className="
+            absolute z-20 bg-white dark:bg-gray-900 rounded-lg
+            shadow-xl p-3 border border-gray-200 dark:border-gray-700 w-64
+            translate-y-1
+          "
+        >
           {reactionUsers.map((u) => {
             const name = u.userName || "Người dùng";
             const avatar = u.userAvatar || "/src/assets/default-avatar.png";
@@ -57,13 +65,20 @@ export default function PlanActions({
             return (
               <div
                 key={u.userId}
-                className="flex items-center justify-between py-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md px-2"
+                className="
+                  flex items-center justify-between py-1
+                  hover:bg-gray-50 dark:hover:bg-gray-800
+                  rounded-md px-2
+                "
               >
                 <div className="flex items-center gap-2">
                   <img
                     src={avatar}
                     alt={name}
-                    className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-gray-600"
+                    className="
+                      w-7 h-7 rounded-full object-cover
+                      border border-gray-300 dark:border-gray-600
+                    "
                   />
                   <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                     {name}
@@ -71,7 +86,7 @@ export default function PlanActions({
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-lg">{reaction?.emoji}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400">
                     {reaction?.label}
                   </span>
                 </div>
@@ -81,20 +96,31 @@ export default function PlanActions({
         </div>
       )}
 
-      {/* Các nút hành động */}
-      <div className="flex border-t border-b dark:border-gray-700 mt-2">
+      <div className="mt-2 flex items-center justify-between border-t border-b dark:border-gray-700 py-1">
         <ReactionPicker value={myReaction} onChange={handleReact} />
 
         <button
+          type="button"
           onClick={onCommentFocus}
-          className="px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center gap-1 text-gray-500 dark:text-gray-400"
+          className="
+            px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800
+            text-sm flex items-center gap-1.5
+            text-gray-500 dark:text-gray-300
+            transition
+          "
         >
           <ChatBubbleLeftRightIcon className="w-4 h-4" /> Bình luận
         </button>
 
         <button
+          type="button"
           onClick={onShare}
-          className="px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center gap-1 text-gray-500 dark:text-gray-400"
+          className="
+            px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800
+            text-sm flex items-center gap-1.5
+            text-gray-500 dark:text-gray-300
+            transition
+          "
         >
           <ShareIcon className="w-4 h-4" /> Chia sẻ
         </button>

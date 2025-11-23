@@ -32,6 +32,7 @@ export default function PlanDashboardPage() {
     createCard,
     updateCard,
     deleteCard,
+    clearTrash,
     reorder,
     localReorder,
     requestAccess,
@@ -42,8 +43,15 @@ export default function PlanDashboardPage() {
 
   const { plans } = useMyPlans();
   const { updateTitle } = usePlanGeneral();
+  const [sidebarPlans, setSidebarPlans] = useState([]); 
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window === "undefined") return "summary";
 
-  const [activeTab, setActiveTab] = useState("summary");
+    const saved = window.localStorage.getItem(
+      `plan-dashboard-tab-${planId || "default"}`
+    );
+    return saved || "summary";
+  });
   const [openShare, setOpenShare] = useState(false);
 
   const [editingListId, setEditingListId] = useState(null);
@@ -52,6 +60,7 @@ export default function PlanDashboardPage() {
 
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
+  const [confirmClearTrash, setConfirmClearTrash] = useState(false);
 
   const [showAccessModal, setShowAccessModal] = useState(false);
   const [accessLoadingType, setAccessLoadingType] = useState(null);
@@ -59,6 +68,10 @@ export default function PlanDashboardPage() {
   const [titleInput, setTitleInput] = useState("");
 
   const canEditGeneral = isOwner || isEditor;
+  
+  useEffect(() => {
+    setSidebarPlans(plans || []);
+  }, [plans]);
 
   useEffect(() => {
     if (!planId) return;
@@ -75,6 +88,14 @@ export default function PlanDashboardPage() {
       setShowAccessModal(true);
     }
   }, [loading, board, error]);
+  
+  useEffect(() => {
+    if (!planId || !activeTab) return;
+    window.localStorage.setItem(
+      `plan-dashboard-tab-${planId}`,
+      activeTab
+    );
+  }, [activeTab, planId]);
 
   useEffect(() => {
     setTitleInput(board?.planTitle || "");
@@ -88,6 +109,12 @@ export default function PlanDashboardPage() {
     try {
       await updateTitle(planId, trimmed).unwrap();
       showSuccess("Đã cập nhật tiêu đề");
+
+      setSidebarPlans((prev) =>
+        prev.map((p) =>
+          String(p.id) === String(planId) ? { ...p, name: trimmed } : p
+        )
+      );
     } catch {
       showError("Không thể cập nhật tiêu đề");
       setTitleInput(board.planTitle || "");
@@ -170,6 +197,8 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await createCard(listId, payload);
+
+      await load();
       showSuccess("Đã thêm hoạt động");
     } catch (e) {
       console.error(e);
@@ -181,6 +210,8 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await updateCard(listId, cardId, payload);
+
+      await load();
       showSuccess("Đã cập nhật hoạt động");
     } catch (e) {
       console.error(e);
@@ -191,6 +222,8 @@ export default function PlanDashboardPage() {
   const handleRemoveCard = async ({ listId, cardId }) => {
     try {
       await deleteCard(listId, cardId);
+
+      await load();
       showSuccess("Đã xoá thẻ");
     } catch {
       showError("Không thể xoá thẻ");
@@ -225,6 +258,7 @@ export default function PlanDashboardPage() {
         actualCost: card.actualCost,
       };
       await createCard(listId, payload);
+
       showSuccess("Đã sao chép thẻ");
     } catch {
       showError("Không thể sao chép thẻ");
@@ -234,6 +268,8 @@ export default function PlanDashboardPage() {
   const handleAddList = async () => {
     try {
       await createList({ title: null });
+
+      await load();
       showSuccess("Đã thêm danh sách");
     } catch {
       showError("Không thể thêm danh sách");
@@ -260,6 +296,8 @@ export default function PlanDashboardPage() {
           actualCost: card.actualCost,
         });
       }
+
+      await load();
       showSuccess("Đã sao chép danh sách");
     } catch {
       showError("Không thể sao chép danh sách");
@@ -299,7 +337,7 @@ export default function PlanDashboardPage() {
   return (
     <PlanLayout
       activePlanId={planId}
-      plans={plans}
+      plans={sidebarPlans}
       onOpenPlanList={() => navigate("/plans/my-plans")}
       onOpenCalendar={() => navigate("/plans/calendar")}
       onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
@@ -312,6 +350,12 @@ export default function PlanDashboardPage() {
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
               onBlur={handleSaveTitle}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.currentTarget.blur(); 
+                  }
+                }}
               placeholder="Tiêu đề kế hoạch..."
               className="
                 w-full text-lg font-semibold
@@ -394,6 +438,7 @@ export default function PlanDashboardPage() {
             plan={board}
             planId={planId}
             canEdit={canEditGeneral}
+            reloadBoard={load}
           />
         )}
 
@@ -405,6 +450,7 @@ export default function PlanDashboardPage() {
             handleAddList={handleAddList}
             renameList={renameList}
             deleteList={deleteList}
+            clearTrash={clearTrash}
             duplicateList={duplicateList}
 
             // ACTIVITY
@@ -469,6 +515,25 @@ export default function PlanDashboardPage() {
         />
       )}
 
+      {confirmClearTrash && (
+        <ConfirmModal
+          open={true}
+          title="Xóa toàn bộ thẻ trong thùng rác"
+          message="Hành động này không thể hoàn tác. Xóa toàn bộ thẻ?"
+          confirmText="Xóa hết"
+          onClose={() => setConfirmClearTrash(false)}
+          onConfirm={async () => {
+            try {
+              await clearTrash();
+              showSuccess("Đã xóa toàn bộ thẻ trong thùng rác");
+            } catch {
+              showError("Không thể xóa thùng rác");
+            }
+            setConfirmClearTrash(false);
+          }}
+        />
+      )}
+
       {confirmDeleteList && (
         <ConfirmModal
           open={true}
@@ -476,9 +541,11 @@ export default function PlanDashboardPage() {
           message={`Xác nhận xóa "${confirmDeleteList.title}"? Các thẻ của danh sách sẽ được chuyển vào thùng rác!`}
           confirmText="Xoá"
           onClose={() => setConfirmDeleteList(null)}
-          onConfirm={() => {
-            deleteList(confirmDeleteList.id);
+          onConfirm={async () => {
+            await deleteList(confirmDeleteList.id);
+            await load();
             setConfirmDeleteList(null);
+            
           }}
         />
       )}

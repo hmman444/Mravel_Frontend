@@ -1,4 +1,3 @@
-// src/features/home/pages/HomePage.jsx (đoán đường dẫn)
 import Navbar from "../../../components/Navbar";
 import HeroSection from "../components/HeroSection";
 import SearchBar from "../../../components/SearchBar";
@@ -7,33 +6,31 @@ import PlanSection from "../components/PlanSection";
 import ReviewSection from "../components/ReviewSection";
 import PartnerSection from "../components/PartnerSection";
 import Footer from "../../../components/Footer";
-
-import FadeInSection from "../../../components/FadeInSection"; // <-- thêm
+import FadeInSection from "../../../components/FadeInSection";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-950">
       <Navbar />
 
       <HeroSection>
         <SearchBar />
       </HeroSection>
 
-      {/* giảm khoảng cách giữa các section */}
-      <main className="space-y-8 md:space-y-12">
+      <main className="flex-1 space-y-8 md:space-y-12">
         <FadeInSection>
           <ServiceList />
         </FadeInSection>
 
-        <FadeInSection delay={100}>
+        <FadeInSection delay={120}>
           <PlanSection />
         </FadeInSection>
 
-        <FadeInSection delay={200}>
+        <FadeInSection delay={220}>
           <ReviewSection />
         </FadeInSection>
 
-        <FadeInSection delay={300}>
+        <FadeInSection delay={320}>
           <PartnerSection />
         </FadeInSection>
       </main>

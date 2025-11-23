@@ -1,6 +1,7 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
+import { showError } from "../../../utils/toastUtils";
 
 export default function PlanDateInputs({
   startDate,
@@ -8,6 +9,22 @@ export default function PlanDateInputs({
   setStartDate,
   setEndDate,
 }) {
+  const handleStartChange = (date) => {
+    if (endDate && date > endDate) {
+      showError("Ngày bắt đầu không thể sau ngày kết thúc!");
+      return;
+    }
+    setStartDate(date);
+  };
+
+  const handleEndChange = (date) => {
+    if (startDate && date < startDate) {
+      showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+      return;
+    }
+    setEndDate(date);
+  };
+
   return (
     <div className="flex gap-4 flex-wrap md:flex-nowrap">
       {/* TỪ NGÀY */}
@@ -38,7 +55,7 @@ export default function PlanDateInputs({
 
           <DatePicker
             selected={startDate}
-            onChange={setStartDate}
+            onChange={handleStartChange}
             dateFormat="dd/MM/yyyy"
             placeholderText="Chọn ngày..."
             locale="vi"
@@ -96,7 +113,7 @@ export default function PlanDateInputs({
 
           <DatePicker
             selected={endDate}
-            onChange={setEndDate}
+            onChange={handleEndChange}
             minDate={startDate}
             dateFormat="dd/MM/yyyy"
             placeholderText="Chọn ngày..."

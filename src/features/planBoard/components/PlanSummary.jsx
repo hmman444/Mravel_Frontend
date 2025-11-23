@@ -20,6 +20,7 @@ import {
   FaCircleNotch,
 } from "react-icons/fa";
 
+import ConfirmModal from "../../../components/ConfirmModal";
 import PlanDateInputs from "./PlanDateInputs";
 import { usePlanGeneral } from "../hooks/usePlanGeneral";
 import { showSuccess, showError } from "../../../utils/toastUtils";
@@ -47,7 +48,7 @@ const STATUS_OPTIONS = [
   { value: "CANCELLED", label: "Đã hủy" },
 ];
 
-export default function PlanSummary({ plan, planId, canEdit }) {
+export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
   const lists = plan?.lists || [];
 
   const {
@@ -82,14 +83,26 @@ export default function PlanSummary({ plan, planId, canEdit }) {
   const [statusPos, setStatusPos] = useState({ top: 0, left: 0 });
   const [statusPosReady, setStatusPosReady] = useState(false);
 
+  // quản lý confirm khi rút ngắn ngày
+  const originalStartRef = useRef(startDate);
+  const originalEndRef = useRef(endDate);
+  const [pendingDates, setPendingDates] = useState(null);
+  const [showConfirmDates, setShowConfirmDates] = useState(false);
+
   // sync khi plan thay đổi
   useEffect(() => {
+    const s = parseDate(plan?.startDate);
+    const e = parseDate(plan?.endDate);
+
     setDescription(plan?.description || "");
-    setStartDate(parseDate(plan?.startDate));
-    setEndDate(parseDate(plan?.endDate));
+    setStartDate(s);
+    setEndDate(e);
     setStatus(plan?.status || "DRAFT");
     setThumbnail(plan?.thumbnail || (plan?.images?.[0] ?? null));
     setImages(plan?.images || []);
+
+    originalStartRef.current = s;
+    originalEndRef.current = e;
   }, [
     plan?.id,
     plan?.description,
@@ -208,9 +221,7 @@ export default function PlanSummary({ plan, planId, canEdit }) {
     }
   };
 
-  const handleDatesChange = async (s, e) => {
-    setStartDate(s);
-    setEndDate(e);
+  const applyDatesChange = async (s, e) => {
     if (!canEdit || !planId) return;
     if (!s || !e) return;
 
@@ -218,10 +229,64 @@ export default function PlanSummary({ plan, planId, canEdit }) {
     try {
       await updateDates(planId, formatDate(s), formatDate(e)).unwrap();
       showSuccess("Đã cập nhật ngày");
+
+      if (typeof reloadBoard === "function") {
+        reloadBoard();
+      }
+
+      // update lại khoảng gốc sau khi BE lưu thành công
+      originalStartRef.current = s;
+      originalEndRef.current = e;
     } catch {
       showError("Không thể cập nhật ngày");
     } finally {
       setDatesSaving(false);
+    }
+  };
+
+  const computeDays = (s, e) => {
+    if (!s || !e) return null;
+    return Math.max(
+      1,
+      Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1
+    );
+  };
+
+  const handlePickDates = (s, e) => {
+    // cập nhật UI trước cho DatePicker
+    setStartDate(s);
+    setEndDate(e);
+
+    if (!canEdit || !planId || !s || !e) return;
+
+    const oldS = originalStartRef.current;
+    const oldE = originalEndRef.current;
+
+    // lần đầu chưa có khoảng gốc thì commit luôn
+    if (!oldS || !oldE) {
+      applyDatesChange(s, e);
+      return;
+    }
+
+    const oldDays = computeDays(oldS, oldE);
+    const newDays = computeDays(s, e);
+
+    // Điều kiện "rút ngắn":
+    // - start mới > start cũ (đi muộn hơn)
+    // - hoặc end mới < end cũ (về sớm hơn)
+    // - hoặc tổng số ngày giảm
+    const shrink =
+      (newDays !== null && oldDays !== null && newDays < oldDays) ||
+      s > oldS ||
+      e < oldE;
+
+    if (shrink) {
+      // chỉ lưu lại, chờ user confirm
+      setPendingDates({ start: s, end: e });
+      setShowConfirmDates(true);
+    } else {
+      // mở rộng khoảng thời gian -> không xoá ngày -> commit thẳng
+      applyDatesChange(s, e);
     }
   };
 
@@ -500,8 +565,8 @@ export default function PlanSummary({ plan, planId, canEdit }) {
                 <PlanDateInputs
                   startDate={startDate}
                   endDate={endDate}
-                  setStartDate={(d) => handleDatesChange(d, endDate)}
-                  setEndDate={(d) => handleDatesChange(startDate, d)}
+                  setStartDate={(d) => handlePickDates(d, endDate)}
+                  setEndDate={(d) => handlePickDates(startDate, d)}
                 />
 
                 {/* DÒNG: [Tổng ngày | Chi phí] ........ [Trạng thái] */}
@@ -832,6 +897,30 @@ export default function PlanSummary({ plan, planId, canEdit }) {
           </label>
         )}
       </div>
+
+      {/* Confirm rút ngắn ngày */}
+      {showConfirmDates && (
+        <ConfirmModal
+          open={showConfirmDates}
+          title="Điều chỉnh thời gian kế hoạch"
+          message="Rút ngắn thời gian sẽ xoá bớt các ngày tương ứng và chuyển các hoạt động trong đó vào thùng rác. Bạn có chắc chắn muốn tiếp tục?"
+          confirmText="Tiếp tục"
+          onClose={() => {
+            // user huỷ -> revert lại khoảng cũ
+            setShowConfirmDates(false);
+            setPendingDates(null);
+            setStartDate(originalStartRef.current);
+            setEndDate(originalEndRef.current);
+          }}
+          onConfirm={async () => {
+            if (pendingDates) {
+              await applyDatesChange(pendingDates.start, pendingDates.end);
+            }
+            setShowConfirmDates(false);
+            setPendingDates(null);
+          }}
+        />
+      )}
 
       {statusDropdown}
     </div>

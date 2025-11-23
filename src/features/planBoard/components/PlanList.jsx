@@ -209,97 +209,75 @@ export default function PlanList({
     ${isTrash ? "border-b border-rose-100/80 dark:border-rose-500/40" : ""}
   `;
 
-  // =============== THÙNG RÁC ===============
   if (isTrash) {
     return (
-      <>
-        <div className={wrapperClass}>
-          <div className={headerClass}>
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-rose-100 border border-rose-300">
-                <FaTrashAlt className="text-[13px] text-rose-500" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-100">
-                  Thùng rác hoạt động
-                </span>
-                <span className="text-[10px] text-rose-500/90 dark:text-rose-100/80">
-                  Các hoạt động tạm cất, không tính vào lịch & chi phí
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <Droppable
-            droppableId={String(list.id)}
-            type="card"
-            isDropDisabled={!canEdit}
-          >
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="px-3 pb-2 pt-2 space-y-1 min-h-[8px]"
-              >
-                <div className="mb-1 rounded-lg border border-rose-200/70 bg-rose-50 px-2.5 py-1.5">
-                  <p className="text-[10px] text-rose-700 leading-snug">
-                    Kéo những hoạt động không dùng nữa vào đây để tạm ẩn khỏi
-                    tuyến plan chính.
-                  </p>
-                </div>
-
-                {list.cards?.map((card, idx) => (
-                  <Draggable
-                    key={`card-${card.id}`}
-                    draggableId={`card-${card.id}`}
-                    index={idx}
-                    isDragDisabled={!canEdit}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="mb-2 drag-card-wrapper"
-                      >
-                        <div className="no-transform no-blur no-shadow">
-                          <PlanCard
-                            card={card}
-                            listId={list.id}
-                            toggleDone={toggleDone}
-                            duplicateCard={duplicateCard}
-                            setConfirmDeleteCard={setConfirmDeleteCard}
-                            activeMenu={activeCardMenu}
-                            setActiveMenu={setActiveCardMenu}
-                            canEdit={canEdit}
-                            onOpenActivityModal={onOpenActivityModal}
-                            isInTrash={true}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-
-                {list.cards?.length === 0 && (
-                  <div className="mt-1 mb-1 rounded-xl border border-dashed border-rose-300/70 bg-rose-50/80 px-3 py-3 flex items-center justify-center">
-                    <span className="text-[11px] text-rose-600 text-center">
-                      Chưa có hoạt động nào trong thùng rác.
-                      Kéo thả hoạt động từ các ngày khác vào đây.
-                    </span>
-                  </div>
-                )}
-
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+      <div className="w-64 flex-shrink-0 rounded-2xl bg-rose-50/70 dark:bg-rose-900/20 p-2">
+        
+        {/* HƯỚNG DẪN: tinh gọn, nhẹ, không box đậm */}
+        <div className="text-[11px] text-rose-600/80 px-2 py-1.5 leading-snug">
+          <span className="flex items-start gap-1.5">
+            <span className="text-center">
+              Kéo những hoạt động không dùng nữa vào đây
+              để tạm ẩn khỏi tuyến plan chính.
+            </span>
+          </span>
         </div>
-      </>
+
+        <Droppable droppableId={String(list.id)} type="card" isDropDisabled={!canEdit}>
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="space-y-2 min-h-[10px] mt-1"
+            >
+
+              {/* Cards */}
+              {list.cards?.map((card, idx) => (
+                <Draggable
+                  key={`card-${card.id}`}
+                  draggableId={`card-${card.id}`}
+                  index={idx}
+                  isDragDisabled={!canEdit}
+                >
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <PlanCard
+                        card={card}
+                        listId={list.id}
+                        toggleDone={toggleDone}
+                        duplicateCard={duplicateCard}
+                        setConfirmDeleteCard={setConfirmDeleteCard}
+                        activeMenu={activeCardMenu}
+                        setActiveMenu={setActiveCardMenu}
+                        canEdit={canEdit}
+                        onOpenActivityModal={onOpenActivityModal}
+                        isInTrash={true}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+
+              {/* Empty state */}
+              {list.cards?.length === 0 && (
+                <div className="py-6 text-[11px] text-rose-500/70 text-center">
+                  (Trống)
+                </div>
+              )}
+
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </div>
     );
   }
 
-  // =============== LIST NGÀY THƯỜNG ===============
+
   const handleBlurRename = async () => {
     try {
       const trimmed = tempTitle.trim();

@@ -54,9 +54,35 @@ export default function FilterSidebar({ onApply }) {
         </div>
 
         <div className="flex gap-2">
-          <button onClick={reset} className="flex-1 py-2 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800">Đặt lại</button>
-          <button onClick={() => onApply(pending)} className="flex-1 py-2 rounded-lg bg-primary text-white hover:bg-primaryHover">Áp dụng</button>
-        </div>
+        <button
+          onClick={reset}
+          className="
+            flex-1 py-2 rounded-lg text-sm font-medium
+            border border-slate-300 dark:border-white/20
+            text-slate-700 dark:text-gray-100
+            bg-white/30 dark:bg-white/5
+            backdrop-blur-md
+            hover:bg-white/60 dark:hover:bg-white/10
+            transition-all duration-200
+          "
+        >
+          Đặt lại
+        </button>
+
+        <button
+          onClick={() => onApply(pending)}
+          className="
+            flex-1 py-2 rounded-lg text-sm font-semibold text-white
+            bg-gradient-to-r from-sky-500 to-blue-600
+            hover:-translate-y-0.5 active:translate-y-0
+            shadow-sm hover:shadow-lg
+            transition-all duration-200
+          "
+        >
+          Áp dụng
+        </button>
+      </div>
+
       </div>
     </aside>
   );
