@@ -41,6 +41,11 @@ export async function deleteCard(planId, listId, cardId) {
   return res.data.data; 
 }
 
+export async function clearTrash(planId) {
+  const res = await api.delete(`${BASE}/${planId}/board/trash/cards`);
+  return res.data.data;
+}
+
 export async function duplicateCard(planId, listId, cardId) {
   const res = await api.post(
     `${BASE}/${planId}/board/lists/${listId}/cards/${cardId}/duplicate`

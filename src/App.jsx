@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useLoadUser } from "./features/auth/hooks/useLoadUser";
+import { useAuthSync } from "./features/auth/hooks/useAuthSync";
 import Toast from "./components/Toast";
 // Auth
 import LoginPage from "./features/auth/pages/LoginPage";
@@ -7,6 +8,7 @@ import RegisterPage from "./features/auth/pages/RegisterPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
+
 // Home
 import HomePage from "./features/home/pages/HomePage";
 // Search
@@ -14,6 +16,8 @@ import SearchPage from "./features/search/pages/SearchPage";
 // Plans
 import PlanListPage from "./features/planFeed/pages/PlanListPage";
 import PlanDashboardPage from "./features/planBoard/pages/PlanDashboardPage";
+import PlanCalendarPage from "./features/planBoard/pages/PlanCalendarPage";
+import ListPlanPage from "./features/planBoard/pages/ListPlanPage";
 //Catalog
 import PlaceDetailPage from "./features/catalog/pages/PlaceDetailPage";
 import LocationResultsPage from "./features/catalog/pages/LocationResultsPage";
@@ -36,6 +40,7 @@ import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 function App() {
   useLoadUser();
+  useAuthSync();
   return (
     <>
     <Router>
@@ -63,6 +68,8 @@ function App() {
         <Route path="/plans" element={<PlanListPage />} />
         <Route path="/plans/:planId" element={<PlanDashboardPage />} />
         <Route path="/plans/join" element={<JoinPlanPage />} />
+        <Route path="/plans/calendar" element={<PlanCalendarPage />} />
+        <Route path="/plans/my-plans" element={<ListPlanPage />} />
 
         {/* Catalog routes */}       
         <Route path="/place/:slug" element={<PlaceDetailPage />} />

@@ -20,14 +20,26 @@ import { useSubmitFromSearchBar } from "../features/catalog/hooks/useSubmitFromS
 /* ───────── Small helpers ───────── */
 function RowField({ label, children, onClick, refBox, className = "" }) {
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <div className="text-sm font-semibold text-white/90">{label}</div>
+        <div className="text-xs md:text-sm font-semibold text-white/90">
+          {label}
+        </div>
       )}
       <div
         ref={refBox}
         onClick={onClick}
-        className="relative flex items-center h-12 rounded-lg border border-gray-300 px-3 bg-white cursor-text"
+        className="
+          relative flex items-center h-12
+          rounded-xl border border-white/40 md:border-slate-200
+          bg-white/95 md:bg-white
+          dark:bg-gray-900/85 dark:border-white/10
+          shadow-sm md:shadow
+          cursor-text
+          px-3 md:px-3.5
+          transition-all duration-150
+          hover:border-primary/70 hover:shadow-md
+        "
       >
         {children}
       </div>
@@ -35,7 +47,6 @@ function RowField({ label, children, onClick, refBox, className = "" }) {
   );
 }
 
-/* (TextInput vẫn để cho tab khác dùng nếu cần) */
 function TextInput({
   label,
   icon,
@@ -49,16 +60,28 @@ function TextInput({
   return (
     <div className={className}>
       {label && (
-        <div className="mb-1.5 text-sm font-semibold text-white/90">
+        <div className="mb-1.5 text-xs md:text-sm font-semibold text-white/90">
           {label}
         </div>
       )}
-      <div className="flex items-center border rounded-lg px-3 py-2 bg-white dark:bg-gray-900/80 dark:border-white/10">
-        <span className="text-gray-400 mr-2">{icon}</span>
+      <div
+        className="
+          flex items-center
+          rounded-xl border border-white/40 md:border-slate-200
+          px-3 md:px-3.5 py-2.5
+          bg-white/95 dark:bg-gray-900/85 dark:border-white/10
+          shadow-sm md:shadow
+          transition-all duration-150
+          hover:border-primary/70 hover:shadow-md
+        "
+      >
+        <span className="text-gray-400 mr-2 flex items-center justify-center">
+          {icon}
+        </span>
         <input
           type="text"
           placeholder={placeholder}
-          className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-200"
+          className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-200 text-sm"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
@@ -73,7 +96,7 @@ function TextInput({
 const formatDate = (d) =>
   d ? new Date(d).toISOString().slice(0, 10) : "";
 
-/* ===== helper VN_DATE cho popup Số đêm ===== */
+/* helper VN_DATE cho popup Số đêm */
 const VN_DATE = (d) =>
   d.toLocaleDateString("vi-VN", {
     weekday: "short",
@@ -82,14 +105,12 @@ const VN_DATE = (d) =>
     year: "numeric",
   });
 
-/* ───────── Hotel Search Form (giống HotelSearchCard) ───────── */
+/* ───────── Hotel Search Form ───────── */
 function HotelSearchForm() {
   const { goHotels } = useSubmitFromSearchBar();
 
-  /* Địa điểm */
   const [dest, setDest] = useState({ text: "", slug: null });
 
-  /* Ngày nhận phòng */
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -97,7 +118,6 @@ function HotelSearchForm() {
   }, []);
   const [checkIn, setCheckIn] = useState(today);
 
-  /* Số đêm */
   const [nights, setNights] = useState(1);
   const [openNights, setOpenNights] = useState(false);
   const nightsBoxRef = useRef(null);
@@ -116,16 +136,14 @@ function HotelSearchForm() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  /* Guests & rooms + tuổi trẻ em */
   const [openGuests, setOpenGuests] = useState(false);
   const guestsBoxRef = useRef(null);
   const [adults, setAdults] = useState(1);
   const [rooms, setRooms] = useState(1);
   const [children, setChildren] = useState(0);
-  const [childrenAges, setChildrenAges] = useState([]); // 0..8 (0 = "<1")
+  const [childrenAges, setChildrenAges] = useState([]);
 
   useEffect(() => {
-    // sync length childrenAges với số lượng trẻ em
     setChildrenAges((prev) => {
       const next = [...prev];
       if (children > next.length) {
@@ -155,7 +173,6 @@ function HotelSearchForm() {
     })),
   ];
 
-  /* Submit */
   const submit = (e) => {
     e.preventDefault();
     goHotels({
@@ -173,9 +190,9 @@ function HotelSearchForm() {
 
   return (
     <form onSubmit={submit} className="space-y-3 md:space-y-4">
-      {/* Hàng 1: Điểm đến (40%) / Ngày nhận phòng / Số đêm */}
+      {/* Hàng 1: Điểm đến / Ngày nhận phòng / Số đêm */}
       <div className="grid grid-cols-12 gap-3 md:gap-4">
-        {/* Điểm đến ~40% */}
+        {/* Điểm đến */}
         <div className="col-span-12 md:col-span-5">
           <RowField label="Điểm đến:">
             <DestinationTypeahead
@@ -188,7 +205,7 @@ function HotelSearchForm() {
           </RowField>
         </div>
 
-        {/* Ngày nhận phòng ~30% */}
+        {/* Ngày nhận phòng */}
         <div className="col-span-12 md:col-span-3">
           <RowField label="Ngày nhận phòng:">
             <FaCalendarAlt className="text-gray-400 mr-2" />
@@ -196,7 +213,7 @@ function HotelSearchForm() {
           </RowField>
         </div>
 
-        {/* Số đêm ~30% */}
+        {/* Số đêm */}
         <div className="col-span-12 md:col-span-4">
           <RowField
             label="Số đêm:"
@@ -207,25 +224,37 @@ function HotelSearchForm() {
             <input
               readOnly
               value={`${nights} đêm`}
-              className="w-full bg-transparent outline-none cursor-pointer"
+              className="w-full bg-transparent outline-none cursor-pointer text-sm text-gray-800 dark:text-gray-100"
             />
-            <span className="ml-auto text-gray-400">▾</span>
+            <span className="ml-auto text-gray-400 text-xs">▾</span>
 
             {openNights && (
               <div
-                className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-gray-200 bg-white shadow-lg max-h-72 overflow-auto"
+                className="
+                  absolute left-0 right-0 top-[calc(100%+6px)] z-50
+                  rounded-xl border border-slate-200 bg-white
+                  shadow-xl max-h-72 overflow-auto
+                "
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {nightList.map((n) => {
                   const d = new Date(checkIn);
                   d.setDate(d.getDate() + n);
+                  const isActive = n === nights;
                   return (
                     <button
                       key={n}
                       type="button"
-                      className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 ${
-                        n === nights ? "bg-blue-50" : ""
-                      }`}
+                      className={`
+                        w-full flex items-center justify-between
+                        px-3.5 py-2 text-left text-sm
+                        transition
+                        ${
+                          isActive
+                            ? "bg-sky-50 text-sky-700"
+                            : "hover:bg-gray-50"
+                        }
+                      `}
                       onMouseDown={(e) => e.stopPropagation()}
                       onClick={() => {
                         setNights(n);
@@ -233,7 +262,12 @@ function HotelSearchForm() {
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                        <span
+                          className={`
+                            w-2 h-2 rounded-full inline-block
+                            ${isActive ? "bg-sky-500" : "bg-gray-300"}
+                          `}
+                        />
                         <span className="font-medium">{n} đêm</span>
                       </div>
                       <div className="text-xs text-gray-500">{VN_DATE(d)}</div>
@@ -246,9 +280,9 @@ function HotelSearchForm() {
         </div>
       </div>
 
-      {/* Hàng 2: Khách & phòng (70%) + nút tìm kiếm */}
+      {/* Hàng 2: Khách & phòng + nút tìm kiếm */}
       <div className="grid grid-cols-12 gap-3 md:gap-4">
-        {/* Khách & phòng ~70% */}
+        {/* Khách & phòng */}
         <div className="col-span-12 md:col-span-8">
           <RowField
             label="Khách & phòng:"
@@ -256,45 +290,53 @@ function HotelSearchForm() {
             refBox={guestsBoxRef}
           >
             <FaUsers className="text-gray-400 mr-2" />
-            <span className="text-gray-800 select-none">
+            <span className="text-gray-800 dark:text-gray-100 text-sm select-none truncate">
               {adults} người lớn, {children} trẻ em, {rooms} phòng
             </span>
-            <span className="ml-auto text-gray-400">▾</span>
+            <span className="ml-auto text-gray-400 text-xs">▾</span>
 
             {openGuests && (
               <div
-                className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-gray-200 bg-white shadow-lg p-4"
+                className="
+                  absolute left-0 right-0 top-[calc(100%+6px)] z-50
+                  rounded-xl border border-slate-200 bg-white shadow-xl p-4
+                  text-sm
+                "
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {/* Người lớn */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-5 h-5 grid place-items-center rounded bg-gray-100">
+                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
                       <FaUsers className="text-gray-600 text-xs" />
                     </span>
-                    <span className="font-medium">Người lớn</span>
+                    <span className="font-medium text-gray-800">
+                      Người lớn
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setAdults((v) => Math.max(1, v - 1));
                       }}
                     >
-                      <FaMinus />
+                      <FaMinus className="text-[10px]" />
                     </button>
-                    <span className="w-6 text-center">{adults}</span>
+                    <span className="w-6 text-center font-medium">
+                      {adults}
+                    </span>
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setAdults((v) => v + 1);
                       }}
                     >
-                      <FaPlus />
+                      <FaPlus className="text-[10px]" />
                     </button>
                   </div>
                 </div>
@@ -302,32 +344,34 @@ function HotelSearchForm() {
                 {/* Trẻ em */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-5 h-5 grid place-items-center rounded bg-gray-100">
+                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
                       👶
                     </span>
-                    <span className="font-medium">Trẻ em</span>
+                    <span className="font-medium text-gray-800">Trẻ em</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setChildren((v) => Math.max(0, v - 1));
                       }}
                     >
-                      <FaMinus />
+                      <FaMinus className="text-[10px]" />
                     </button>
-                    <span className="w-6 text-center">{children}</span>
+                    <span className="w-6 text-center font-medium">
+                      {children}
+                    </span>
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setChildren((v) => Math.min(6, v + 1));
                       }}
                     >
-                      <FaPlus />
+                      <FaPlus className="text-[10px]" />
                     </button>
                   </div>
                 </div>
@@ -335,32 +379,34 @@ function HotelSearchForm() {
                 {/* Phòng */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-5 h-5 grid place-items-center rounded bg-gray-100">
+                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
                       🏠
                     </span>
-                    <span className="font-medium">Phòng</span>
+                    <span className="font-medium text-gray-800">Phòng</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setRooms((v) => Math.max(1, v - 1));
                       }}
                     >
-                      <FaMinus />
+                      <FaMinus className="text-[10px]" />
                     </button>
-                    <span className="w-6 text-center">{rooms}</span>
+                    <span className="w-6 text-center font-medium">
+                      {rooms}
+                    </span>
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setRooms((v) => v + 1);
                       }}
                     >
-                      <FaPlus />
+                      <FaPlus className="text-[10px]" />
                     </button>
                   </div>
                 </div>
@@ -368,17 +414,17 @@ function HotelSearchForm() {
                 {/* Độ tuổi trẻ em */}
                 {children > 0 && (
                   <>
-                    <div className="mt-3 text-sm text-gray-600">
-                      Điền tuổi của trẻ để giúp chúng tôi tìm được phòng phù hợp
+                    <div className="mt-3 text-xs text-gray-600">
+                      Điền tuổi của trẻ để giúp chúng tôi gợi ý phòng phù hợp.
                     </div>
                     <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {childrenAges.map((age, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600">
+                          <span className="text-xs text-gray-600">
                             Trẻ em {idx + 1}
                           </span>
                           <select
-                            className="flex-1 border rounded px-2 py-2"
+                            className="flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-xs"
                             value={age}
                             onMouseDown={(e) => e.stopPropagation()}
                             onChange={(e) => {
@@ -405,7 +451,11 @@ function HotelSearchForm() {
                 <div className="mt-4 flex justify-end">
                   <button
                     type="button"
-                    className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                    className="
+                      px-4 py-2 rounded-full text-xs font-semibold
+                      bg-primary text-white hover:bg-primaryHover
+                      transition
+                    "
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                       e.preventDefault();
@@ -420,12 +470,9 @@ function HotelSearchForm() {
           </RowField>
         </div>
 
-        {/* Nút tìm kiếm ~30% */}
+        {/* Nút tìm kiếm */}
         <div className="col-span-12 md:col-span-4 flex items-end">
-          <Button
-            type="submit"
-            className="w-full h-12 rounded-lg bg-primary hover:bg-primaryHover text-white font-semibold inline-flex items-center justify-center gap-2"
-          >
+          <Button type="submit" className="w-full h-12 rounded-xl text-sm">
             <FaSearch />
             Tìm khách sạn
           </Button>
@@ -435,7 +482,7 @@ function HotelSearchForm() {
   );
 }
 
-/* ───────── Restaurant Search Form (Khu vực + Ngày + Loại ẩm thực) ───────── */
+/* ───────── Restaurant Search Form ───────── */
 function RestaurantSearchForm() {
   const { goRestaurants } = useSubmitFromSearchBar();
 
@@ -459,7 +506,7 @@ function RestaurantSearchForm() {
       onSubmit={submit}
       className="grid grid-cols-12 gap-3 md:gap-4 items-end"
     >
-      {/* Khu vực / Thành phố – THU LẠI: 5 -> 4 */}
+      {/* Khu vực / Thành phố */}
       <div className="col-span-12 md:col-span-4">
         <RowField label="Khu vực / Thành phố">
           <DestinationTypeahead
@@ -472,7 +519,7 @@ function RestaurantSearchForm() {
         </RowField>
       </div>
 
-      {/* Ngày dùng bữa – giữ nguyên 3 */}
+      {/* Ngày dùng bữa */}
       <div className="col-span-12 md:col-span-3">
         <RowField label="Ngày dùng bữa">
           <FaCalendarAlt className="text-gray-400 mr-2" />
@@ -484,7 +531,7 @@ function RestaurantSearchForm() {
         </RowField>
       </div>
 
-      {/* Loại ẩm thực – TĂNG: 2 -> 3 */}
+      {/* Loại ẩm thực */}
       <div className="col-span-12 md:col-span-3">
         <RowField label="Loại ẩm thực">
           <FaUtensils className="text-gray-400 mr-2" />
@@ -493,17 +540,14 @@ function RestaurantSearchForm() {
             value={cuisine}
             onChange={(e) => setCuisine(e.target.value)}
             placeholder="Việt, Nhật, BBQ…"
-            className="w-full bg-transparent outline-none text-sm text-gray-800"
+            className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-100"
           />
         </RowField>
       </div>
 
-      {/* Nút tìm kiếm – giữ 2 */}
+      {/* Nút tìm kiếm */}
       <div className="col-span-12 md:col-span-2 flex items-end">
-        <Button
-          type="submit"
-          className="w-full h-12 rounded-lg bg-primary hover:bg-primaryHover text-white font-semibold inline-flex items-center justify-center gap-2"
-        >
+        <Button type="submit" className="w-full h-12 rounded-xl text-sm">
           <FaSearch />
           Tìm quán ăn
         </Button>
@@ -512,7 +556,7 @@ function RestaurantSearchForm() {
   );
 }
 
-/* main SearchBar */
+/* ───────── Main SearchBar ───────── */
 export default function SearchBar() {
   const [activeTab, setActiveTab] = useState("hotel");
   const navigate = useNavigate();
@@ -549,36 +593,70 @@ export default function SearchBar() {
 
   return (
     <div className="w-full max-w-6xl mx-auto relative z-20">
-      {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 md:gap-3">
-        {tabs.map((t) => {
-          const isActive = activeTab === t.key;
-          return (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
-              className={[
-                "group inline-flex items-center gap-2",
-                "px-4 md:px-5 py-2 md:py-2.5 rounded-full text-base font-semibold",
-                "transition-all duration-150",
-                isActive
-                  ? "bg-white text-gray-900 shadow ring-1 ring-white/70"
-                  : "text-white/90 hover:text-white hover:ring-2 hover:ring-white/90 rounded-full",
-              ].join(" ")}
-            >
-              <span className={isActive ? "text-primary" : "text-white"}>
-                {t.icon}
-              </span>
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
+    {/* Tabs */}
+    <div className="flex flex-wrap items-center gap-2 md:gap-3">
+      {tabs.map((t) => {
+        const isActive = activeTab === t.key;
 
-      <div className="mt-3 md:mt-4 mb-4 md:mb-5 h-[2px] bg-white/50 rounded-full"></div>
+        // màu gradient theo từng loại tab
+        const gradientMap = {
+          hotel: "from-sky-500 to-blue-600",
+          restaurant: "from-sky-500 to-blue-600",
+          locations: "from-sky-500 to-blue-600",
+          plans: "from-sky-500 to-blue-600",
+        };
+
+        return (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            className={[
+              "group inline-flex items-center gap-2 select-none",
+              "px-4 md:px-5 py-2 md:py-2.5 rounded-full text-sm md:text-base font-semibold",
+              "transition-all duration-300 ease-out",
+              isActive
+                ? `
+                  text-white shadow-md
+                  bg-gradient-to-r ${gradientMap[t.key]}
+                  hover:shadow-lg hover:-translate-y-0.5
+                  ring-1 ring-black/5
+                `
+                : `
+                  text-white/90
+                  hover:text-white
+                  hover:ring-2 hover:ring-white/70
+                  bg-white/10 backdrop-blur
+                  hover:bg-white/20
+                  transition-all
+                `,
+            ].join(" ")}
+          >
+            <span
+              className={`${
+                isActive ? "text-white" : "text-white/80"
+              } transition-colors duration-300`}
+            >
+              {t.icon}
+            </span>
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+
+    {/* Divider */}
+    <div className="mt-3 md:mt-4 mb-4 md:mb-5 h-[2px] bg-white/40 rounded-full" />
+
 
       {/* Content */}
-      <div className="min-h-[168px] md:min-h-[152px]">
+      <div
+        key={activeTab}
+        className="
+          transition-all duration-300
+          opacity-100 translate-y-0
+          animate-[fadeSlide_.35s_ease-out]
+        "
+      >
         {activeTab === "hotel" && <HotelSearchForm />}
         {activeTab === "restaurant" && <RestaurantSearchForm />}
 
@@ -587,7 +665,7 @@ export default function SearchBar() {
             className="grid grid-cols-12 gap-3 md:gap-4"
             onSubmit={(e) => e.preventDefault()}
           >
-            {/* Ô nhập địa điểm – dùng lại RowField cho đồng bộ style */}
+            {/* Ô nhập địa điểm */}
             <div className="col-span-12 md:col-span-10">
               <RowField label="Địa điểm">
                 <DestinationTypeahead
@@ -596,19 +674,18 @@ export default function SearchBar() {
                   className="flex-1 min-w-0 w-full !max-w-none !mx-0"
                   onSubmit={goLocations}
                   buttonSlot={({ submit }) => {
-                    // lưu hàm submit nội bộ để nút bên phải gọi
                     locationSubmitRef.current = submit;
-                    return null; // không render nút ở trong
+                    return null;
                   }}
                 />
               </RowField>
             </div>
 
-            {/* Nút riêng giống các tab khác */}
+            {/* Nút tìm kiếm địa điểm */}
             <div className="col-span-12 md:col-span-2 flex items-end">
               <Button
                 type="button"
-                className="w-full h-12 rounded-lg bg-primary hover:bg-primaryHover text-white font-semibold inline-flex items-center justify-center gap-2"
+                className="w-full h-12 rounded-xl text-sm"
                 onClick={() => {
                   if (locationSubmitRef.current) locationSubmitRef.current();
                 }}
@@ -633,22 +710,32 @@ export default function SearchBar() {
               onChange={() => {}}
               className="col-span-12 md:col-span-8"
             />
+
             <div className="col-span-6 md:col-span-2">
-              <div className="mb-1.5 text-sm font-semibold text-white/90">
+              <div className="mb-1.5 text-xs md:text-sm font-semibold text-white/90">
                 Ngày bắt đầu
               </div>
-              <div className="flex items-center border rounded-lg px-3 py-2 bg-white/90 dark:bg-gray-900/80 supports-[backdrop-filter]:backdrop-blur dark:border-white/10">
+              <div
+                className="
+                  flex items-center
+                  rounded-xl border border-white/40 md:border-slate-200
+                  px-3 md:px-3.5 py-2.5
+                  bg-white/95 dark:bg-gray-900/85 dark:border-white/10
+                  shadow-sm md:shadow
+                "
+              >
                 <FaCalendarAlt className="text-gray-400 mr-2" />
                 <input
                   type="date"
-                  className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-200"
+                  className="w-full outline-none bg-transparent text-sm text-gray-800 dark:text-gray-200"
                 />
               </div>
             </div>
+
             <div className="col-span-6 md:col-span-2 flex items-end">
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primaryHover"
+                className="w-full h-12 rounded-xl text-sm"
               >
                 Tạo lịch trình
               </Button>

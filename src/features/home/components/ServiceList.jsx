@@ -1,4 +1,3 @@
-// src/features/home/components/ServiceList.jsx
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCatalogPlaces } from "../../catalog/hooks/useCatalogPlaces";
@@ -7,20 +6,17 @@ export default function ServiceList() {
   const { items, loading, error, fetchPlaces } = useCatalogPlaces();
 
   useEffect(() => {
-    // Lấy 6 POI phổ biến (page=0, size=6)
     fetchPlaces({
       page: 0,
       size: 6,
-      // nếu backend có sort theo popularity thì có thể thêm:
-      // sort: "popularity,DESC",
-      kind: "POI", // phòng khi backend còn filter theo kind
+      kind: "POI",
     });
   }, [fetchPlaces]);
 
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           Đang tải các địa điểm tham quan...
         </div>
       );
@@ -36,7 +32,7 @@ export default function ServiceList() {
 
     if (!items || items.length === 0) {
       return (
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           Hiện chưa có địa điểm nổi bật để hiển thị.
         </div>
       );
@@ -55,25 +51,21 @@ export default function ServiceList() {
           return (
             <Link
               key={poi.id || poi.slug}
-              // ❗ Nếu route detail của bạn là dạng khác (vd: "/places/:slug")
-              // thì đổi lại cho đúng:
-              // to={`/places/${poi.slug}`}
               to={`/place/${poi.slug}`}
-              className="relative block overflow-hidden rounded-2xl cursor-pointer shadow-md group"
+              className="relative block overflow-hidden rounded-2xl cursor-pointer shadow-md shadow-slate-200/70 dark:shadow-black/40 group bg-gray-900"
             >
-              {/* Ảnh nền */}
               <img
                 src={cover}
                 alt={poi.name}
                 className="w-full h-44 md:h-52 object-cover transform group-hover:scale-105 transition duration-700"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent group-hover:from-black/80 group-hover:via-black/40 transition duration-500" />
 
-              {/* Overlay mờ khi hover */}
-              <div className="absolute inset-0 bg-black/25 group-hover:bg-black/45 transition duration-500" />
-
-              {/* Tên địa điểm trên ảnh */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <h3 className="text-white text-lg md:text-xl font-semibold drop-shadow-lg tracking-wide text-center px-3">
+              <div className="absolute inset-x-3 bottom-3">
+                <span className="inline-flex px-2 py-1 text-[11px] rounded-full bg-white/15 text-slate-100 border border-white/20 mb-1.5">
+                  Điểm đến phổ biến
+                </span>
+                <h3 className="text-white text-lg font-semibold drop-shadow-md tracking-wide line-clamp-2">
                   {poi.name}
                 </h3>
               </div>
@@ -85,11 +77,28 @@ export default function ServiceList() {
   };
 
   return (
-    <section className="py-12 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-black">
-        Địa điểm phổ biến
-      </h2>
-      {renderContent()}
+    <section className="py-12 md:py-14 bg-slate-50 dark:bg-gray-950">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-50">
+              Địa điểm phổ biến
+            </h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Gợi ý những nơi được nhiều du khách tìm kiếm và yêu thích.
+            </p>
+          </div>
+
+          <a
+            href="/places"
+            className="hidden sm:inline-flex items-center text-sm text-primary hover:text-primaryHover"
+          >
+            Xem tất cả địa điểm →
+          </a>
+        </div>
+
+        {renderContent()}
+      </div>
     </section>
   );
 }

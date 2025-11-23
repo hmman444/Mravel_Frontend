@@ -8,6 +8,90 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
+const TYPE_STYLES = {
+  TRANSPORT: {
+    bg: "bg-sky-50",
+    border: "border-sky-100",
+    accent: "text-sky-600",
+    pillBg: "bg-sky-100",
+    pillText: "text-sky-800",
+    icon: "🚕",
+    label: "Di chuyển",
+  },
+  FOOD: {
+    bg: "bg-orange-50",
+    border: "border-orange-100",
+    accent: "text-orange-600",
+    pillBg: "bg-orange-100",
+    pillText: "text-orange-800",
+    icon: "🥘",
+    label: "Ăn uống",
+  },
+  STAY: {
+    bg: "bg-violet-50",
+    border: "border-violet-100",
+    accent: "text-violet-600",
+    pillBg: "bg-violet-100",
+    pillText: "text-violet-800",
+    icon: "🛏️",
+    label: "Nghỉ ngơi",
+  },
+  ENTERTAIN: {
+    bg: "bg-emerald-50",
+    border: "border-emerald-100",
+    accent: "text-emerald-600",
+    pillBg: "bg-emerald-100",
+    pillText: "text-emerald-800",
+    icon: "🎡",
+    label: "Vui chơi",
+  },
+  SIGHTSEEING: {
+    bg: "bg-amber-50",
+    border: "border-amber-100",
+    accent: "text-amber-600",
+    pillBg: "bg-amber-100",
+    pillText: "text-amber-800",
+    icon: "🏛️",
+    label: "Tham quan",
+  },
+  SHOPPING: {
+    bg: "bg-pink-50",
+    border: "border-pink-100",
+    accent: "text-pink-600",
+    pillBg: "bg-pink-100",
+    pillText: "text-pink-800",
+    icon: "🛍️",
+    label: "Mua sắm",
+  },
+  CINEMA: {
+    bg: "bg-rose-50",
+    border: "border-rose-100",
+    accent: "text-rose-600",
+    pillBg: "bg-rose-100",
+    pillText: "text-rose-800",
+    icon: "🎬",
+    label: "Xem phim",
+  },
+  EVENT: {
+    bg: "bg-indigo-50",
+    border: "border-indigo-100",
+    accent: "text-indigo-600",
+    pillBg: "bg-indigo-100",
+    pillText: "text-indigo-800",
+    icon: "🎤",
+    label: "Sự kiện",
+  },
+  OTHER: {
+    bg: "bg-slate-50",
+    border: "border-slate-100",
+    accent: "text-slate-600",
+    pillBg: "bg-slate-100",
+    pillText: "text-slate-800",
+    icon: "📝",
+    label: "Hoạt động",
+  },
+};
+
 export default function PlanCard({
   card,
   listId,
@@ -18,6 +102,7 @@ export default function PlanCard({
   setActiveMenu,
   setConfirmDeleteCard,
   canEdit = true,
+  onOpenActivityModal
 }) {
   const btnRef = useRef(null);
   const menuRef = useRef(null);
@@ -56,57 +141,92 @@ export default function PlanCard({
   const formatTime = (t) =>
     t ? String(t).split(":").slice(0, 2).join(":") : "";
 
-  const hasStart = !!card.start;
-  const hasEnd = !!card.end;
+  const hasStart = !!card.startTime;
+  const hasEnd = !!card.endTime;
+
+  const typeStyle =
+    card.activityType && TYPE_STYLES[card.activityType]
+      ? TYPE_STYLES[card.activityType]
+      : TYPE_STYLES.OTHER;
+
+  const displayIcon = card.activityTypeIcon || typeStyle.icon;
+  const displayLabel = card.activityTypeLabel || typeStyle.label;
+
+  const showCost = card.estimatedCost != null || card.actualCost != null;
+  const estimated = card.estimatedCost ?? null;
+  const actual = card.actualCost ?? null;
+
+  const hasDescription = card.description && card.description.trim().length > 0;
 
   return (
     <div
-      onClick={() => setEditCard({ ...card, listId })}
-      className="
-        group
+      onClick={() => {
+        if (canEdit && onOpenActivityModal) {
+          onOpenActivityModal(listId, card);
+        }
+      }}
+      className={`
+        group relative
         p-3 rounded-xl mb-2 
-        bg-[#f3f6fa] dark:bg-gray-800/90
-        border border-gray-200/60 dark:border-gray-700/50
-        shadow-[0_1px_3px_rgba(0,0,0,0.07)]
-        hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)]
+        border ${typeStyle.border} dark:border-gray-700/60
+        shadow-[0_1px_4px_rgba(0,0,0,0.06)]
+        hover:shadow-[0_6px_18px_rgba(0,0,0,0.12)]
+        hover:-translate-y-[1px]
         transition-all duration-200 
         cursor-pointer
         animate-fadeIn
-      "
+        ${typeStyle.bg} dark:bg-gray-800/90
+      `}
     >
-      {/* Labels */}
-      {card.labels?.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {card.labels.slice(0, 4).map((lbl) => (
-            <span
-              key={lbl.id}
-              className={`
-                ${lbl.color}
-                text-[10px] text-white 
-                px-2 py-[2px] rounded-md 
-                shadow-sm
-              `}
-            >
-              {lbl.text}
-            </span>
-          ))}
-          {card.labels.length > 4 && (
-            <span className="text-[10px] text-gray-400">
-              +{card.labels.length - 4}
-            </span>
-          )}
-        </div>
-      )}
+      {/* Accent line bên trái */}
+      <div
+        className={`
+          absolute inset-y-2 left-0 w-[3px] rounded-full 
+          ${typeStyle.accent} opacity-70
+          bg-current
+        `}
+      />
 
-      {/* Main row */}
-      <div className="flex items-center gap-2">
-        {/* Checkbox */}
+      {/* Activity pill + cost */}
+      <div className="pl-1.5 pr-0.5 mb-1.5 flex items-center justify-between gap-2">
+        <div
+          className={`
+            inline-flex items-center gap-1.5 px-2 py-[2px] rounded-full border text-[10px] font-medium
+            ${typeStyle.pillBg} ${typeStyle.pillText} border-white/60 shadow-sm
+          `}
+        >
+          <span>{displayIcon}</span>
+          <span className="truncate max-w-[120px]">{displayLabel}</span>
+        </div>
+
+        {showCost && (
+          <div className="flex flex-col items-end gap-[2px]">
+            {estimated != null && (
+              <span className="text-[11px] font-semibold text-gray-700/80 dark:text-gray-100">
+                💰 {estimated.toLocaleString("vi-VN")}đ
+              </span>
+            )}
+            {actual != null && actual !== estimated && (
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                Thực tế:{" "}
+                <span className="font-semibold">
+                  {actual.toLocaleString("vi-VN")}đ
+                </span>
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Main row: checkbox + title + menu */}
+      <div className="pl-1.5 flex items-start gap-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
             if (canEdit) toggleDone(listId, card.id);
           }}
           className={`
+            mt-[2px]
             w-5 h-5 p-[2px]
             rounded-full border flex items-center justify-center
             shadow-sm transition-all duration-200
@@ -117,25 +237,49 @@ export default function PlanCard({
             }
           `}
         >
-          {card.done && <FaCheck className="text-xs" />}
+          {card.done && <FaCheck className="text-[11px]" />}
         </button>
 
-        {/* Title */}
-        <span
-          className={`
-            flex-1 text-sm 
-            transition 
-            ${
-              card.done
-                ? "text-gray-400 line-through"
-                : "text-gray-900 dark:text-gray-100"
-            }
-          `}
-        >
-          {card.text}
-        </span>
+        <div className="flex-1 min-w-0">
+          <div
+            className={`
+              text-sm font-medium 
+              ${card.done ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"}
+              transition-colors
+            `}
+          >
+            {card.text}
+          </div>
 
-        {/* Menu button */}
+          {hasDescription && (
+            <div
+              className={`
+                mt-0.5 text-[11px] text-gray-600 dark:text-gray-300 
+                line-clamp-2 group-hover:text-gray-800 dark:group-hover:text-gray-100
+              `}
+            >
+              {card.description}
+            </div>
+          )}
+
+          {(hasStart || hasEnd) && (
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-300">
+              <FaCalendarAlt className="opacity-70" />
+              {hasStart && (
+                <span className="px-1.5 py-[1px] rounded-lg bg-white/70 dark:bg-gray-900/60 border border-gray-200/70 dark:border-gray-700/80">
+                  {formatTime(card.startTime)}
+                </span>
+              )}
+              {hasStart && hasEnd && <span className="mx-0.5">→</span>}
+              {hasEnd && (
+                <span className="px-1.5 py-[1px] rounded-lg bg-white/70 dark:bg-gray-900/60 border border-gray-200/70 dark:border-gray-700/80">
+                  {formatTime(card.endTime)}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         {canEdit && (
           <button
             ref={btnRef}
@@ -144,7 +288,7 @@ export default function PlanCard({
               setActiveMenu(activeMenu === card.id ? null : card.id);
             }}
             className="
-              p-1.5 rounded-lg
+              ml-1 p-1.5 rounded-lg
               text-gray-500 hover:text-gray-700 
               hover:bg-gray-200/50 
               dark:hover:bg-gray-700/50 
@@ -156,41 +300,6 @@ export default function PlanCard({
         )}
       </div>
 
-      {/* Time */}
-      {(hasStart || hasEnd) && (
-        <div className="mt-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-300">
-          <FaCalendarAlt className="opacity-70" />
-          {hasStart && <span>{formatTime(card.start)}</span>}
-          {hasStart && hasEnd && <span className="mx-1">→</span>}
-          {hasEnd && <span>{formatTime(card.end)}</span>}
-        </div>
-      )}
-
-      {/* Priority */}
-      {card.priority && (
-        <div
-          className={`
-            mt-2 inline-block text-[11px] px-2 py-[2px] rounded-md 
-            font-medium shadow-sm
-            ${
-              card.priority === "high"
-                ? "bg-red-500/90 text-white"
-                : card.priority === "medium"
-                ? "bg-yellow-400/90 text-gray-900"
-                : "bg-green-500/90 text-white"
-            }
-          `}
-        >
-          Ưu tiên:{" "}
-          {card.priority === "high"
-            ? "Cao"
-            : card.priority === "medium"
-            ? "Trung bình"
-            : "Thấp"}
-        </div>
-      )}
-
-      {/* --- DROPDOWN MENU --- */}
       {activeMenu === card.id &&
         createPortal(
           <div
@@ -210,7 +319,6 @@ export default function PlanCard({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Duplicate */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -228,7 +336,6 @@ export default function PlanCard({
               <FaCopy className="text-gray-500" /> Tạo bản sao
             </button>
 
-            {/* Delete */}
             <button
               onClick={(e) => {
                 e.stopPropagation();

@@ -1,209 +1,367 @@
+"use client";
+
 import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import vi from "date-fns/locale/vi";
+
 import {
-  CameraIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  LockClosedIcon,
-} from "@heroicons/react/24/solid";
-import { createPlan } from "../services/planService";
+  FaFlag,
+  FaAlignLeft,
+  FaCalendarAlt,
+  FaLock,
+  FaUsers,
+  FaGlobe,
+  FaMoneyBillWave,
+} from "react-icons/fa";
+
+import VisibilityDropdown from "../../planBoard/components/VisibilityDropdown";
+import CurrencyDropdown from "./CurrencyDropdown";
+
 import { useSelector } from "react-redux";
+import { createPlan } from "../services/planService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
+
+// Đăng ký locale tiếng Việt cho react-datepicker
+registerLocale("vi", vi);
 
 export default function NewPlanModal({ open, onClose, onCreated }) {
   const { user } = useSelector((s) => s.auth);
+
   const [form, setForm] = useState({
     title: "",
     description: "",
-    startDate: "",
-    endDate: "",
+    startDate: null,
+    endDate: null,
     visibility: "PRIVATE",
-    images: [],
+    budgetCurrency: "VND",
+    budgetTotal: "",
+    budgetPerPerson: "",
   });
-  const [uploading, setUploading] = useState(false);
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    const urls = files.map((f) => URL.createObjectURL(f));
-    setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleStart = (d) => {
+    if (form.endDate && d > form.endDate)
+      return showError("Ngày bắt đầu không thể sau ngày kết thúc!");
+    setForm((f) => ({ ...f, startDate: d }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user?.id) {
-      showError("Bạn cần đăng nhập để tạo lịch trình!");
-      return;
-    }
+  const handleEnd = (d) => {
+    if (form.startDate && d < form.startDate)
+      return showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+    setForm((f) => ({ ...f, endDate: d }));
+  };
 
-    setUploading(true);
+  const iconMap = {
+    PRIVATE: <FaLock className="text-gray-500" />,
+    FRIENDS: <FaUsers className="text-emerald-500" />,
+    PUBLIC: <FaGlobe className="text-blue-500" />,
+  };
+
+  const visibilityLabel = {
+    PRIVATE: "Riêng tư",
+    FRIENDS: "Bạn bè",
+    PUBLIC: "Công khai",
+  };
+
+  const submit = async (e) => {
+    e?.preventDefault();
+
+    if (!user?.id) return showError("Bạn cần đăng nhập!");
+    if (!form.startDate || !form.endDate)
+      return showError("Vui lòng chọn ngày hợp lệ!");
+
+    setSubmitting(true);
+
     try {
-      const res = await createPlan(form, user);
-      showSuccess("🎉 Đã tạo lịch trình thành công!");
+      const payload = {
+        ...form,
+        startDate: form.startDate.toISOString().substring(0, 10),
+        endDate: form.endDate.toISOString().substring(0, 10),
+      };
+
+      const res = await createPlan(payload, user);
+      showSuccess("🎉 Tạo lịch trình thành công!");
       onCreated?.(res);
       onClose();
-      setForm({
-        title: "",
-        description: "",
-        startDate: "",
-        endDate: "",
-        visibility: "PRIVATE",
-        images: [],
-      });
-    } catch (err) {
-      console.error(err);
-      showError("Tạo thất bại!");
+    } catch {
+      showError("Không thể tạo lịch trình!");
     } finally {
-      setUploading(false);
+      setSubmitting(false);
     }
   };
 
-  const visibilityIcon = {
-    PUBLIC: <GlobeAltIcon className="w-5 h-5 text-blue-500" />,
-    FRIENDS: <UserGroupIcon className="w-5 h-5 text-green-500" />,
-    PRIVATE: <LockClosedIcon className="w-5 h-5 text-gray-500" />,
-  }[form.visibility];
+  const inputBox =
+    "flex-1 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm " +
+    "shadow-sm focus-within:ring-2 focus-within:ring-sky-400 transition";
+
+  const iconChip =
+    "flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 text-sky-500";
+
+  const fieldLabel = "text-xs font-medium text-gray-600 px-1 mb-1 block";
 
   return (
     <Transition appear show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-[100]" onClose={onClose}>
-        {/* Overlay mờ nền */}
+      <Dialog as="div" className="relative z-[2000]" onClose={onClose}>
+        {/* BACKDROP */}
         <Transition.Child
           as={Fragment}
-          enter="ease-out duration-300"
+          enter="duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-200"
+          leave="duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+          <div className="fixed inset-0 bg-black/25 backdrop-blur-[3px]" />
         </Transition.Child>
 
-        {/* Nội dung modal */}
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center px-3 py-8 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95 translate-y-2"
-              enterTo="opacity-100 scale-100 translate-y-0"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100 translate-y-0"
-              leaveTo="opacity-0 scale-95 translate-y-2"
+        {/* MODAL */}
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-250"
+            enterFrom="opacity-0 scale-95 translate-y-2"
+            enterTo="opacity-100 scale-100 translate-y-0"
+            leave="duration-200"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95 translate-y-2"
+          >
+            <Dialog.Panel
+              className="
+                w-full max-w-md rounded-2xl p-6
+                bg-white
+                border border-gray-100 
+                shadow-[0_18px_55px_rgba(0,0,0,0.14)]
+              "
             >
-              <Dialog.Panel className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6 transition-all">
-                <Dialog.Title className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  ✈️ Tạo lịch trình mới
-                </Dialog.Title>
+              {/* HEADER */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <FaFlag />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Tạo lịch trình mới
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Lên kế hoạch chuyến đi và chia sẻ với mọi người
+                  </p>
+                </div>
+              </div>
 
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  <input
-                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:text-white"
-                    placeholder="Tiêu đề"
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm({ ...form, title: e.target.value })
-                    }
-                    required
-                  />
-                  <textarea
-                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:text-white"
-                    placeholder="Mô tả"
-                    rows="3"
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                  />
-                  <div className="flex gap-3">
-                    <input
-                      type="date"
-                      className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:text-white"
-                      value={form.startDate}
-                      onChange={(e) =>
-                        setForm({ ...form, startDate: e.target.value })
-                      }
-                    />
-                    <input
-                      type="date"
-                      className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:text-white"
-                      value={form.endDate}
-                      onChange={(e) =>
-                        setForm({ ...form, endDate: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      {visibilityIcon}
-                      {form.visibility}
-                    </span>
-                    <select
-                      value={form.visibility}
-                      onChange={(e) =>
-                        setForm({ ...form, visibility: e.target.value })
-                      }
-                      className="border rounded-md px-2 py-1 text-sm dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="PRIVATE">Riêng tư</option>
-                      <option value="FRIENDS">Bạn bè</option>
-                      <option value="PUBLIC">Công khai</option>
-                    </select>
-                  </div>
-
-                  {/* Upload ảnh */}
-                  <div className="border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    <label
-                      htmlFor="upload"
-                      className="cursor-pointer text-gray-500 text-sm"
-                    >
-                      <CameraIcon className="w-6 h-6 mx-auto mb-1" />
-                      Thêm ảnh
-                    </label>
-                    <input
-                      id="upload"
-                      type="file"
-                      hidden
-                      multiple
-                      onChange={handleFileChange}
-                    />
-                  </div>
-
-                  {form.images.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {form.images.map((img, i) => (
-                        <img
-                          key={i}
-                          src={img}
-                          alt=""
-                          className="w-full h-20 object-cover rounded-lg shadow-sm"
-                        />
-                      ))}
+              {/* FORM */}
+              <form
+                className="space-y-2"
+                onSubmit={(e) => e.preventDefault()}
+              >
+                {/* TITLE */}
+                <div className="space-y-1">
+                  <label className={fieldLabel}>Tiêu đề lịch trình</label>
+                  <div className="flex items-center gap-3">
+                    <div className={iconChip}>
+                      <FaFlag />
                     </div>
-                  )}
-
-                  {/* Buttons */}
-                  <div className="flex justify-end gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="px-4 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={uploading}
-                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                    >
-                      {uploading ? "Đang tạo..." : "Tạo"}
-                    </button>
+                    <div className={inputBox}>
+                      <input
+                        value={form.title}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, title: e.target.value }))
+                        }
+                        placeholder="Ví dụ: Đà Lạt 3N2Đ, Team building..."
+                        className="w-full bg-transparent outline-none"
+                      />
+                    </div>
                   </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+                </div>
+
+                {/* DESCRIPTION */}
+                <div className="space-y-1">
+                  <label className={fieldLabel}>Mô tả</label>
+                  <div className="flex items-start gap-3">
+                    <div className={iconChip}>
+                      <FaAlignLeft />
+                    </div>
+                    <div className={inputBox}>
+                      <textarea
+                        rows={2}
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            description: e.target.value,
+                          }))
+                        }
+                        placeholder="Ghi chú nhanh về lịch trình, mục đích chuyến đi..."
+                        className="w-full bg-transparent outline-none resize-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* DATE RANGE */}
+                <div className="space-y-2">
+                  <p className={fieldLabel}>Thời gian chuyến đi</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-500 px-1">
+                        Từ ngày
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <div className={iconChip}>
+                          <FaCalendarAlt />
+                        </div>
+                        <div className={inputBox}>
+                          <DatePicker
+                            selected={form.startDate}
+                            onChange={handleStart}
+                            placeholderText="Chọn ngày bắt đầu"
+                            dateFormat="dd/MM/yyyy"
+                            locale="vi"
+                            className="w-full bg-transparent outline-none"
+                            calendarClassName="rounded-xl shadow-xl bg-white border border-gray-200"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-500 px-1">
+                        Đến ngày
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <div className={iconChip}>
+                          <FaCalendarAlt />
+                        </div>
+                        <div className={inputBox}>
+                          <DatePicker
+                            selected={form.endDate}
+                            onChange={handleEnd}
+                            minDate={form.startDate}
+                            placeholderText="Chọn ngày kết thúc"
+                            dateFormat="dd/MM/yyyy"
+                            locale="vi"
+                            className="w-full bg-transparent outline-none"
+                            calendarClassName="rounded-xl shadow-xl bg-white border border-gray-200"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* VISIBILITY */}
+                <div className="space-y-1">
+                  <label className={fieldLabel}>Quyền hiển thị</label>
+                  <div className="flex items-center gap-3">
+                    <div className={iconChip}>{iconMap[form.visibility]}</div>
+                    <div className={`${inputBox} flex items-center justify-between`}>
+                      <div className="text-sm text-gray-700">
+                        {visibilityLabel[form.visibility]}
+                      </div>
+                      <VisibilityDropdown
+                        value={form.visibility}
+                        onChange={(v) =>
+                          setForm((f) => ({ ...f, visibility: v }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* BUDGET */}
+                <div className="space-y-2">
+                  <label className={fieldLabel}>Ngân sách dự kiến</label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={iconChip}>
+                        <FaMoneyBillWave />
+                      </div>
+                      <div className={inputBox}>
+                        <CurrencyDropdown
+                          value={form.budgetCurrency}
+                          onChange={(v) =>
+                            setForm((f) => ({ ...f, budgetCurrency: v }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className={iconChip}>
+                        <FaMoneyBillWave />
+                      </div>
+                      <div className={inputBox}>
+                        <input
+                          type="number"
+                          placeholder="Ngân sách tổng (ước tính)"
+                          value={form.budgetTotal}
+                          onChange={(e) =>
+                            setForm((f) => ({
+                              ...f,
+                              budgetTotal: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className={iconChip}>
+                      <FaMoneyBillWave />
+                    </div>
+                    <div className={inputBox}>
+                      <input
+                        type="number"
+                        placeholder="Ngân sách / người (nếu có)"
+                        value={form.budgetPerPerson}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            budgetPerPerson: e.target.value,
+                          }))
+                        }
+                        className="w-full bg-transparent outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* BUTTONS */}
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="
+                      px-4 py-2 rounded-xl border border-gray-300 text-sm 
+                      hover:bg-gray-100 transition
+                    "
+                  >
+                    Hủy
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => submit()}
+                    disabled={submitting}
+                    className="
+                      px-6 py-2 rounded-xl text-sm text-white font-semibold
+                      bg-gradient-to-r from-sky-500 to-indigo-500
+                      shadow hover:shadow-lg hover:-translate-y-0.5
+                      transition disabled:opacity-50
+                    "
+                  >
+                    {submitting ? "Đang tạo..." : "Tạo lịch trình"}
+                  </button>
+                </div>
+              </form>
+            </Dialog.Panel>
+          </Transition.Child>
         </div>
       </Dialog>
     </Transition>

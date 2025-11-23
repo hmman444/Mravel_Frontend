@@ -3,12 +3,11 @@ import { createPortal } from "react-dom";
 import { FaChevronDown } from "react-icons/fa";
 
 const OPTIONS = [
-  { value: "PRIVATE", label: "Riêng tư" },
-  { value: "FRIENDS", label: "Bạn bè" },
-  { value: "PUBLIC", label: "Công khai" },
+  { value: "VND", label: "VND (₫)" },
+  { value: "USD", label: "USD ($)" },
 ];
 
-export default function VisibilityDropdown({ value, onChange }) {
+export default function CurrencyDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [posReady, setPosReady] = useState(false);
@@ -18,11 +17,11 @@ export default function VisibilityDropdown({ value, onChange }) {
   useEffect(() => {
     if (open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const dropdownWidth = 180;
+      const width = 160;
 
       setPos({
         top: rect.bottom + 6,
-        left: rect.right - dropdownWidth,
+        left: rect.right - width,
       });
 
       requestAnimationFrame(() => setPosReady(true));
@@ -31,56 +30,39 @@ export default function VisibilityDropdown({ value, onChange }) {
     }
   }, [open]);
 
-
   useEffect(() => {
     if (!open) return;
 
     const close = () => setOpen(false);
     document.addEventListener("mousedown", close);
-
     return () => document.removeEventListener("mousedown", close);
   }, [open]);
-
-  const toggle = (e) => {
-    e.stopPropagation();
-    setOpen(!open);
-  };
-
-  const handleSelect = (val) => {
-    onChange(val);
-    setOpen(false);
-  };
 
   const dropdown =
     open && posReady
       ? createPortal(
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
             className="
-              fixed z-[99999] w-44
+              fixed z-[99999] w-40
               bg-white dark:bg-gray-900 
               border border-gray-200 dark:border-gray-700
               rounded-xl shadow-lg
-              origin-top-right
-              opacity-100 scale-100
-              transition-all duration-150 ease-out
+              origin-top-right animate-[fadeDown_0.15s_ease-out]
             "
             style={{ top: pos.top, left: pos.left }}
           >
             {OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => handleSelect(opt.value)}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
                 className={`
-                  w-full text-left px-3 py-2 text-sm 
-                  hover:bg-gray-100 dark:hover:bg-gray-800 
-                  transition
-                  ${
-                    value === opt.value
-                      ? "text-blue-600 font-semibold"
-                      : "text-gray-700 dark:text-gray-200"
-                  }
+                  w-full text-left px-3 py-2 text-sm
+                  hover:bg-gray-100 dark:hover:bg-gray-800 transition
+                  ${value === opt.value ? "text-blue-600 font-semibold" : ""}
                 `}
               >
                 {opt.label}
@@ -95,15 +77,16 @@ export default function VisibilityDropdown({ value, onChange }) {
     <>
       <button
         ref={buttonRef}
-        onClick={toggle}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(!open);
+        }}
         className="
-          flex items-center gap-2
-          px-3 py-1.5 rounded-md
-          border border-gray-300 dark:border-gray-700
-          bg-white dark:bg-gray-900
-          text-sm text-gray-700 dark:text-gray-200
-          hover:bg-gray-100 dark:hover:bg-gray-800
-          transition
+          flex items-center justify-between gap-2 w-full
+          px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700
+          bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200
+          shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition
         "
       >
         {OPTIONS.find((o) => o.value === value)?.label}
