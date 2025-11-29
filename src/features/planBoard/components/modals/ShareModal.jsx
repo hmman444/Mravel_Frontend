@@ -1,6 +1,13 @@
 // src/features/planBoard/components/modals/ShareModal.jsx
+"use client";
+
 import { useEffect, useState } from "react";
-import { FaTimes, FaCopy, FaUserCircle } from "react-icons/fa";
+import {
+  FaTimes,
+  FaCopy,
+  FaUserCircle,
+  FaShareAlt,
+} from "react-icons/fa";
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 import AccessRow from "./AccessRow";
 import ConfirmModal from "../../../../components/ConfirmModal";
@@ -44,7 +51,6 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   const [inviteRole, setInviteRole] = useState("editor");
 
   const [visibility, setVisibility] = useState("PRIVATE");
-
   const [accessList, setAccessList] = useState([]);
 
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
@@ -144,7 +150,6 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     if (!backend) return;
 
     if (isViewer) return;
-
     if (isEditor && user.userId !== currentUserId) return;
 
     try {
@@ -192,7 +197,9 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
         `${window.location.origin}/plans/${planId}`
       );
       showSuccess("Đã sao chép liên kết!");
-    } catch {}
+    } catch {
+      // ignore
+    }
   };
 
   const handleRequestEdit = async () => {
@@ -208,84 +215,128 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   return (
     <>
       <div className="fixed inset-0 z-[2000] flex items-center justify-center">
+        {/* overlay */}
         <div
           className={`
-            absolute inset-0 bg-black/40 backdrop-blur-[3px]
+            absolute inset-0 bg-black/45 backdrop-blur-[3px]
             transition-opacity duration-200
             ${mounted ? "opacity-100" : "opacity-0"}
           `}
           onClick={onClose}
         />
 
+        {/* modal */}
         <div
           className={`
-            relative rounded-2xl bg-white/95 dark:bg-gray-900/95
-            shadow-[0_15px_45px_rgba(0,0,0,0.18)]
-            border border-gray-200/60 dark:border-gray-700/60
+            relative rounded-2xl bg-gradient-to-br from-slate-50 via-white to-slate-50
+            dark:from-slate-900 dark:via-slate-950 dark:to-slate-900
+            shadow-[0_18px_50px_rgba(15,23,42,0.4)]
+            border border-white/60 dark:border-slate-700/70
             backdrop-blur-xl
-            w-[520px] max-w-[90vw]
+            w-[540px] max-w-[92vw]
             transform transition-all duration-200
             ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-3 scale-95"}
           `}
         >
           <LoadingOverlay open={actionLoading} message="Đang xử lý..." />
 
-          <div className="p-6 max-h-[76vh] overflow-y-auto">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="
+              absolute top-3 right-3 p-2 rounded-full
+              bg-slate-100/90 dark:bg-slate-800/80
+              text-slate-600 dark:text-slate-300
+              hover:bg-rose-500 hover:text-white
+              shadow-sm hover:shadow-md
+              transition
+            "
+          >
+            <FaTimes size={14} />
+          </button>
 
-            <button
-              onClick={onClose}
-              className="
-                absolute top-3 right-3 p-2 rounded-full
-                bg-gray-200/70 dark:bg-gray-700/70
-                text-gray-600 dark:text-gray-300
-                hover:bg-red-500 hover:text-white transition
-              "
-            >
-              <FaTimes size={14} />
-            </button>
+          <div className="p-6 max-h-[78vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300/80 scrollbar-track-transparent dark:scrollbar-thumb-slate-700/80">
+            {/* HEADER TITLE */}
+            {phase === "default" && (
+              <div className="flex items-start gap-3 mb-5">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-300 flex items-center justify-center">
+                  <FaShareAlt />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                    Chia sẻ lịch trình
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                      {planName}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Quản lý quyền truy cập, hiển thị và lời mời tham gia lịch trình.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {phase === "invite" && (
-              <>
+              <div className="mb-5">
                 <button
                   onClick={() => setPhase("default")}
-                  className="text-blue-600 text-sm mb-3 hover:underline"
+                  className="text-xs text-blue-600 hover:text-blue-500 flex items-center gap-1 mb-3"
                 >
-                  ← Quay lại
+                  <span className="text-base leading-none">←</span>
+                  <span>Quay lại chia sẻ</span>
                 </button>
 
-                <h2 className="text-xl font-semibold mb-4">
-                  Mời chia sẻ “{planName}”
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                  Mời tham gia “{planName}”
                 </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                  Xác nhận email &amp; chọn quyền trước khi gửi lời mời.
+                </p>
 
-                <div className="flex gap-3 mb-5">
-                  <input
-                    readOnly
-                    value={emailInput}
-                    className="
-                      flex-1 border rounded-xl px-3 py-2
-                      bg-gray-50 dark:bg-gray-800 shadow-sm text-sm
-                    "
-                  />
+                <div className="space-y-3 mb-4">
+                  <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Email được mời
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      readOnly
+                      value={emailInput}
+                      className="
+                        flex-1 border rounded-xl px-3 py-2 text-sm
+                        bg-slate-50 dark:bg-slate-900/80
+                        border-slate-200 dark:border-slate-700
+                        shadow-sm
+                      "
+                    />
 
-                  <select
-                    value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value)}
-                    className="
-                      border rounded-xl px-3 py-2 text-sm
-                      bg-white/80 dark:bg-gray-900/80 shadow-sm
-                    "
-                  >
-                    <option value="viewer">Người xem</option>
-                    <option value="editor">Người chỉnh sửa</option>
-                  </select>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value)}
+                        className="
+                          border rounded-xl px-3 py-2 text-sm
+                          bg-white/90 dark:bg-slate-900/90
+                          border-slate-200 dark:border-slate-700
+                          shadow-sm
+                        "
+                      >
+                        <option value="viewer">Người xem</option>
+                        <option value="editor">Người chỉnh sửa</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setPhase("default")}
                     className="
-                      px-4 py-2 rounded-xl text-sm border
-                      hover:bg-gray-50 dark:hover:bg-gray-800
+                      px-4 py-2 rounded-xl text-sm
+                      border border-slate-200 dark:border-slate-700
+                      text-slate-600 dark:text-slate-200
+                      bg-white/80 dark:bg-slate-900/80
+                      hover:bg-slate-50 dark:hover:bg-slate-800
+                      transition
                     "
                   >
                     Hủy
@@ -294,105 +345,147 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   <button
                     onClick={handleSendInvite}
                     className="
-                      px-4 py-2 rounded-xl text-sm
+                      px-4 py-2 rounded-xl text-sm font-semibold
                       bg-gradient-to-r from-blue-500 to-indigo-500
-                      text-white shadow hover:brightness-110
+                      text-white shadow-md hover:shadow-lg hover:brightness-110
+                      transition
                     "
                   >
                     Gửi lời mời
                   </button>
                 </div>
-              </>
+              </div>
             )}
 
             {phase === "default" && (
               <>
-                <h2 className="text-xl font-semibold mb-4">
-                  Chia sẻ “{planName}”
-                </h2>
+                {/* VISIBILITY + INVITE */}
+                <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-3 mb-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                        Quyền hiển thị
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Ai có thể tìm và xem lịch trình này.
+                      </span>
+                    </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
-                    Hiển thị:
-                  </span>
-
-                  <div className={!canChangeVisibility ? "opacity-60" : ""}>
-                    <VisibilityDropdown
-                      value={visibility}
-                      onChange={handleVisibilityChange}
-                    />
+                    <div className={!canChangeVisibility ? "opacity-60" : ""}>
+                      <VisibilityDropdown
+                        value={visibility}
+                        onChange={handleVisibilityChange}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {canInvite && (
-                  <div className="mb-3">
-                    <input
-                      value={emailInput}
-                      onChange={(e) => {
-                        setEmailInput(e.target.value);
-                        setEmailValid(true);
-                      }}
-                      onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
-                      placeholder="Nhập email để mời"
-                      className={`
-                        w-full px-4 py-2 rounded-xl shadow-sm text-sm
-                        bg-white/80 dark:bg-gray-900/80 border
-                        ${
-                          emailValid
-                            ? "border-gray-300 dark:border-gray-700"
-                            : "border-red-500"
-                        }
-                      `}
-                    />
+                  {canInvite && (
+                    <div className="mt-2">
+                      <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                        Mời bằng email
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="flex-1 relative">
+                          <input
+                            value={emailInput}
+                            onChange={(e) => {
+                              setEmailInput(e.target.value);
+                              setEmailValid(true);
+                            }}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handleAddEmail()
+                            }
+                            placeholder="Nhập email người được mời..."
+                            className={`
+                              w-full px-4 py-2.5 rounded-xl text-sm
+                              bg-slate-50/90 dark:bg-slate-900/80
+                              border
+                              ${
+                                emailValid
+                                  ? "border-slate-200 dark:border-slate-700"
+                                  : "border-rose-500"
+                              }
+                              shadow-sm focus:outline-none focus:ring-[1.5px]
+                              focus:ring-blue-400/80
+                            `}
+                          />
+                          {!emailValid && (
+                            <p className="text-[11px] text-rose-500 mt-1">
+                              Email không hợp lệ.
+                            </p>
+                          )}
+                        </div>
 
-                    {!emailValid && (
-                      <p className="text-xs text-red-500 mt-1">
-                        Email không hợp lệ
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex gap-6 border-b mb-4">
-                  <button
-                    onClick={() => setActiveTab("members")}
-                    className={`
-                      pb-3 text-sm font-medium relative
-                      ${
-                        activeTab === "members"
-                          ? "text-blue-600"
-                          : "text-gray-500 hover:text-gray-700"
-                      }
-                    `}
-                  >
-                    Thành viên lịch trình
-                    {activeTab === "members" && (
-                      <span className="absolute left-0 -bottom-[1px] w-full h-[2px] bg-blue-600" />
-                    )}
-                  </button>
-
-                  {canSeeRequests && (
-                    <button
-                      onClick={() => setActiveTab("requests")}
-                      className={`
-                        pb-3 text-sm font-medium relative
-                        ${
-                          activeTab === "requests"
-                            ? "text-blue-600"
-                            : "text-gray-500 hover:text-gray-700"
-                        }
-                      `}
-                    >
-                      Yêu cầu ({requests?.length || 0})
-                      {activeTab === "requests" && (
-                        <span className="absolute left-0 -bottom-[1px] w-full h-[2px] bg-blue-600" />
-                      )}
-                    </button>
+                        <button
+                          onClick={handleAddEmail}
+                          disabled={!emailInput.trim()}
+                          className="
+                            px-4 py-2.5 rounded-xl text-sm font-medium
+                            bg-gradient-to-r from-blue-500 to-indigo-500
+                            text-white shadow-sm hover:shadow-md
+                            hover:brightness-110 active:scale-[0.98]
+                            disabled:opacity-50 disabled:cursor-not-allowed
+                            transition
+                          "
+                        >
+                          Mời
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
 
+                {/* TABS */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="inline-flex rounded-full bg-slate-100/90 dark:bg-slate-900/80 p-1">
+                    <button
+                      onClick={() => setActiveTab("members")}
+                      className={`
+                        px-3.5 py-1.5 rounded-full text-xs font-medium
+                        transition-all
+                        ${
+                          activeTab === "members"
+                            ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        }
+                      `}
+                    >
+                      Thành viên ({accessList.length})
+                    </button>
+
+                    {canSeeRequests && (
+                      <button
+                        onClick={() => setActiveTab("requests")}
+                        className={`
+                          px-3.5 py-1.5 rounded-full text-xs font-medium
+                          transition-all
+                          ${
+                            activeTab === "requests"
+                              ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
+                              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                          }
+                        `}
+                      >
+                        Yêu cầu
+                        {requests?.length ? (
+                          <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-rose-500 text-[10px] text-white">
+                            {requests.length}
+                          </span>
+                        ) : null}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* MEMBERS TAB */}
                 {activeTab === "members" && (
-                  <div className="space-y-2 mb-5">
+                  <div className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-2.5 space-y-1.5 mb-5">
+                    {accessList.length === 0 && (
+                      <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
+                        Chưa có thành viên nào khác ngoài bạn.
+                      </div>
+                    )}
+
                     {accessList.map((u, i) => {
                       const isSelf =
                         u.userId && currentUserId && u.userId === currentUserId;
@@ -427,42 +520,49 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   </div>
                 )}
 
+                {/* REQUESTS TAB */}
                 {activeTab === "requests" && (
-                  <div className="space-y-3 mt-2">
+                  <div className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-3 space-y-3 mb-5">
                     {requests?.length === 0 && (
-                      <p className="text-sm text-gray-500">Không có yêu cầu nào.</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Không có yêu cầu nào.
+                      </p>
                     )}
 
                     {requests?.map((r) => (
                       <div
                         key={r.id}
                         className="
-                          p-4 rounded-xl border shadow-sm
-                          bg-white/80 dark:bg-gray-800/60
-                          border-gray-200 dark:border-gray-700
-                          flex items-start gap-4
-                          hover:shadow-md hover:bg-white dark:hover:bg-gray-800
+                          p-3.5 rounded-xl border
+                          bg-slate-50/90 dark:bg-slate-900/70
+                          border-slate-200 dark:border-slate-700
+                          flex items-start gap-3.5
+                          hover:shadow-md hover:bg-white dark:hover:bg-slate-900
                           transition-all
                         "
                       >
-                        <div className="pt-1">
+                        <div className="pt-0.5">
                           {r.avatar ? (
                             <img
                               src={r.avatar}
-                              className="w-11 h-11 rounded-full shadow object-cover"
+                              className="w-10 h-10 rounded-full shadow object-cover"
                             />
                           ) : (
-                            <FaUserCircle className="text-5xl text-gray-400" />
+                            <FaUserCircle className="text-4xl text-slate-400" />
                           )}
                         </div>
 
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                             {r.fullname || r.email}
                           </p>
-                          <p className="text-xs text-gray-500">{r.email}</p>
-                          <p className="mt-1 text-[11px] text-blue-600 font-medium">
-                            • Yêu cầu quyền {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
+                          <p className="text-xs text-slate-500 truncate">
+                            {r.email}
+                          </p>
+                          <p className="mt-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+                            <span className="text-[10px]">•</span>
+                            Yêu cầu quyền{" "}
+                            {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
                           </p>
                         </div>
 
@@ -480,15 +580,19 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   </div>
                 )}
 
-                <div className="flex justify-end gap-3 mt-5">
+                {/* FOOTER ACTIONS */}
+                <div className="flex justify-end gap-2 mt-2 pt-3 border-t border-slate-200/70 dark:border-slate-800">
                   {isViewer && (
                     <button
                       onClick={handleRequestEdit}
                       disabled={loading}
                       className="
-                        mr-auto px-4 py-2 rounded-xl text-sm
-                        border border-blue-500 text-blue-600
-                        hover:bg-blue-50 dark:hover:bg-blue-900/20
+                        mr-auto px-4 py-2 rounded-xl text-xs sm:text-sm
+                        border border-blue-500/80 text-blue-600 dark:text-blue-400
+                        bg-blue-50/60 dark:bg-blue-900/10
+                        hover:bg-blue-100 dark:hover:bg-blue-900/30
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        transition
                       "
                     >
                       {loading ? "Đang gửi yêu cầu..." : "Yêu cầu quyền chỉnh sửa"}
@@ -498,10 +602,13 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   <button
                     onClick={handleCopyLink}
                     className="
-                      px-4 py-2 rounded-xl text-sm border
+                      px-4 py-2 rounded-xl text-xs sm:text-sm
+                      border border-slate-200 dark:border-slate-700
                       flex items-center gap-2 shadow-sm
-                      bg-white/80 dark:bg-gray-900/80
-                      hover:bg-gray-50 dark:hover:bg-gray-800
+                      bg-white/85 dark:bg-slate-900/80
+                      text-slate-700 dark:text-slate-200
+                      hover:bg-slate-50 dark:hover:bg-slate-800
+                      transition
                     "
                   >
                     <FaCopy />
@@ -511,9 +618,11 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   <button
                     onClick={onClose}
                     className="
-                      px-4 py-2 rounded-xl text-sm
+                      px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold
                       bg-gradient-to-r from-blue-500 to-indigo-500
-                      text-white shadow hover:brightness-110
+                      text-white shadow-md hover:shadow-lg
+                      hover:brightness-110 active:scale-[0.98]
+                      transition
                     "
                   >
                     Xong
@@ -521,7 +630,6 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                 </div>
               </>
             )}
-
           </div>
         </div>
       </div>
@@ -586,29 +694,36 @@ function RequestAction({
   };
 
   return (
-    <div className="flex flex-col items-end gap-2 min-w-[150px] relative">
+    <div className="flex flex-col items-end gap-2 min-w-[160px] relative">
+      {/* dropdown chọn role duyệt */}
       <button
         onClick={() => setRoleOpen(!roleOpen)}
         className="
-          px-3 py-1.5 rounded-xl text-xs font-medium w-full
-          bg-white/80 dark:bg-gray-900/80
-          border border-gray-300 dark:border-gray-700
-          shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800
+          px-3 py-1.5 rounded-xl text-[11px] font-medium w-full
+          bg-white/90 dark:bg-slate-900/90
+          border border-slate-200 dark:border-slate-700
+          shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800
           flex items-center justify-between
+          transition
         "
       >
         {ROLE_LABEL[currentRole]}
-        <span className={`text-[10px] ${roleOpen ? "rotate-180" : ""}`}>▼</span>
+        <span
+          className={`text-[9px] transition-transform ${
+            roleOpen ? "rotate-180" : ""
+          }`}
+        >
+          ▼
+        </span>
       </button>
 
       {roleOpen && (
         <div
           className="
-            absolute right-0 mt-2 w-full z-[9999]
-            bg-white dark:bg-gray-900
-            border border-gray-200 dark:border-gray-700
-            rounded-xl shadow-lg
-            animate-[fadeDown_0.18s_ease-out]
+            absolute right-0 mt-1.5 w-full z-[9999]
+            bg-white dark:bg-slate-900
+            border border-slate-200 dark:border-slate-700
+            rounded-xl shadow-lg overflow-hidden
           "
         >
           <button
@@ -617,9 +732,13 @@ function RequestAction({
               setRoleOpen(false);
             }}
             className={`
-              w-full text-left px-4 py-2 text-sm rounded-t-xl
-              hover:bg-gray-100 dark:hover:bg-gray-800
-              ${currentRole === "VIEWER" ? "text-blue-600 font-semibold" : ""}
+              w-full text-left px-4 py-2 text-xs
+              hover:bg-slate-100 dark:hover:bg-slate-800
+              ${
+                currentRole === "VIEWER"
+                  ? "text-blue-600 font-semibold"
+                  : "text-slate-700 dark:text-slate-200"
+              }
             `}
           >
             Quyền xem
@@ -631,9 +750,13 @@ function RequestAction({
               setRoleOpen(false);
             }}
             className={`
-              w-full text-left px-4 py-2 text-sm rounded-b-xl
-              hover:bg-gray-100 dark:hover:bg-gray-800
-              ${currentRole === "EDITOR" ? "text-blue-600 font-semibold" : ""}
+              w-full text-left px-4 py-2 text-xs
+              hover:bg-slate-100 dark:hover:bg-slate-800
+              ${
+                currentRole === "EDITOR"
+                  ? "text-blue-600 font-semibold"
+                  : "text-slate-700 dark:text-slate-200"
+              }
             `}
           >
             Quyền chỉnh sửa
@@ -648,9 +771,11 @@ function RequestAction({
             setConfirmAction("REJECT");
           }}
           className="
-            px-3 py-1.5 rounded-xl text-xs font-medium
-            bg-gray-200/80 dark:bg-gray-700/70
-            hover:bg-gray-300 dark:hover:bg-gray-600
+            px-3 py-1.5 rounded-xl text-[11px] font-medium
+            bg-slate-100/90 dark:bg-slate-800/80
+            text-slate-600 dark:text-slate-200
+            hover:bg-slate-200 dark:hover:bg-slate-700
+            transition
           "
         >
           Từ chối
@@ -667,9 +792,11 @@ function RequestAction({
             }
           }}
           className="
-            px-3 py-1.5 rounded-xl text-xs font-medium
+            px-3 py-1.5 rounded-xl text-[11px] font-semibold
             bg-gradient-to-r from-blue-500 to-indigo-500
-            text-white shadow hover:brightness-110
+            text-white shadow-sm hover:shadow-md
+            hover:brightness-110 active:scale-[0.98]
+            transition
           "
         >
           Chấp nhận

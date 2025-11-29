@@ -161,37 +161,111 @@ export default function PlanDashboardPage() {
     if (!activity) return {};
 
     const {
+      // activity “chuẩn mới” từ các modal như TransportActivityModal
       type,
       title,
+      text,
+      description,
       startTime,
       endTime,
+      durationMinutes,
+      participantCount,
+      participants,
+      activityData,
+      cost,
+      split,
+
+      // để backward-compatible với các modal cũ (food, stay, …)
       estimatedCost,
       actualCost,
       note,
       ...rest
     } = activity;
 
+    const finalText = text || title || "Hoạt động";
+    const finalDescription = description || note || "";
+
+    const parsedEstimated =
+      typeof estimatedCost === "number"
+        ? estimatedCost
+        : cost?.estimatedCost ?? null;
+
+    const parsedActual =
+      typeof actualCost === "number"
+        ? actualCost
+        : cost?.actualCost ?? null;
+
+    const finalParticipantCount =
+      participantCount ??
+      cost?.participantCount ??
+      (Array.isArray(participants) ? participants.length : null);
+
+    const finalParticipants =
+      participants ||
+      cost?.participants ||
+      (Array.isArray(rest.participants) ? rest.participants : []);
+
+    const normalizedCost =
+      cost || {
+        currencyCode: "VND",
+        estimatedCost: parsedEstimated,
+        budgetAmount: cost?.budgetAmount ?? null,
+        actualCost: parsedActual,
+        participantCount: finalParticipantCount,
+        participants: finalParticipants,
+        extraCosts: cost?.extraCosts || [],
+      };
+
+    const normalizedSplit =
+      split || {
+        splitType: "NONE",
+        payerId: null,
+        includePayerInSplit: true,
+        splitMembers: [],
+        splitDetails: [],
+        payments: [],
+      };
+
+    const activityJson = {
+      ...(activityData || {}),
+      ...rest,
+      type: type || "OTHER",
+      title: finalText,
+      description: finalDescription,
+      startTime,
+      endTime,
+      estimatedCost: parsedEstimated,
+      actualCost: parsedActual,
+    };
+
     return {
-      text: title || "Hoạt động",
-      description: note || "",
+      // các field “cơ bản” của card
+      text: finalText,
+      description: finalDescription,
+
+      // giữ cả start/end cũ + startTime/endTime mới cho an toàn
       start: startTime || null,
       end: endTime || null,
+      startTime: startTime || null,
+      endTime: endTime || null,
+      durationMinutes: durationMinutes ?? null,
+
+      // loại activity
       activityType: type || "OTHER",
-      activityDataJson: JSON.stringify({
-        ...rest,
-        type: type || "OTHER",
-        title,
-        note,
-        startTime,
-        endTime,
-        estimatedCost,
-        actualCost,
-      }),
-      estimatedCost:
-        typeof estimatedCost === "number" ? estimatedCost : null,
-      actualCost: typeof actualCost === "number" ? actualCost : null,
+
+      // dữ liệu tuỳ biến dưới dạng JSON string
+      activityDataJson: JSON.stringify(activityJson),
+
+      // tham gia hoạt động
+      participantCount: finalParticipantCount,
+      participants: finalParticipants,
+
+      // cost & split gửi đúng lên BE (không bị null nữa)
+      cost: normalizedCost,
+      split: normalizedSplit,
     };
   };
+
 
   const createActivityCard = async (listId, activityPayload) => {
     try {
@@ -246,24 +320,48 @@ export default function PlanDashboardPage() {
 
   const duplicateCard = async (card, listId) => {
     try {
-      const payload = {
-        text: (card.text || "") + " (Copy)",
+      const baseTitle = card.text || "Hoạt động";
+
+      const activityPayload = {
+        // loại activity
+        type: card.activityType,
+
+        // tiêu đề / mô tả
+        title: baseTitle + " (Copy)",
+        text: baseTitle + " (Copy)",
         description: card.description,
-        start: card.startTime,
-        end: card.endTime,
-        done: false,
-        activityType: card.activityType,
-        activityDataJson: card.activityDataJson,
-        estimatedCost: card.estimatedCost,
-        actualCost: card.actualCost,
+        note: card.description,
+
+        // thời gian
+        startTime: card.startTime,
+        endTime: card.endTime,
+        durationMinutes: card.durationMinutes ?? null,
+
+        // tham gia hoạt động
+        participantCount: card.cost?.participantCount ?? null,
+        participants: card.cost?.participants || [],
+
+        // cost & split từ DTO mới (PlanCardCostDto, PlanCardSplitConfigDto)
+        cost: card.cost || undefined,
+        split: card.split || undefined,
+
+        // dữ liệu activity tuỳ biến
+        activityData: card.activityDataJson
+          ? JSON.parse(card.activityDataJson)
+          : {},
       };
+
+      const payload = buildCardPayloadFromActivity(activityPayload);
       await createCard(listId, payload);
+      await load();
 
       showSuccess("Đã sao chép thẻ");
-    } catch {
+    } catch (e) {
+      console.error(e);
       showError("Không thể sao chép thẻ");
     }
   };
+
 
   const handleAddList = async () => {
     try {
@@ -284,22 +382,40 @@ export default function PlanDashboardPage() {
       const newList = newListAction.payload || newListAction;
 
       for (const card of list.cards || []) {
-        await createCard(newList.id, {
-          text: card.text,
+        const baseTitle = card.text || "Hoạt động";
+
+        const activityPayload = {
+          type: card.activityType,
+
+          // với card trong list copy, giữ nguyên tên (không thêm "(Copy)" nữa)
+          title: baseTitle,
+          text: baseTitle,
           description: card.description,
-          start: card.startTime,
-          end: card.endTime,
-          done: false,
-          activityType: card.activityType,
-          activityDataJson: card.activityDataJson,
-          estimatedCost: card.estimatedCost,
-          actualCost: card.actualCost,
-        });
+          note: card.description,
+
+          startTime: card.startTime,
+          endTime: card.endTime,
+          durationMinutes: card.durationMinutes ?? null,
+
+          participantCount: card.cost?.participantCount ?? null,
+          participants: card.cost?.participants || [],
+
+          cost: card.cost || undefined,
+          split: card.split || undefined,
+
+          activityData: card.activityDataJson
+            ? JSON.parse(card.activityDataJson)
+            : {},
+        };
+
+        const payload = buildCardPayloadFromActivity(activityPayload);
+        await createCard(newList.id, payload);
       }
 
       await load();
       showSuccess("Đã sao chép danh sách");
-    } catch {
+    } catch (e) {
+      console.error(e);
       showError("Không thể sao chép danh sách");
     }
   };
