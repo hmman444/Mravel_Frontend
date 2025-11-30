@@ -6,6 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const CATALOG_PREFIX = `${API_URL}/catalog`;
 const PLACES_PREFIX = `${CATALOG_PREFIX}/places`;
 const HOTELS_PREFIX = `${CATALOG_PREFIX}/hotels`;
+const GEO_PREFIX = `${CATALOG_PREFIX}/geo`;
 
 const normalizePage = (page) => ({
   items: page?.content ?? [],
@@ -120,6 +121,19 @@ export const suggestPlaces = async (q, limit = 6) => {
     return { success: true, data: res.data?.content ?? [] };
   } catch (error) {
     return toError(error, "Lỗi gợi ý địa điểm");
+  }
+};
+
+/** GET /catalog/geo/suggest?q=&limit=  (gợi ý kiểu Google) */
+export const suggestGeoLocations = async (q, limit = 6) => {
+  try {
+    const res = await axios.get(`${GEO_PREFIX}/suggest`, {
+      params: { q, limit },
+    });
+    // BE trả List<LocationSuggestDTO> -> res.data là mảng
+    return { success: true, data: res.data ?? [] };
+  } catch (error) {
+    return toError(error, "Lỗi gợi ý vị trí ngoài hệ thống");
   }
 };
 

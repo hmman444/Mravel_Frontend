@@ -51,6 +51,7 @@ export default function PlanBoard({
   setConfirmDeleteCard,
   setConfirmDeleteList,
 }) {
+  // trạng thái mở/đóng 9 modal activity
   const modalStates = {
     TRANSPORT: useState(false),
     FOOD: useState(false),
@@ -67,6 +68,7 @@ export default function PlanBoard({
   const [activeListForActivity, setActiveListForActivity] = useState(null);
   const [activeActivityType, setActiveActivityType] = useState(null);
 
+  // ======= TRASH + SCROLL LOGIC (giữ nguyên) =======
   const [showTrash, setShowTrash] = useState(false);
   const [confirmClearTrash, setConfirmClearTrash] = useState(false);
 
@@ -130,7 +132,7 @@ export default function PlanBoard({
     } else if (diff < -epsilon) {
       if (bottomPadding !== 40) setBottomPadding(40);
     }
-  }, [showTrash, trashPos.y, trashList?.cards?.length, bottomPadding]);
+  }, [showTrash, trashPos.y, trashList?.cards?.length, bottomPadding, isDraggingTrash]);
 
   const openModal = (type) => modalStates[type][1](true);
   const closeModal = (type) => modalStates[type][1](false);
@@ -161,6 +163,10 @@ export default function PlanBoard({
 
     closeModal(activeActivityType);
     setEditingCard(null);
+
+    // sau khi lưu activity di chuyển, có thể reset from/to nếu muốn
+    // setFromLocation(null);
+    // setToLocation(null);
   };
 
   // auto-scroll với rAF
@@ -243,7 +249,9 @@ export default function PlanBoard({
       const TRASH_WIDTH = 280;
       const trashHeight = trashRef.current
         ? trashRef.current.offsetHeight
-        : (showTrash ? 260 : 40);
+        : showTrash
+        ? 260
+        : 40;
 
       const scrollWidth = boardEl.scrollWidth;
       const boardHeight = boardEl.scrollHeight;
@@ -485,13 +493,14 @@ export default function PlanBoard({
         </DragDropContext>
       </div>
 
-      {/* 9 MODALS */}
+      {/* ========= 9 MODALS ========= */}
       <TransportActivityModal
         open={modalStates.TRANSPORT[0]}
         onClose={() => closeModal("TRANSPORT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
       />
+
       <FoodActivityModal
         open={modalStates.FOOD[0]}
         onClose={() => closeModal("FOOD")}
@@ -521,6 +530,7 @@ export default function PlanBoard({
         onClose={() => closeModal("SHOPPING")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+
       />
       <CinemaActivityModal
         open={modalStates.CINEMA[0]}
@@ -533,12 +543,14 @@ export default function PlanBoard({
         onClose={() => closeModal("EVENT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+
       />
       <OtherActivityModal
         open={modalStates.OTHER[0]}
         onClose={() => closeModal("OTHER")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+
       />
 
       {confirmClearTrash && (

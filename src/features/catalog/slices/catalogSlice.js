@@ -7,6 +7,7 @@ import {
   getPlaceDetail,
   getHotelDetail,
   suggestPlaces as apiSuggest,
+  suggestGeoLocations,
 } from "../services/catalogService";
 
 /* ====================== THUNKS ====================== */
@@ -68,6 +69,16 @@ export const suggestPlaces = createAsyncThunk(
   }
 );
 
+export const suggestGeoLocationsThunk = createAsyncThunk(
+  "catalog/suggestGeoLocations",
+  async ({ q, limit = 6 }, { rejectWithValue }) => {
+    if (!q || !q.trim()) return { data: [], q: "" };
+    const res = await suggestGeoLocations(q, limit);
+    if (res.success) return { data: res.data, q };
+    return rejectWithValue(res.message || "Lỗi gợi ý vị trí ngoài hệ thống");
+  }
+);
+
 /* ====================== STATE ====================== */
 
 const initialListState = {
@@ -98,6 +109,7 @@ const initialState = {
     error: null,
   },
   suggest: { items: [], loading: false, error: null, q: "" },
+  geoSuggest: { items: [], loading: false, error: null, q: "" },
 };
 
 /* ====================== SLICE ====================== */
@@ -116,6 +128,9 @@ const catalogSlice = createSlice({
     },
     clearSuggest(state) {
       state.suggest = { items: [], loading: false, error: null, q: "" };
+    },
+    clearGeoSuggest(state) {
+      state.geoSuggest = { items: [], loading: false, error: null, q: "" };
     },
   },
   extraReducers: (builder) => {
@@ -231,9 +246,25 @@ const catalogSlice = createSlice({
       .addCase(suggestPlaces.rejected, (state, action) => {
         state.suggest.loading = false;
         state.suggest.error = action.payload || "Lỗi gợi ý địa điểm";
+      })
+          /* ---------- Geo Suggest (kiểu Google) ---------- */
+    builder
+      .addCase(suggestGeoLocationsThunk.pending, (state) => {
+        state.geoSuggest.loading = true;
+        state.geoSuggest.error = null;
+      })
+      .addCase(suggestGeoLocationsThunk.fulfilled, (state, action) => {
+        state.geoSuggest.loading = false;
+        state.geoSuggest.items = action.payload?.data ?? [];
+        state.geoSuggest.q = action.payload?.q ?? "";
+      })
+      .addCase(suggestGeoLocationsThunk.rejected, (state, action) => {
+        state.geoSuggest.loading = false;
+        state.geoSuggest.error =
+          action.payload || "Lỗi gợi ý vị trí ngoài hệ thống";
       });
   },
 });
 
-export const { clearCatalogErrors, clearSuggest } = catalogSlice.actions;
+export const { clearCatalogErrors, clearSuggest, clearGeoSuggest } = catalogSlice.actions;
 export default catalogSlice.reducer;

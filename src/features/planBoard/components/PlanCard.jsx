@@ -200,19 +200,25 @@ export default function PlanCard({
     }
   }, [activityData, card.activityType]);
 
-  const rawEstimated =
-    card.estimatedCost ??
-    (card.cost ? card.cost.estimatedCost ?? null : null);
-  const rawActual =
-    card.actualCost ?? (card.cost ? card.cost.actualCost ?? null : null);
-  const rawBudget =
-    card.budgetAmount ??
-    (card.cost ? card.cost.budgetAmount ?? null : null);
+  // ƯU TIÊN TUYỆT ĐỐI chi phí thực tế
+  const actual =
+    card.cost?.actualCost != null && card.cost.actualCost > 0
+      ? card.cost.actualCost
+      : null;
 
+  // Chỉ dùng chi phí ước tính nếu CHƯA có actual
   const estimated =
-    rawEstimated != null && rawEstimated > 0 ? rawEstimated : null;
-  const actual = rawActual != null && rawActual > 0 ? rawActual : null;
-  const budget = rawBudget != null && rawBudget > 0 ? rawBudget : null;
+    actual == null &&
+    card.cost?.estimatedCost != null &&
+    card.cost.estimatedCost > 0
+      ? card.cost.estimatedCost
+      : null;
+
+  // Ngân sách giữ nguyên
+  const budget =
+    card.cost?.budgetAmount != null && card.cost.budgetAmount > 0
+      ? card.cost.budgetAmount
+      : null;
 
   const showCost = actual != null || estimated != null;
 
