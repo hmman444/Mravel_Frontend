@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   FaCalendarAlt,
@@ -102,7 +102,7 @@ export default function PlanCard({
   setActiveMenu,
   setConfirmDeleteCard,
   canEdit = true,
-  onOpenActivityModal
+  onOpenActivityModal,
 }) {
   const btnRef = useRef(null);
   const menuRef = useRef(null);
@@ -152,128 +152,232 @@ export default function PlanCard({
   const displayIcon = card.activityTypeIcon || typeStyle.icon;
   const displayLabel = card.activityTypeLabel || typeStyle.label;
 
-  const showCost = card.estimatedCost != null || card.actualCost != null;
-  const estimated = card.estimatedCost ?? null;
-  const actual = card.actualCost ?? null;
+  const activityData = useMemo(() => {
+    if (!card.activityDataJson) return null;
+    try {
+      return JSON.parse(card.activityDataJson);
+    } catch {
+      return null;
+    }
+  }, [card.activityDataJson]);
 
-  const hasDescription = card.description && card.description.trim().length > 0;
+  const subtitle = useMemo(() => {
+    if (!activityData) return null;
+
+    switch (card.activityType) {
+      case "TRANSPORT": {
+        const from = activityData.fromPlace || activityData.from || "";
+        const to = activityData.toPlace || activityData.to || "";
+        if (from && to) return `${from} → ${to}`;
+        return from || to || null;
+      }
+      case "FOOD":
+        return activityData.restaurantName || activityData.placeName || null;
+      case "STAY":
+        return (
+          activityData.stayName ||
+          activityData.hotelName ||
+          activityData.placeName ||
+          null
+        );
+      case "ENTERTAIN":
+      case "SIGHTSEEING":
+      case "SHOPPING":
+        return activityData.placeName || activityData.storeName || null;
+      case "CINEMA":
+        return (
+          activityData.movieName ||
+          activityData.cinemaName ||
+          activityData.placeName ||
+          null
+        );
+      case "EVENT":
+        return activityData.eventName || activityData.venue || null;
+      case "OTHER":
+        return activityData.location || null;
+      default:
+        return activityData.placeName || activityData.location || null;
+    }
+  }, [activityData, card.activityType]);
+
+  // ƯU TIÊN TUYỆT ĐỐI chi phí thực tế
+  const actual =
+    card.cost?.actualCost != null && card.cost.actualCost > 0
+      ? card.cost.actualCost
+      : null;
+
+  // Chỉ dùng chi phí ước tính nếu CHƯA có actual
+  const estimated =
+    actual == null &&
+    card.cost?.estimatedCost != null &&
+    card.cost.estimatedCost > 0
+      ? card.cost.estimatedCost
+      : null;
+
+  // Ngân sách giữ nguyên
+  const budget =
+    card.cost?.budgetAmount != null && card.cost.budgetAmount > 0
+      ? card.cost.budgetAmount
+      : null;
+
+  const showCost = actual != null || estimated != null;
+
+  const participantCount =
+    card.participantCount ??
+    (card.cost ? card.cost.participantCount ?? null : null);
+  const showParticipants =
+    participantCount != null && Number(participantCount) > 0;
+
+  const hasCustomTitle = card.text && card.text.trim().length > 0;
+
+  const displayTitle = hasCustomTitle
+    ? card.text
+    : (() => {
+        if (subtitle) return `${displayLabel} · ${subtitle}`;
+        return displayLabel;
+      })();
+
+  const showSubtitle = hasCustomTitle && subtitle;
+
+  const handleCardClick = () => {
+    if (canEdit && onOpenActivityModal) {
+      onOpenActivityModal(listId, card);
+    }
+  };
 
   return (
     <div
-      onClick={() => {
-        if (canEdit && onOpenActivityModal) {
-          onOpenActivityModal(listId, card);
-        }
-      }}
+      onClick={handleCardClick}
       className={`
         group relative
-        p-3 rounded-xl mb-2 
+        p-2 rounded-xl mb-1.5
         border ${typeStyle.border} dark:border-gray-700/60
-        shadow-[0_1px_4px_rgba(0,0,0,0.06)]
-        hover:shadow-[0_6px_18px_rgba(0,0,0,0.12)]
+        shadow-[0_1px_3px_rgba(0,0,0,0.05)]
+        hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]
         hover:-translate-y-[1px]
         transition-all duration-200 
         cursor-pointer
-        animate-fadeIn
         ${typeStyle.bg} dark:bg-gray-800/90
       `}
     >
-      {/* Accent line bên trái */}
       <div
         className={`
-          absolute inset-y-2 left-0 w-[3px] rounded-full 
-          ${typeStyle.accent} opacity-70
+          absolute inset-y-1.5 left-0 w-[3px] rounded-full 
+          ${typeStyle.accent} opacity-80
           bg-current
         `}
       />
 
-      {/* Activity pill + cost */}
-      <div className="pl-1.5 pr-0.5 mb-1.5 flex items-center justify-between gap-2">
-        <div
-          className={`
-            inline-flex items-center gap-1.5 px-2 py-[2px] rounded-full border text-[10px] font-medium
-            ${typeStyle.pillBg} ${typeStyle.pillText} border-white/60 shadow-sm
-          `}
-        >
-          <span>{displayIcon}</span>
-          <span className="truncate max-w-[120px]">{displayLabel}</span>
+      <div className="pl-1.5 pr-0.5 mb-0.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div
+            className="
+              w-6 h-6 rounded-full flex items-center justify-center text-sm
+              bg-white/80 dark:bg-gray-900/80 shadow-sm flex-shrink-0
+            "
+          >
+            <span className="leading-none">{displayIcon}</span>
+          </div>
+
+          <span
+            className={`
+              text-[11px] font-medium truncate
+              ${typeStyle.pillText}
+            `}
+          >
+            {displayLabel}
+          </span>
         </div>
 
         {showCost && (
-          <div className="flex flex-col items-end gap-[2px]">
-            {estimated != null && (
-              <span className="text-[11px] font-semibold text-gray-700/80 dark:text-gray-100">
-                💰 {estimated.toLocaleString("vi-VN")}đ
+          <div className="flex flex-col items-end leading-tight text-right">
+            {actual != null ? (
+              <span className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
+                {actual.toLocaleString("vi-VN")}đ
               </span>
+            ) : (
+              estimated != null && (
+                <>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Ước tính
+                  </span>
+                  <span className="text-[12px] font-semibold text-slate-800 dark:text-slate-50">
+                    {estimated.toLocaleString("vi-VN")}đ
+                  </span>
+                </>
+              )
             )}
-            {actual != null && actual !== estimated && (
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                Thực tế:{" "}
-                <span className="font-semibold">
-                  {actual.toLocaleString("vi-VN")}đ
-                </span>
+
+            {budget != null && (
+              <span className="mt-[1px] text-[10px] text-slate-400 dark:text-slate-500">
+                Ngân sách {budget.toLocaleString("vi-VN")}đ
               </span>
             )}
           </div>
         )}
       </div>
 
-      {/* Main row: checkbox + title + menu */}
-      <div className="pl-1.5 flex items-start gap-2">
+      <div className="pl-1.5 flex items-start gap-1.5">
         <button
           onClick={(e) => {
             e.stopPropagation();
             if (canEdit) toggleDone(listId, card.id);
           }}
           className={`
-            mt-[2px]
-            w-5 h-5 p-[2px]
+            mt-0.5
+            w-5 h-5
             rounded-full border flex items-center justify-center
-            shadow-sm transition-all duration-200
+            transition-all duration-200 flex-shrink-0
             ${
               card.done
-                ? "bg-green-500 text-white border-green-600 shadow-md scale-110"
-                : "bg-white border-gray-400 hover:border-gray-500"
+                ? "bg-emerald-500 text-white border-emerald-500 shadow-[0_4px_10px_rgba(16,185,129,0.45)] scale-105"
+                : "bg-white/95 border-gray-300 hover:border-emerald-400 hover:bg-emerald-50"
             }
           `}
         >
-          {card.done && <FaCheck className="text-[11px]" />}
+          {card.done ? (
+            <FaCheck className="text-[12px]" />
+          ) : (
+            <span className="w-2 h-2 rounded-full" />
+          )}
         </button>
 
         <div className="flex-1 min-w-0">
           <div
             className={`
-              text-sm font-medium 
-              ${card.done ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"}
+              text-[13px] font-medium truncate
+              ${
+                card.done
+                  ? "text-gray-400 line-through"
+                  : "text-gray-900 dark:text-gray-100"
+              }
               transition-colors
             `}
           >
-            {card.text}
+            {displayTitle}
           </div>
 
-          {hasDescription && (
-            <div
-              className={`
-                mt-0.5 text-[11px] text-gray-600 dark:text-gray-300 
-                line-clamp-2 group-hover:text-gray-800 dark:group-hover:text-gray-100
-              `}
-            >
-              {card.description}
+          {showSubtitle && (
+            <div className="mt-0.5 text-[11px] text-gray-600 dark:text-gray-300 truncate">
+              {subtitle}
             </div>
           )}
 
-          {(hasStart || hasEnd) && (
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-300">
-              <FaCalendarAlt className="opacity-70" />
-              {hasStart && (
-                <span className="px-1.5 py-[1px] rounded-lg bg-white/70 dark:bg-gray-900/60 border border-gray-200/70 dark:border-gray-700/80">
-                  {formatTime(card.startTime)}
-                </span>
+          {(hasStart || hasEnd || showParticipants) && (
+            <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-300 flex flex-wrap items-center gap-x-2 gap-y-1">
+              {(hasStart || hasEnd) && (
+                <div className="flex items-center gap-1 min-w-0">
+                  <FaCalendarAlt className="opacity-70 flex-shrink-0" />
+                  <span className="whitespace-nowrap">
+                    {hasStart && formatTime(card.startTime)}
+                    {hasEnd && ` - ${formatTime(card.endTime)}`}
+                  </span>
+                </div>
               )}
-              {hasStart && hasEnd && <span className="mx-0.5">→</span>}
-              {hasEnd && (
-                <span className="px-1.5 py-[1px] rounded-lg bg-white/70 dark:bg-gray-900/60 border border-gray-200/70 dark:border-gray-700/80">
-                  {formatTime(card.endTime)}
+
+              {showParticipants && (
+                <span className="px-1.5 py-[1px] rounded-lg bg-gray-900/5 dark:bg-gray-900/60 border border-gray-200/60 dark:border-gray-700/80 text-[10px] whitespace-nowrap">
+                  👥 {participantCount} người
                 </span>
               )}
             </div>
@@ -288,14 +392,14 @@ export default function PlanCard({
               setActiveMenu(activeMenu === card.id ? null : card.id);
             }}
             className="
-              ml-1 p-1.5 rounded-lg
+              ml-1 p-1 rounded-lg
               text-gray-500 hover:text-gray-700 
               hover:bg-gray-200/50 
               dark:hover:bg-gray-700/50 
-              transition-all duration-200
+              transition-all duration-200 flex-shrink-0
             "
           >
-            <FaEllipsisV size={13} />
+            <FaEllipsisV size={12} />
           </button>
         )}
       </div>
@@ -327,7 +431,7 @@ export default function PlanCard({
               }}
               className="
                 flex w-full items-center gap-2 
-                px-3 py-2.5 text-sm
+                px-3 py-2 text-sm
                 text-gray-700 dark:text-gray-200
                 hover:bg-gray-100/70 dark:hover:bg-gray-700/50
                 rounded-t-xl transition-all
@@ -344,7 +448,7 @@ export default function PlanCard({
               }}
               className="
                 flex w-full items-center gap-2 
-                px-3 py-2.5 text-sm
+                px-3 py-2 text-sm
                 text-red-600 hover:bg-red-50/70 dark:hover:bg-red-900/30
                 rounded-b-xl transition-all
               "
