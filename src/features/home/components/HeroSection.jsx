@@ -3,7 +3,7 @@ import bg from "../../../assets/mountain-bg.jpg";
 export default function HeroSection({ children }) {
   return (
     <section
-      className="relative overflow-hidden bg-cover bg-center"
+      className="relative bg-cover bg-center"
       style={{ backgroundImage: `url(${bg})` }}
     >
       {/* Main dark overlay */}
@@ -45,6 +45,7 @@ export default function HeroSection({ children }) {
             <div className="mt-6 md:mt-8">
               <div
                 className="
+                  relative z-30
                   rounded-2xl bg-black/25 border border-white/12
                   shadow-[0_18px_45px_rgba(15,23,42,0.85)]
                   backdrop-blur-lg
@@ -60,7 +61,7 @@ export default function HeroSection({ children }) {
           )}
 
           {/* Feature chips */}
-          <div className="mt-6 md:mt-7 flex flex-wrap gap-3 text-[11px] md:text-xs text-sky-100/85">
+          <div className="relative z-10 mt-6 md:mt-7 flex flex-wrap gap-3 text-[11px] md:text-xs text-sky-100/85">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 border border-white/10 backdrop-blur-sm">
               <span>✈️</span>
               <span>Hơn 50+ điểm đến nổi bật</span>

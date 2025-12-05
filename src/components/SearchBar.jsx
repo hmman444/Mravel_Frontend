@@ -1,3 +1,4 @@
+// src/components/SearchBar.jsx
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,7 +16,6 @@ import MravelDatePicker from "../components/MravelDatePicker";
 
 import Button from "./Button";
 import DestinationTypeahead from "../components/DestinationTypeahead";
-import { useSubmitFromSearchBar } from "../features/catalog/hooks/useSubmitFromSearchBar";
 
 /* ───────── Small helpers ───────── */
 function RowField({ label, children, onClick, refBox, className = "" }) {
@@ -93,8 +93,7 @@ function TextInput({
 }
 
 /* helper format date để gửi query */
-const formatDate = (d) =>
-  d ? new Date(d).toISOString().slice(0, 10) : "";
+const formatDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
 
 /* helper VN_DATE cho popup Số đêm */
 const VN_DATE = (d) =>
@@ -107,9 +106,10 @@ const VN_DATE = (d) =>
 
 /* ───────── Hotel Search Form ───────── */
 function HotelSearchForm() {
-  const { goHotels } = useSubmitFromSearchBar();
+  const navigate = useNavigate();
 
-  const [dest, setDest] = useState({ text: "", slug: null });
+  const destRef = useRef({ text: "", slug: null });
+  const [, setDest] = useState({ text: "", slug: null });
 
   const today = useMemo(() => {
     const d = new Date();
@@ -121,10 +121,7 @@ function HotelSearchForm() {
   const [nights, setNights] = useState(1);
   const [openNights, setOpenNights] = useState(false);
   const nightsBoxRef = useRef(null);
-  const nightList = useMemo(
-    () => Array.from({ length: 30 }, (_, i) => i + 1),
-    []
-  );
+  const nightList = useMemo(() => Array.from({ length: 30 }, (_, i) => i + 1), []);
 
   useEffect(() => {
     const onDoc = (e) => {
@@ -167,45 +164,60 @@ function HotelSearchForm() {
 
   const ageOptions = [
     { label: "<1", value: 0 },
-    ...Array.from({ length: 8 }, (_, i) => ({
-      label: String(i + 1),
-      value: i + 1,
-    })),
+    ...Array.from({ length: 8 }, (_, i) => ({ label: String(i + 1), value: i + 1 })),
   ];
+
+  const handleDestUpdate = (payload) => {
+    const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null };
+    destRef.current = next;
+    setDest(next);
+  };
 
   const submit = (e) => {
     e.preventDefault();
-    goHotels({
-      location: dest.slug || dest.text,
-      checkIn: checkIn ? new Date(checkIn).toISOString().slice(0, 10) : "",
-      nights,
-      adults,
-      children,
-      childrenAges,
-      rooms,
-      page: 0,
-      size: 9,
+
+    const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
+    if (!locationVal) {
+      alert("Vui lòng nhập hoặc chọn Điểm đến.");
+      return;
+    }
+
+    const qs = new URLSearchParams({
+      location: locationVal,
+      checkIn: formatDate(checkIn),
+      nights: String(nights),
+      adults: String(adults),
+      children: String(children),
+      rooms: String(rooms),
+      page: "0",
+      size: "9",
     });
+
+    if (Array.isArray(childrenAges) && childrenAges.length) {
+      childrenAges.forEach((age) => qs.append("childrenAges", String(age)));
+    }
+
+    navigate(`/hotels/search?${qs.toString()}`);
   };
 
   return (
     <form onSubmit={submit} className="space-y-3 md:space-y-4">
-      {/* Hàng 1: Điểm đến / Ngày nhận phòng / Số đêm */}
       <div className="grid grid-cols-12 gap-3 md:gap-4">
-        {/* Điểm đến */}
         <div className="col-span-12 md:col-span-5">
           <RowField label="Điểm đến:">
             <DestinationTypeahead
               label={null}
               placeholder="Thành phố, khách sạn, điểm đến"
-              onSubmit={({ text, slug }) => setDest({ text, slug })}
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
+              /* BẮT ĐỦ CÁC CASE: gõ, chọn suggestion, nhấn enter */
+              onSubmit={handleDestUpdate}
+              onPick={handleDestUpdate}
+              onChangeText={(text) => handleDestUpdate({ text, slug: null })}
             />
           </RowField>
         </div>
 
-        {/* Ngày nhận phòng */}
         <div className="col-span-12 md:col-span-3">
           <RowField label="Ngày nhận phòng:">
             <FaCalendarAlt className="text-gray-400 mr-2" />
@@ -213,7 +225,6 @@ function HotelSearchForm() {
           </RowField>
         </div>
 
-        {/* Số đêm */}
         <div className="col-span-12 md:col-span-4">
           <RowField
             label="Số đêm:"
@@ -230,11 +241,7 @@ function HotelSearchForm() {
 
             {openNights && (
               <div
-                className="
-                  absolute left-0 right-0 top-[calc(100%+6px)] z-50
-                  rounded-xl border border-slate-200 bg-white
-                  shadow-xl max-h-72 overflow-auto
-                "
+                className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 bg-white shadow-xl max-h-72 overflow-auto"
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {nightList.map((n) => {
@@ -245,16 +252,9 @@ function HotelSearchForm() {
                     <button
                       key={n}
                       type="button"
-                      className={`
-                        w-full flex items-center justify-between
-                        px-3.5 py-2 text-left text-sm
-                        transition
-                        ${
-                          isActive
-                            ? "bg-sky-50 text-sky-700"
-                            : "hover:bg-gray-50"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between px-3.5 py-2 text-left text-sm transition ${
+                        isActive ? "bg-sky-50 text-sky-700" : "hover:bg-gray-50"
+                      }`}
                       onMouseDown={(e) => e.stopPropagation()}
                       onClick={() => {
                         setNights(n);
@@ -263,10 +263,9 @@ function HotelSearchForm() {
                     >
                       <div className="flex items-center gap-2">
                         <span
-                          className={`
-                            w-2 h-2 rounded-full inline-block
-                            ${isActive ? "bg-sky-500" : "bg-gray-300"}
-                          `}
+                          className={`w-2 h-2 rounded-full inline-block ${
+                            isActive ? "bg-sky-500" : "bg-gray-300"
+                          }`}
                         />
                         <span className="font-medium">{n} đêm</span>
                       </div>
@@ -310,9 +309,7 @@ function HotelSearchForm() {
                     <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
                       <FaUsers className="text-gray-600 text-xs" />
                     </span>
-                    <span className="font-medium text-gray-800">
-                      Người lớn
-                    </span>
+                    <span className="font-medium text-gray-800">Người lớn</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -325,9 +322,7 @@ function HotelSearchForm() {
                     >
                       <FaMinus className="text-[10px]" />
                     </button>
-                    <span className="w-6 text-center font-medium">
-                      {adults}
-                    </span>
+                    <span className="w-6 text-center font-medium">{adults}</span>
                     <button
                       type="button"
                       className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
@@ -360,9 +355,7 @@ function HotelSearchForm() {
                     >
                       <FaMinus className="text-[10px]" />
                     </button>
-                    <span className="w-6 text-center font-medium">
-                      {children}
-                    </span>
+                    <span className="w-6 text-center font-medium">{children}</span>
                     <button
                       type="button"
                       className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
@@ -395,9 +388,7 @@ function HotelSearchForm() {
                     >
                       <FaMinus className="text-[10px]" />
                     </button>
-                    <span className="w-6 text-center font-medium">
-                      {rooms}
-                    </span>
+                    <span className="w-6 text-center font-medium">{rooms}</span>
                     <button
                       type="button"
                       className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
@@ -483,43 +474,57 @@ function HotelSearchForm() {
 }
 
 /* ───────── Restaurant Search Form ───────── */
+// trong SearchBar.jsx — giữ nguyên phần khác, chỉ thay RestaurantSearchForm
 function RestaurantSearchForm() {
-  const { goRestaurants } = useSubmitFromSearchBar();
+  const navigate = useNavigate();
 
-  const [dest, setDest] = useState({ text: "", slug: null });
+  const destRef = useRef({ text: "", slug: null });
+  const [, setDest] = useState({ text: "", slug: null });
   const [date, setDate] = useState(() => new Date());
   const [cuisine, setCuisine] = useState("");
 
+  const handleDestUpdate = (payload) => {
+    const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null };
+    destRef.current = next;
+    setDest(next); // để UI nếu cần rerender
+  };
+
   const submit = (e) => {
     e.preventDefault();
-    goRestaurants({
-      location: dest.slug || dest.text,
+
+    const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
+    if (!locationVal) {
+      alert("Vui lòng nhập hoặc chọn Khu vực / Thành phố.");
+      return;
+    }
+
+    const qs = new URLSearchParams({
+      location: locationVal,
       date: formatDate(date),
-      cuisine: cuisine || undefined,
-      page: 0,
-      size: 9,
+      ...(cuisine ? { cuisine } : {}),
+      page: "0",
+      size: "9",
     });
+
+    navigate(`/restaurants/search?${qs.toString()}`);
   };
 
   return (
-    <form
-      onSubmit={submit}
-      className="grid grid-cols-12 gap-3 md:gap-4 items-end"
-    >
-      {/* Khu vực / Thành phố */}
+    <form onSubmit={submit} className="grid grid-cols-12 gap-3 md:gap-4 items-end">
       <div className="col-span-12 md:col-span-4">
         <RowField label="Khu vực / Thành phố">
           <DestinationTypeahead
             label={null}
             placeholder="TP.HCM, Hà Nội, Đà Nẵng…"
-            onSubmit={({ text, slug }) => setDest({ text, slug })}
             className="flex-1 min-w-0 w-full !max-w-none !mx-0"
             buttonSlot={null}
+            onSubmit={handleDestUpdate}                 // nhấn Enter
+            onPick={handleDestUpdate}                   // chọn suggestion
+            onChangeText={(text) => handleDestUpdate({ text, slug: null })} // gõ tay
           />
         </RowField>
       </div>
 
-      {/* Ngày dùng bữa */}
       <div className="col-span-12 md:col-span-3">
         <RowField label="Ngày dùng bữa">
           <FaCalendarAlt className="text-gray-400 mr-2" />
@@ -531,7 +536,6 @@ function RestaurantSearchForm() {
         </RowField>
       </div>
 
-      {/* Loại ẩm thực */}
       <div className="col-span-12 md:col-span-3">
         <RowField label="Loại ẩm thực">
           <FaUtensils className="text-gray-400 mr-2" />
@@ -545,7 +549,6 @@ function RestaurantSearchForm() {
         </RowField>
       </div>
 
-      {/* Nút tìm kiếm */}
       <div className="col-span-12 md:col-span-2 flex items-end">
         <Button type="submit" className="w-full h-12 rounded-xl text-sm">
           <FaSearch />
@@ -592,36 +595,36 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto relative z-20">
-    {/* Tabs */}
-    <div className="flex flex-wrap items-center gap-2 md:gap-3">
-      {tabs.map((t) => {
-        const isActive = activeTab === t.key;
+    <div className="w-full max-w-6xl mx-auto relative z-30">
+      {/* Tabs */}
+      <div className="flex flex-wrap items-center gap-2 md:gap-3">
+        {tabs.map((t) => {
+          const isActive = activeTab === t.key;
 
-        // màu gradient theo từng loại tab
-        const gradientMap = {
-          hotel: "from-sky-500 to-blue-600",
-          restaurant: "from-sky-500 to-blue-600",
-          locations: "from-sky-500 to-blue-600",
-          plans: "from-sky-500 to-blue-600",
-        };
+          // màu gradient theo từng loại tab
+          const gradientMap = {
+            hotel: "from-sky-500 to-blue-600",
+            restaurant: "from-sky-500 to-blue-600",
+            locations: "from-sky-500 to-blue-600",
+            plans: "from-sky-500 to-blue-600",
+          };
 
-        return (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={[
-              "group inline-flex items-center gap-2 select-none",
-              "px-4 md:px-5 py-2 md:py-2.5 rounded-full text-sm md:text-base font-semibold",
-              "transition-all duration-300 ease-out",
-              isActive
-                ? `
+          return (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className={[
+                "group inline-flex items-center gap-2 select-none",
+                "px-4 md:px-5 py-2 md:py-2.5 rounded-full text-sm md:text-base font-semibold",
+                "transition-all duration-300 ease-out",
+                isActive
+                  ? `
                   text-white shadow-md
                   bg-gradient-to-r ${gradientMap[t.key]}
                   hover:shadow-lg hover:-translate-y-0.5
                   ring-1 ring-black/5
                 `
-                : `
+                  : `
                   text-white/90
                   hover:text-white
                   hover:ring-2 hover:ring-white/70
@@ -629,24 +632,23 @@ export default function SearchBar() {
                   hover:bg-white/20
                   transition-all
                 `,
-            ].join(" ")}
-          >
-            <span
-              className={`${
-                isActive ? "text-white" : "text-white/80"
-              } transition-colors duration-300`}
+              ].join(" ")}
             >
-              {t.icon}
-            </span>
-            {t.label}
-          </button>
-        );
-      })}
-    </div>
+              <span
+                className={`${
+                  isActive ? "text-white" : "text-white/80"
+                } transition-colors duration-300`}
+              >
+                {t.icon}
+              </span>
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
 
-    {/* Divider */}
-    <div className="mt-3 md:mt-4 mb-4 md:mb-5 h-[2px] bg-white/40 rounded-full" />
-
+      {/* Divider */}
+      <div className="mt-3 md:mt-4 mb-4 md:mb-5 h-[2px] bg-white/40 rounded-full" />
 
       {/* Content */}
       <div
@@ -733,10 +735,7 @@ export default function SearchBar() {
             </div>
 
             <div className="col-span-6 md:col-span-2 flex items-end">
-              <Button
-                type="submit"
-                className="w-full h-12 rounded-xl text-sm"
-              >
+              <Button type="submit" className="w-full h-12 rounded-xl text-sm">
                 Tạo lịch trình
               </Button>
             </div>

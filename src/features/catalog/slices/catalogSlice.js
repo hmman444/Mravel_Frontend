@@ -6,6 +6,7 @@ import {
   getRestaurants,
   getPlaceDetail,
   getHotelDetail,
+   getRestaurantDetail,
   suggestPlaces as apiSuggest,
   suggestGeoLocations,
 } from "../services/catalogService";
@@ -59,6 +60,15 @@ export const fetchHotelDetail = createAsyncThunk(
   }
 );
 
+export const fetchRestaurantDetail = createAsyncThunk(
+  "catalog/fetchRestaurantDetail",
+  async (slug, { rejectWithValue }) => {
+    const res = await getRestaurantDetail(slug);
+    if (res.success) return res.data;
+    return rejectWithValue(res.message || "Không tìm thấy quán ăn");
+  }
+);
+
 export const suggestPlaces = createAsyncThunk(
   "catalog/suggestPlaces",
   async ({ q, limit = 6 }, { rejectWithValue }) => {
@@ -108,6 +118,7 @@ const initialState = {
     loading: false,
     error: null,
   },
+  restaurantDetail: { data: null, loading: false, error: null },
   suggest: { items: [], loading: false, error: null, q: "" },
   geoSuggest: { items: [], loading: false, error: null, q: "" },
 };
@@ -262,6 +273,22 @@ const catalogSlice = createSlice({
         state.geoSuggest.loading = false;
         state.geoSuggest.error =
           action.payload || "Lỗi gợi ý vị trí ngoài hệ thống";
+      });
+
+      /* ---------- Restaurant detail ---------- */
+    builder
+      .addCase(fetchRestaurantDetail.pending, (state) => {
+        state.restaurantDetail.loading = true;
+        state.restaurantDetail.error = null;
+        state.restaurantDetail.data = null;
+      })
+      .addCase(fetchRestaurantDetail.fulfilled, (state, action) => {
+        state.restaurantDetail.loading = false;
+        state.restaurantDetail.data = action.payload || null;
+      })
+      .addCase(fetchRestaurantDetail.rejected, (state, action) => {
+        state.restaurantDetail.loading = false;
+        state.restaurantDetail.error = action.payload || "Không tìm thấy quán ăn";
       });
   },
 });
