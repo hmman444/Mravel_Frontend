@@ -1,3 +1,4 @@
+// src/components/DestinationTypeahead.jsx
 import { useEffect, useRef, useState } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { usePlaceTypeahead } from "../features/catalog/hooks/usePlaceTypeahead";
@@ -6,9 +7,11 @@ import { makePlaceDisplay } from "../utils/makePlaceDisplay";
 export default function DestinationTypeahead({
   label = "Tìm địa điểm",
   placeholder = "Nhập địa điểm muốn tham quan (TP. Hồ Chí Minh, Phú Quốc, Hội An...)",
-  onSubmit,                  // ({ text, slug })
-  className = "",            // ví dụ: "col-span-12 md:col-span-10"
-  buttonSlot = null,         // render-prop: ({ submit, text, slugPicked }) => JSX
+  onSubmit,          // ({ text, slug })
+  onPick,            // NEW: gọi khi chọn 1 suggestion
+  onChangeText,      // NEW: gọi mỗi khi text thay đổi
+  className = "",
+  buttonSlot = null,
 }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -18,7 +21,6 @@ export default function DestinationTypeahead({
 
   const { items, loading, fetchSuggest, resetSuggest } = usePlaceTypeahead();
 
-  // debounce fetch
   useEffect(() => {
     if (skipNextFetch.current) {
       skipNextFetch.current = false;
@@ -32,7 +34,6 @@ export default function DestinationTypeahead({
     }
     const t = setTimeout(() => {
       if (!pickedSlug) {
-        // đã pick thì không mở lại/dropdown
         fetchSuggest(q, 8);
         setOpen(true);
       }
@@ -40,7 +41,6 @@ export default function DestinationTypeahead({
     return () => clearTimeout(t);
   }, [q, pickedSlug, fetchSuggest, resetSuggest]);
 
-  // click outside
   useEffect(() => {
     const onDoc = (e) => {
       if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false);
@@ -54,11 +54,15 @@ export default function DestinationTypeahead({
   );
 
   const pick = (it) => {
-    setQ(makePlaceDisplay(it));
+    const text = makePlaceDisplay(it);
+    setQ(text);
     setPickedSlug(it.slug);
     setOpen(false);
-    resetSuggest(); // xoá kết quả để không render “Đang tìm…”
-    skipNextFetch.current = true; // chặn 1 lần fetch tiếp theo
+    resetSuggest();
+    skipNextFetch.current = true;
+
+    // 👉 phát dữ liệu ra ngoài cho form Restaurant
+    if (typeof onPick === "function") onPick({ text, slug: it.slug });
   };
 
   const submit = (e) => {
@@ -69,19 +73,19 @@ export default function DestinationTypeahead({
   return (
     <div className={["relative", className].join(" ")} ref={boxRef}>
       {label && (
-        <div className="mb-1.5 text-sm font-semibold text-white/90">
-          {label}
-        </div>
+        <div className="mb-1.5 text-sm font-semibold text-white/90">{label}</div>
       )}
 
-      {/* ⬇️ BỎ border/rounded/px/py tại đây, chỉ giữ flex + full width */}
       <div className="flex items-center w-full">
         <FaMapMarkerAlt className="text-gray-400 mr-2" />
         <input
           value={q}
           onChange={(e) => {
-            setQ(e.target.value);
+            const val = e.target.value;
+            setQ(val);
             setPickedSlug(null);
+            // 👉 phát dữ liệu thô khi người dùng gõ
+            if (typeof onChangeText === "function") onChangeText(val);
           }}
           onFocus={() => setOpen(Boolean(q) && !pickedSlug)}
           onKeyDown={(e) => {
@@ -101,9 +105,7 @@ export default function DestinationTypeahead({
             <div className="px-3 py-2 text-sm text-gray-500">Đang tìm...</div>
           )}
           {!loading && !suggestions.length && (
-            <div className="px-3 py-2 text-sm text-gray-500">
-              Không có gợi ý
-            </div>
+            <div className="px-3 py-2 text-sm text-gray-500">Không có gợi ý</div>
           )}
           {suggestions.map((it) => (
             <button
