@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
 import {
   FaTimes,
   FaPenFancy,
@@ -10,16 +9,33 @@ import {
   FaMoneyBillWave,
 } from "react-icons/fa";
 import TimePicker from "../../../../components/TimePicker";
+import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
+
+import ActivityModalShell from "../ActivityModalShell";
+import SplitMoneySection from "../SplitMoneySection";
+import ExtraCostsSection from "../ExtraCostsSection";
+import PlacePickerModal from "../PlacePickerModal";
+import { inputBase, sectionCard } from "../activityStyles";
+
+const EXTRA_TYPES = [
+  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
+  { value: "SURCHARGE", label: "Phụ thu" },
+  { value: "TAX", label: "Thuế" },
+  { value: "OTHER", label: "Khác" },
+];
 
 export default function OtherActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
+  planMembers = [],
 }) {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
-  const [time, setTime] = useState("");
+
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   const [estimatedCost, setEstimatedCost] = useState("");
   const [actualCost, setActualCost] = useState("");
@@ -27,30 +43,118 @@ export default function OtherActivityModal({
 
   const [customFields, setCustomFields] = useState([{ key: "", value: "" }]);
 
-  // Load khi edit
+  // extraCosts dùng chung format với Food / Transport / Stay / Event
+  const [extraCosts, setExtraCosts] = useState([]);
+  const [budgetAmount, setBudgetAmount] = useState("");
+
+  // ===== CHIA TIỀN =====
+  const [splitEnabled, setSplitEnabled] = useState(false);
+  const [splitType, setSplitType] = useState("EVEN");
+  const [participantCount, setParticipantCount] = useState("2");
+  const [splitNames, setSplitNames] = useState([]);
+  const [exactAmounts, setExactAmounts] = useState([]);
+
+  const [payerChoice, setPayerChoice] = useState("");
+  const [payerExternalName, setPayerExternalName] = useState("");
+
+  // ===== PLACE PICKER =====
+  const [placePickerOpen, setPlacePickerOpen] = useState(false);
+  const [internalOtherLocation, setInternalOtherLocation] = useState(null);
+  const effectiveOtherLocation = internalOtherLocation || null;
+
+  // ===== ERRORS =====
+  const [errors, setErrors] = useState({});
+
+  // ===== LOAD KHI EDIT / RESET =====
   useEffect(() => {
     if (!open) return;
+
+    setErrors({});
 
     if (editingCard) {
       const data = editingCard.activityDataJson
         ? JSON.parse(editingCard.activityDataJson)
         : {};
+      const cost = editingCard.cost || {};
+      const split = editingCard.split || {};
 
-      setTitle(editingCard.text || "");
+      setTitle(editingCard.text || data.title || "Hoạt động khác");
       setLocation(data.location || "");
-      setTime(editingCard.startTime || data.time || "");
+
+      const loadedStart = editingCard.startTime || data.startTime || "";
+      const loadedEnd =
+        editingCard.endTime || data.endTime || editingCard.startTime || "";
+
+      setStartTime(loadedStart);
+      setEndTime(loadedEnd);
 
       setEstimatedCost(
-        editingCard.estimatedCost != null
-          ? String(editingCard.estimatedCost)
+        data.estimatedCost != null
+          ? String(data.estimatedCost)
+          : cost.estimatedCost != null
+          ? String(cost.estimatedCost)
           : ""
       );
 
       setActualCost(
-        editingCard.actualCost != null
-          ? String(editingCard.actualCost)
+        data.actualCost != null
+          ? String(data.actualCost)
+          : cost.actualCost != null
+          ? String(cost.actualCost)
           : ""
       );
+
+      // ---- EXTRA COSTS ----
+      let extras = [];
+
+      if (
+        data.extraItems &&
+        Array.isArray(data.extraItems) &&
+        data.extraItems.length > 0
+      ) {
+        extras = data.extraItems.map((it) => ({
+          reason: it.reason || it.note || "Chi phí phụ",
+          type: it.type || "OTHER",
+          estimatedAmount: null,
+          actualAmount:
+            it.actualAmount != null
+              ? it.actualAmount
+              : it.amount != null
+              ? Number(it.amount)
+              : 0,
+        }));
+      } else if (
+        cost.extraCosts &&
+        Array.isArray(cost.extraCosts) &&
+        cost.extraCosts.length > 0
+      ) {
+        extras = cost.extraCosts.map((e) => ({
+          reason: e.reason || "Chi phí phụ",
+          type: e.type || "OTHER",
+          estimatedAmount: null,
+          actualAmount:
+            e.actualAmount != null && e.actualAmount !== ""
+              ? Number(e.actualAmount)
+              : 0,
+        }));
+      } else if (data.extraSpend != null) {
+        extras = [
+          {
+            reason: "Chi phí phụ",
+            type: "OTHER",
+            estimatedAmount: null,
+            actualAmount: Number(data.extraSpend) || 0,
+          },
+        ];
+      }
+
+      setExtraCosts(extras);
+
+      if (cost.budgetAmount != null) {
+        setBudgetAmount(String(cost.budgetAmount));
+      } else {
+        setBudgetAmount("");
+      }
 
       setNote(editingCard.description || "");
 
@@ -59,19 +163,234 @@ export default function OtherActivityModal({
           ? data.customFields
           : [{ key: "", value: "" }]
       );
+
+      // location object từ activityData mới
+      if (data.otherLocation) {
+        setInternalOtherLocation(data.otherLocation);
+      } else {
+        setInternalOtherLocation(null);
+      }
+
+      // ===== LOAD SPLIT dùng buildSplitBase =====
+      if (split.splitType && split.splitType !== "NONE") {
+        setSplitEnabled(true);
+        setSplitType(split.splitType);
+
+        const pc =
+          cost.participantCount ||
+          split.splitMembers?.length ||
+          split.splitDetails?.length ||
+          editingCard.participantCount ||
+          2;
+
+        setParticipantCount(String(pc));
+
+        let names = [];
+        if (split.splitMembers?.length) {
+          names = split.splitMembers.map((m) => m.displayName || "");
+        }
+        if (names.length < pc) {
+          names = [...names, ...Array(pc - names.length).fill("")];
+        }
+        setSplitNames(names);
+
+        if (split.splitType === "EXACT" && split.splitDetails) {
+          setExactAmounts(
+            split.splitDetails.map((d) =>
+              d.amount != null ? String(d.amount) : ""
+            )
+          );
+        } else {
+          setExactAmounts([]);
+        }
+
+        setPayerChoice("");
+        setPayerExternalName("");
+        if (split.payerId) {
+          setPayerChoice(`member:${split.payerId}`);
+        } else if (split.payments && split.payments.length > 0) {
+          const first = split.payments[0];
+          const payer = first?.payer;
+          if (payer) {
+            if (payer.external || !payer.memberId) {
+              setPayerChoice("external");
+              setPayerExternalName(payer.displayName || "");
+            } else if (payer.memberId) {
+              setPayerChoice(`member:${payer.memberId}`);
+            }
+          }
+        }
+      } else {
+        setSplitEnabled(false);
+        setSplitType("EVEN");
+        setParticipantCount("2");
+        setSplitNames([]);
+        setExactAmounts([]);
+        setPayerChoice("");
+        setPayerExternalName("");
+      }
     } else {
-      // reset new
+      // RESET NEW
       setTitle("");
       setLocation("");
-      setTime("");
+      setStartTime("");
+      setEndTime("");
       setEstimatedCost("");
       setActualCost("");
       setNote("");
       setCustomFields([{ key: "", value: "" }]);
+      setExtraCosts([]);
+      setBudgetAmount("");
+
+      setSplitEnabled(false);
+      setSplitType("EVEN");
+      setParticipantCount("2");
+      setSplitNames([]);
+      setExactAmounts([]);
+      setPayerChoice("");
+      setPayerExternalName("");
+
+      setInternalOtherLocation(null);
     }
   }, [open, editingCard]);
 
-  // Thêm field
+  // SYNC từ effectiveOtherLocation vào location text
+  useEffect(() => {
+    if (!effectiveOtherLocation) return;
+
+    if (
+      effectiveOtherLocation.address ||
+      effectiveOtherLocation.fullAddress ||
+      effectiveOtherLocation.label ||
+      effectiveOtherLocation.name
+    ) {
+      setLocation(
+        effectiveOtherLocation.address ||
+          effectiveOtherLocation.fullAddress ||
+          effectiveOtherLocation.label ||
+          effectiveOtherLocation.name ||
+          ""
+      );
+    }
+  }, [effectiveOtherLocation]);
+
+  // ===== COST LOGIC =====
+  const estimatedValue = useMemo(
+    () => Number(estimatedCost || 0),
+    [estimatedCost]
+  );
+
+  const extraTotal = useMemo(
+    () =>
+      extraCosts
+        .map((e) => Number(e.actualAmount) || 0)
+        .reduce((a, b) => a + b, 0),
+    [extraCosts]
+  );
+
+  const estimatedTotal = useMemo(
+    () => estimatedValue + extraTotal,
+    [estimatedValue, extraTotal]
+  );
+
+  const parsedActual = useMemo(() => {
+    const a = Number(actualCost || 0);
+    if (a > 0) return a;
+    return estimatedTotal;
+  }, [actualCost, estimatedTotal]);
+
+  // ===== DURATION =====
+  const computeDurationMinutes = () => {
+    if (!startTime || !endTime) return null;
+    const [sh, sm] = startTime.split(":").map(Number);
+    const [eh, em] = endTime.split(":").map(Number);
+    if (
+      Number.isNaN(sh) ||
+      Number.isNaN(sm) ||
+      Number.isNaN(eh) ||
+      Number.isNaN(em)
+    ) {
+      return null;
+    }
+    let diff = eh * 60 + em - (sh * 60 + sm);
+    if (diff <= 0) return null;
+    return diff;
+  };
+
+  const durationMinutes = computeDurationMinutes();
+
+  // ===== SPLIT UTILS (dùng chung buildSplitBase) =====
+  const handleParticipantCount = (value) => {
+    setParticipantCount(value);
+    const n = Math.max(1, Number(value) || 1);
+
+    setSplitNames((prev) => {
+      const arr = [...prev];
+      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
+      if (arr.length > n) return arr.slice(0, n);
+      return arr;
+    });
+
+    setExactAmounts((prev) => {
+      const arr = [...prev];
+      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
+      if (arr.length > n) return arr.slice(0, n);
+      return arr;
+    });
+  };
+
+  const splitBase = useMemo(
+    () =>
+      buildSplitBase({
+        splitEnabled,
+        splitType,
+        participantCount,
+        splitNames,
+        exactAmounts,
+        payerChoice,
+        payerExternalName,
+        planMembers,
+        parsedActual,
+      }),
+    [
+      splitEnabled,
+      splitType,
+      participantCount,
+      splitNames,
+      exactAmounts,
+      payerChoice,
+      payerExternalName,
+      planMembers,
+      parsedActual,
+    ]
+  );
+
+  const {
+    parsedParticipants,
+    participants,
+    split: splitPayload,
+    evenShare,
+    evenRemainder,
+    totalExact,
+  } = splitBase;
+
+  // ===== EXTRA COSTS HANDLER =====
+  const addExtraCost = () =>
+    setExtraCosts((prev) => [
+      ...prev,
+      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
+    ]);
+
+  const updateExtraCost = (idx, key, value) => {
+    const arr = [...extraCosts];
+    arr[idx] = { ...arr[idx], [key]: value };
+    setExtraCosts(arr);
+  };
+
+  const removeExtraCost = (idx) =>
+    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
+
+  // ===== CUSTOM FIELDS HANDLERS =====
   const handleAddField = () => {
     setCustomFields((prev) => [...prev, { key: "", value: "" }]);
   };
@@ -86,231 +405,618 @@ export default function OtherActivityModal({
     setCustomFields((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Submit
+  // ===== BUILD PAYLOAD =====
+  const buildPayload = () => {
+    const normalizedExtraCosts = extraCosts
+      .map((e) => ({
+        reason: e.reason || "Chi phí phụ",
+        type: e.type || "OTHER",
+        estimatedAmount: null,
+        actualAmount:
+          e.actualAmount !== undefined &&
+          e.actualAmount !== null &&
+          e.actualAmount !== ""
+            ? Number(e.actualAmount)
+            : 0,
+      }))
+      .filter(
+        (e) =>
+          (e.actualAmount && e.actualAmount > 0) ||
+          (e.reason && e.reason.trim() !== "")
+      );
+
+    const extraTotalNormalized = normalizedExtraCosts
+      .map((e) => e.actualAmount || 0)
+      .reduce((a, b) => a + b, 0);
+
+    const cost = {
+      currencyCode: "VND",
+      estimatedCost: estimatedTotal || null,
+      budgetAmount: budgetAmount ? Number(budgetAmount) : null,
+      actualCost: actualCost ? Number(actualCost) : null,
+      participantCount: splitEnabled ? parsedParticipants : null,
+      participants,
+      extraCosts: normalizedExtraCosts,
+    };
+
+    return {
+      cost,
+      split: splitPayload,
+      participants,
+      normalizedExtraCosts,
+      extraTotal: extraTotalNormalized,
+    };
+  };
+
+  // ===== SUBMIT =====
   const handleSubmit = () => {
+    const newErrors = {};
+
+    if (!location.trim()) {
+      newErrors.location = "Vui lòng nhập hoặc chọn địa điểm.";
+    }
+
+    if (startTime && endTime && durationMinutes == null) {
+      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+
+    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
+      buildPayload();
+
     onSubmit?.({
       type: "OTHER",
       title: title || "Hoạt động khác",
-      startTime: time,
-      endTime: time,
-      estimatedCost: estimatedCost ? Number(estimatedCost) : null,
-      actualCost: actualCost ? Number(actualCost) : null,
-      note,
-
-      // data chi tiết
-      location,
-      time,
-      customFields: customFields.filter(
-        (f) => f.key.trim() !== "" || f.value.trim() !== ""
-      ),
+      text: title || "Hoạt động khác",
+      description: note || "",
+      startTime: startTime || null,
+      endTime: endTime || null,
+      durationMinutes: durationMinutes ?? null,
+      participantCount:
+        splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
+      participants,
+      activityData: {
+        location,
+        otherLocation: effectiveOtherLocation || null,
+        startTime,
+        endTime,
+        estimatedCost: estimatedTotal || null,
+        actualCost: actualCost ? Number(actualCost) : null,
+        extraSpend: extraTotal || null,
+        extraItems: normalizedExtraCosts,
+        customFields: customFields.filter(
+          (f) => f.key.trim() !== "" || f.value.trim() !== ""
+        ),
+      },
+      cost,
+      split,
     });
 
     onClose?.();
   };
 
-  const inputBase =
-    "bg-white/90 dark:bg-gray-800/90 border border-gray-300/70 dark:border-gray-700 rounded-xl shadow-sm px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-400";
+  // ===== HEADER / FOOTER =====
+  const headerRight =
+    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
+      <div className="hidden sm:flex flex-col items-end text-xs">
+        {parsedActual > 0 && (
+          <>
+            <span className="text-slate-500 dark:text-slate-400">
+              Tổng chi dùng để chia
+            </span>
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {parsedActual.toLocaleString("vi-VN")}đ
+            </span>
+          </>
+        )}
+        {budgetAmount && Number(budgetAmount) > 0 && (
+          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+            Ngân sách:{" "}
+            <b className="text-slate-700 dark:text-slate-100">
+              {Number(budgetAmount).toLocaleString("vi-VN")}đ
+            </b>
+          </span>
+        )}
+      </div>
+    ) : null;
+
+  const footerLeft = (
+    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
+      <span>{title || "Hoạt động tuỳ chỉnh khác"}</span>
+      {(effectiveOtherLocation || location) && (
+        <span>
+          Địa điểm:{" "}
+          <b>
+            {effectiveOtherLocation?.label ||
+              effectiveOtherLocation?.name ||
+              effectiveOtherLocation?.address ||
+              effectiveOtherLocation?.fullAddress ||
+              location}
+          </b>
+        </span>
+      )}
+      {startTime && endTime && durationMinutes != null && !errors.time && (
+        <span>
+          Thời gian:{" "}
+          <b>
+            {startTime} - {endTime} ({durationMinutes} phút)
+          </b>
+        </span>
+      )}
+    </div>
+  );
+
+  const footerRight = (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
+        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
+        dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+      >
+        Hủy
+      </button>
+      <button
+        onClick={handleSubmit}
+        type="button"
+        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-slate-600 to-gray-700 
+        text-white text-xs sm:text-sm font-semibold shadow-lg shadow-slate-600/30 hover:shadow-xl
+        hover:brightness-105 active:scale-[0.98] transition"
+      >
+        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động khác"}
+      </button>
+    </div>
+  );
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[70] bg-black/35 backdrop-blur-sm flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-white/95 dark:bg-gray-900/95 border border-gray-200/60 dark:border-gray-700/70 
-            rounded-2xl w-[600px] max-h-[90vh] shadow-[0_16px_45px_rgba(0,0,0,0.16)] overflow-hidden relative"
-            initial={{ scale: 0.92, opacity: 0, y: 10 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.92, opacity: 0, y: 10 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-          >
-            {/* Close */}
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 p-2 rounded-full bg-gray-200/70 dark:bg-gray-700/70 
-              text-gray-600 dark:text-gray-300 hover:bg-red-500 hover:text-white transition"
-            >
-              <FaTimes size={14} />
-            </button>
+    <>
+      <ActivityModalShell
+        open={open}
+        onClose={onClose}
+        icon={{
+          main: <FaPenFancy />,
+          close: <FaTimes size={14} />,
+          bg: "from-slate-600 to-gray-700",
+        }}
+        title="Hoạt động khác"
+        typeLabel="Other"
+        subtitle="Thêm hoạt động tuỳ chỉnh không thuộc các nhóm mặc định."
+        headerRight={headerRight}
+        footerLeft={footerLeft}
+        footerRight={footerRight}
+      >
+        {/* THÔNG TIN CHUNG */}
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Thông tin chung
+            </label>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+              Tên hoạt động + địa điểm + thời gian
+            </span>
+          </div>
 
-            {/* Header */}
-            <div className="px-6 pt-6 pb-4 border-b border-gray-200/70 dark:border-gray-700/70 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center">
-                <FaPenFancy />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
-                  Hoạt động khác
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Thêm hoạt động tuỳ chỉnh không thuộc các nhóm mặc định
-                </p>
-              </div>
+          <div className={sectionCard}>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                Tên hoạt động
+              </label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ví dụ: Sinh nhật, họp nhóm, check-in..."
+                className={`${inputBase} w-full mt-1`}
+              />
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-4 overflow-y-auto max-h-[78vh]">
+            {/* ĐỊA ĐIỂM - chọn trên bản đồ (bắt buộc) */}
+            <div className="mt-3">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                Địa điểm
+              </label>
 
-              {/* Title */}
-              <div>
-                <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                  Tên hoạt động
-                </label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ví dụ: Sinh nhật, họp nhóm, check-in..."
-                  className={`${inputBase} w-full`}
-                />
+              <button
+                type="button"
+                onClick={() => setPlacePickerOpen(true)}
+                className={`group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
+                          border-slate-200/80 dark:border-slate-700 px-3 py-2.5
+                          flex items-start gap-3 text-left
+                          hover:border-slate-500 hover:shadow-md hover:bg-slate-50/80
+                          dark:hover:border-slate-400 dark:hover:bg-slate-900
+                          transition
+                          ${
+                            errors.location
+                              ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
+                              : ""
+                          }`}
+              >
+                <div
+                  className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
+                                bg-slate-50 text-slate-600 border border-slate-100
+                                dark:bg-slate-900/40 dark:text-slate-200 dark:border-slate-700"
+                >
+                  <FaMapMarkerAlt />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  {effectiveOtherLocation || location ? (
+                    <>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
+                        {effectiveOtherLocation?.label ||
+                          effectiveOtherLocation?.name ||
+                          "Địa điểm đã chọn"}
+                      </p>
+                      {(effectiveOtherLocation?.address ||
+                        effectiveOtherLocation?.fullAddress ||
+                        location) && (
+                        <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                          {effectiveOtherLocation?.address ||
+                            effectiveOtherLocation?.fullAddress ||
+                            location}
+                        </p>
+                      )}
+
+                      <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                        <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
+                          Đã chọn trên bản đồ
+                        </span>
+                        {effectiveOtherLocation?.lat != null &&
+                          effectiveOtherLocation?.lng != null && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-200">
+                              {effectiveOtherLocation.lat.toFixed(4)},{" "}
+                              {effectiveOtherLocation.lng.toFixed(4)}
+                            </span>
+                          )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
+                        Chọn địa điểm trên bản đồ
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                        Nhấn để mở bản đồ, chọn địa điểm cho hoạt động này (quán,
+                        công viên,...).
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                <span className="hidden md:inline-flex items-center text-[11px] font-medium
+                                text-slate-500 group-hover:text-slate-700 dark:text-slate-300
+                                dark:group-hover:text-slate-100">
+                  Mở bản đồ
+                </span>
+              </button>
+              {errors.location && (
+                <p className="mt-1 text-[11px] text-rose-500">
+                  {errors.location}
+                </p>
+              )}
+            </div>
+
+            {/* Thời gian */}
+            <div className="mt-3">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                Thời gian hoạt động
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
+                <div
+                  className={`
+                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
+                    ${
+                      errors.time
+                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
+                        : ""
+                    }
+                  `}
+                >
+                  <FaClock
+                    className={errors.time ? "text-rose-500" : "text-sky-500"}
+                  />
+                  <span className="text-xs text-slate-600 dark:text-slate-300">
+                    Bắt đầu
+                  </span>
+                  <div className="flex-1 flex justify-end">
+                    <TimePicker
+                      value={startTime}
+                      onChange={(val) => {
+                        setStartTime(val);
+                        setErrors((prev) => ({ ...prev, time: "" }));
+                      }}
+                      error={Boolean(errors.time)}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className={`
+                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
+                    ${
+                      errors.time
+                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
+                        : ""
+                    }
+                  `}
+                >
+                  <FaClock
+                    className={errors.time ? "text-rose-500" : "text-sky-500"}
+                  />
+                  <span className="text-xs text-slate-600 dark:text-slate-300">
+                    Kết thúc
+                  </span>
+                  <div className="flex-1 flex justify-end">
+                    <TimePicker
+                      value={endTime}
+                      onChange={(val) => {
+                        setEndTime(val);
+                        setErrors((prev) => ({ ...prev, time: "" }));
+                      }}
+                      error={Boolean(errors.time)}
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Location */}
+              {errors.time && (
+                <p className="mt-1.5 text-[11px] text-rose-500">
+                  {errors.time}
+                </p>
+              )}
+
+              {durationMinutes != null && !errors.time && (
+                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                  Thời lượng ước tính:{" "}
+                  <span className="font-semibold">{durationMinutes} phút</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* CHI PHÍ */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Chi phí
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              Ước lượng, chi thực tế và chi phí phát sinh
+            </span>
+          </div>
+
+          <div className={sectionCard + " space-y-4"}>
+            {/* ƯỚC LƯỢNG + THỰC TẾ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                  Địa điểm (tuỳ chọn)
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  Chi phí ước lượng (chính)
                 </label>
                 <div className="flex items-center gap-2">
-                  <FaMapMarkerAlt className="text-red-400" />
+                  <FaMoneyBillWave className="text-emerald-500" />
                   <input
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Địa điểm diễn ra hoạt động"
+                    type="number"
+                    min="0"
+                    value={estimatedCost}
+                    onChange={(e) => setEstimatedCost(e.target.value)}
+                    placeholder="VD: 100.000"
                     className={`${inputBase} flex-1`}
                   />
+                  <span className="text-xs text-slate-500">đ</span>
                 </div>
               </div>
 
-              {/* Time */}
               <div>
-                <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                  Thời gian (tuỳ chọn)
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  Chi tiêu thực tế (chính)
                 </label>
-                <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 border 
-                border-gray-300/70 dark:border-gray-700 rounded-xl px-3 py-2 shadow-sm w-full">
-                  <FaClock className="text-blue-500" />
-                  <TimePicker value={time} onChange={setTime} />
+                <div className="flex items-center gap-2">
+                  <FaMoneyBillWave className="text-emerald-500" />
+                  <input
+                    type="number"
+                    min="0"
+                    value={actualCost}
+                    onChange={(e) => setActualCost(e.target.value)}
+                    placeholder="Điền sau khi hoàn thành"
+                    className={`${inputBase} flex-1`}
+                  />
+                  <span className="text-xs text-slate-500">đ</span>
                 </div>
               </div>
+            </div>
 
-              {/* Cost */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Estimated */}
-                <div>
-                  <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                    Chi phí ước lượng
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <FaMoneyBillWave className="text-emerald-500" />
-                    <input
-                      type="number"
-                      min="0"
-                      value={estimatedCost}
-                      onChange={(e) => setEstimatedCost(e.target.value)}
-                      placeholder="VD: 100.000"
-                      className={`${inputBase} flex-1`}
-                    />
-                    <span className="text-xs">đ</span>
-                  </div>
-                </div>
+            {/* PHÁT SINH – dùng ExtraCostsSection */}
+            <ExtraCostsSection
+              extraCosts={extraCosts}
+              addExtraCost={addExtraCost}
+              updateExtraCost={updateExtraCost}
+              removeExtraCost={removeExtraCost}
+              extraTypes={EXTRA_TYPES}
+              title="Chi phí phát sinh (tuỳ chọn)"
+              addLabel="+ Thêm khoản phát sinh"
+              hint="Ví dụ: gửi xe, phụ phí, đồ uống, đạo cụ, quà tặng..."
+            />
 
-                {/* Actual */}
-                <div>
-                  <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                    Chi tiêu thực tế
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <FaMoneyBillWave className="text-emerald-500" />
-                    <input
-                      type="number"
-                      min="0"
-                      value={actualCost}
-                      onChange={(e) => setActualCost(e.target.value)}
-                      placeholder="Điền sau khi hoàn thành"
-                      className={`${inputBase} flex-1`}
-                    />
-                    <span className="text-xs">đ</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Custom fields */}
+            {/* NGÂN SÁCH + TÓM TẮT */}
+            <div className="flex flex-col gap-4">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                    Thông tin thêm (tuỳ chọn)
-                  </label>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  Ngân sách cho hoạt động (tuỳ chọn)
+                </label>
+                <div className="flex items-center gap-2">
+                  <FaMoneyBillWave className="text-sky-500" />
+                  <input
+                    type="number"
+                    min="0"
+                    value={budgetAmount}
+                    onChange={(e) => setBudgetAmount(e.target.value)}
+                    placeholder="VD: 500.000"
+                    className={`${inputBase} flex-1`}
+                  />
+                  <span className="text-xs text-slate-500">đ</span>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
+                <div>
+                  Ước lượng ban đầu:{" "}
+                  <span className="font-semibold">
+                    {estimatedValue.toLocaleString("vi-VN")}đ
+                  </span>
+                </div>
+                <div>
+                  Phát sinh:{" "}
+                  <span className="font-semibold">
+                    {extraTotal.toLocaleString("vi-VN")}đ
+                  </span>
+                </div>
+                <div>
+                  Tổng dự kiến:{" "}
+                  <span className="font-semibold text-slate-800 dark:text-slate-100">
+                    {estimatedTotal.toLocaleString("vi-VN")}đ
+                  </span>
+                </div>
+                {actualCost && Number(actualCost) > 0 && (
+                  <div>
+                    Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                    <span className="font-semibold text-slate-800 dark:text-slate-100">
+                      {Number(actualCost).toLocaleString("vi-VN")}đ
+                    </span>
+                  </div>
+                )}
+                {budgetAmount && Number(budgetAmount) > 0 && (
+                  <div>
+                    Ngân sách:{" "}
+                    <span className="font-semibold">
+                      {Number(budgetAmount).toLocaleString("vi-VN")}đ
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CHIA TIỀN */}
+        <section className="space-y-4">
+          <SplitMoneySection
+            planMembers={planMembers}
+            splitEnabled={splitEnabled}
+            setSplitEnabled={setSplitEnabled}
+            splitType={splitType}
+            setSplitType={setSplitType}
+            participantCount={participantCount}
+            handleParticipantCount={handleParticipantCount}
+            splitNames={splitNames}
+            setSplitNames={setSplitNames}
+            exactAmounts={exactAmounts}
+            setExactAmounts={setExactAmounts}
+            payerChoice={payerChoice}
+            setPayerChoice={setPayerChoice}
+            payerExternalName={payerExternalName}
+            setPayerExternalName={setPayerExternalName}
+            parsedParticipants={parsedParticipants}
+            parsedActual={parsedActual}
+            evenShare={evenShare}
+            evenRemainder={evenRemainder}
+            totalExact={totalExact}
+          />
+        </section>
+
+        {/* THÔNG TIN THÊM */}
+        <section className="space-y-2">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Thông tin thêm (tuỳ chọn)
+            </label>
+            <button
+              type="button"
+              onClick={handleAddField}
+              className="text-[11px] text-sky-500 hover:text-sky-400"
+            >
+              + Thêm trường
+            </button>
+          </div>
+
+          <div className={sectionCard}>
+            {customFields.map((f, idx) => (
+              <div key={idx} className="grid grid-cols-2 gap-2 mb-2">
+                <input
+                  placeholder="Tên trường (vd: Dresscode, mua quà, ...)"
+                  value={f.key}
+                  onChange={(e) =>
+                    handleChangeField(idx, "key", e.target.value)
+                  }
+                  className={inputBase}
+                />
+
+                <div className="flex items-center gap-2">
+                  <input
+                    placeholder="Giá trị (vd: Trang phục màu đỏ, 500.000đ, ...)"
+                    value={f.value}
+                    onChange={(e) =>
+                      handleChangeField(idx, "value", e.target.value)
+                    }
+                    className={`${inputBase} flex-1`}
+                  />
                   <button
-                    onClick={handleAddField}
-                    className="text-[11px] text-blue-500 hover:text-blue-400"
+                    type="button"
+                    onClick={() => handleRemoveField(idx)}
+                    className="text-red-500 hover:text-red-600 text-xs ml-1"
                   >
-                    + Thêm trường
+                    ✕
                   </button>
                 </div>
-
-                {customFields.map((f, idx) => (
-                  <div key={idx} className="grid grid-cols-2 gap-2 mb-2">
-                    <input
-                      placeholder="Tên trường (vd: Sự kiện)"
-                      value={f.key}
-                      onChange={(e) =>
-                        handleChangeField(idx, "key", e.target.value)
-                      }
-                      className={`${inputBase}`}
-                    />
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        placeholder="Giá trị"
-                        value={f.value}
-                        onChange={(e) =>
-                          handleChangeField(idx, "value", e.target.value)
-                        }
-                        className={`${inputBase} flex-1`}
-                      />
-                      <button
-                        onClick={() => handleRemoveField(idx)}
-                        className="text-red-500 hover:text-red-600 text-xs ml-1"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
+            ))}
+          </div>
+        </section>
 
-              {/* Note */}
-              <div>
-                <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                  Ghi chú
-                </label>
-                <textarea
-                  rows={3}
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Mô tả thêm về hoạt động..."
-                  className={`${inputBase} w-full`}
-                />
-              </div>
+        {/* GHI CHÚ */}
+        <section>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Ghi chú
+            </label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              Mô tả thêm cho cả nhóm
+            </span>
+          </div>
+          <textarea
+            rows={3}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Mô tả thêm về hoạt động..."
+            className={`${inputBase} w-full`}
+          />
+        </section>
+      </ActivityModalShell>
 
-              {/* Submit */}
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={handleSubmit}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-slate-600 to-gray-700 text-white 
-                  font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm"
-                >
-                  {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động khác"}
-                </button>
-              </div>
-
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      {/* PLACE PICKER CHO OTHER */}
+      <PlacePickerModal
+        open={placePickerOpen}
+        onClose={() => setPlacePickerOpen(false)}
+        onSelect={(loc) => {
+          setInternalOtherLocation(loc || null);
+          if (loc?.address || loc?.fullAddress || loc?.label || loc?.name) {
+            setLocation(
+              loc.address || loc.fullAddress || loc.label || loc.name
+            );
+            setErrors((prev) => ({ ...prev, location: "" }));
+          }
+        }}
+        initialTab="PLACE"
+        activityType="OTHER"
+        field="other"
+        initialLocation={effectiveOtherLocation}
+      />
+    </>
   );
 }

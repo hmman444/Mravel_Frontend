@@ -114,7 +114,7 @@ export default function ListPlanPage() {
     <PlanLayout
       activePlanId={null}
       plans={plans}
-      onOpenPlanList={() => navigate("/my-plans")}
+      onOpenPlanList={() => navigate("/plans/my-plans")}
       onOpenCalendar={() => navigate("/plans/calendar")}
       onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
     >

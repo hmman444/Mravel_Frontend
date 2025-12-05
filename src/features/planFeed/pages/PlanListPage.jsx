@@ -12,7 +12,7 @@ import PostSkeleton from "../components/PostSkeleton";
 import NewPlanModal from "../components/NewPlanModal";
 import { usePlans } from "../hooks/usePlans";
 
-import FadeInSection from "../../../components/FadeInSection"; // ⬅️ IMPORT
+import FadeInSection from "../../../components/FadeInSection";
 
 export default function PlanListPage() {
   const [openNew, setOpenNew] = useState(false);
@@ -57,7 +57,6 @@ export default function PlanListPage() {
 
       <main className="flex-1 max-w-3xl w-full mx-auto pt-24 pb-16 px-3 sm:px-4">
 
-        {/* ⬅️ HEADER FADE */}
         <FadeInSection delay={0}>
           <section className="mb-6">
             <div className="flex items-center justify-between gap-3">

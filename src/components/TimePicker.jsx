@@ -1,12 +1,63 @@
 import { useState, useRef, useEffect } from "react";
 import { FaClock } from "react-icons/fa";
 
-export default function TimePicker({ value, onChange }) {
+const COLOR_STYLES = {
+  sky: {
+    icon: "text-sky-500",
+    selectedBg: "bg-sky-500",
+  },
+  violet: {
+    icon: "text-violet-500",
+    selectedBg: "bg-violet-500",
+  },
+  emerald: {
+    icon: "text-emerald-500",
+    selectedBg: "bg-emerald-500",
+  },
+  indigo: {
+    icon: "text-indigo-500",
+    selectedBg: "bg-indigo-500",
+  },
+  orange: {
+    icon: "text-orange-500",
+    selectedBg: "bg-orange-500",
+  },
+  amber: {
+    icon: "text-amber-500",
+    selectedBg: "bg-amber-500",
+  },
+  pink: {
+    icon: "text-pink-500",
+    selectedBg: "bg-pink-500",
+  },
+  rose: {
+    icon: "text-rose-500",
+    selectedBg: "bg-rose-500",
+  },
+  slate: {
+    icon: "text-slate-500",
+    selectedBg: "bg-slate-500",
+  },
+};
+
+export default function TimePicker({
+  value,
+  onChange,
+  error = false,
+  color = "sky",
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    String(i).padStart(2, "0")
+  );
+  const minutes = Array.from({ length: 60 }, (_, i) =>
+    String(i).padStart(2, "0")
+  );
+
+  // fallback sky nếu truyền màu không tồn tại
+  const accent = COLOR_STYLES[color] || COLOR_STYLES.sky;
 
   useEffect(() => {
     const close = (e) => {
@@ -20,17 +71,28 @@ export default function TimePicker({ value, onChange }) {
     <div className="relative w-full select-none" ref={ref}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="
-          w-full px-3 py-1.5 rounded-lg 
-          bg-transparent text-sm flex items-center justify-between 
+        className={`
+          w-full px-3 py-1.5 rounded-lg border
+          text-sm flex items-center justify-between 
           text-gray-900 dark:text-gray-100
+          bg-transparent
           hover:bg-gray-100/70 dark:hover:bg-gray-700/70
           transition
           whitespace-nowrap
-        "
+          ${
+            error
+              ? "border-rose-400 bg-rose-50/80 dark:border-rose-500 dark:bg-rose-950/40"
+              : "border-transparent"
+          }
+        `}
       >
         {value || "--:--"}
-        <FaClock className="ml-2 text-gray-500" />
+        <FaClock
+          className={`
+            ml-2
+            ${error ? "text-rose-500" : accent.icon}
+          `}
+        />
       </button>
 
       {open && (
@@ -44,16 +106,19 @@ export default function TimePicker({ value, onChange }) {
             transition-all duration-150
           "
         >
+          {/* HOURS */}
           <div className="flex-1 max-h-60 overflow-y-auto pr-1 space-y-1">
             {hours.map((h) => (
               <button
                 key={h}
-                onClick={() => onChange(`${h}:${value?.split(":")[1] || "00"}`)}
+                onClick={() =>
+                  onChange(`${h}:${value?.split(":")[1] || "00"}`)
+                }
                 className={`
                   w-full rounded-lg py-2.5 text-sm
                   ${
                     value?.startsWith(h)
-                      ? "bg-blue-500 text-white shadow-md"
+                      ? `${accent.selectedBg} text-white shadow-md`
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }
                 `}
@@ -63,16 +128,19 @@ export default function TimePicker({ value, onChange }) {
             ))}
           </div>
 
+          {/* MINUTES */}
           <div className="flex-1 max-h-60 overflow-y-auto pl-1 space-y-1">
             {minutes.map((m) => (
               <button
                 key={m}
-                onClick={() => onChange(`${value?.split(":")[0] || "00"}:${m}`)}
+                onClick={() =>
+                  onChange(`${value?.split(":")[0] || "00"}:${m}`)
+                }
                 className={`
                   w-full rounded-lg py-2.5 text-sm
                   ${
                     value?.endsWith(m)
-                      ? "bg-blue-500 text-white shadow-md"
+                      ? `${accent.selectedBg} text-white shadow-md`
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }
                 `}

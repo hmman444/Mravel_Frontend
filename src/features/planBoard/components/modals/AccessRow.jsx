@@ -1,4 +1,6 @@
 // src/features/planBoard/components/modals/AccessRow.jsx
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaUserCircle, FaChevronDown, FaTrashAlt } from "react-icons/fa";
@@ -12,7 +14,6 @@ export default function AccessRow({
   canChangeRole,
   canRemove,
 }) {
-  // row chủ
   const isOwnerRow = user.owner;
   const hasMenu = (canChangeRole || canRemove) && !isOwnerRow;
   const open = activeMenu === user.email;
@@ -53,12 +54,11 @@ export default function AccessRow({
   }, [open, setActiveMenu]);
 
   const handleToggleMenu = () => {
-    if (!hasMenu) return; // không có quyền gì thì không mở menu
+    if (!hasMenu) return;
     setActiveMenu(open ? null : user.email);
   };
 
   const handleSelectRole = (role) => {
-    // Không đổi role nếu không có quyền hoặc user là pending invite
     if (!canChangeRole || user.pending) return;
     if (onChangeRole) onChangeRole(role);
     setActiveMenu(null);
@@ -70,26 +70,23 @@ export default function AccessRow({
     setActiveMenu(null);
   };
 
-  // dropdown qua portal
   const dropdown =
     open && posReady
       ? createPortal(
           <div
             className="
               fixed z-[99999]
-              bg-white dark:bg-gray-900
-              border border-gray-200 dark:border-gray-700
+              bg-white dark:bg-slate-900
+              border border-slate-200 dark:border-slate-700
               w-56 rounded-xl shadow-lg
               origin-top-right
-              transition-all duration-150 ease-out
-              opacity-100 scale-100
+              animate-[fadeDown_0.16s_ease-out]
             "
             style={{ top: pos.top, left: pos.left }}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="py-1">
-              {/* Chỉ render các option đổi role nếu có quyền đổi và user không pending */}
               {["Người xem", "Người chỉnh sửa"].map((r) => (
                 <button
                   key={r}
@@ -97,11 +94,11 @@ export default function AccessRow({
                   disabled={!canChangeRole || user.pending}
                   className={`
                     w-full text-left px-3 py-1.5 text-sm
-                    hover:bg-gray-100 dark:hover:bg-gray-800 transition
+                    hover:bg-slate-100 dark:hover:bg-slate-800
                     ${
                       user.role === r
                         ? "text-blue-600 font-semibold"
-                        : "text-gray-700 dark:text-gray-200"
+                        : "text-slate-700 dark:text-slate-200"
                     }
                     ${
                       !canChangeRole || user.pending
@@ -117,12 +114,12 @@ export default function AccessRow({
 
             {canRemove && (
               <>
-                <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                <div className="border-t border-slate-200 dark:border-slate-700 my-1" />
                 <button
                   onClick={handleRemove}
                   className="
                     w-full text-left px-3 py-1.5 text-sm
-                    text-red-600 hover:bg-red-50 dark:hover:bg-gray-800
+                    text-rose-600 hover:bg-rose-50/80 dark:hover:bg-slate-800
                     flex items-center gap-2 transition
                   "
                 >
@@ -142,28 +139,29 @@ export default function AccessRow({
         ref={rowRef}
         className="
           flex items-center justify-between
-          px-3 py-2 rounded-lg
-          hover:bg-gray-50 dark:hover:bg-gray-800
-          transition
+          px-3 py-2.5 rounded-xl
+          hover:bg-slate-50/90 dark:hover:bg-slate-900/80
+          border border-transparent
+          transition-all
         "
       >
         {/* info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           {user.avatar ? (
             <img
               src={user.avatar}
               alt={user.name}
-              className="w-9 h-9 rounded-full object-cover"
+              className="w-9 h-9 rounded-full object-cover shadow-sm"
             />
           ) : (
-            <FaUserCircle className="text-3xl text-gray-400" />
+            <FaUserCircle className="text-3xl text-slate-400" />
           )}
 
-          <div>
-            <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
               {user.name}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
               {user.email}
             </p>
 
@@ -175,14 +173,13 @@ export default function AccessRow({
           </div>
         </div>
 
-        {/* role */}
-        <div>
-          {/* chủ */}
+        {/* role & actions */}
+        <div className="flex items-center gap-2">
           {isOwnerRow && (
             <span
               className="
-                px-3 py-1 rounded-full text-xs font-semibold
-                bg-amber-100 text-amber-700
+                px-3 py-1 rounded-full text-[11px] font-semibold
+                bg-amber-50 text-amber-700
                 dark:bg-amber-500/10 dark:text-amber-300
               "
             >
@@ -190,13 +187,12 @@ export default function AccessRow({
             </span>
           )}
 
-          {/* k đổi đc role thì là label */}
           {!isOwnerRow && !canChangeRole && (
             <span
               className="
-                px-3 py-1 rounded-full text-xs font-medium
-                bg-gray-100 text-gray-600
-                dark:bg-gray-800 dark:text-gray-300
+                px-3 py-1 rounded-full text-[11px] font-medium
+                bg-slate-100 text-slate-600
+                dark:bg-slate-800 dark:text-slate-300
                 select-none
               "
             >
@@ -204,32 +200,33 @@ export default function AccessRow({
             </span>
           )}
 
-          {/* có quyền đổi role (owner) - dropdown */}
           {!isOwnerRow && canChangeRole && (
             <button
               onClick={handleToggleMenu}
-              className="
-                flex items-center gap-1.5 px-2.5 py-1
-                rounded-full border border-gray-300 dark:border-gray-700
-                text-xs text-gray-700 dark:text-gray-200
-                bg-white dark:bg-gray-900
-                hover:bg-gray-100 dark:hover:bg-gray-800
+              className={`
+                flex items-center gap-1.5 px-3 py-1
+                rounded-full border text-[11px] font-medium
+                ${
+                  open
+                    ? "border-blue-400 bg-blue-50/80 dark:border-blue-500/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300"
+                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                }
+                hover:bg-slate-50 dark:hover:bg-slate-800
                 transition
-              "
+              `}
             >
               {user.role}
               <FaChevronDown
-                className={`text-[10px] transition-transform ${
+                className={`text-[9px] transition-transform ${
                   open ? "rotate-180" : ""
                 }`}
               />
             </button>
           )}
         </div>
+      </div>
 
-              </div>
-
-              {dropdown}
-            </>
-          );
-        }
+      {dropdown}
+    </>
+  );
+}
