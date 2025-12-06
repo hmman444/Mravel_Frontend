@@ -176,6 +176,18 @@ export const suggestPlaces = async (q, limit = 6) => {
   }
 };
 
+/** GET /catalog/places/{slug} */
+export const getPlaceDetail = async (slug) => {
+  try {
+    const res = await axios.get(
+      `${PLACES_PREFIX}/${encodeURIComponent(slug)}`
+    );
+    return { success: true, data: res.data };
+  } catch (error) {
+    return toError(error, "Không tìm thấy địa điểm");
+  }
+};
+
 /** GET /catalog/geo/suggest?q=&limit=  (gợi ý kiểu Google) */
 export const suggestGeoLocations = async (q, limit = 6) => {
   try {
@@ -186,18 +198,6 @@ export const suggestGeoLocations = async (q, limit = 6) => {
     return { success: true, data: res.data ?? [] };
   } catch (error) {
     return toError(error, "Lỗi gợi ý vị trí ngoài hệ thống");
-  }
-};
-
-/** GET /catalog/places/{slug} */
-export const getPlaceDetail = async (slug) => {
-  try {
-    const res = await axios.get(
-      `${PLACES_PREFIX}/${encodeURIComponent(slug)}`
-    );
-    return { success: true, data: res.data };
-  } catch (error) {
-    return toError(error, "Không tìm thấy địa điểm");
   }
 };
 
