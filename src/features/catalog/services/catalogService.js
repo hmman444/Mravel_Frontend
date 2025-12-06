@@ -7,7 +7,7 @@ const CATALOG_PREFIX = `${API_URL}/catalog`;
 const PLACES_PREFIX = `${CATALOG_PREFIX}/places`;
 const HOTELS_PREFIX = `${CATALOG_PREFIX}/hotels`;
 const RESTAURANTS_PREFIX = `${CATALOG_PREFIX}/restaurants`;
-
+const GEO_PREFIX = `${CATALOG_PREFIX}/geo`;
 const normalizePage = (page) => ({
   items: page?.content ?? [],
   page: page?.number ?? 0,
@@ -27,10 +27,6 @@ const toError = (error, fallback = "Lỗi kết nối đến server") => {
   }
   return { success: false, message: fallback };
 };
-
-/* =====================================================================
- *                           HOTELS (BACKEND MỚI)
- * ===================================================================*/
 
 /**
  * POST /api/catalog/hotels/search?page=&size=&sort=
@@ -87,10 +83,6 @@ export const getHotelDetail = async (slug) => {
     return toError(error, "Không tải được chi tiết khách sạn");
   }
 };
-
-/* =====================================================================
- *                    RESTAURANTS & PLACES (giữ như cũ)
- * ===================================================================*/
 
 /** 
  * POST /api/catalog/restaurants/search?page=&size=&sort=
@@ -193,6 +185,19 @@ export const getPlaceDetail = async (slug) => {
     return { success: true, data: res.data };
   } catch (error) {
     return toError(error, "Không tìm thấy địa điểm");
+  }
+};
+
+/** GET /catalog/geo/suggest?q=&limit=  (gợi ý kiểu Google) */
+export const suggestGeoLocations = async (q, limit = 6) => {
+  try {
+    const res = await axios.get(`${GEO_PREFIX}/suggest`, {
+      params: { q, limit },
+    });
+    // BE trả List<LocationSuggestDTO> -> res.data là mảng
+    return { success: true, data: res.data ?? [] };
+  } catch (error) {
+    return toError(error, "Lỗi gợi ý vị trí ngoài hệ thống");
   }
 };
 

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
-
+import { FaMapMarkerAlt } from "react-icons/fa";
 import PlanList from "./PlanList";
 import ConfirmModal from "../../../components/ConfirmModal";
 
@@ -18,6 +18,7 @@ import EventActivityModal from "./modals/EventActivityModal";
 import ShoppingActivityModal from "./modals/ShoppingActivityModal";
 import CinemaActivityModal from "./modals/CinemaActivityModal";
 import OtherActivityModal from "./modals/OtherActivityModal";
+import PlanDayMapModal from "./PlanDayMapModal";
 
 export default function PlanBoard({
   board,
@@ -68,21 +69,37 @@ export default function PlanBoard({
   const [activeListForActivity, setActiveListForActivity] = useState(null);
   const [activeActivityType, setActiveActivityType] = useState(null);
 
-  // ======= TRASH + SCROLL LOGIC (giữ nguyên) =======
+  const [dayMapList, setDayMapList] = useState(null);
+  const [dayMapIndex, setDayMapIndex] = useState(0);
+
+  const handleOpenDayMap = (list, idx) => {
+    setDayMapList(list);
+    setDayMapIndex(idx);
+  };
+
+  const handleCloseDayMap = () => {
+    setDayMapList(null);
+  };
+
+  // trash logic
   const [showTrash, setShowTrash] = useState(false);
   const [confirmClearTrash, setConfirmClearTrash] = useState(false);
 
   const lists = board?.lists || [];
   const dayLists = lists.filter((l) => l.type !== "TRASH");
   const trashList = lists.find((l) => l.type === "TRASH");
-
   const boardRef = useRef(null);
   const trashRef = useRef(null);
 
-  // vị trí thùng rác (trong toạ độ content của board)
-  const [trashPos, setTrashPos] = useState({ x: 0, y: 120 });
+  // trash position
+  const [trashPos, setTrashPos] = useState({ x: 0, y: 0 });
   const [trashInitialized, setTrashInitialized] = useState(false);
   const [isDraggingTrash, setIsDraggingTrash] = useState(false);
+
+  // trash state
+  const [isDocked, setIsDocked] = useState(true);
+  const trashDockRef = useRef({ x: 0, y: 0 });
+
   // info drag
   const trashDragRef = useRef({
     dragging: false,
@@ -90,6 +107,8 @@ export default function PlanBoard({
     startMouseY: 0,
     offsetX: 0,
     offsetY: 0,
+    lastX: 0,
+    lastY: 0,
   });
 
   // auto scroll
@@ -98,19 +117,24 @@ export default function PlanBoard({
   // padding dưới của board
   const [bottomPadding, setBottomPadding] = useState(40);
 
-  // canh thùng rác lần đầu
+  // canh thùng rác lần đầu: dock cố định trên "thanh" của board (mép trên vùng scroll)
   useEffect(() => {
     if (!boardRef.current || trashInitialized) return;
 
     const rect = boardRef.current.getBoundingClientRect();
-    const approxWidth = 280;
-    const x = Math.max(rect.width - approxWidth - 16, 0);
+    const TRASH_WIDTH = 280;
+    const marginRight = 16;
+    const dockX = Math.max(rect.width - TRASH_WIDTH - marginRight, 0);
+    const dockY = 0; // dính trên thanh của PlanBoard
 
-    setTrashPos((prev) => ({ ...prev, x }));
+    trashDockRef.current = { x: dockX, y: dockY };
+
+    setTrashPos({ x: dockX, y: dockY });
+    setIsDocked(true);
     setTrashInitialized(true);
   }, [trashInitialized]);
 
-  // paddingBottom động: dùng epsilon để tránh giật
+  // paddingBottom động
   useEffect(() => {
     if (!boardRef.current || isDraggingTrash) return;
 
@@ -163,10 +187,6 @@ export default function PlanBoard({
 
     closeModal(activeActivityType);
     setEditingCard(null);
-
-    // sau khi lưu activity di chuyển, có thể reset from/to nếu muốn
-    // setFromLocation(null);
-    // setToLocation(null);
   };
 
   // auto-scroll với rAF
@@ -223,6 +243,8 @@ export default function PlanBoard({
       startMouseY: e.clientY,
       offsetX: pointerXBoard - trashPos.x,
       offsetY: pointerYBoard - trashPos.y,
+      lastX: trashPos.x,
+      lastY: trashPos.y,
     };
 
     const onMove = (ev) => {
@@ -234,6 +256,8 @@ export default function PlanBoard({
         (Math.abs(moveDx) > 3 || Math.abs(moveDy) > 3)
       ) {
         trashDragRef.current.dragging = true;
+        // kéo ra khỏi "bãi đỗ"
+        setIsDocked(false);
       }
 
       const boardRect = boardEl.getBoundingClientRect();
@@ -263,13 +287,14 @@ export default function PlanBoard({
       newY = Math.max(0, Math.min(newY, maxY));
 
       setTrashPos({ x: newX, y: newY });
+      trashDragRef.current.lastX = newX;
+      trashDragRef.current.lastY = newY;
 
       // AUTO-SCROLL: ngang theo board, dọc theo viewport
       const edgeH = 80;
       const edgeV = 80;
       const maxSpeed = 20;
 
-      // ngang (so với board)
       if (ev.clientX < boardRect.left + edgeH) {
         autoScrollRef.current.vx =
           -maxSpeed * (1 - (ev.clientX - boardRect.left) / edgeH);
@@ -281,7 +306,6 @@ export default function PlanBoard({
         autoScrollRef.current.vx = 0;
       }
 
-      // dọc (so với viewport, luôn đảm bảo tay cầm trong màn hình)
       const vh = window.innerHeight;
       if (ev.clientY < edgeV) {
         autoScrollRef.current.vy =
@@ -305,9 +329,23 @@ export default function PlanBoard({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
 
-      if (!trashDragRef.current.dragging) {
+      const { dragging, lastX, lastY } = trashDragRef.current;
+
+      if (!dragging) {
+        // click nhẹ: chỉ ẩn/mở thùng rác
         setShowTrash((prev) => !prev);
+      } else {
+        // nếu thả gần thanh dock trên cùng thì "đỗ" lại lên thanh
+        const dock = trashDockRef.current;
+        const dist = Math.hypot(lastX - dock.x, lastY - dock.y);
+        const SNAP_RADIUS = 80;
+
+        if (dist <= SNAP_RADIUS) {
+          setTrashPos(dock);
+          setIsDocked(true);
+        }
       }
+
       stopAutoScroll();
       setIsDraggingTrash(false);
     };
@@ -335,18 +373,19 @@ export default function PlanBoard({
           </p>
         </div>
 
-        {/* nút + thêm ngày (floating) */}
-        <button
-          onClick={handleAddList}
-          className="
-            fixed bottom-6 right-6 z-50 rounded-full p-4 
-            bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
-            shadow-lg shadow-blue-500/40 hover:shadow-xl hover:-translate-y-1 
-            transition-all
-          "
-        >
-          <FaPlus />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleAddList}
+            className="
+              fixed bottom-6 right-6 z-50 rounded-full p-4 
+              bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
+              shadow-lg shadow-blue-500/40 hover:shadow-xl hover:-translate-y-1 
+              transition-all
+            "
+          >
+            <FaPlus />
+          </button>
+        </div>
       </div>
 
       {/* Lists + Trash trong board */}
@@ -367,7 +406,7 @@ export default function PlanBoard({
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="flex items-start gap-5 overflow-y-visible pr-[280px]"
+                className="flex items-start gap-5 overflow-y-visible pr-[280px] pt-10"
               >
                 {dayLists.map((list, idx) => (
                   <PlanList
@@ -392,6 +431,7 @@ export default function PlanBoard({
                     onActivityTypeSelected={handleActivityPicked}
                     onOpenActivityModal={openEditModal}
                     canEdit={!isViewer}
+                    onOpenListMap={() => handleOpenDayMap(list, idx)}
                   />
                 ))}
                 {provided.placeholder}
@@ -417,15 +457,18 @@ export default function PlanBoard({
               {/* Tay cầm */}
               <div
                 onPointerDown={handleTrashPointerDown}
-                className="
+                className={`
                   mb-2 inline-flex items-center gap-2
-                  rounded-full bg-rose-500/90 px-3 py-1
+                  rounded-full px-3 py-1
                   text-xs font-semibold text-white shadow-md
-                  cursor-move
-                "
+                  cursor-move transition-all
+                  ${isDocked ? "bg-rose-500" : "bg-rose-500/90"}
+                `}
               >
                 <FaTrashAlt className="text-[11px]" />
-                <span>Thùng rác (bấm để ẩn/mở)</span>
+                <span>
+                  {isDocked ? "Thùng rác (Gắn)" : "Thùng rác (Kéo lên để gắn)"}
+                </span>
               </div>
 
               {/* List thùng rác */}
@@ -493,14 +536,13 @@ export default function PlanBoard({
         </DragDropContext>
       </div>
 
-      {/* ========= 9 MODALS ========= */}
+      {/* 9 modals */}
       <TransportActivityModal
         open={modalStates.TRANSPORT[0]}
         onClose={() => closeModal("TRANSPORT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
       />
-
       <FoodActivityModal
         open={modalStates.FOOD[0]}
         onClose={() => closeModal("FOOD")}
@@ -530,7 +572,6 @@ export default function PlanBoard({
         onClose={() => closeModal("SHOPPING")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
-
       />
       <CinemaActivityModal
         open={modalStates.CINEMA[0]}
@@ -543,14 +584,12 @@ export default function PlanBoard({
         onClose={() => closeModal("EVENT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
-
       />
       <OtherActivityModal
         open={modalStates.OTHER[0]}
         onClose={() => closeModal("OTHER")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
-
       />
 
       {confirmClearTrash && (
@@ -563,6 +602,13 @@ export default function PlanBoard({
           onConfirm={handleConfirmClearTrash}
         />
       )}
+      <PlanDayMapModal
+        open={!!dayMapList}
+        onClose={handleCloseDayMap}
+        list={dayMapList}
+        dayIndex={dayMapIndex}
+      />
+
     </div>
   );
 }

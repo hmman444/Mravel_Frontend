@@ -71,6 +71,15 @@ body {
     transform: translateY(0);
   }
 }
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  font-size: 12px !important; /* chỉnh ở đây */
+  padding: 6px 8px !important;
+  line-height: 1.4 !important;
+}
+
+.recharts-tooltip-wrapper .recharts-tooltip-item {
+  font-size: 12px !important;
+}
 
 
 @keyframes fadeScale {
@@ -103,4 +112,22 @@ body {
 
 .react-datepicker__day--keyboard-selected {
   background-color: transparent;
+}
+.mravel-map-pin {
+  background: transparent;
+  border: none;
+}
+
+.mravel-map-pin-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.4));
+}
+
+/* màu + kích thước ghim */
+.mravel-map-pin-svg {
+  width: 30px;
+  height: 30px;
+  color: #ef4444; /* Tailwind red-500 */
 }

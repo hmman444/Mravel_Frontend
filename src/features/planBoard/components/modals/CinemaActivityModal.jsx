@@ -58,7 +58,7 @@ export default function CinemaActivityModal({
   // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
+  // chia tiền
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -69,15 +69,15 @@ export default function CinemaActivityModal({
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
 
-  // ===== PLACE PICKER =====
+  // place picker
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalCinemaLocation, setInternalCinemaLocation] = useState(null);
   const effectiveCinemaLocation = internalCinemaLocation || null;
 
-  // ===== ERRORS =====
+  // errors
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD KHI EDIT =====
+  // load khi edit
   useEffect(() => {
     if (!open) return;
 
@@ -158,7 +158,6 @@ export default function CinemaActivityModal({
       }
       setExtraCosts(extras);
 
-      // THỰC TẾ: ưu tiên activityData, sau đó cost.actualCost
       if (data.actualCost != null) {
         setActualCost(String(data.actualCost));
       } else if (cost.actualCost != null) {
@@ -181,7 +180,7 @@ export default function CinemaActivityModal({
         setInternalCinemaLocation(null);
       }
 
-      // ===== LOAD SPLIT =====
+      // load split
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -270,7 +269,7 @@ export default function CinemaActivityModal({
     }
   }, [open, editingCard]);
 
-  // SYNC location từ PlacePicker vào rạp + địa chỉ
+  // sync location từ PlacePicker vào rạp + địa chỉ
   useEffect(() => {
     if (!effectiveCinemaLocation) return;
 
@@ -293,7 +292,7 @@ export default function CinemaActivityModal({
     }
   }, [effectiveCinemaLocation]);
 
-  // ===== COST LOGIC =====
+  // cost logic
   const baseCost = useMemo(() => {
     const t = Number(ticketPrice || 0);
     const c = Number(comboPrice || 0);
@@ -316,7 +315,7 @@ export default function CinemaActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ===== DURATION =====
+  // duration
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -336,7 +335,7 @@ export default function CinemaActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== SPLIT UTILS =====
+  // split utils
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -391,7 +390,7 @@ export default function CinemaActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
+  // extra cost
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -407,7 +406,7 @@ export default function CinemaActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD (cost + split + participants) =====
+  // build payload
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -450,7 +449,7 @@ export default function CinemaActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
+  // submit
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -511,7 +510,7 @@ export default function CinemaActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  // header + footer
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">

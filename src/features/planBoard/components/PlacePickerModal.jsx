@@ -64,7 +64,6 @@ export default function PlacePickerModal({
   const [hasSelectionSource, setHasSelectionSource] = useState(false);
   const [initialLatLon, setInitialLatLon] = useState(null);
 
-  // ===== VỊ TRÍ TỰ NHẬP =====
   const [customMode, setCustomMode] = useState(false);
   const [customLabel, setCustomLabel] = useState("");
   const [customAddress, setCustomAddress] = useState("");
@@ -72,7 +71,6 @@ export default function PlacePickerModal({
   const [customLng, setCustomLng] = useState("");
   const [debouncedCustomAddress, setDebouncedCustomAddress] = useState("");
 
-  // ===== CATALOG HOOKS =====
   const {
     items: hotelItems,
     loading: hotelsLoading,
@@ -91,7 +89,7 @@ export default function PlacePickerModal({
   const isLoading = activeTab === "HOTEL" ? hotelsLoading : placesLoading;
   const error = activeTab === "HOTEL" ? hotelsError : placesError;
 
-  // ===== SUGGEST (giống Google Maps) — chỉ dùng cho customMode =====
+  // suggest vị trí tự nhập
   const geoSuggestState = useSelector((s) => s.catalog.geoSuggest);
   const suggestItems = geoSuggestState?.items || [];
   const suggestLoading = geoSuggestState?.loading;
@@ -99,7 +97,7 @@ export default function PlacePickerModal({
   // reset khi mở/đóng
   useEffect(() => {
     if (!open) {
-      // ĐÓNG modal → chuẩn bị cho lần mở tiếp theo
+      // đóng modal → chuẩn bị cho lần mở tiếp theo
       setInitializedFromInitial(false);
       setHasSelectionSource(false);
       setInitialLatLon(null);
@@ -107,7 +105,7 @@ export default function PlacePickerModal({
       return;
     }
 
-    // MỞ modal → reset input
+    // mở modal → reset input
     setActiveTab(initialTab);
     setQuery("");
     setDebouncedQuery("");

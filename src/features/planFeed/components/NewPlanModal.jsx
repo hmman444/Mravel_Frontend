@@ -203,7 +203,6 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
 
                 {/* DATE RANGE */}
                 <div className="space-y-2">
-                  <p className={fieldLabel}>Thời gian chuyến đi</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <span className="text-xs text-gray-500 px-1">
@@ -275,20 +274,6 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                 <div className="space-y-2">
                   <label className={fieldLabel}>Ngân sách dự kiến</label>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className={iconChip}>
-                        <FaMoneyBillWave />
-                      </div>
-                      <div className={inputBox}>
-                        <CurrencyDropdown
-                          value={form.budgetCurrency}
-                          onChange={(v) =>
-                            setForm((f) => ({ ...f, budgetCurrency: v }))
-                          }
-                        />
-                      </div>
-                    </div>
 
                     <div className="flex items-center gap-3">
                       <div className={iconChip}>
@@ -309,7 +294,8 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                         />
                       </div>
                     </div>
-                  </div>
+
+                    
 
                   <div className="flex items-center gap-3">
                     <div className={iconChip}>

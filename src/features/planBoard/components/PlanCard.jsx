@@ -138,8 +138,43 @@ export default function PlanCard({
     return () => document.removeEventListener("mousedown", handle);
   }, [activeMenu, setActiveMenu]);
 
-  const formatTime = (t) =>
-    t ? String(t).split(":").slice(0, 2).join(":") : "";
+  const formatTime = (raw) => {
+    if (!raw) return "";
+
+    const s = String(raw).trim();
+
+    // Case sai kiểu "0,1" → xem như giờ,phút
+    const commaMatch = s.match(/^(\d{1,2}),(\d{1,2})$/);
+    if (commaMatch) {
+      const hh = commaMatch[1].padStart(2, "0");
+      const mm = commaMatch[2].padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    // Case decimal "0.5" hoặc "0,5" → số giờ
+    if (!s.includes(":") && (s.includes(".") || s.includes(","))) {
+      const hours = Number(s.replace(",", "."));
+      if (!Number.isNaN(hours) && Number.isFinite(hours)) {
+        const totalMinutes = Math.round(hours * 60);
+        const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+        const mm = String(totalMinutes % 60).padStart(2, "0");
+        return `${hh}:${mm}`;
+      }
+    }
+
+    // Mọi trường hợp có dấu ":" (00:01, 00:01:00, 3:1:0, ...) → lấy 2 phần đầu
+    if (s.includes(":")) {
+      const [h, m] = s.split(":");
+      if (!h || !m) return s;
+      const hh = h.padStart(2, "0");
+      const mm = m.padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    // Fallback
+    return s;
+  };
+
 
   const hasStart = !!card.startTime;
   const hasEnd = !!card.endTime;

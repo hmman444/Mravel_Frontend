@@ -16,7 +16,7 @@ import { usePlanBoard } from "../hooks/usePlanBoard";
 import { usePlanGeneral } from "../hooks/usePlanGeneral";
 
 import { showSuccess, showError } from "../../../utils/toastUtils";
-
+import { usePlanBoardRealtime } from "../../../realtime/usePlanBoardRealtime";
 export default function PlanDashboardPage() {
   const { planId } = useParams();
   const navigate = useNavigate();
@@ -73,6 +73,8 @@ export default function PlanDashboardPage() {
     setSidebarPlans(plans || []);
   }, [plans]);
 
+  usePlanBoardRealtime(planId);
+  
   useEffect(() => {
     if (!planId) return;
     load();

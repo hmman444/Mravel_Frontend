@@ -2,43 +2,22 @@ import { useState, useRef, useEffect } from "react";
 import { FaClock } from "react-icons/fa";
 
 const COLOR_STYLES = {
-  sky: {
-    icon: "text-sky-500",
-    selectedBg: "bg-sky-500",
-  },
-  violet: {
-    icon: "text-violet-500",
-    selectedBg: "bg-violet-500",
-  },
-  emerald: {
-    icon: "text-emerald-500",
-    selectedBg: "bg-emerald-500",
-  },
-  indigo: {
-    icon: "text-indigo-500",
-    selectedBg: "bg-indigo-500",
-  },
-  orange: {
-    icon: "text-orange-500",
-    selectedBg: "bg-orange-500",
-  },
-  amber: {
-    icon: "text-amber-500",
-    selectedBg: "bg-amber-500",
-  },
-  pink: {
-    icon: "text-pink-500",
-    selectedBg: "bg-pink-500",
-  },
-  rose: {
-    icon: "text-rose-500",
-    selectedBg: "bg-rose-500",
-  },
-  slate: {
-    icon: "text-slate-500",
-    selectedBg: "bg-slate-500",
-  },
+  sky: { icon: "text-sky-500", selectedBg: "bg-sky-500" },
+  violet: { icon: "text-violet-500", selectedBg: "bg-violet-500" },
+  emerald: { icon: "text-emerald-500", selectedBg: "bg-emerald-500" },
+  indigo: { icon: "text-indigo-500", selectedBg: "bg-indigo-500" },
+  orange: { icon: "text-orange-500", selectedBg: "bg-orange-500" },
+  amber: { icon: "text-amber-500", selectedBg: "bg-amber-500" },
+  pink: { icon: "text-pink-500", selectedBg: "bg-pink-500" },
+  rose: { icon: "text-rose-500", selectedBg: "bg-rose-500" },
+  slate: { icon: "text-slate-500", selectedBg: "bg-slate-500" },
 };
+
+// 🔥 Chuẩn hóa HH:mm cả khi BE trả về HH:mm:ss
+function normalizeHHmm(v) {
+  if (!v) return "";
+  return v.substring(0, 5); // luôn lấy HH:mm
+}
 
 export default function TimePicker({
   value,
@@ -56,8 +35,13 @@ export default function TimePicker({
     String(i).padStart(2, "0")
   );
 
-  // fallback sky nếu truyền màu không tồn tại
   const accent = COLOR_STYLES[color] || COLOR_STYLES.sky;
+
+  // giá trị đã normalize (HH:mm)
+  const normalized = normalizeHHmm(value);
+
+  const selectedHour = normalized ? normalized.split(":")[0] : "00";
+  const selectedMinute = normalized ? normalized.split(":")[1] : "00";
 
   useEffect(() => {
     const close = (e) => {
@@ -66,6 +50,12 @@ export default function TimePicker({
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
   }, []);
+
+  // Cập nhật giá trị theo HH:mm
+  const updateTime = (h, m) => {
+    const formatted = `${h}:${m}`;
+    onChange(formatted);
+  };
 
   return (
     <div className="relative w-full select-none" ref={ref}>
@@ -86,13 +76,8 @@ export default function TimePicker({
           }
         `}
       >
-        {value || "--:--"}
-        <FaClock
-          className={`
-            ml-2
-            ${error ? "text-rose-500" : accent.icon}
-          `}
-        />
+        {normalized || "--:--"}
+        <FaClock className={`ml-2 ${error ? "text-rose-500" : accent.icon}`} />
       </button>
 
       {open && (
@@ -111,13 +96,11 @@ export default function TimePicker({
             {hours.map((h) => (
               <button
                 key={h}
-                onClick={() =>
-                  onChange(`${h}:${value?.split(":")[1] || "00"}`)
-                }
+                onClick={() => updateTime(h, selectedMinute)}
                 className={`
                   w-full rounded-lg py-2.5 text-sm
                   ${
-                    value?.startsWith(h)
+                    h === selectedHour
                       ? `${accent.selectedBg} text-white shadow-md`
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }
@@ -133,13 +116,11 @@ export default function TimePicker({
             {minutes.map((m) => (
               <button
                 key={m}
-                onClick={() =>
-                  onChange(`${value?.split(":")[0] || "00"}:${m}`)
-                }
+                onClick={() => updateTime(selectedHour, m)}
                 className={`
                   w-full rounded-lg py-2.5 text-sm
                   ${
-                    value?.endsWith(m)
+                    m === selectedMinute
                       ? `${accent.selectedBg} text-white shadow-md`
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }

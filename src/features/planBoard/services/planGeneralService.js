@@ -57,3 +57,8 @@ export const uploadToCloudinary = async (file) => {
 
   return data.secure_url;
 };
+
+export const apiUpdateBudget = (planId, payload) =>
+  api
+    .put(`${BASE}/${planId}/budget`, payload)
+    .then((res) => res.data.data); 
