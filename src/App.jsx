@@ -38,9 +38,12 @@ import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartn
 import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
+
+import { useMainSocket } from "./realtime/useMainSocket";
 function App() {
   useLoadUser();
   useAuthSync();
+  useMainSocket();
   return (
     <>
     <Router>

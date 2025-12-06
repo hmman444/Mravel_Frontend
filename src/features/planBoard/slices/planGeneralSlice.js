@@ -9,6 +9,7 @@ import {
   apiAddImage,
   apiRemoveImage,
   uploadToCloudinary,
+  apiUpdateBudget,
 } from "../services/planGeneralService";
 
 const asyncAction = (type, fn) =>
@@ -46,6 +47,17 @@ export const removePlanImage = asyncAction("removeImage", async ({ planId, url }
   await apiRemoveImage(planId, url);
   return url;
 });
+
+export const updatePlanBudget = asyncAction(
+  "updateBudget",
+  async ({ planId, budgetTotal, budgetPerPerson, budgetCurrency }) => {
+    return apiUpdateBudget(planId, {
+      budgetTotal,
+      budgetPerPerson,
+      budgetCurrency,
+    });
+  }
+);
 
 const slice = createSlice({
   name: "planGeneral",

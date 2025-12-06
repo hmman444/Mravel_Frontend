@@ -8,6 +8,7 @@ import {
   updatePlanThumbnail,
   addPlanImage,
   removePlanImage,
+  updatePlanBudget,
 } from "../slices/planGeneralSlice";
 
 export const usePlanGeneral = () => {
@@ -37,5 +38,8 @@ export const usePlanGeneral = () => {
 
     removeImage: (planId, url) =>
       dispatch(removePlanImage({ planId, url })),
+
+    updateBudget: (planId, payload) =>
+      dispatch(updatePlanBudget({ planId, ...payload })),
   };
 };
