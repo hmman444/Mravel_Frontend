@@ -21,7 +21,7 @@ import {
   clearTrash,
 } from "../services/planBoardService";
 
-// ================== Helpers: normalize board/time ==================
+// helpers
 
 // Chuẩn hóa thời gian để hiển thị ổn định "HH:mm"
 function normalizeTime(value) {
@@ -91,8 +91,6 @@ function normalizeBoard(rawBoard) {
   };
 }
 
-// ================== Initial state ==================
-
 const initialState = {
   board: null,
   share: null,
@@ -101,8 +99,6 @@ const initialState = {
   error: null,
   requests: [],
 };
-
-// ================== Thunks ==================
 
 export const loadBoard = createAsyncThunk("planBoard/loadBoard", async (planId) => {
   return await fetchBoard(planId);
@@ -246,8 +242,6 @@ export const decideRequest = createAsyncThunk(
     return await handleRequest(planId, reqId, { action, role });
   }
 );
-
-// ================== Slice ==================
 
 const planBoardSlice = createSlice({
   name: "planBoard",

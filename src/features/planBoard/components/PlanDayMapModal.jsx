@@ -200,7 +200,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
     list.cards?.forEach((card) => {
       const data = parseActivityData(card);
 
-      // ===== TRANSPORT: tách from / to thành 2 node =====
+      // transport riêng: chia 2 địa điểm thành 2 node
       if (card.activityType === "TRANSPORT") {
         const fromLoc = data.fromLocation;
         const toLoc = data.toLocation;
@@ -276,7 +276,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
           });
         }
 
-        // ĐƯỜNG ĐI TRANSPORT
+        // đường đi
         let positions = null;
 
         if (
@@ -309,7 +309,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
         return; // xong TRANSPORT, không chạy tiếp phần dưới
       }
 
-      // ===== CÁC HOẠT ĐỘNG KHÁC =====
+      // các hoạt động khác
       const { location } = extractLocationForMap(card);
 
       if (location) {
@@ -360,7 +360,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
       }
     });
 
-    // ===== ĐƯỜNG NÉT ĐỨT NỐI TUẦN TỰ CÁC NODE =====
+    // nét đứt giữa các activity 
     const seqSegs = [];
     if (pts.length > 1) {
       for (let i = 0; i < pts.length - 1; i++) {

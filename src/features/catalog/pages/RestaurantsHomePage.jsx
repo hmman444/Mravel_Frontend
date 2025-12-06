@@ -12,6 +12,7 @@ import RestaurantPartners from "../components/restaurant/RestaurantPartners";
 import RestaurantPopularSection from "../components/restaurant/RestaurantPopularSection";
 import RestaurantSearchCard from "../components/restaurant/RestaurantSearchCard";
 import RestaurantWhyUs from "../components/restaurant/RestaurantWhyUs";
+import RestaurantSearchResults from "../components/restaurant/RestaurantSearchResults";
 
 export default function RestaurantsHomePage() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function RestaurantsHomePage() {
       size: "9",
     });
 
-    navigate(`/restaurants/search?${qs.toString()}`);
+    navigate(`/restaurants?${qs.toString()}`);
   };
 
   return (
@@ -55,8 +56,9 @@ export default function RestaurantsHomePage() {
       </FadeInSection>
 
       {/* Nội dung phía dưới */}
-            <main className="flex-1 w-full">
+      <main className="flex-1 w-full">
         <FadeInSection delay={140}>
+          <RestaurantSearchResults />
           <RestaurantPopularSection />
         </FadeInSection>
 

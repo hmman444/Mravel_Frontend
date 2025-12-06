@@ -81,7 +81,7 @@ export default function PlanBoard({
     setDayMapList(null);
   };
 
-  // ======= TRASH + SCROLL LOGIC =======
+  // trash logic
   const [showTrash, setShowTrash] = useState(false);
   const [confirmClearTrash, setConfirmClearTrash] = useState(false);
 
@@ -91,12 +91,12 @@ export default function PlanBoard({
   const boardRef = useRef(null);
   const trashRef = useRef(null);
 
-  // vị trí thùng rác (trong toạ độ content của board)
+  // trash position
   const [trashPos, setTrashPos] = useState({ x: 0, y: 0 });
   const [trashInitialized, setTrashInitialized] = useState(false);
   const [isDraggingTrash, setIsDraggingTrash] = useState(false);
 
-  // trạng thái "đang đỗ" trên thanh trên của board
+  // trash state
   const [isDocked, setIsDocked] = useState(true);
   const trashDockRef = useRef({ x: 0, y: 0 });
 
@@ -536,7 +536,7 @@ export default function PlanBoard({
         </DragDropContext>
       </div>
 
-      {/* ========= 9 MODALS ========= */}
+      {/* 9 modals */}
       <TransportActivityModal
         open={modalStates.TRANSPORT[0]}
         onClose={() => closeModal("TRANSPORT")}

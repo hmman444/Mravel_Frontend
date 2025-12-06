@@ -8,7 +8,6 @@ import RegisterPage from "./features/auth/pages/RegisterPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
-
 // Home
 import HomePage from "./features/home/pages/HomePage";
 // Search
@@ -24,6 +23,7 @@ import LocationResultsPage from "./features/catalog/pages/LocationResultsPage";
 import HotelsHomePage from "./features/catalog/pages/HotelsHomePage";
 import RestaurantsHomePage from "./features/catalog/pages/RestaurantsHomePage";
 import HotelDetailPage from "./features/catalog/pages/HotelDetailPage";
+import RestaurantDetailPage from "./features/catalog/pages/RestaurantDetailPage";
 //User
 import AccountProfilePage from "./features/user/pages/AccountProfilePage";
 // Admin
@@ -40,6 +40,8 @@ import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 
 import { useMainSocket } from "./realtime/useMainSocket";
+//Others
+import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 function App() {
   useLoadUser();
   useAuthSync();
@@ -80,6 +82,7 @@ function App() {
         <Route path="/hotels" element={<HotelsHomePage />} />
         <Route path="/hotels/:slug" element={<HotelDetailPage />} />
         <Route path="/restaurants" element={<RestaurantsHomePage />} />
+        <Route path="/restaurants/:slug" element={<RestaurantDetailPage />} />
 
         {/* User routes */}
         <Route path="/account/profile" element={<AccountProfilePage />} />
@@ -88,6 +91,9 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="*" element={<HomePage />} />
+
+        {/* Coming soon routes */}
+        <Route path="/maybe" element={<FeatureComingSoonPage />} />
       </Routes>
     </Router>
     <Toast position="top-center" autoClose={2000} />

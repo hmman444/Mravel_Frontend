@@ -88,7 +88,6 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     updateBudget, 
   } = usePlanGeneral();
 
-  // ====== STATE CƠ BẢN ======
   const [description, setDescription] = useState(plan?.description || "");
   const [startDate, setStartDate] = useState(parseDate(plan?.startDate));
   const [endDate, setEndDate] = useState(parseDate(plan?.endDate));
@@ -116,7 +115,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
   const [pendingDates, setPendingDates] = useState(null);
   const [showConfirmDates, setShowConfirmDates] = useState(false);
 
-  // ====== BUDGET / COST PLAN-LEVEL ======
+  // budget
   const currency = plan?.budgetCurrency || "VND";
 
   const [budgetTotalLocal, setBudgetTotalLocal] = useState(
@@ -165,7 +164,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
   const currencySuffix =
     currency === "VND" || currency === "VNĐ" ? "đ" : ` ${currency}`;
 
-  // ====== LẤY LIST & CARD (bỏ TRASH) ======
+  // load list card (k lấy trash)
   const dayLists = useMemo(
     () => lists.filter((l) => l.type !== "TRASH"),
     [lists]
@@ -178,7 +177,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
 
   const totalCardsCount = allCards.length;
 
-  // ====== CHI PHÍ THEO LOẠI ACTIVITY ======
+  // chi phí theo loại hoạt động
   const typeBreakdown = useMemo(() => {
     const map = {};
     allCards.forEach((card) => {
@@ -231,7 +230,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     [typeBreakdown]
   );
 
-  // ====== CHI PHÍ THEO NGÀY ======
+  // chi phí theo ngày
   const dayCostBreakdown = useMemo(
     () =>
       dayLists.map((list, idx) => {
@@ -275,7 +274,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         )
       : null;
 
-  // ====== TỔNG NGÀY & TRUNG BÌNH ======
+  // thống kê nhịp độ
   const totalDays =
     startDate && endDate
       ? Math.max(
@@ -295,7 +294,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       ? Math.round(used / (participantsCount * totalDays))
       : null;
 
-  // ====== CHI PHÍ THEO NGƯỜI (từ splitDetails) ======
+  // phân bổ chi phí theo người
   const splitOverview = useMemo(() => {
     const map = new Map();
     let total = 0;
@@ -331,7 +330,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     [splitOverview]
   );
 
-  // ====== THỐNG KÊ NHỊP ĐỘ & CẤU TRÚC ======
+  // thống kê hoạt động
   const activityStats = useMemo(() => {
     const totalActivities = allCards.length;
     const totalDaysLocal = totalDays;
@@ -389,7 +388,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     };
   }, [allCards, dayLists, totalDays]);
 
-  // ====== SYNC KHI plan THAY ĐỔI ======
+  // effect khi plan thay đổi
   useEffect(() => {
     const s = parseDate(plan?.startDate);
     const e = parseDate(plan?.endDate);
@@ -426,7 +425,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     plan?.budgetPerPerson,
   ]);
 
-  // ====== DROPDOWN STATUS POS ======
+  // dropdown vị trí
   useEffect(() => {
     if (statusOpen && statusBtnRef.current) {
       const rect = statusBtnRef.current.getBoundingClientRect();
@@ -455,7 +454,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     return () => document.removeEventListener("mousedown", close);
   }, [statusOpen]);
 
-  // ====== HANDLERS ======
+  // handlers
   const handleSaveDescription = async () => {
     if (!canEdit || !planId) return;
     setDescSaving(true);
@@ -719,7 +718,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         </div>
       )}
 
-      {/* ====== HÀNG 1: THÔNG TIN CHUNG + NGÂN SÁCH ====== */}
+      {/* hàng 1 */}
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr,1.1fr] gap-6">
         {/* Thông tin chung */}
         <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
@@ -1187,7 +1186,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         </div>
       </div>
 
-      {/* ====== KHỐI THỐNG KÊ CHI PHÍ (3 CARD) ====== */}
+      {/* thống kê */}
       <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
         {/* theo loại hoạt động */}
         <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
@@ -1500,7 +1499,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         </div>
       </div>
 
-      {/* ====== MEDIA ====== */}
+      {/* media */}
       <div className="grid grid-cols-1">
         <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
           <div className="flex items-center justify-between gap-3">

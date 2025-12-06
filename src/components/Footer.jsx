@@ -45,9 +45,9 @@ export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-200 mt-12">
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 space-y-10">
-        {/* ===== TOP AREA ===== */}
+        {/* top area */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-          {/* LEFT: Brand + badges + payment partners */}
+          {/* left: Brand + badges + payment partners */}
           <div className="lg:col-span-2 space-y-6">
             {/* Logo / brand */}
             <div>
@@ -241,7 +241,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* ===== BOTTOM LINE ===== */}
+        {/* bottom */}
         <div className="border-t border-slate-800 pt-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} Mravel. All rights reserved.</p>
         </div>

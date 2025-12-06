@@ -37,7 +37,7 @@ export default function HotelDetailPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7fb]">
       <Navbar />
-      <div className="h-[50px] md:h-[60px]" aria-hidden />
+      <div className="h-[64px] md:h-[72px]" aria-hidden />
 
       <main className="flex-1 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
