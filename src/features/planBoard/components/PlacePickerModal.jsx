@@ -299,7 +299,7 @@ export default function PlacePickerModal({
     );
   }, [effectiveItems, selectedId, customMode]);
 
-  // === SCROLL LIST TỚI ITEM CŨ ===
+  // scroll to selected item khi mở modal 
   useEffect(() => {
     if (!open || customMode || !listRef.current || !selectedId) return;
     if (isLoading) return; // đợi load xong
@@ -356,7 +356,6 @@ export default function PlacePickerModal({
     return DEFAULT_CENTER;
   }, [selectedItem, anchorPoint, customMode, customLat, customLng, initialLatLon]);
 
-  // ===== PAYLOAD API ITEM =====
   const buildLocationPayloadFromApiItem = (item) => {
     if (!item) return null;
 
@@ -436,7 +435,7 @@ export default function PlacePickerModal({
     return payload;
   };
 
-  // ===== PAYLOAD CUSTOM =====
+  // payload cho vị trí custom
   const buildLocationPayloadFromCustom = () => {
     const label = customLabel.trim() || customAddress.trim() || "Vị trí tuỳ chọn";
     const address = customAddress.trim() || null;

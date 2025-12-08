@@ -52,7 +52,7 @@ export default function PlanMedia({ images = [] }) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [viewerOpen, images.length]); // có thể thêm closeViewer, showPrev, showNext nếu eslint exhaustive-deps báo
 
-  // 🔹 Hook đã được gọi xong, giờ mới được return conditionally
+  // Hook đã được gọi xong, giờ mới được return conditionally
   if (!images.length) return null;
 
   const shown = images.slice(0, 5);

@@ -155,7 +155,7 @@ export default function PlanList({
               <>
                 <button
                   onClick={() => {
-                    duplicateList(list);
+                    duplicateList(list.id);
                     setActiveListMenu(null);
                   }}
                   className="flex items-center w-full px-3 py-2 text-sm 

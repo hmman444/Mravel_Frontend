@@ -9,17 +9,18 @@ import {
   editCard,
   removeCard,
   reorder,
-  saveLabel,
   removeLabel,
   inviteMembers,
   localReorder,
   loadShareInfo,
   changeMemberRole,
+  duplicateListThunk,
   deleteMember,
   sendAccessRequest,
   loadRequests as loadRequestsThunk,
   decideRequest as decideRequestThunk,
-  clearTrashThunk
+  clearTrashThunk,
+  duplicateCardThunk
 } from "../slices/planBoardSlice";
 import { updateVisibility } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
@@ -55,6 +56,8 @@ export function usePlanBoard(planId) {
   const canSeeRequests = isOwner;             // tab "Yêu cầu tham gia"
   const canManageMembers = isOwner;           // đổi role, xoá thành viên
 
+  const memberCostSummary = board?.memberCostSummary || null;
+  const planMembers = board?.memberCostSummary?.members || [];
   return {
     board,
     share,
@@ -62,6 +65,8 @@ export function usePlanBoard(planId) {
     actionLoading,
     error,
     requests,
+    memberCostSummary,
+    planMembers,
 
     // load data
     load: () => dispatch(loadBoard(planId)),
@@ -98,6 +103,16 @@ export function usePlanBoard(planId) {
         "Không thể xoá danh sách"
       ),
 
+    duplicateList: (listId) =>
+      tryCall(
+        (async () => {
+          await dispatch(duplicateListThunk({ planId, listId }));
+
+          await dispatch(loadBoard(planId));
+        })(),
+        "Không thể sao chép danh sách"
+      ),
+
     // cards
     createCard: (listId, payload) =>
       tryCall(
@@ -117,6 +132,16 @@ export function usePlanBoard(planId) {
         "Không thể xoá thẻ"
       ),
 
+    duplicateCard: (listId, cardId) =>
+     tryCall(
+       (async () => {
+         await dispatch(
+           duplicateCardThunk({ planId, listId, cardId })
+         ).unwrap();
+       })(),
+       "Không thể sao chép thẻ"
+     ),
+
     clearTrash: () =>
       tryCall(
         dispatch(clearTrashThunk(planId)),
@@ -130,13 +155,6 @@ export function usePlanBoard(planId) {
       tryCall(
         dispatch(reorder({ planId, payload })),
         "Không thể cập nhật vị trí"
-      ),
-
-    // label
-    upsertLabel: (payload) =>
-      tryCall(
-        dispatch(saveLabel({ planId, payload })),
-        "Không thể lưu nhãn"
       ),
 
     deleteLabel: (labelId) =>

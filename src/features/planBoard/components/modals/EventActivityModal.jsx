@@ -1,3 +1,4 @@
+// src/features/planBoard/components/modals/EventActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -5,17 +6,26 @@ import {
   FaTimes,
   FaCalendarAlt,
   FaMapMarkerAlt,
-  FaClock,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import TimePicker from "../../../../components/TimePicker";
-import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
 
 import ActivityModalShell from "../ActivityModalShell";
 import SplitMoneySection from "../SplitMoneySection";
 import ExtraCostsSection from "../ExtraCostsSection";
 import PlacePickerModal from "../PlacePickerModal";
+
+import ActivityTimeRangeSection from "../ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "../ActivityHeaderCostSummary";
+import ActivityFooterSummary from "../ActivityFooterSummary";
+import ActivityFooterButtons from "../ActivityFooterButtons";
+
 import { inputBase, sectionCard } from "../activityStyles";
+import { useSplitMoney } from "../../hooks/useSplitMoney";
+import {
+  buildInitialExtraCosts,
+  normalizeExtraCosts,
+  calcExtraTotal,
+} from "../../utils/costUtils";
 
 const EXTRA_TYPES = [
   { value: "SERVICE_FEE", label: "Phí dịch vụ" },
@@ -38,6 +48,7 @@ export default function EventActivityModal({
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
   const [ticketPrice, setTicketPrice] = useState("");
   const [ticketCount, setTicketCount] = useState("1");
@@ -47,25 +58,13 @@ export default function EventActivityModal({
 
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [splitType, setSplitType] = useState("EVEN");
-  const [participantCount, setParticipantCount] = useState("2");
-  const [splitNames, setSplitNames] = useState([]);
-  const [exactAmounts, setExactAmounts] = useState([]);
-
-  const [payerChoice, setPayerChoice] = useState("");
-  const [payerExternalName, setPayerExternalName] = useState("");
-
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalEventLocation, setInternalEventLocation] = useState(null);
   const effectiveEventLocation = internalEventLocation || null;
 
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD KHI EDIT / RESET =====
+  // ===== LOAD KHI MỞ MODAL =====
   useEffect(() => {
     if (!open) return;
 
@@ -76,7 +75,6 @@ export default function EventActivityModal({
         ? JSON.parse(editingCard.activityDataJson)
         : {};
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {};
 
       setTitle(editingCard.text || "");
       setEventName(data.eventName || "");
@@ -94,6 +92,7 @@ export default function EventActivityModal({
 
       setStartTime(loadedStart);
       setEndTime(loadedEnd);
+      setDurationMinutes(null); // để ActivityTimeRangeSection tự tính lại
 
       setTicketPrice(
         data.ticketPrice != null ? String(data.ticketPrice) : ""
@@ -101,52 +100,6 @@ export default function EventActivityModal({
       setTicketCount(
         data.ticketCount != null ? String(data.ticketCount) : "1"
       );
-
-      // ---- EXTRA COSTS ----
-      let extras = [];
-
-      if (
-        data.extraItems &&
-        Array.isArray(data.extraItems) &&
-        data.extraItems.length > 0
-      ) {
-        extras = data.extraItems.map((it) => ({
-          reason: it.reason || it.note || "Chi phí phụ",
-          type: it.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            it.actualAmount != null
-              ? it.actualAmount
-              : it.amount != null
-              ? Number(it.amount)
-              : 0,
-        }));
-      } else if (
-        cost.extraCosts &&
-        Array.isArray(cost.extraCosts) &&
-        cost.extraCosts.length > 0
-      ) {
-        extras = cost.extraCosts.map((e) => ({
-          reason: e.reason || "Chi phí phụ",
-          type: e.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            e.actualAmount != null && e.actualAmount !== ""
-              ? Number(e.actualAmount)
-              : 0,
-        }));
-      } else if (data.extraSpend != null) {
-        extras = [
-          {
-            reason: "Chi phí phụ",
-            type: "OTHER",
-            estimatedAmount: null,
-            actualAmount: Number(data.extraSpend) || 0,
-          },
-        ];
-      }
-
-      setExtraCosts(extras);
 
       if (cost.budgetAmount != null) {
         setBudgetAmount(String(cost.budgetAmount));
@@ -164,74 +117,16 @@ export default function EventActivityModal({
 
       setNote(editingCard.description || "");
 
+      // extraCosts: dùng helper chung
+      setExtraCosts(buildInitialExtraCosts(data, cost));
+
       if (data.eventLocation) {
         setInternalEventLocation(data.eventLocation);
       } else {
         setInternalEventLocation(null);
       }
-
-      // ===== LOAD SPLIT dùng chung buildSplitBase =====
-      const splitObj = split || {};
-      if (splitObj.splitType && splitObj.splitType !== "NONE") {
-        setSplitEnabled(true);
-        setSplitType(splitObj.splitType);
-
-        const pc =
-          cost.participantCount ||
-          splitObj.splitMembers?.length ||
-          splitObj.splitDetails?.length ||
-          data.ticketCount ||
-          editingCard.participantCount ||
-          2;
-
-        setParticipantCount(String(pc));
-
-        let names = [];
-        if (splitObj.splitMembers?.length) {
-          names = splitObj.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
-
-        if (splitObj.splitType === "EXACT" && splitObj.splitDetails) {
-          setExactAmounts(
-            splitObj.splitDetails.map((d) =>
-              d.amount != null ? String(d.amount) : ""
-            )
-          );
-        } else {
-          setExactAmounts([]);
-        }
-
-        setPayerChoice("");
-        setPayerExternalName("");
-        if (splitObj.payerId) {
-          setPayerChoice(`member:${splitObj.payerId}`);
-        } else if (splitObj.payments && splitObj.payments.length > 0) {
-          const first = splitObj.payments[0];
-          const payer = first?.payer;
-          if (payer) {
-            if (payer.external || !payer.memberId) {
-              setPayerChoice("external");
-              setPayerExternalName(payer.displayName || "");
-            } else if (payer.memberId) {
-              setPayerChoice(`member:${payer.memberId}`);
-            }
-          }
-        }
-      } else {
-        setSplitEnabled(false);
-        setSplitType("EVEN");
-        setParticipantCount("2");
-        setSplitNames([]);
-        setExactAmounts([]);
-        setPayerChoice("");
-        setPayerExternalName("");
-      }
     } else {
-      // RESET khi mở mới
+      // RESET khi tạo mới
       setTitle("");
       setEventName("");
       setVenue("");
@@ -239,6 +134,7 @@ export default function EventActivityModal({
 
       setStartTime("");
       setEndTime("");
+      setDurationMinutes(null);
 
       setTicketPrice("");
       setTicketCount("1");
@@ -247,19 +143,11 @@ export default function EventActivityModal({
       setNote("");
       setExtraCosts([]);
 
-      setSplitEnabled(false);
-      setSplitType("EVEN");
-      setParticipantCount("2");
-      setSplitNames([]);
-      setExactAmounts([]);
-      setPayerChoice("");
-      setPayerExternalName("");
-
       setInternalEventLocation(null);
     }
   }, [open, editingCard]);
 
-  // SYNC từ effectiveEventLocation vào venue + address
+  // SYNC từ map → venue + address
   useEffect(() => {
     if (!effectiveEventLocation) return;
 
@@ -267,6 +155,7 @@ export default function EventActivityModal({
       setVenue(
         effectiveEventLocation.label || effectiveEventLocation.name || ""
       );
+      setErrors((prev) => ({ ...prev, venue: "" }));
     }
     if (
       effectiveEventLocation.address ||
@@ -280,7 +169,7 @@ export default function EventActivityModal({
     }
   }, [effectiveEventLocation]);
 
-  // ===== DỰ KIẾN & TỔNG =====
+  // ===== COST LOGIC =====
   const ticketTotal = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(ticketCount || 0);
@@ -288,17 +177,11 @@ export default function EventActivityModal({
   }, [ticketPrice, ticketCount]);
 
   const extraTotal = useMemo(
-    () =>
-      extraCosts
-        .map((e) => Number(e.actualAmount) || 0)
-        .reduce((a, b) => a + b, 0),
+    () => calcExtraTotal(extraCosts),
     [extraCosts]
   );
 
-  const estimatedTotal = useMemo(
-    () => ticketTotal + extraTotal,
-    [ticketTotal, extraTotal]
-  );
+  const estimatedTotal = ticketTotal + extraTotal;
 
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
@@ -306,82 +189,39 @@ export default function EventActivityModal({
     return estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== DURATION =====
-  const computeDurationMinutes = () => {
-    if (!startTime || !endTime) return null;
-    const [sh, sm] = startTime.split(":").map(Number);
-    const [eh, em] = endTime.split(":").map(Number);
-    if (
-      Number.isNaN(sh) ||
-      Number.isNaN(sm) ||
-      Number.isNaN(eh) ||
-      Number.isNaN(em)
-    ) {
-      return null;
-    }
-    let diff = eh * 60 + em - (sh * 60 + sm);
-    if (diff <= 0) return null;
-    return diff;
-  };
-
-  const durationMinutes = computeDurationMinutes();
-
-  // ===== SPLIT UTILS (dùng chung buildSplitBase) =====
-  const handleParticipantCount = (value) => {
-    setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
-
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-  };
-
-  const splitBase = useMemo(
-    () =>
-      buildSplitBase({
-        splitEnabled,
-        splitType,
-        participantCount,
-        splitNames,
-        exactAmounts,
-        payerChoice,
-        payerExternalName,
-        planMembers,
-        parsedActual,
-      }),
-    [
-      splitEnabled,
-      splitType,
-      participantCount,
-      splitNames,
-      exactAmounts,
-      payerChoice,
-      payerExternalName,
-      planMembers,
-      parsedActual,
-    ]
-  );
+  // ===== HOOK CHIA TIỀN CHUNG =====
+  const splitHook = useSplitMoney({
+    editingCard,
+    planMembers,
+    parsedActual,
+  });
 
   const {
+    splitEnabled,
+    setSplitEnabled,
+    splitType,
+    setSplitType,
+    participantCount,
+    handleParticipantCount,
+    splitNames,
+    setSplitNames,
+    exactAmounts,
+    setExactAmounts,
+    payerChoice,
+    setPayerChoice,
+    payerExternalName,
+    setPayerExternalName,
+    selectedMemberIds,
+    setSelectedMemberIds,
     parsedParticipants,
     participants,
     split: splitPayload,
     evenShare,
     evenRemainder,
     totalExact,
-  } = splitBase;
+  } = splitHook;
 
-  // ===== EXTRA COSTS HANDLER =====
+  // ===== EXTRA COST CRUD =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -399,42 +239,27 @@ export default function EventActivityModal({
 
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
-    const normalizedExtraCosts = extraCosts
-      .map((e) => ({
-        reason: e.reason || "Chi phí phụ",
-        type: e.type || "OTHER",
-        estimatedAmount: null,
-        actualAmount:
-          e.actualAmount !== undefined &&
-          e.actualAmount !== null &&
-          e.actualAmount !== ""
-            ? Number(e.actualAmount)
-            : 0,
-      }))
-      .filter(
-        (e) =>
-          (e.actualAmount && e.actualAmount > 0) ||
-          (e.reason && e.reason.trim() !== "")
-      );
+    const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
+    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
-    const extraTotalNormalized = normalizedExtraCosts
-      .map((e) => e.actualAmount || 0)
-      .reduce((a, b) => a + b, 0);
+    const normalizedParticipants = participants.map((p) =>
+      typeof p === "number" ? p : p?.memberId
+    );
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedTotal || null,
+      estimatedCost: estimatedTotal > 0 ? estimatedTotal : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      participants: normalizedParticipants,
       extraCosts: normalizedExtraCosts,
     };
 
     return {
       cost,
       split: splitPayload,
-      participants,
+      participants: normalizedParticipants,
       normalizedExtraCosts,
       extraTotal: extraTotalNormalized,
     };
@@ -449,11 +274,7 @@ export default function EventActivityModal({
     }
 
     // BẮT BUỘC CÓ ĐỊA ĐIỂM: venue / address / chọn trên bản đồ
-    if (
-      !effectiveEventLocation &&
-      !venue.trim() &&
-      !address.trim()
-    ) {
+    if (!effectiveEventLocation && !venue.trim() && !address.trim()) {
       newErrors.venue =
         "Vui lòng chọn địa điểm sự kiện trên bản đồ hoặc nhập venue / địa chỉ.";
     }
@@ -505,81 +326,58 @@ export default function EventActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER CHO SHELL =====
-  const headerRight =
-    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
-      <div className="hidden sm:flex flex-col items-end text-xs">
-        {parsedActual > 0 && (
-          <>
-            <span className="text-slate-500 dark:text-slate-400">
-              Tổng chi dùng để chia
-            </span>
-            <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-              {parsedActual.toLocaleString("vi-VN")}đ
-            </span>
-          </>
-        )}
-        {budgetAmount && Number(budgetAmount) > 0 && (
-          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            Ngân sách:{" "}
-            <b className="text-slate-700 dark:text-slate-100">
-              {Number(budgetAmount).toLocaleString("vi-VN")}đ
-            </b>
-          </span>
-        )}
-      </div>
-    ) : null;
+  // ===== HEADER + FOOTER =====
+  const headerRight = (
+    <ActivityHeaderCostSummary
+      parsedActual={parsedActual}
+      budgetAmount={budgetAmount}
+      accentClass="text-indigo-600 dark:text-indigo-400"
+    />
+  );
 
   const footerLeft = (
-    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
-      <span>
-        {eventName
-          ? `Sự kiện: ${eventName}`
-          : "Điền tên sự kiện để lưu hoạt động."}
-      </span>
-      {(effectiveEventLocation || venue || address) && (
-        <span>
-          Địa điểm:{" "}
-            <b>
-              {effectiveEventLocation?.label ||
-                effectiveEventLocation?.name ||
-                venue ||
-                "Đã chọn"}
-            </b>
-        </span>
-      )}
-      {startTime && endTime && durationMinutes != null && !errors.time && (
-        <span>
-          Thời gian:{" "}
-          <b>
-            {startTime} - {endTime} ({durationMinutes} phút)
-          </b>
-        </span>
-      )}
-    </div>
+    <ActivityFooterSummary
+      labelPrefix="Sự kiện"
+      name={eventName}
+      emptyLabelText="Điền tên sự kiện để lưu hoạt động."
+      locationText={
+        effectiveEventLocation || venue || address
+          ? `Địa điểm: ${
+              effectiveEventLocation?.label ||
+              effectiveEventLocation?.name ||
+              venue ||
+              "Đã chọn"
+            }${
+              effectiveEventLocation?.address ||
+              effectiveEventLocation?.fullAddress ||
+              address
+                ? ` – ${
+                    effectiveEventLocation?.address ||
+                    effectiveEventLocation?.fullAddress ||
+                    address
+                  }`
+                : ""
+            }`
+          : ""
+      }
+      timeText={
+        startTime &&
+        endTime &&
+        durationMinutes != null &&
+        !errors.time
+          ? `Thời gian: ${startTime} - ${endTime} (${durationMinutes} phút)`
+          : ""
+      }
+    />
   );
 
   const footerRight = (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
-        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
-        dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-      >
-        Hủy
-      </button>
-      <button
-        onClick={handleSubmit}
-        type="button"
-        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 
-        text-white text-xs sm:text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl
-        hover:brightness-105 active:scale-[0.98] transition"
-      >
-        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động sự kiện"}
-      </button>
-    </div>
+    <ActivityFooterButtons
+      onCancel={onClose}
+      onSubmit={handleSubmit}
+      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động sự kiện"}
+      submitClassName="bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/30"
+    />
   );
 
   return (
@@ -625,8 +423,7 @@ export default function EventActivityModal({
 
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên sự kiện{" "}
-                <span className="text-red-500 align-middle">*</span>
+                Tên sự kiện <span className="text-red-500 align-middle">*</span>
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <FaCalendarAlt className="text-indigo-500" />
@@ -665,7 +462,7 @@ export default function EventActivityModal({
                   setErrors((prev) => ({ ...prev, venue: "" }));
                 }}
                 className={`group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
-                          border-slate-200/80 dark:border-slate-700 px-3 py-2.5
+                          border-slate-200/80_dark:border-slate-700 px-3 py-2.5
                           flex items-start gap-3 text-left
                           hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50/70
                           dark:hover:border-indigo-500 dark:hover:bg-slate-900
@@ -742,97 +539,25 @@ export default function EventActivityModal({
               )}
             </div>
 
-            {/* Địa chỉ chi tiết (tuỳ chọn) */}
+            {/* Thời gian sự kiện – dùng ActivityTimeRangeSection */}
             <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa chỉ chi tiết (tuỳ chọn)
-              </label>
-              <input
-                value={address}
-                onChange={(e) => {
-                  setAddress(e.target.value);
-                  if (e.target.value.trim()) {
-                    setErrors((prev) => ({ ...prev, venue: "" }));
-                  }
-                }}
-                placeholder="Địa chỉ cụ thể, ghi chú chỗ gửi xe, cổng vào..."
-                className={`${inputBase} w-full mt-1`}
+              <ActivityTimeRangeSection
+                sectionLabel="Thời gian sự kiện"
+                startLabel="Bắt đầu"
+                endLabel="Kết thúc"
+                color="indigo"
+                iconClassName="text-indigo-500"
+                startTime={startTime}
+                endTime={endTime}
+                onStartTimeChange={(val) => setStartTime(val)}
+                onEndTimeChange={(val) => setEndTime(val)}
+                error={errors.time}
+                onErrorChange={(msg) =>
+                  setErrors((prev) => ({ ...prev, time: msg }))
+                }
+                onDurationChange={(mins) => setDurationMinutes(mins)}
+                durationHintPrefix="Thời lượng ước tính"
               />
-            </div>
-
-            {/* Thời gian sự kiện */}
-            <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Thời gian sự kiện
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock className="text-indigo-500" />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Bắt đầu
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={startTime}
-                      onChange={(val) => {
-                        setStartTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="indigo"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock className="text-indigo-500" />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Kết thúc
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={endTime}
-                      onChange={(val) => {
-                        setEndTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="indigo"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {errors.time && (
-                <p className="mt-1.5 text-[11px] text-rose-500">
-                  {errors.time}
-                </p>
-              )}
-
-              {durationMinutes != null && !errors.time && (
-                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  Thời lượng ước tính:{" "}
-                  <span className="font-semibold">{durationMinutes} phút</span>
-                </p>
-              )}
             </div>
           </div>
         </section>
@@ -883,7 +608,7 @@ export default function EventActivityModal({
               </div>
             </div>
 
-            {/* CHI PHÍ PHÁT SINH – dùng ExtraCostsSection chung */}
+            {/* CHI PHÍ PHÁT SINH */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -983,7 +708,7 @@ export default function EventActivityModal({
             planMembers={planMembers}
             splitEnabled={splitEnabled}
             setSplitEnabled={setSplitEnabled}
-            splitType={setSplitType}
+            splitType={splitType}
             setSplitType={setSplitType}
             participantCount={participantCount}
             handleParticipantCount={handleParticipantCount}
@@ -1000,12 +725,14 @@ export default function EventActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 
         {/* GHI CHÚ */}
         <section>
-          <div className="flex items-center justify_between gap-2 mb-2">
+          <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Ghi chú
             </label>

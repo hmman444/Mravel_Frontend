@@ -23,6 +23,7 @@ import PlanDayMapModal from "./PlanDayMapModal";
 export default function PlanBoard({
   board,
   isViewer,
+  planMembers,
 
   // LIST
   handleAddList,
@@ -138,8 +139,9 @@ export default function PlanBoard({
   useEffect(() => {
     if (!boardRef.current || isDraggingTrash) return;
 
+    // Nếu không show trash thì trả padding về 40
     if (!showTrash || !trashRef.current) {
-      if (bottomPadding !== 40) setBottomPadding(40);
+      setBottomPadding((prev) => (prev === 40 ? prev : 40));
       return;
     }
 
@@ -150,13 +152,21 @@ export default function PlanBoard({
     const diff = trashRect.bottom + desiredGap - boardRect.bottom;
     const epsilon = 6;
 
-    if (diff > epsilon) {
-      const newPadding = 40 + diff;
-      if (bottomPadding !== newPadding) setBottomPadding(newPadding);
-    } else if (diff < -epsilon) {
-      if (bottomPadding !== 40) setBottomPadding(40);
-    }
-  }, [showTrash, trashPos.y, trashList?.cards?.length, bottomPadding, isDraggingTrash]);
+    setBottomPadding((prev) => {
+      let target = prev;
+
+      if (diff > epsilon) {
+        // đủ khoảng cách + làm tròn cho đỡ nhảy lắt nhắt
+        target = Math.round(40 + diff);
+      } else if (diff < -epsilon) {
+        target = 40;
+      }
+
+      // Nếu chênh lệch quá nhỏ thì giữ nguyên, tránh setState vô ích
+      if (Math.abs(target - prev) < 1) return prev;
+      return target;
+    });
+  }, [showTrash, trashPos.y, trashList?.cards?.length, isDraggingTrash]);
 
   const openModal = (type) => modalStates[type][1](true);
   const closeModal = (type) => modalStates[type][1](false);
@@ -410,7 +420,7 @@ export default function PlanBoard({
               >
                 {dayLists.map((list, idx) => (
                   <PlanList
-                    key={list.id}
+                    key={`list-${list.id}`}
                     list={list}
                     index={idx}
                     dayNumber={idx + 1}
@@ -467,7 +477,7 @@ export default function PlanBoard({
               >
                 <FaTrashAlt className="text-[11px]" />
                 <span>
-                  {isDocked ? "Thùng rác (Gắn)" : "Thùng rác (Kéo lên để gắn)"}
+                  Thùng rác (Kéo lên để gắn)
                 </span>
               </div>
 
@@ -542,54 +552,63 @@ export default function PlanBoard({
         onClose={() => closeModal("TRANSPORT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <FoodActivityModal
         open={modalStates.FOOD[0]}
         onClose={() => closeModal("FOOD")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <StayActivityModal
         open={modalStates.STAY[0]}
         onClose={() => closeModal("STAY")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <SightseeingActivityModal
         open={modalStates.SIGHTSEEING[0]}
         onClose={() => closeModal("SIGHTSEEING")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <EntertainmentActivityModal
         open={modalStates.ENTERTAIN[0]}
         onClose={() => closeModal("ENTERTAIN")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <ShoppingActivityModal
         open={modalStates.SHOPPING[0]}
         onClose={() => closeModal("SHOPPING")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <CinemaActivityModal
         open={modalStates.CINEMA[0]}
         onClose={() => closeModal("CINEMA")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <EventActivityModal
         open={modalStates.EVENT[0]}
         onClose={() => closeModal("EVENT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <OtherActivityModal
         open={modalStates.OTHER[0]}
         onClose={() => closeModal("OTHER")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
 
       {confirmClearTrash && (

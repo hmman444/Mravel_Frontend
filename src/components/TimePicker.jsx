@@ -13,7 +13,7 @@ const COLOR_STYLES = {
   slate: { icon: "text-slate-500", selectedBg: "bg-slate-500" },
 };
 
-// 🔥 Chuẩn hóa HH:mm cả khi BE trả về HH:mm:ss
+//  Chuẩn hóa HH:mm cả khi BE trả về HH:mm:ss
 function normalizeHHmm(v) {
   if (!v) return "";
   return v.substring(0, 5); // luôn lấy HH:mm

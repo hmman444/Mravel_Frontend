@@ -29,7 +29,7 @@ class MainSocket {
 
     this.client.onConnect = () => {
       this.connected = true;
-      // 🔥 flush tất cả subscription chờ
+      // flush tất cả subscription chờ
       this.pendingSubs.forEach(({ id, destination, handler }) => {
         const sub = this.client.subscribe(destination, (msg) => {
           try {

@@ -19,7 +19,7 @@ export default function JoinPlanPage() {
         return;
       }
 
-      // 1️⃣ CHƯA ĐĂNG NHẬP → redirect login
+      // CHƯA ĐĂNG NHẬP → redirect login
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
         navigate({
@@ -29,7 +29,7 @@ export default function JoinPlanPage() {
         return;
       }
 
-      // 2️⃣ ĐÃ ĐĂNG NHẬP → gọi API để join
+      // ĐÃ ĐĂNG NHẬP → gọi API để join
       try {
         const res = await acceptInvite(token);
 

@@ -1,21 +1,26 @@
+// src/features/planBoard/components/modals/SightseeingActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  FaTimes,
-  FaLandmark,
-  FaMapMarkerAlt,
-  FaClock,
-  FaMoneyBillWave,
-} from "react-icons/fa";
-import TimePicker from "../../../../components/TimePicker";
+import { FaTimes, FaLandmark, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "../ActivityModalShell";
 import SplitMoneySection from "../SplitMoneySection";
 import ExtraCostsSection from "../ExtraCostsSection";
 import PlacePickerModal from "../PlacePickerModal";
-import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
+
+import ActivityTimeRangeSection from "../ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "../ActivityHeaderCostSummary";
+import ActivityFooterSummary from "../ActivityFooterSummary";
+import ActivityFooterButtons from "../ActivityFooterButtons";
+
 import { inputBase, sectionCard } from "../activityStyles";
+import { useSplitMoney } from "../../hooks/useSplitMoney";
+import {
+  buildInitialExtraCosts,
+  normalizeExtraCosts,
+  calcExtraTotal,
+} from "../../utils/costUtils";
 
 const EXTRA_TYPES = [
   { value: "PARKING", label: "Gửi xe" },
@@ -37,6 +42,7 @@ export default function SightseeingActivityModal({
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
   const [ticketPrice, setTicketPrice] = useState("");
   const [peopleCount, setPeopleCount] = useState("2");
@@ -45,28 +51,15 @@ export default function SightseeingActivityModal({
   const [budgetAmount, setBudgetAmount] = useState("");
   const [note, setNote] = useState("");
 
-  // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [splitType, setSplitType] = useState("EVEN");
-  const [participantCount, setParticipantCount] = useState("2");
-  const [splitNames, setSplitNames] = useState([]);
-  const [exactAmounts, setExactAmounts] = useState([]);
-
-  const [payerChoice, setPayerChoice] = useState("");
-  const [payerExternalName, setPayerExternalName] = useState("");
-
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalSightLocation, setInternalSightLocation] = useState(null);
   const effectiveSightLocation = internalSightLocation || null;
 
-  // ===== LOAD DATA =====
+  // ===== LOAD DỮ LIỆU =====
   useEffect(() => {
     if (!open) return;
 
@@ -77,7 +70,6 @@ export default function SightseeingActivityModal({
         ? JSON.parse(editingCard.activityDataJson)
         : {};
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {};
 
       setTitle(editingCard.text || "");
       setPlaceName(data.placeName || "");
@@ -94,11 +86,11 @@ export default function SightseeingActivityModal({
 
       setStartTime(loadedStart);
       setEndTime(loadedEnd);
+      setDurationMinutes(null); // để ActivityTimeRangeSection tự tính lại
 
       setTicketPrice(
         data.ticketPrice != null ? String(data.ticketPrice) : ""
       );
-
       setPeopleCount(
         data.peopleCount != null ? String(data.peopleCount) : "2"
       );
@@ -111,49 +103,8 @@ export default function SightseeingActivityModal({
         setActualCost("");
       }
 
-      // extraCosts: map từ nhiều format cũ về format chung
-      let extras = [];
-      if (
-        data.extraItems &&
-        Array.isArray(data.extraItems) &&
-        data.extraItems.length > 0
-      ) {
-        extras = data.extraItems.map((it) => ({
-          reason: it.reason || it.note || "Chi phí phụ",
-          type: it.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            it.actualAmount != null
-              ? it.actualAmount
-              : it.amount != null
-              ? Number(it.amount)
-              : 0,
-        }));
-      } else if (
-        cost.extraCosts &&
-        Array.isArray(cost.extraCosts) &&
-        cost.extraCosts.length > 0
-      ) {
-        extras = cost.extraCosts.map((e) => ({
-          reason: e.reason || "Chi phí phụ",
-          type: e.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            e.actualAmount != null && e.actualAmount !== ""
-              ? Number(e.actualAmount)
-              : 0,
-        }));
-      } else if (data.extraSpend != null) {
-        extras = [
-          {
-            reason: "Chi phí phụ",
-            type: "OTHER",
-            estimatedAmount: null,
-            actualAmount: Number(data.extraSpend) || 0,
-          },
-        ];
-      }
-      setExtraCosts(extras);
+      // extraCosts dùng helper chung
+      setExtraCosts(buildInitialExtraCosts(data, cost));
 
       setBudgetAmount(
         cost.budgetAmount !== undefined && cost.budgetAmount !== null
@@ -163,70 +114,10 @@ export default function SightseeingActivityModal({
 
       setNote(editingCard.description || "");
 
-      // location object nếu có
       if (data.sightLocation) {
         setInternalSightLocation(data.sightLocation);
       } else {
         setInternalSightLocation(null);
-      }
-
-      // ===== LOAD SPLIT (dùng pattern chung) =====
-      if (split.splitType && split.splitType !== "NONE") {
-        setSplitEnabled(true);
-        setSplitType(split.splitType);
-
-        const pc =
-          cost.participantCount ||
-          split.splitMembers?.length ||
-          split.splitDetails?.length ||
-          editingCard.participantCount ||
-          2;
-
-        setParticipantCount(String(pc));
-
-        let names = [];
-        if (split.splitMembers?.length) {
-          names = split.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
-
-        if (split.splitType === "EXACT" && split.splitDetails) {
-          setExactAmounts(
-            split.splitDetails.map((d) =>
-              d.amount != null ? String(d.amount) : ""
-            )
-          );
-        } else {
-          setExactAmounts([]);
-        }
-
-        setPayerChoice("");
-        setPayerExternalName("");
-        if (split.payerId) {
-          setPayerChoice(`member:${split.payerId}`);
-        } else if (split.payments && split.payments.length > 0) {
-          const first = split.payments[0];
-          const payer = first?.payer;
-          if (payer) {
-            if (payer.external || !payer.memberId) {
-              setPayerChoice("external");
-              setPayerExternalName(payer.displayName || "");
-            } else if (payer.memberId) {
-              setPayerChoice(`member:${payer.memberId}`);
-            }
-          }
-        }
-      } else {
-        setSplitEnabled(false);
-        setSplitType("EVEN");
-        setParticipantCount("2");
-        setSplitNames([]);
-        setExactAmounts([]);
-        setPayerChoice("");
-        setPayerExternalName("");
       }
     } else {
       // reset new
@@ -236,6 +127,7 @@ export default function SightseeingActivityModal({
 
       setStartTime("");
       setEndTime("");
+      setDurationMinutes(null);
 
       setTicketPrice("");
       setPeopleCount("2");
@@ -243,14 +135,6 @@ export default function SightseeingActivityModal({
       setBudgetAmount("");
       setNote("");
       setExtraCosts([]);
-
-      setSplitEnabled(false);
-      setSplitType("EVEN");
-      setParticipantCount("2");
-      setSplitNames([]);
-      setExactAmounts([]);
-      setPayerChoice("");
-      setPayerExternalName("");
 
       setInternalSightLocation(null);
     }
@@ -275,7 +159,7 @@ export default function SightseeingActivityModal({
     }
   }, [effectiveSightLocation]);
 
-  // ===== COST LOGIC =====
+  // ===== TÍNH CHI PHÍ =====
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(peopleCount || 0);
@@ -283,10 +167,7 @@ export default function SightseeingActivityModal({
   }, [ticketPrice, peopleCount]);
 
   const extraTotal = useMemo(
-    () =>
-      extraCosts
-        .map((e) => Number(e.actualAmount) || 0)
-        .reduce((a, b) => a + b, 0),
+    () => calcExtraTotal(extraCosts),
     [extraCosts]
   );
 
@@ -301,82 +182,39 @@ export default function SightseeingActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ===== DURATION =====
-  const computeDurationMinutes = () => {
-    if (!startTime || !endTime) return null;
-    const [sh, sm] = startTime.split(":").map(Number);
-    const [eh, em] = endTime.split(":").map(Number);
-    if (
-      Number.isNaN(sh) ||
-      Number.isNaN(sm) ||
-      Number.isNaN(eh) ||
-      Number.isNaN(em)
-    ) {
-      return null;
-    }
-    let diff = eh * 60 + em - (sh * 60 + sm);
-    if (diff <= 0) return null;
-    return diff;
-  };
-
-  const durationMinutes = computeDurationMinutes();
-
-  // ===== SPLIT UTILS (buildSplitBase) =====
-  const handleParticipantCount = (value) => {
-    setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
-
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-  };
-
-  const splitBase = useMemo(
-    () =>
-      buildSplitBase({
-        splitEnabled,
-        splitType,
-        participantCount,
-        splitNames,
-        exactAmounts,
-        payerChoice,
-        payerExternalName,
-        planMembers,
-        parsedActual,
-      }),
-    [
-      splitEnabled,
-      splitType,
-      participantCount,
-      splitNames,
-      exactAmounts,
-      payerChoice,
-      payerExternalName,
-      planMembers,
-      parsedActual,
-    ]
-  );
+  // ===== HOOK CHIA TIỀN CHUNG =====
+  const splitHook = useSplitMoney({
+    editingCard,
+    planMembers,
+    parsedActual,
+  });
 
   const {
+    splitEnabled,
+    setSplitEnabled,
+    splitType,
+    setSplitType,
+    participantCount,
+    handleParticipantCount,
+    splitNames,
+    setSplitNames,
+    exactAmounts,
+    setExactAmounts,
+    payerChoice,
+    setPayerChoice,
+    payerExternalName,
+    setPayerExternalName,
+    selectedMemberIds,
+    setSelectedMemberIds,
     parsedParticipants,
     participants,
     split: splitPayload,
     evenShare,
     evenRemainder,
     totalExact,
-  } = splitBase;
+  } = splitHook;
 
-  // ===== EXTRA COSTS HANDLER =====
+  // ===== EXTRA COSTS CRUD =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -394,42 +232,27 @@ export default function SightseeingActivityModal({
 
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
-    const normalizedExtraCosts = extraCosts
-      .map((e) => ({
-        reason: e.reason || "Chi phí phụ",
-        type: e.type || "OTHER",
-        estimatedAmount: null,
-        actualAmount:
-          e.actualAmount !== undefined &&
-          e.actualAmount !== null &&
-          e.actualAmount !== ""
-            ? Number(e.actualAmount)
-            : 0,
-      }))
-      .filter(
-        (e) =>
-          (e.actualAmount && e.actualAmount > 0) ||
-          (e.reason && e.reason.trim() !== "")
-      );
+    const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
+    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
-    const extraTotalNormalized = normalizedExtraCosts
-      .map((e) => e.actualAmount || 0)
-      .reduce((a, b) => a + b, 0);
+    const normalizedParticipants = participants.map((p) =>
+      typeof p === "number" ? p : p?.memberId
+    );
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedCost > 0 ? estimatedCost : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      participants: normalizedParticipants,
       extraCosts: normalizedExtraCosts,
     };
 
     return {
       cost,
       split: splitPayload,
-      participants,
+      participants: normalizedParticipants,
       normalizedExtraCosts,
       extraTotal: extraTotalNormalized,
     };
@@ -490,79 +313,46 @@ export default function SightseeingActivityModal({
   };
 
   // ===== HEADER / FOOTER =====
-  const headerRight =
-    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
-      <div className="hidden sm:flex flex-col items-end text-xs">
-        {parsedActual > 0 && (
-          <>
-            <span className="text-slate-500 dark:text-slate-400">
-              Tổng chi dùng để chia
-            </span>
-            <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-              {parsedActual.toLocaleString("vi-VN")}đ
-            </span>
-          </>
-        )}
-        {budgetAmount && Number(budgetAmount) > 0 && (
-          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            Ngân sách:{" "}
-            <b className="text-slate-700 dark:text-slate-100">
-              {Number(budgetAmount).toLocaleString("vi-VN")}đ
-            </b>
-          </span>
-        )}
-      </div>
-    ) : null;
+  const headerRight = (
+    <ActivityHeaderCostSummary
+      parsedActual={parsedActual}
+      budgetAmount={budgetAmount}
+      accentClass="text-amber-600 dark:text-amber-400"
+    />
+  );
 
   const footerLeft = (
-    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
-      <span>
-        {placeName
-          ? `Tham quan: ${placeName}`
-          : "Điền/chọn địa điểm tham quan để lưu hoạt động."}
-      </span>
-      {(effectiveSightLocation || address) && (
-        <span>
-          Địa điểm:{" "}
-          <b>
-            {effectiveSightLocation?.address ||
+    <ActivityFooterSummary
+      labelPrefix="Tham quan"
+      name={placeName}
+      emptyLabelText="Điền/chọn địa điểm tham quan để lưu hoạt động."
+      locationText={
+        (effectiveSightLocation || address)
+          ? `Địa điểm: ${
+              effectiveSightLocation?.address ||
               effectiveSightLocation?.fullAddress ||
-              address}
-          </b>
-        </span>
-      )}
-      {startTime && endTime && durationMinutes != null && !errors.time && (
-        <span>
-          Thời gian:{" "}
-          <b>
-            {startTime} - {endTime} ({durationMinutes} phút)
-          </b>
-        </span>
-      )}
-    </div>
+              address
+            }`
+          : ""
+      }
+      timeText={
+        startTime &&
+        endTime &&
+        durationMinutes != null &&
+        !errors.time
+          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          : ""
+      }
+    />
   );
 
   const footerRight = (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
-        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
-        dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-      >
-        Hủy
-      </button>
-      <button
-        onClick={handleSubmit}
-        type="button"
-        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 
-        text-white text-xs sm:text-sm font-semibold shadow-lg shadow-amber-500/30 hover:shadow-xl
-        hover:brightness-105 active:scale-[0.98] transition"
-      >
-        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động tham quan"}
-      </button>
-    </div>
+    <ActivityFooterButtons
+      onCancel={onClose}
+      onSubmit={handleSubmit}
+      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động tham quan"}
+      submitClassName="bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30"
+    />
   );
 
   return (
@@ -694,83 +484,25 @@ export default function SightseeingActivityModal({
               )}
             </div>
 
-            {/* Thời gian tham quan */}
+            {/* Thời gian tham quan: dùng ActivityTimeRangeSection */}
             <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Thời gian tham quan
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-amber-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Bắt đầu
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={startTime}
-                      onChange={(val) => {
-                        setStartTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="amber"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-amber-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Kết thúc
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={endTime}
-                      onChange={(val) => {
-                        setEndTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="amber"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {errors.time && (
-                <p className="mt-1.5 text-[11px] text-rose-500">
-                  {errors.time}
-                </p>
-              )}
-
-              {durationMinutes != null && !errors.time && (
-                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  Thời lượng ước tính:{" "}
-                  <span className="font-semibold">{durationMinutes} phút</span>
-                </p>
-              )}
+              <ActivityTimeRangeSection
+                sectionLabel="Thời gian tham quan"
+                startLabel="Bắt đầu"
+                endLabel="Kết thúc"
+                color="amber"
+                iconClassName="text-amber-500"
+                startTime={startTime}
+                endTime={endTime}
+                onStartTimeChange={(val) => setStartTime(val)}
+                onEndTimeChange={(val) => setEndTime(val)}
+                error={errors.time}
+                onErrorChange={(msg) =>
+                  setErrors((prev) => ({ ...prev, time: msg }))
+                }
+                onDurationChange={(mins) => setDurationMinutes(mins)}
+                durationHintPrefix="Thời lượng ước tính"
+              />
             </div>
           </div>
         </section>
@@ -821,7 +553,7 @@ export default function SightseeingActivityModal({
               </div>
             </div>
 
-            {/* Chi phí phát sinh – dùng ExtraCostsSection */}
+            {/* Chi phí phát sinh */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -937,6 +669,8 @@ export default function SightseeingActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 
@@ -946,39 +680,39 @@ export default function SightseeingActivityModal({
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Ghi chú
             </label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm lưu ý nhỏ cho cả nhóm
-            </span>
-          </div>
-          <textarea
-            rows={3}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: nên đến sớm, có show nước 19h..."
-            className={`${inputBase} w-full`}
-          />
-        </section>
-      </ActivityModalShell>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+            Thêm lưu ý nhỏ cho cả nhóm
+          </span>
+        </div>
+        <textarea
+          rows={3}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Ví dụ: nên đến sớm, có show nước 19h..."
+          className={`${inputBase} w-full`}
+        />
+      </section>
+    </ActivityModalShell>
 
-      {/* PLACE PICKER CHO SIGHTSEEING */}
-      <PlacePickerModal
-        open={placePickerOpen}
-        onClose={() => setPlacePickerOpen(false)}
-        onSelect={(loc) => {
-          setInternalSightLocation(loc || null);
-          if (loc?.label || loc?.name) {
-            setPlaceName(loc.label || loc.name);
-            setErrors((prev) => ({ ...prev, placeName: "" }));
-          }
-          if (loc?.address || loc?.fullAddress) {
-            setAddress(loc.address || loc.fullAddress);
-          }
-        }}
-        initialTab="SIGHTSEEING"
-        activityType="SIGHTSEEING"
-        field="sight"
-        initialLocation={effectiveSightLocation}
-      />
-    </>
+    {/* PLACE PICKER CHO SIGHTSEEING */}
+    <PlacePickerModal
+      open={placePickerOpen}
+      onClose={() => setPlacePickerOpen(false)}
+      onSelect={(loc) => {
+        setInternalSightLocation(loc || null);
+        if (loc?.label || loc?.name) {
+          setPlaceName(loc.label || loc.name);
+          setErrors((prev) => ({ ...prev, placeName: "" }));
+        }
+        if (loc?.address || loc?.fullAddress) {
+          setAddress(loc.address || loc.fullAddress);
+        }
+      }}
+      initialTab="SIGHTSEEING"
+      activityType="SIGHTSEEING"
+      field="sight"
+      initialLocation={effectiveSightLocation}
+    />
+  </>
   );
 }
