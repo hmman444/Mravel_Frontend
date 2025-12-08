@@ -139,8 +139,9 @@ export default function PlanBoard({
   useEffect(() => {
     if (!boardRef.current || isDraggingTrash) return;
 
+    // Nếu không show trash thì trả padding về 40
     if (!showTrash || !trashRef.current) {
-      if (bottomPadding !== 40) setBottomPadding(40);
+      setBottomPadding((prev) => (prev === 40 ? prev : 40));
       return;
     }
 
@@ -151,13 +152,21 @@ export default function PlanBoard({
     const diff = trashRect.bottom + desiredGap - boardRect.bottom;
     const epsilon = 6;
 
-    if (diff > epsilon) {
-      const newPadding = 40 + diff;
-      if (bottomPadding !== newPadding) setBottomPadding(newPadding);
-    } else if (diff < -epsilon) {
-      if (bottomPadding !== 40) setBottomPadding(40);
-    }
-  }, [showTrash, trashPos.y, trashList?.cards?.length, bottomPadding, isDraggingTrash]);
+    setBottomPadding((prev) => {
+      let target = prev;
+
+      if (diff > epsilon) {
+        // đủ khoảng cách + làm tròn cho đỡ nhảy lắt nhắt
+        target = Math.round(40 + diff);
+      } else if (diff < -epsilon) {
+        target = 40;
+      }
+
+      // Nếu chênh lệch quá nhỏ thì giữ nguyên, tránh setState vô ích
+      if (Math.abs(target - prev) < 1) return prev;
+      return target;
+    });
+  }, [showTrash, trashPos.y, trashList?.cards?.length, isDraggingTrash]);
 
   const openModal = (type) => modalStates[type][1](true);
   const closeModal = (type) => modalStates[type][1](false);

@@ -155,17 +155,18 @@ export const removeCard = createAsyncThunk(
   }
 );
 
+export const duplicateCardThunk = createAsyncThunk(
+  "planBoard/duplicateCard",
+  async ({ planId, listId, cardId }) => {
+    return await duplicateCard(planId, listId, cardId);
+  }
+);
+
+
 export const clearTrashThunk = createAsyncThunk(
   "planBoard/clearTrash",
   async (planId) => {
     return await clearTrash(planId);
-  }
-);
-
-export const copyCard = createAsyncThunk(
-  "planBoard/copyCard",
-  async ({ planId, listId, cardId }) => {
-    return await duplicateCard(planId, listId, cardId);
   }
 );
 
@@ -321,7 +322,15 @@ const planBoardSlice = createSlice({
       const incoming = action.payload;
       if (!incoming) return;
 
-      state.board = normalizeBoard(incoming);
+      const prevBoard = state.board;
+      const preMyRole = prevBoard?.myRole;
+
+      const normalized = normalizeBoard(incoming);
+      if(preMyRole){
+        normalized.myRole = preMyRole;
+      }
+
+      state.board = normalized;
     },
   },
   extraReducers: (builder) => {
@@ -341,10 +350,7 @@ const planBoardSlice = createSlice({
       })
 
       // Add list
-      .addCase(addList.fulfilled, (s, a) => {
-        if (!s.board?.lists) return;
-        s.board.lists.push(a.payload);
-      })
+      .addCase(addList.fulfilled, (s, a) => {})
 
       // Edit list title
       .addCase(editListTitle.fulfilled, (s, a) => {
@@ -369,14 +375,7 @@ const planBoardSlice = createSlice({
 
       // Add card
       .addCase(addCard.fulfilled, (s, a) => {
-        const { listId } = a.meta.arg;
-        const list = s.board?.lists?.find(
-          (l) => String(l.id) === String(listId)
-        );
-        if (list) {
-          list.cards = list.cards || [];
-          list.cards.push(normalizeCard(a.payload));
-        }
+        s.error = null;
       })
 
       // Edit card
@@ -390,18 +389,6 @@ const planBoardSlice = createSlice({
         list.cards = (list.cards || []).map((c) =>
           String(c.id) === String(cardId) ? updatedCard : c
         );
-      })
-
-      // Copy card
-      .addCase(copyCard.fulfilled, (s, a) => {
-        const { listId } = a.meta.arg;
-        const list = s.board?.lists?.find(
-          (l) => String(l.id) === String(listId)
-        );
-        if (list) {
-          list.cards = list.cards || [];
-          list.cards.push(normalizeCard(a.payload));
-        }
       })
 
       // Remove card

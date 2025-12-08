@@ -323,6 +323,12 @@ export default function MemberRow({
                   }}
                 />
               </div>
+              {percentOfPlan != null && (
+                <p className="mt-1 text-[10px] text-gray-400">
+                  Đóng góp {formatPercent(percentOfPlan)} 
+                </p>
+              )}
+              
             </div>
           </div>
         </div>

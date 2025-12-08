@@ -9,7 +9,6 @@ import {
   editCard,
   removeCard,
   reorder,
-  saveLabel,
   removeLabel,
   inviteMembers,
   localReorder,
@@ -20,7 +19,8 @@ import {
   sendAccessRequest,
   loadRequests as loadRequestsThunk,
   decideRequest as decideRequestThunk,
-  clearTrashThunk
+  clearTrashThunk,
+  duplicateCardThunk
 } from "../slices/planBoardSlice";
 import { updateVisibility } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
@@ -132,6 +132,16 @@ export function usePlanBoard(planId) {
         "Không thể xoá thẻ"
       ),
 
+    duplicateCard: (listId, cardId) =>
+     tryCall(
+       (async () => {
+         await dispatch(
+           duplicateCardThunk({ planId, listId, cardId })
+         ).unwrap();
+       })(),
+       "Không thể sao chép thẻ"
+     ),
+
     clearTrash: () =>
       tryCall(
         dispatch(clearTrashThunk(planId)),
@@ -145,13 +155,6 @@ export function usePlanBoard(planId) {
       tryCall(
         dispatch(reorder({ planId, payload })),
         "Không thể cập nhật vị trí"
-      ),
-
-    // label
-    upsertLabel: (payload) =>
-      tryCall(
-        dispatch(saveLabel({ planId, payload })),
-        "Không thể lưu nhãn"
       ),
 
     deleteLabel: (labelId) =>

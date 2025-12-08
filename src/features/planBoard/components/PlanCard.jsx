@@ -461,7 +461,7 @@ export default function PlanCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                duplicateCard(card, listId);
+                duplicateCard(listId, card.id);
                 setActiveMenu(null);
               }}
               className="

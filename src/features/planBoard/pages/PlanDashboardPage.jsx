@@ -42,6 +42,7 @@ export default function PlanDashboardPage() {
     isEditor,
     isOwner,
     planMembers,
+    duplicateCard,
   } = usePlanBoard(planId);
 
   const { plans } = useMyPlans();
@@ -322,51 +323,6 @@ export default function PlanDashboardPage() {
       console.error("Toggle done failed");
     }
   };
-
-  const duplicateCard = async (card, listId) => {
-    try {
-      const baseTitle = card.text || "Hoạt động";
-
-      const activityPayload = {
-        // loại activity
-        type: card.activityType,
-
-        // tiêu đề / mô tả
-        title: baseTitle + " (Copy)",
-        text: baseTitle + " (Copy)",
-        description: card.description,
-        note: card.description,
-
-        // thời gian
-        startTime: card.startTime,
-        endTime: card.endTime,
-        durationMinutes: card.durationMinutes ?? null,
-
-        // tham gia hoạt động
-        participantCount: card.cost?.participantCount ?? null,
-        participants: card.cost?.participants || [],
-
-        // cost & split từ DTO mới (PlanCardCostDto, PlanCardSplitConfigDto)
-        cost: card.cost || undefined,
-        split: card.split || undefined,
-
-        // dữ liệu activity tuỳ biến
-        activityData: card.activityDataJson
-          ? JSON.parse(card.activityDataJson)
-          : {},
-      };
-
-      const payload = buildCardPayloadFromActivity(activityPayload);
-      await createCard(listId, payload);
-      await load();
-
-      showSuccess("Đã sao chép thẻ");
-    } catch (e) {
-      console.error(e);
-      showError("Không thể sao chép thẻ");
-    }
-  };
-
 
   const handleAddList = async () => {
     try {

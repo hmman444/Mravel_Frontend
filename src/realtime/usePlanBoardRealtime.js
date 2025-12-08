@@ -27,7 +27,12 @@ export function usePlanBoardRealtime(planId) {
     const destination = `/topic/plans/${planId}/board`;
 
     const subId = mainSocket.subscribe(destination, (payload) => {
+      //console.log("[WS] /topic/plans/board payload:", payload);
       if (!payload) return;
+      // console.log(
+      //   "[WS] eventType=", payload.eventType,
+      //   "myRole=", payload.board?.myRole
+      // );
 
       // TH1: payload = PlanBoardEvent { eventType, actorId, board }
       // TH2: payload = BoardResponse (fallback cũ)
