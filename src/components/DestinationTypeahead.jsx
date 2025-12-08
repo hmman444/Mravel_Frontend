@@ -61,7 +61,7 @@ export default function DestinationTypeahead({
     resetSuggest();
     skipNextFetch.current = true;
 
-    // 👉 phát dữ liệu ra ngoài cho form Restaurant
+    // phát dữ liệu ra ngoài cho form Restaurant
     if (typeof onPick === "function") onPick({ text, slug: it.slug });
   };
 
@@ -84,7 +84,7 @@ export default function DestinationTypeahead({
             const val = e.target.value;
             setQ(val);
             setPickedSlug(null);
-            // 👉 phát dữ liệu thô khi người dùng gõ
+            // phát dữ liệu thô khi người dùng gõ
             if (typeof onChangeText === "function") onChangeText(val);
           }}
           onFocus={() => setOpen(Boolean(q) && !pickedSlug)}

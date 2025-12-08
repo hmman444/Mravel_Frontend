@@ -48,7 +48,6 @@ export default function ShoppingActivityModal({
   // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ==== CHIA TIỀN ====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -58,16 +57,13 @@ export default function ShoppingActivityModal({
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
 
-  // ==== ERRORS ====
   const [errors, setErrors] = useState({});
 
-  // ==== PLACE PICKER ====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalShoppingLocation, setInternalShoppingLocation] =
     useState(null);
   const effectiveShoppingLocation = internalShoppingLocation || null;
 
-  // ==== LOAD DATA ====
   useEffect(() => {
     if (!open) return;
 
@@ -172,7 +168,6 @@ export default function ShoppingActivityModal({
         setInternalShoppingLocation(null);
       }
 
-      // ===== LOAD SPLIT =====
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -281,7 +276,6 @@ export default function ShoppingActivityModal({
     }
   }, [effectiveShoppingLocation]);
 
-  // ==== ITEMS UTILS ====
   const handleAddItem = () => {
     setItems((prev) => [...prev, { name: "", price: "" }]);
   };
@@ -298,7 +292,6 @@ export default function ShoppingActivityModal({
     setItems((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // ==== EXTRA COSTS HANDLER ====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -314,7 +307,6 @@ export default function ShoppingActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ==== COST LOGIC ====
   const totalItemCost = useMemo(
     () =>
       items.reduce((sum, it) => {
@@ -343,7 +335,6 @@ export default function ShoppingActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ==== SPLIT UTILS (dùng buildSplitBase) ====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -398,7 +389,6 @@ export default function ShoppingActivityModal({
     totalExact,
   } = splitBase;
 
-  // ==== THỜI LƯỢNG ====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -418,7 +408,6 @@ export default function ShoppingActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ==== BUILD PAYLOAD ====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -461,7 +450,6 @@ export default function ShoppingActivityModal({
     };
   };
 
-  // ==== SUBMIT ====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -522,7 +510,6 @@ export default function ShoppingActivityModal({
     onClose?.();
   };
 
-  // ==== HEADER / FOOTER ====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">

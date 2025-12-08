@@ -1,3 +1,4 @@
+// src/features/planBoard/components/modals/FoodActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -47,7 +48,6 @@ export default function FoodActivityModal({
   // extraCosts dùng chung format với Transport / Stay
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -56,16 +56,14 @@ export default function FoodActivityModal({
 
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
+  const [selectedMemberIds, setSelectedMemberIds] = useState([]); // danh sách userId đang chia
 
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalFoodLocation, setInternalFoodLocation] = useState(null);
   const effectiveFoodLocation = internalFoodLocation || null;
 
-  // ===== LOAD KHI EDIT / RESET =====
   useEffect(() => {
     if (!open) return;
 
@@ -102,7 +100,7 @@ export default function FoodActivityModal({
         data.peopleCount != null ? String(data.peopleCount) : "2"
       );
 
-      // ---- EXTRA COSTS ----
+      // ===== Extra costs =====
       let extras = [];
 
       if (
@@ -171,29 +169,36 @@ export default function FoodActivityModal({
         setInternalFoodLocation(null);
       }
 
-      // ===== LOAD SPLIT dùng logic chung =====
+      // ===== LOAD THÔNG TIN CHIA TIỀN ĐÃ LƯU =====
+      // Ai đang chia tiền
+      let initialSelectedIds = [];
+      if (Array.isArray(cost.participants) && cost.participants.length > 0) {
+        initialSelectedIds = cost.participants.filter((id) => id != null);
+      } else if (
+        Array.isArray(split.splitMembers) &&
+        split.splitMembers.length > 0
+      ) {
+        // BE mới có thể lưu list userId ở split.splitMembers
+        initialSelectedIds = split.splitMembers.filter((id) => id != null);
+      }
+      setSelectedMemberIds(initialSelectedIds);
+
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
 
         const pc =
           cost.participantCount ||
-          split.splitMembers?.length ||
-          split.splitDetails?.length ||
+          (Array.isArray(initialSelectedIds) && initialSelectedIds.length) ||
+          (Array.isArray(split.splitDetails) && split.splitDetails.length) ||
           data.peopleCount ||
           editingCard.participantCount ||
           2;
 
         setParticipantCount(String(pc));
 
-        let names = [];
-        if (split.splitMembers?.length) {
-          names = split.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
+        // splitNames sẽ được Sync từ planMembers + selectedMemberIds trong SplitMoneySection
+        setSplitNames([]);
 
         if (split.splitType === "EXACT" && split.splitDetails) {
           setExactAmounts(
@@ -205,6 +210,7 @@ export default function FoodActivityModal({
           setExactAmounts([]);
         }
 
+        // Người trả chính: prefer payerId (userId)
         setPayerChoice("");
         setPayerExternalName("");
         if (split.payerId) {
@@ -229,9 +235,10 @@ export default function FoodActivityModal({
         setExactAmounts([]);
         setPayerChoice("");
         setPayerExternalName("");
+        setSelectedMemberIds([]);
       }
     } else {
-      // RESET khi mở mới
+      // RESET khi mở modal mới
       setTitle("");
       setRestaurantName("");
       setLocation("");
@@ -253,6 +260,7 @@ export default function FoodActivityModal({
       setExactAmounts([]);
       setPayerChoice("");
       setPayerExternalName("");
+      setSelectedMemberIds([]);
 
       setInternalFoodLocation(null);
     }
@@ -277,7 +285,6 @@ export default function FoodActivityModal({
     }
   }, [effectiveFoodLocation]);
 
-  // ===== DỰ KIẾN & TỔNG =====
   const totalEstimated = useMemo(() => {
     const p = Number(pricePerPerson || 0);
     const c = Number(peopleCount || 0);
@@ -303,7 +310,6 @@ export default function FoodActivityModal({
     return estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== DURATION =====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -323,24 +329,10 @@ export default function FoodActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== SPLIT UTILS (dùng chung buildSplitBase) =====
   const handleParticipantCount = (value) => {
+    // participantCount vẫn dùng cho buildSplitBase,
+    // nhưng số lượng thực tế sẽ sync theo selectedMemberIds trong SplitMoneySection
     setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
-
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
   };
 
   const splitBase = useMemo(
@@ -355,6 +347,7 @@ export default function FoodActivityModal({
         payerExternalName,
         planMembers,
         parsedActual,
+        selectedMemberIds,
       }),
     [
       splitEnabled,
@@ -366,6 +359,7 @@ export default function FoodActivityModal({
       payerExternalName,
       planMembers,
       parsedActual,
+      selectedMemberIds,
     ]
   );
 
@@ -378,7 +372,6 @@ export default function FoodActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -394,7 +387,6 @@ export default function FoodActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -423,8 +415,11 @@ export default function FoodActivityModal({
       estimatedCost: estimatedTotal || null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      // luôn gửi userId thuần về BE
+      participants: participants.map((p) =>
+        typeof p === "number" ? p : p.memberId
+      ),
       extraCosts: normalizedExtraCosts,
     };
 
@@ -437,7 +432,6 @@ export default function FoodActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -469,7 +463,9 @@ export default function FoodActivityModal({
       durationMinutes: durationMinutes ?? null,
       participantCount:
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
-      participants,
+      participants: participants.map((p) =>
+        typeof p === "number" ? p : p.memberId
+      ),
       activityData: {
         restaurantName,
         location,
@@ -491,7 +487,6 @@ export default function FoodActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER CHO SHELL =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">
@@ -586,7 +581,7 @@ export default function FoodActivityModal({
       >
         {/* THÔNG TIN CHUNG */}
         <section className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify_between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Thông tin chung
             </label>
@@ -777,7 +772,7 @@ export default function FoodActivityModal({
           </div>
         </section>
 
-        {/* GIÁ / SỐ NGƯỜI / EXTRA / NGÂN SÁCH / THỰC TẾ + TÓM TẮT */}
+        {/* CHI PHÍ BỮA ĂN */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
@@ -823,7 +818,7 @@ export default function FoodActivityModal({
               </div>
             </div>
 
-            {/* CHI PHÍ PHÁT SINH – dùng ExtraCostsSection chung */}
+            {/* Chi phí phát sinh */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -877,7 +872,7 @@ export default function FoodActivityModal({
               </div>
             </div>
 
-            {/* TÓM TẮT CHI PHÍ */}
+            {/* Tóm tắt chi phí */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
                 Dự kiến theo đầu người:{" "}
@@ -940,6 +935,8 @@ export default function FoodActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 

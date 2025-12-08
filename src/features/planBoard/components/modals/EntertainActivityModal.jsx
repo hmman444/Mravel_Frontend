@@ -48,7 +48,6 @@ export default function EntertainActivityModal({
   // dùng format extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -58,16 +57,13 @@ export default function EntertainActivityModal({
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
 
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalEntertainLocation, setInternalEntertainLocation] =
     useState(null);
   const effectiveEntertainLocation = internalEntertainLocation || null;
 
-  // ===== LOAD KHI EDIT / RESET =====
   useEffect(() => {
     if (!open) return;
 
@@ -110,8 +106,6 @@ export default function EntertainActivityModal({
       } else {
         setActualCost("");
       }
-
-      // --- EXTRA COSTS ---
       let extras = [];
 
       if (
@@ -172,7 +166,6 @@ export default function EntertainActivityModal({
         setInternalEntertainLocation(null);
       }
 
-      // ===== LOAD SPLIT với buildSplitBase pattern =====
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -282,7 +275,6 @@ export default function EntertainActivityModal({
     }
   }, [effectiveEntertainLocation]);
 
-  // ===== COST LOGIC =====
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(ticketCount || 0);
@@ -309,7 +301,6 @@ export default function EntertainActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ===== DURATION =====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -329,7 +320,6 @@ export default function EntertainActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== SPLIT UTILS – dùng buildSplitBase =====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -384,7 +374,6 @@ export default function EntertainActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -400,7 +389,6 @@ export default function EntertainActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -443,7 +431,6 @@ export default function EntertainActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -497,7 +484,6 @@ export default function EntertainActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">

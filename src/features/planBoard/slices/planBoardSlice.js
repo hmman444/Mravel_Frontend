@@ -12,6 +12,7 @@ import {
   deleteLabel,
   sendInvite,
   duplicateCard,
+  duplicateList,
   fetchShareInfo,
   updateMemberRole,
   removeMember,
@@ -123,6 +124,13 @@ export const removeList = createAsyncThunk(
   async ({ planId, listId }) => {
     console.log("DELETE LIST:", planId, listId);
     return await deleteList(planId, listId);
+  }
+);
+
+export const duplicateListThunk = createAsyncThunk(
+  "planBoard/duplicateList",
+  async ({ planId, listId }) => {
+    return await duplicateList(planId, listId);
   }
 );
 
@@ -309,7 +317,6 @@ const planBoardSlice = createSlice({
       );
     },
 
-    // 🔥 Sync từ realtime – luôn replace toàn bộ board đã normalize
     syncBoardFromRealtime(state, action) {
       const incoming = action.payload;
       if (!incoming) return;
@@ -358,6 +365,7 @@ const planBoardSlice = createSlice({
           (l) => String(l.id) !== String(listId)
         );
       })
+
 
       // Add card
       .addCase(addCard.fulfilled, (s, a) => {

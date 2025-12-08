@@ -23,6 +23,7 @@ import PlanDayMapModal from "./PlanDayMapModal";
 export default function PlanBoard({
   board,
   isViewer,
+  planMembers,
 
   // LIST
   handleAddList,
@@ -410,7 +411,7 @@ export default function PlanBoard({
               >
                 {dayLists.map((list, idx) => (
                   <PlanList
-                    key={list.id}
+                    key={`list-${list.id}`}
                     list={list}
                     index={idx}
                     dayNumber={idx + 1}
@@ -467,7 +468,7 @@ export default function PlanBoard({
               >
                 <FaTrashAlt className="text-[11px]" />
                 <span>
-                  {isDocked ? "Thùng rác (Gắn)" : "Thùng rác (Kéo lên để gắn)"}
+                  Thùng rác (Kéo lên để gắn)
                 </span>
               </div>
 
@@ -542,54 +543,63 @@ export default function PlanBoard({
         onClose={() => closeModal("TRANSPORT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <FoodActivityModal
         open={modalStates.FOOD[0]}
         onClose={() => closeModal("FOOD")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <StayActivityModal
         open={modalStates.STAY[0]}
         onClose={() => closeModal("STAY")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <SightseeingActivityModal
         open={modalStates.SIGHTSEEING[0]}
         onClose={() => closeModal("SIGHTSEEING")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <EntertainmentActivityModal
         open={modalStates.ENTERTAIN[0]}
         onClose={() => closeModal("ENTERTAIN")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <ShoppingActivityModal
         open={modalStates.SHOPPING[0]}
         onClose={() => closeModal("SHOPPING")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <CinemaActivityModal
         open={modalStates.CINEMA[0]}
         onClose={() => closeModal("CINEMA")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <EventActivityModal
         open={modalStates.EVENT[0]}
         onClose={() => closeModal("EVENT")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
       <OtherActivityModal
         open={modalStates.OTHER[0]}
         onClose={() => closeModal("OTHER")}
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
+        planMembers={planMembers}
       />
 
       {confirmClearTrash && (

@@ -1,38 +1,47 @@
 // splitUtils.js
 export function buildSplitBase({
   splitEnabled,
-  splitType,          // "EVEN" | "EXACT"
-  participantCount,   // string hoặc number
-  splitNames,         // ["A", "B", ...]
-  exactAmounts,       // ["50000", "60000", ...]
-  payerChoice,        // "", "member:<id>", "external"
-  payerExternalName,  // string
-  planMembers = [],   // [{ userId, displayName, name, ... }]
-  parsedActual,       // số tiền dùng để chia
+  splitType,             
+  exactAmounts = [],     
+  payerChoice,            
+  planMembers = [],     
+  parsedActual,           
+  selectedMemberIds = [], 
 }) {
-  // số người tham gia
-  const parsedParticipants = splitEnabled
-    ? Math.max(1, Number(participantCount) || 1)
-    : 0;
+  if (!splitEnabled) {
+    return {
+      parsedParticipants: 0,
+      participants: [],
+      split: {
+        splitType: "NONE",
+        payerId: null,
+        includePayerInSplit: true,
+        splitMembers: [],
+        splitDetails: [],
+        payments: [],
+      },
+      splitDetails: [],
+      evenShare: 0,
+      evenRemainder: 0,
+      totalExact: 0,
+    };
+  }
 
-  // danh sách person cho splitMembers
-  const participants = splitEnabled
-    ? Array.from({ length: parsedParticipants }).map((_, i) => ({
-        memberId: null, // hiện tại đang coi tất cả là người ngoài
-        displayName:
-          splitNames[i] && splitNames[i].trim()
-            ? splitNames[i].trim()
-            : `Người ${i + 1}`,
-        external: true,
-      }))
-    : [];
+  const participants = selectedMemberIds.map((id) => {
+    const m = planMembers.find((x) => x.userId === id);
+    return {
+      memberId: id,
+      displayName: m?.displayName || m?.name || `Thành viên ${id}`,
+      external: false,
+    };
+  });
 
-  // EVEN share
-  let evenShare = null;
+  const parsedParticipants = participants.length;
+
+  let evenShare = 0;
   let evenRemainder = 0;
 
   if (
-    splitEnabled &&
     splitType === "EVEN" &&
     parsedParticipants > 0 &&
     parsedActual > 0
@@ -41,100 +50,76 @@ export function buildSplitBase({
     evenRemainder = parsedActual % parsedParticipants;
   }
 
-  // EXACT tổng
   const totalExact = exactAmounts
     .map((v) => Number(v) || 0)
     .reduce((a, b) => a + b, 0);
 
-  // splitDetails
-  let splitDetails = [];
-  if (splitEnabled) {
-    if (splitType === "EVEN") {
-      const baseEven = evenShare || 0;
-      const rem = evenRemainder || 0;
-      splitDetails = Array.from({ length: parsedParticipants }).map(
-        (_, i) => ({
-          person: participants[i],
-          amount: baseEven + (i < rem ? 1 : 0),
-        })
-      );
-    } else if (splitType === "EXACT") {
-      splitDetails = Array.from({ length: parsedParticipants }).map(
-        (_, i) => ({
-          person: participants[i],
-          amount: Number(exactAmounts[i]) || 0,
-        })
-      );
-    }
+  let rawSplitDetails = [];
+
+  if (splitType === "EVEN") {
+    rawSplitDetails = participants.map((p, idx) => ({
+      person: p,
+      amount: evenShare + (idx < evenRemainder ? 1 : 0),
+    }));
+  } else if (splitType === "EXACT") {
+    rawSplitDetails = participants.map((p, idx) => ({
+      person: p,
+      amount: Number(exactAmounts[idx]) || 0,
+    }));
   }
 
-  // chọn payer
-  const selectedMemberId = payerChoice.startsWith("member:")
+  let payerId = null;
+  let paymentsRaw = [];
+
+  const selectedMemberId = payerChoice?.startsWith("member:")
     ? Number(payerChoice.split(":")[1])
     : null;
 
-  const selectedMember = selectedMemberId
+  const payer = selectedMemberId
     ? planMembers.find((m) => m.userId === selectedMemberId)
     : null;
 
-  let payerId = null;
-  const payments = [];
+  if (payer && parsedActual > 0) {
+    payerId = payer.userId;
 
-  if (splitEnabled && parsedActual > 0) {
-    if (selectedMember) {
-      payerId = selectedMember.userId;
-      payments.push({
-        payer: {
-          memberId: selectedMember.userId,
-          displayName:
-            selectedMember.displayName ||
-            selectedMember.name ||
-            `Thành viên ${selectedMember.userId}`,
-          external: false,
-        },
-        amount: parsedActual,
-        note: null,
-      });
-    } else if (payerChoice === "external") {
-      const name =
-        payerExternalName && payerExternalName.trim()
-          ? payerExternalName.trim()
-          : "Người trả";
-      payments.push({
-        payer: {
-          memberId: null,
-          displayName: name,
-          external: true,
-        },
-        amount: parsedActual,
-        note: null,
-      });
-    }
+    paymentsRaw.push({
+      payer: {
+        memberId: payer.userId,
+        displayName: payer.displayName || payer.name,
+        external: false,
+      },
+      amount: parsedActual,
+      note: null,
+    });
   }
 
-  const split = splitEnabled
-    ? {
-        splitType,
-        payerId,
-        includePayerInSplit: true,
-        splitMembers: participants,
-        splitDetails,
-        payments,
-      }
-    : {
-        splitType: "NONE",
-        payerId: null,
-        includePayerInSplit: true,
-        splitMembers: [],
-        splitDetails: [],
-        payments: [],
-      };
+  const splitMembersForBE = participants.map((p) => p.memberId);
+
+  const splitDetailsForBE = rawSplitDetails.map((d) => ({
+    userId: d.person.memberId,
+    amount: d.amount,
+  }));
+
+  const paymentsForBE = paymentsRaw.map((p) => ({
+    payerUserId: p.payer.memberId,
+    amount: p.amount,
+    note: p.note,
+  }));
+
+  const split = {
+    splitType,
+    payerId,
+    includePayerInSplit: true,
+    splitMembers: splitMembersForBE,
+    splitDetails: splitDetailsForBE,
+    payments: paymentsForBE,
+  };
 
   return {
     parsedParticipants,
     participants,
     split,
-    splitDetails,
+    splitDetails: rawSplitDetails,
     evenShare,
     evenRemainder,
     totalExact,

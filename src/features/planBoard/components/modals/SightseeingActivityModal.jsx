@@ -48,7 +48,6 @@ export default function SightseeingActivityModal({
   // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -58,15 +57,12 @@ export default function SightseeingActivityModal({
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
 
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalSightLocation, setInternalSightLocation] = useState(null);
   const effectiveSightLocation = internalSightLocation || null;
 
-  // ===== LOAD DATA =====
   useEffect(() => {
     if (!open) return;
 
@@ -170,7 +166,6 @@ export default function SightseeingActivityModal({
         setInternalSightLocation(null);
       }
 
-      // ===== LOAD SPLIT (dùng pattern chung) =====
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -275,7 +270,6 @@ export default function SightseeingActivityModal({
     }
   }, [effectiveSightLocation]);
 
-  // ===== COST LOGIC =====
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(peopleCount || 0);
@@ -301,7 +295,6 @@ export default function SightseeingActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ===== DURATION =====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -321,7 +314,6 @@ export default function SightseeingActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== SPLIT UTILS (buildSplitBase) =====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -376,7 +368,6 @@ export default function SightseeingActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -392,7 +383,6 @@ export default function SightseeingActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -435,7 +425,6 @@ export default function SightseeingActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -489,7 +478,6 @@ export default function SightseeingActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">

@@ -50,7 +50,6 @@ export default function StayActivityModal({
   // dùng chung format với Transport: { reason, type, estimatedAmount, actualAmount }
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -62,13 +61,11 @@ export default function StayActivityModal({
 
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER LOCAL =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalStayLocation, setInternalStayLocation] = useState(null);
 
   const effectiveStayLocation = internalStayLocation || stayLocationProp || null;
 
-  // ===== LOAD MODAL =====
   useEffect(() => {
     if (!open) return;
 
@@ -106,7 +103,6 @@ export default function StayActivityModal({
         setActualCost("");
       }
 
-      // ===== LOAD EXTRA COSTS (chuẩn hoá về {reason, type, actualAmount}) =====
       let extras = [];
 
       if (data.extraItems && Array.isArray(data.extraItems) && data.extraItems.length > 0) {
@@ -162,7 +158,6 @@ export default function StayActivityModal({
         setInternalStayLocation(null);
       }
 
-      // ===== LOAD SPLIT =====
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -253,7 +248,6 @@ export default function StayActivityModal({
     }
   }, [stayLocationProp, editingCard]);
 
-  // ===== SYNC LOCATION VÀO TÊN / ĐỊA CHỈ =====
   useEffect(() => {
     if (!effectiveStayLocation) return;
 
@@ -270,7 +264,6 @@ export default function StayActivityModal({
     }
   }, [effectiveStayLocation]);
 
-  // ===== COST LOGIC =====
   const baseEstimated = useMemo(
     () => Number(pricePerTime || 0),
     [pricePerTime]
@@ -295,7 +288,6 @@ export default function StayActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ===== TIME LOGIC =====
   const computeDurationMinutes = () => {
     if (!checkIn || !checkOut) return null;
     const [sh, sm] = checkIn.split(":").map(Number);
@@ -315,7 +307,6 @@ export default function StayActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== CHIA TIỀN =====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -370,7 +361,6 @@ export default function StayActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -386,7 +376,6 @@ export default function StayActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -424,7 +413,6 @@ export default function StayActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -477,7 +465,6 @@ export default function StayActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">

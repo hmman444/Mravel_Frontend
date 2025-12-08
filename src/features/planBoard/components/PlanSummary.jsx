@@ -480,7 +480,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       if (typeof reloadBoard === "function") {
         reloadBoard();
       }
-
+      
       originalStartRef.current = s;
       originalEndRef.current = e;
     } catch {

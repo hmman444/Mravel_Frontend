@@ -39,19 +39,23 @@ export function usePlanBoardRealtime(planId) {
           String(actorId) === String(currentUserId);
 
         if (eventType && eventType.startsWith("REORDER")) {
-          // 🟢 Người kéo: đã localReorder rồi → bỏ qua để tránh giật
+          //  Người kéo: đã localReorder rồi → bỏ qua để tránh giật
           if (isSelf) {
             return;
           }
 
-          // 🟢 Tab khác: đợi 200–300ms cho chắc DB đã commit rồi mới reload
+          // đợi 150ms cho chắc DB đã commit rồi mới reload
           if (reloadTimerRef.current) {
             clearTimeout(reloadTimerRef.current);
           }
           reloadTimerRef.current = setTimeout(() => {
             dispatch(loadBoard(planId));
-          }, 250);
+          }, 150);
 
+          return;
+        }
+        if (eventType === "CLEAR_TRASH") {
+          dispatch(loadBoard(planId));
           return;
         }
 

@@ -6,6 +6,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import PlanLayout from "../components/PlanLayout";
 import PlanSummary from "../components/PlanSummary";
 import PlanBoard from "../components/PlanBoard";
+import PlanMembers from "../components/PlanMembers";
 
 import ShareModal from "../components/modals/ShareModal";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -36,9 +37,11 @@ export default function PlanDashboardPage() {
     reorder,
     localReorder,
     requestAccess,
+    duplicateList,
     isViewer,
     isEditor,
     isOwner,
+    planMembers,
   } = usePlanBoard(planId);
 
   const { plans } = useMyPlans();
@@ -376,52 +379,6 @@ export default function PlanDashboardPage() {
     }
   };
 
-  const duplicateList = async (list) => {
-    try {
-      const newListAction = await createList({
-        title: list.title + " (Copy)",
-      });
-      const newList = newListAction.payload || newListAction;
-
-      for (const card of list.cards || []) {
-        const baseTitle = card.text || "Hoạt động";
-
-        const activityPayload = {
-          type: card.activityType,
-
-          // với card trong list copy, giữ nguyên tên (không thêm "(Copy)" nữa)
-          title: baseTitle,
-          text: baseTitle,
-          description: card.description,
-          note: card.description,
-
-          startTime: card.startTime,
-          endTime: card.endTime,
-          durationMinutes: card.durationMinutes ?? null,
-
-          participantCount: card.cost?.participantCount ?? null,
-          participants: card.cost?.participants || [],
-
-          cost: card.cost || undefined,
-          split: card.split || undefined,
-
-          activityData: card.activityDataJson
-            ? JSON.parse(card.activityDataJson)
-            : {},
-        };
-
-        const payload = buildCardPayloadFromActivity(activityPayload);
-        await createCard(newList.id, payload);
-      }
-
-      await load();
-      showSuccess("Đã sao chép danh sách");
-    } catch (e) {
-      console.error(e);
-      showError("Không thể sao chép danh sách");
-    }
-  };
-
   const handleRequestView = async () => {
     try {
       setAccessLoadingType("VIEW");
@@ -564,6 +521,7 @@ export default function PlanDashboardPage() {
           <PlanBoard
             board={board}
             isViewer={isViewer}
+            planMembers={planMembers}
 
             handleAddList={handleAddList}
             renameList={renameList}
@@ -602,10 +560,11 @@ export default function PlanDashboardPage() {
         )}
 
         {activeTab === "members" && (
-          <div className="p-6 text-center text-gray-500">
-            Quản lý thành viên đang cập nhật
-          </div>
+          <PlanMembers
+            planId = {planId}
+          />
         )}
+
       </div>
 
       {/* MODALS */}

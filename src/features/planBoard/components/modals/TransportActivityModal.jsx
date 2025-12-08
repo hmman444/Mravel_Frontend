@@ -67,7 +67,6 @@ export default function TransportActivityModal({
 
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER LOCAL =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [placePickerField, setPlacePickerField] = useState(null); // "from" | "to"
   const [internalFromLocation, setInternalFromLocation] = useState(null);
@@ -76,7 +75,6 @@ export default function TransportActivityModal({
   const effectiveFromLocation = internalFromLocation || null;
   const effectiveToLocation = internalToLocation || null;
 
-  // ===== LOAD DATA =====
   useEffect(() => {
     if (!open) return;
 
@@ -126,7 +124,6 @@ export default function TransportActivityModal({
       setInternalFromLocation(data.fromLocation || null);
       setInternalToLocation(data.toLocation || null);
 
-      // ===== LOAD SPLIT =====
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -248,7 +245,6 @@ export default function TransportActivityModal({
     setStops((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -264,7 +260,6 @@ export default function TransportActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== CHIA TIỀN =====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -284,7 +279,6 @@ export default function TransportActivityModal({
     });
   };
 
-  // ===== TÍNH TIỀN =====
   const baseEstimated = Number(estimatedCost || 0);
 
   const extraTotal = extraCosts
@@ -299,7 +293,6 @@ export default function TransportActivityModal({
     return estimatedTotal;
   })();
 
-  // ===== THỜI GIAN =====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -319,7 +312,6 @@ export default function TransportActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== KHOẢNG CÁCH & GOOGLE MAPS =====
   const distanceKm = useMemo(() => {
     if (!effectiveFromLocation || !effectiveToLocation) return null;
     return haversineDistanceKm(
@@ -372,7 +364,6 @@ export default function TransportActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -469,7 +460,6 @@ export default function TransportActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">
@@ -540,7 +530,6 @@ export default function TransportActivityModal({
     </div>
   );
 
-  // ====== ANCHOR POINT CHO PLACE PICKER ======
   let anchorPoint = null;
   if (placePickerField === "from" && effectiveToLocation?.lat != null) {
     anchorPoint = {

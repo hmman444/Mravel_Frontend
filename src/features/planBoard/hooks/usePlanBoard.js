@@ -15,6 +15,7 @@ import {
   localReorder,
   loadShareInfo,
   changeMemberRole,
+  duplicateListThunk,
   deleteMember,
   sendAccessRequest,
   loadRequests as loadRequestsThunk,
@@ -55,6 +56,8 @@ export function usePlanBoard(planId) {
   const canSeeRequests = isOwner;             // tab "Yêu cầu tham gia"
   const canManageMembers = isOwner;           // đổi role, xoá thành viên
 
+  const memberCostSummary = board?.memberCostSummary || null;
+  const planMembers = board?.memberCostSummary?.members || [];
   return {
     board,
     share,
@@ -62,6 +65,8 @@ export function usePlanBoard(planId) {
     actionLoading,
     error,
     requests,
+    memberCostSummary,
+    planMembers,
 
     // load data
     load: () => dispatch(loadBoard(planId)),
@@ -96,6 +101,16 @@ export function usePlanBoard(planId) {
       tryCall(
         dispatch(removeList({ planId, listId })),
         "Không thể xoá danh sách"
+      ),
+
+    duplicateList: (listId) =>
+      tryCall(
+        (async () => {
+          await dispatch(duplicateListThunk({ planId, listId }));
+
+          await dispatch(loadBoard(planId));
+        })(),
+        "Không thể sao chép danh sách"
       ),
 
     // cards

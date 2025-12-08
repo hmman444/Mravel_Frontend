@@ -47,7 +47,6 @@ export default function EventActivityModal({
 
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -57,15 +56,12 @@ export default function EventActivityModal({
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalEventLocation, setInternalEventLocation] = useState(null);
   const effectiveEventLocation = internalEventLocation || null;
 
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD KHI EDIT / RESET =====
   useEffect(() => {
     if (!open) return;
 
@@ -102,7 +98,6 @@ export default function EventActivityModal({
         data.ticketCount != null ? String(data.ticketCount) : "1"
       );
 
-      // ---- EXTRA COSTS ----
       let extras = [];
 
       if (
@@ -170,7 +165,6 @@ export default function EventActivityModal({
         setInternalEventLocation(null);
       }
 
-      // ===== LOAD SPLIT dùng chung buildSplitBase =====
       const splitObj = split || {};
       if (splitObj.splitType && splitObj.splitType !== "NONE") {
         setSplitEnabled(true);
@@ -280,7 +274,6 @@ export default function EventActivityModal({
     }
   }, [effectiveEventLocation]);
 
-  // ===== DỰ KIẾN & TỔNG =====
   const ticketTotal = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(ticketCount || 0);
@@ -306,7 +299,6 @@ export default function EventActivityModal({
     return estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== DURATION =====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -326,7 +318,6 @@ export default function EventActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== SPLIT UTILS (dùng chung buildSplitBase) =====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -381,7 +372,6 @@ export default function EventActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -397,7 +387,6 @@ export default function EventActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -440,7 +429,6 @@ export default function EventActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -505,7 +493,6 @@ export default function EventActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER CHO SHELL =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">

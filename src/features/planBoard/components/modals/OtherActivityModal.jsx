@@ -47,7 +47,6 @@ export default function OtherActivityModal({
   const [extraCosts, setExtraCosts] = useState([]);
   const [budgetAmount, setBudgetAmount] = useState("");
 
-  // ===== CHIA TIỀN =====
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitType, setSplitType] = useState("EVEN");
   const [participantCount, setParticipantCount] = useState("2");
@@ -57,15 +56,12 @@ export default function OtherActivityModal({
   const [payerChoice, setPayerChoice] = useState("");
   const [payerExternalName, setPayerExternalName] = useState("");
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalOtherLocation, setInternalOtherLocation] = useState(null);
   const effectiveOtherLocation = internalOtherLocation || null;
 
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD KHI EDIT / RESET =====
   useEffect(() => {
     if (!open) return;
 
@@ -104,7 +100,6 @@ export default function OtherActivityModal({
           : ""
       );
 
-      // ---- EXTRA COSTS ----
       let extras = [];
 
       if (
@@ -171,7 +166,6 @@ export default function OtherActivityModal({
         setInternalOtherLocation(null);
       }
 
-      // ===== LOAD SPLIT dùng buildSplitBase =====
       if (split.splitType && split.splitType !== "NONE") {
         setSplitEnabled(true);
         setSplitType(split.splitType);
@@ -274,7 +268,6 @@ export default function OtherActivityModal({
     }
   }, [effectiveOtherLocation]);
 
-  // ===== COST LOGIC =====
   const estimatedValue = useMemo(
     () => Number(estimatedCost || 0),
     [estimatedCost]
@@ -299,7 +292,6 @@ export default function OtherActivityModal({
     return estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== DURATION =====
   const computeDurationMinutes = () => {
     if (!startTime || !endTime) return null;
     const [sh, sm] = startTime.split(":").map(Number);
@@ -319,7 +311,6 @@ export default function OtherActivityModal({
 
   const durationMinutes = computeDurationMinutes();
 
-  // ===== SPLIT UTILS (dùng chung buildSplitBase) =====
   const handleParticipantCount = (value) => {
     setParticipantCount(value);
     const n = Math.max(1, Number(value) || 1);
@@ -374,7 +365,6 @@ export default function OtherActivityModal({
     totalExact,
   } = splitBase;
 
-  // ===== EXTRA COSTS HANDLER =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -390,7 +380,6 @@ export default function OtherActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== CUSTOM FIELDS HANDLERS =====
   const handleAddField = () => {
     setCustomFields((prev) => [...prev, { key: "", value: "" }]);
   };
@@ -405,7 +394,6 @@ export default function OtherActivityModal({
     setCustomFields((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = extraCosts
       .map((e) => ({
@@ -448,7 +436,6 @@ export default function OtherActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -501,7 +488,6 @@ export default function OtherActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
   const headerRight =
     parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
       <div className="hidden sm:flex flex-col items-end text-xs">
