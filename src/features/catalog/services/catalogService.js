@@ -1,13 +1,12 @@
 // src/features/catalog/services/catalogService.js
-import axios from "axios";
+import api from "../../../utils/axiosInstance";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const CATALOG_PREFIX = `${API_URL}/catalog`;
+const CATALOG_PREFIX = "/catalog";
 const PLACES_PREFIX = `${CATALOG_PREFIX}/places`;
 const HOTELS_PREFIX = `${CATALOG_PREFIX}/hotels`;
 const RESTAURANTS_PREFIX = `${CATALOG_PREFIX}/restaurants`;
 const GEO_PREFIX = `${CATALOG_PREFIX}/geo`;
+
 const normalizePage = (page) => ({
   items: page?.content ?? [],
   page: page?.number ?? 0,
@@ -42,14 +41,12 @@ export const getHotels = async (params = {}) => {
       ...searchBody
     } = params || {};
 
-    // nếu tất cả field trong body đều rỗng → vẫn gửi {}
     const hasBody = Object.values(searchBody).some(
       (v) => v !== undefined && v !== null && v !== ""
     );
-
     const body = hasBody ? searchBody : {};
 
-    const res = await axios.post(
+    const res = await api.post(
       `${HOTELS_PREFIX}/search`,
       body,
       {
@@ -64,7 +61,8 @@ export const getHotels = async (params = {}) => {
       }
     );
 
-    const pageData = res.data?.data; // ApiResponse.data = Page<HotelSummaryDTO>
+    // ApiResponse.data = Page<HotelSummaryDTO>
+    const pageData = res.data?.data;
     return { success: true, data: normalizePage(pageData) };
   } catch (error) {
     console.error("getHotels error:", error?.response || error);
@@ -75,7 +73,7 @@ export const getHotels = async (params = {}) => {
 /** GET /api/catalog/hotels/{slug} */
 export const getHotelDetail = async (slug) => {
   try {
-    const res = await axios.get(
+    const res = await api.get(
       `${HOTELS_PREFIX}/${encodeURIComponent(slug)}`
     );
     return { success: true, data: res.data?.data };
@@ -84,7 +82,7 @@ export const getHotelDetail = async (slug) => {
   }
 };
 
-/** 
+/**
  * POST /api/catalog/restaurants/search?page=&size=&sort=
  * Body: { location, cuisineSlugs, date, time, people, ... }
  */
@@ -97,13 +95,12 @@ export const getRestaurants = async (params = {}) => {
       ...searchBody
     } = params || {};
 
-    // nếu tất cả field trong body đều rỗng → vẫn gửi {}
     const hasBody = Object.values(searchBody).some(
       (v) => v !== undefined && v !== null && v !== ""
     );
     const body = hasBody ? searchBody : {};
 
-    const res = await axios.post(
+    const res = await api.post(
       `${RESTAURANTS_PREFIX}/search`,
       body,
       {
@@ -130,7 +127,7 @@ export const getRestaurants = async (params = {}) => {
 /** GET /api/catalog/restaurants/{slug} */
 export const getRestaurantDetail = async (slug) => {
   try {
-    const res = await axios.get(
+    const res = await api.get(
       `${RESTAURANTS_PREFIX}/${encodeURIComponent(slug)}`
     );
     return { success: true, data: res.data?.data };
@@ -139,25 +136,54 @@ export const getRestaurantDetail = async (slug) => {
   }
 };
 
-// TÌM NHÀ HÀNG (POST)
-export async function searchRestaurants({ location, visitDate, visitTime, people, cuisineSlugs, page=0, size=9 }) {
-  const url = `${API_URL}/catalog/restaurants/search?page=${page}&size=${size}`;
-  // Nếu bạn không có gì lọc thêm, vẫn gửi {}
-  const body = {
-    ...(location ? { location } : {}),
-    ...(visitDate ? { visitDate } : {}),
-    ...(visitTime ? { visitTime } : {}),
-    ...(people ? { people } : {}),
-    ...(Array.isArray(cuisineSlugs) && cuisineSlugs.length ? { cuisineSlugs } : {}),
-  };
-  const res = await axios.post(url, body, { headers: { "Content-Type": "application/json" } });
-  return res.data; // { message, data: Page<RestaurantSummaryDTO>, ... }
+/**
+ * TÌM NHÀ HÀNG (POST)
+ * POST /api/catalog/restaurants/search?page=&size=
+ * Trả về đúng { message, data: Page<RestaurantSummaryDTO>, ... } như cũ
+ */
+export async function searchRestaurants({
+  location,
+  visitDate,
+  visitTime,
+  people,
+  cuisineSlugs,
+  page = 0,
+  size = 9,
+}) {
+  try {
+    const body = {
+      ...(location ? { location } : {}),
+      ...(visitDate ? { visitDate } : {}),
+      ...(visitTime ? { visitTime } : {}),
+      ...(people ? { people } : {}),
+      ...(Array.isArray(cuisineSlugs) && cuisineSlugs.length
+        ? { cuisineSlugs }
+        : {}),
+    };
+
+    const res = await api.post(
+      `${RESTAURANTS_PREFIX}/search`,
+      body,
+      {
+        params: { page, size },
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    // Giữ nguyên format cũ: res.data (ApiResponse)
+    return res.data;
+  } catch (error) {
+    console.error("searchRestaurants error:", error?.response || error);
+    // Trả về format giống các hàm khác để slice xử lý
+    return toError(error, "Lỗi tìm kiếm quán ăn");
+  }
 }
 
 /** GET /catalog/places/poi */
 export const getPlaces = async (params = {}) => {
   try {
-    const res = await axios.get(`${PLACES_PREFIX}/poi`, { params });
+    const res = await api.get(`${PLACES_PREFIX}/poi`, { params });
+    // BE trả trực tiếp Page<PlaceSummaryDTO>
     return { success: true, data: normalizePage(res.data) };
   } catch (error) {
     return toError(error, "Lỗi tải danh sách địa điểm");
@@ -167,7 +193,7 @@ export const getPlaces = async (params = {}) => {
 /** GET /catalog/places/poi (suggest) */
 export const suggestPlaces = async (q, limit = 6) => {
   try {
-    const res = await axios.get(`${PLACES_PREFIX}/poi`, {
+    const res = await api.get(`${PLACES_PREFIX}/poi`, {
       params: { q, page: 0, size: limit },
     });
     return { success: true, data: res.data?.content ?? [] };
@@ -179,7 +205,7 @@ export const suggestPlaces = async (q, limit = 6) => {
 /** GET /catalog/places/{slug} */
 export const getPlaceDetail = async (slug) => {
   try {
-    const res = await axios.get(
+    const res = await api.get(
       `${PLACES_PREFIX}/${encodeURIComponent(slug)}`
     );
     return { success: true, data: res.data };
@@ -191,7 +217,7 @@ export const getPlaceDetail = async (slug) => {
 /** GET /catalog/geo/suggest?q=&limit=  (gợi ý kiểu Google) */
 export const suggestGeoLocations = async (q, limit = 6) => {
   try {
-    const res = await axios.get(`${GEO_PREFIX}/suggest`, {
+    const res = await api.get(`${GEO_PREFIX}/suggest`, {
       params: { q, limit },
     });
     // BE trả List<LocationSuggestDTO> -> res.data là mảng
@@ -203,9 +229,12 @@ export const suggestGeoLocations = async (q, limit = 6) => {
 
 export const getChildren = async (slug, params = {}, options = {}) => {
   try {
-    const res = await axios.get(
+    const res = await api.get(
       `${PLACES_PREFIX}/${encodeURIComponent(slug)}/children`,
-      { params, signal: options.signal }
+      {
+        params,
+        signal: options.signal,
+      }
     );
     return { success: true, data: normalizePage(res.data) };
   } catch (error) {

@@ -6,19 +6,11 @@ import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import PlanList from "./PlanList";
-import ConfirmModal from "../../../components/ConfirmModal";
+import ConfirmModal from "../../../../components/ConfirmModal";
 
 // 9 activity modals
-import TransportActivityModal from "./modals/TransportActivityModal";
-import FoodActivityModal from "./modals/FoodActivityModal";
-import StayActivityModal from "./modals/StayActivityModal";
-import SightseeingActivityModal from "./modals/SightseeingActivityModal";
-import EntertainmentActivityModal from "./modals/EntertainActivityModal";
-import EventActivityModal from "./modals/EventActivityModal";
-import ShoppingActivityModal from "./modals/ShoppingActivityModal";
-import CinemaActivityModal from "./modals/CinemaActivityModal";
-import OtherActivityModal from "./modals/OtherActivityModal";
-import PlanDayMapModal from "./PlanDayMapModal";
+import ActivityModals from "../modals/ActivityModals";
+import PlanDayMapModal from "../modals/PlanDayMapModal";
 
 export default function PlanBoard({
   board,
@@ -547,66 +539,10 @@ export default function PlanBoard({
       </div>
 
       {/* 9 modals */}
-      <TransportActivityModal
-        open={modalStates.TRANSPORT[0]}
-        onClose={() => closeModal("TRANSPORT")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <FoodActivityModal
-        open={modalStates.FOOD[0]}
-        onClose={() => closeModal("FOOD")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <StayActivityModal
-        open={modalStates.STAY[0]}
-        onClose={() => closeModal("STAY")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <SightseeingActivityModal
-        open={modalStates.SIGHTSEEING[0]}
-        onClose={() => closeModal("SIGHTSEEING")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <EntertainmentActivityModal
-        open={modalStates.ENTERTAIN[0]}
-        onClose={() => closeModal("ENTERTAIN")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <ShoppingActivityModal
-        open={modalStates.SHOPPING[0]}
-        onClose={() => closeModal("SHOPPING")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <CinemaActivityModal
-        open={modalStates.CINEMA[0]}
-        onClose={() => closeModal("CINEMA")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <EventActivityModal
-        open={modalStates.EVENT[0]}
-        onClose={() => closeModal("EVENT")}
-        onSubmit={handleSubmitActivity}
-        editingCard={editingCard}
-        planMembers={planMembers}
-      />
-      <OtherActivityModal
-        open={modalStates.OTHER[0]}
-        onClose={() => closeModal("OTHER")}
-        onSubmit={handleSubmitActivity}
+      <ActivityModals
+        modalStates={modalStates}
+        closeModal={closeModal}
+        handleSubmitActivity={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
       />

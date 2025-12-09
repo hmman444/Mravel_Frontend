@@ -1,6 +1,6 @@
 // src/features/planBoard/utils/costUtils.js
 
-// ====== EXTRA COSTS ======
+// EXTRA COSTS 
 
 /**
  * Build extraCosts state khi LOAD CARD (edit) từ activityData + cost
@@ -85,7 +85,7 @@ export function calcExtraTotal(extraCosts = []) {
     .reduce((a, b) => a + b, 0);
 }
 
-// ====== THỜI GIAN / DURATION ======
+// THỜI GIAN / DURATION
 
 /**
  * Tính số phút giữa startTime và endTime (format "HH:mm")

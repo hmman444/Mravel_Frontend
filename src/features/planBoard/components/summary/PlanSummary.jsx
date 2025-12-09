@@ -24,10 +24,10 @@ import {
   FaBed,
   FaTicketAlt,
 } from "react-icons/fa";
-import ConfirmModal from "../../../components/ConfirmModal";
+import ConfirmModal from "../../../../components/ConfirmModal";
 import PlanDateInputs from "./PlanDateInputs";
-import { usePlanGeneral } from "../hooks/usePlanGeneral";
-import { showSuccess, showError } from "../../../utils/toastUtils";
+import { usePlanGeneral } from "../../hooks/usePlanGeneral";
+import { showSuccess, showError } from "../../../../utils/toastUtils";
 
 // mapping icon + nhãn theo activity type
 const TYPE_CONFIG = {

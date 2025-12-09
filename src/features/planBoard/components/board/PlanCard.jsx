@@ -7,91 +7,8 @@ import {
   FaCopy,
   FaTimes,
 } from "react-icons/fa";
-
-const TYPE_STYLES = {
-  TRANSPORT: {
-    bg: "bg-sky-50",
-    border: "border-sky-100",
-    accent: "text-sky-600",
-    pillBg: "bg-sky-100",
-    pillText: "text-sky-800",
-    icon: "🚕",
-    label: "Di chuyển",
-  },
-  FOOD: {
-    bg: "bg-orange-50",
-    border: "border-orange-100",
-    accent: "text-orange-600",
-    pillBg: "bg-orange-100",
-    pillText: "text-orange-800",
-    icon: "🥘",
-    label: "Ăn uống",
-  },
-  STAY: {
-    bg: "bg-violet-50",
-    border: "border-violet-100",
-    accent: "text-violet-600",
-    pillBg: "bg-violet-100",
-    pillText: "text-violet-800",
-    icon: "🛏️",
-    label: "Nghỉ ngơi",
-  },
-  ENTERTAIN: {
-    bg: "bg-emerald-50",
-    border: "border-emerald-100",
-    accent: "text-emerald-600",
-    pillBg: "bg-emerald-100",
-    pillText: "text-emerald-800",
-    icon: "🎡",
-    label: "Vui chơi",
-  },
-  SIGHTSEEING: {
-    bg: "bg-amber-50",
-    border: "border-amber-100",
-    accent: "text-amber-600",
-    pillBg: "bg-amber-100",
-    pillText: "text-amber-800",
-    icon: "🏛️",
-    label: "Tham quan",
-  },
-  SHOPPING: {
-    bg: "bg-pink-50",
-    border: "border-pink-100",
-    accent: "text-pink-600",
-    pillBg: "bg-pink-100",
-    pillText: "text-pink-800",
-    icon: "🛍️",
-    label: "Mua sắm",
-  },
-  CINEMA: {
-    bg: "bg-rose-50",
-    border: "border-rose-100",
-    accent: "text-rose-600",
-    pillBg: "bg-rose-100",
-    pillText: "text-rose-800",
-    icon: "🎬",
-    label: "Xem phim",
-  },
-  EVENT: {
-    bg: "bg-indigo-50",
-    border: "border-indigo-100",
-    accent: "text-indigo-600",
-    pillBg: "bg-indigo-100",
-    pillText: "text-indigo-800",
-    icon: "🎤",
-    label: "Sự kiện",
-  },
-  OTHER: {
-    bg: "bg-slate-50",
-    border: "border-slate-100",
-    accent: "text-slate-600",
-    pillBg: "bg-slate-100",
-    pillText: "text-slate-800",
-    icon: "📝",
-    label: "Hoạt động",
-  },
-};
-
+import { TYPE_STYLES } from "../../utils/activityStyles";
+import { formatTimeForDisplay } from "../../utils/timeUtils";
 export default function PlanCard({
   card,
   listId,
@@ -137,43 +54,6 @@ export default function PlanCard({
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, [activeMenu, setActiveMenu]);
-
-  const formatTime = (raw) => {
-    if (!raw) return "";
-
-    const s = String(raw).trim();
-
-    // Case sai kiểu "0,1" → xem như giờ,phút
-    const commaMatch = s.match(/^(\d{1,2}),(\d{1,2})$/);
-    if (commaMatch) {
-      const hh = commaMatch[1].padStart(2, "0");
-      const mm = commaMatch[2].padStart(2, "0");
-      return `${hh}:${mm}`;
-    }
-
-    // Case decimal "0.5" hoặc "0,5" → số giờ
-    if (!s.includes(":") && (s.includes(".") || s.includes(","))) {
-      const hours = Number(s.replace(",", "."));
-      if (!Number.isNaN(hours) && Number.isFinite(hours)) {
-        const totalMinutes = Math.round(hours * 60);
-        const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-        const mm = String(totalMinutes % 60).padStart(2, "0");
-        return `${hh}:${mm}`;
-      }
-    }
-
-    // Mọi trường hợp có dấu ":" (00:01, 00:01:00, 3:1:0, ...) → lấy 2 phần đầu
-    if (s.includes(":")) {
-      const [h, m] = s.split(":");
-      if (!h || !m) return s;
-      const hh = h.padStart(2, "0");
-      const mm = m.padStart(2, "0");
-      return `${hh}:${mm}`;
-    }
-
-    // Fallback
-    return s;
-  };
 
 
   const hasStart = !!card.startTime;
@@ -221,13 +101,12 @@ export default function PlanCard({
         return activityData.placeName || activityData.storeName || null;
       case "CINEMA":
         return (
-          activityData.movieName ||
           activityData.cinemaName ||
           activityData.placeName ||
           null
         );
       case "EVENT":
-        return activityData.eventName || activityData.venue || null;
+        return activityData.placeName || activityData.venue || null;
       case "OTHER":
         return activityData.location || null;
       default:
@@ -404,8 +283,8 @@ export default function PlanCard({
                 <div className="flex items-center gap-1 min-w-0">
                   <FaCalendarAlt className="opacity-70 flex-shrink-0" />
                   <span className="whitespace-nowrap">
-                    {hasStart && formatTime(card.startTime)}
-                    {hasEnd && ` - ${formatTime(card.endTime)}`}
+                    {hasStart && formatTimeForDisplay(card.startTime)}
+                    {hasEnd && ` - ${formatTimeForDisplay(card.endTime)}`}
                   </span>
                 </div>
               )}

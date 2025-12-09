@@ -3,8 +3,8 @@
 
 import { useEffect, useMemo } from "react";
 import { FaClock } from "react-icons/fa";
-import TimePicker from "../../../components/TimePicker";
-import { computeDurationMinutes } from "../utils/costUtils";
+import TimePicker from "../../../../components/TimePicker";
+import { computeDurationMinutes } from "../../utils/costUtils";
 
 /**
  * Dùng chung cho 9 modal:
