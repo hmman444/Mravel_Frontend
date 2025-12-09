@@ -17,25 +17,17 @@ export function usePlanBoardRealtime(planId) {
     (s) => s.auth?.profile?.id || s.auth?.user?.id
   );
 
-  // dùng để debounce việc reload khi REORDER
   const reloadTimerRef = useRef(null);
 
   useEffect(() => {
     if (!planId || !accessToken) return;
 
-    mainSocket.connect(accessToken);
     const destination = `/topic/plans/${planId}/board`;
 
     const subId = mainSocket.subscribe(destination, (payload) => {
-      //console.log("[WS] /topic/plans/board payload:", payload);
+      console.log("[WS] /topic/plans/board payload:", payload);
       if (!payload) return;
-      // console.log(
-      //   "[WS] eventType=", payload.eventType,
-      //   "myRole=", payload.board?.myRole
-      // );
 
-      // TH1: payload = PlanBoardEvent { eventType, actorId, board }
-      // TH2: payload = BoardResponse (fallback cũ)
       if (payload.eventType) {
         const { eventType, actorId, board } = payload;
         const isSelf =
@@ -44,27 +36,23 @@ export function usePlanBoardRealtime(planId) {
           String(actorId) === String(currentUserId);
 
         if (eventType && eventType.startsWith("REORDER")) {
-          //  Người kéo: đã localReorder rồi → bỏ qua để tránh giật
-          if (isSelf) {
-            return;
-          }
+          if (isSelf) return;
 
-          // đợi 150ms cho chắc DB đã commit rồi mới reload
           if (reloadTimerRef.current) {
             clearTimeout(reloadTimerRef.current);
           }
           reloadTimerRef.current = setTimeout(() => {
             dispatch(loadBoard(planId));
-          }, 150);
+          }, 30);
 
           return;
         }
+
         if (eventType === "CLEAR_TRASH") {
           dispatch(loadBoard(planId));
           return;
         }
 
-        // Các event khác (CREATE_CARD, UPDATE_CARD, DELETE_CARD, ...) vẫn sync bằng snapshot
         if (board) {
           dispatch(syncBoardFromRealtime(board));
         }

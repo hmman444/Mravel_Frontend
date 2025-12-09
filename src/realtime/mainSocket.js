@@ -4,17 +4,16 @@ import { Client } from "@stomp/stompjs";
 class MainSocket {
   client = null;
   connected = false;
-  subscribers = new Map(); // key: id, value: unsubscribe fn
+
+  // key: subId, value: () => unsubscribe
+  subscribers = new Map();
   nextSubId = 1;
-  pendingSubs = []; // {id, destination, handler}
 
-  connect(accessToken) {
-    if (this.connected && this.client) return;
-    if (this.client) {
-      // đang activating rồi thì thôi
-      return;
-    }
+  // các sub đăng ký khi chưa connect xong
+  // mỗi item: { id, destination, handler }
+  pendingSubs = [];
 
+  _createClient(accessToken) {
     this.client = new Client({
       brokerURL:
         import.meta.env.VITE_REALTIME_WS_URL || "ws://localhost:8080/ws",
@@ -28,8 +27,10 @@ class MainSocket {
     });
 
     this.client.onConnect = () => {
+      console.log("[WS] Connected STOMP");
       this.connected = true;
-      // flush tất cả subscription chờ
+
+      // flush toàn bộ pendingSubs
       this.pendingSubs.forEach(({ id, destination, handler }) => {
         const sub = this.client.subscribe(destination, (msg) => {
           try {
@@ -45,29 +46,59 @@ class MainSocket {
     };
 
     this.client.onStompError = (frame) => {
-      console.error("STOMP error:", frame.headers["message"], frame.body);
+      console.error(
+        "STOMP error:",
+        frame.headers["message"],
+        frame.body
+      );
     };
 
-    this.client.onWebSocketClose = () => {
+    this.client.onWebSocketClose = (event) => {
+      console.warn("[WS] Socket closed:", event.code, event.reason);
       this.connected = false;
-      // console.warn("MainSocket closed");
-    };
 
-    this.client.activate();
+      // cho phép connect() tạo client mới
+      this.client = null;
+      // pendingSubs giữ nguyên, subscribers vẫn còn unsubscribe fn
+      // (unsubscribe có try/catch nên không sao nếu gọi trên socket đã close)
+    };
+  }
+
+  connect(accessToken) {
+    // nếu đã có client đang active rồi thì khỏi làm gì
+    if (this.client && this.client.active) return;
+
+    // nếu client null (chưa tạo lần nào hoặc sau khi bị đóng) → tạo mới
+    if (!this.client) {
+      this._createClient(accessToken);
+    }
+
+    // nếu client chưa active thì activate
+    if (!this.client.active) {
+      this.client.activate();
+    }
   }
 
   disconnect() {
     if (!this.client) return;
 
+    // hủy hết subscription hiện tại
     this.subscribers.forEach((unsub) => {
       try {
         unsub();
-      } catch {}
+      } catch (e) {
+        console.warn("[WS] Error when unsubscribing during disconnect:", e);
+      }
     });
     this.subscribers.clear();
     this.pendingSubs = [];
 
-    this.client.deactivate();
+    try {
+      this.client.deactivate();
+    } catch (e) {
+      console.warn("[WS] Error when deactivating client:", e);
+    }
+
     this.client = null;
     this.connected = false;
   }
@@ -76,14 +107,9 @@ class MainSocket {
    * Đăng ký subscribe 1 topic
    * @param {string} destination - ví dụ `/topic/plans/123/board`
    * @param {(msgBody:any)=>void} handler
-   * @returns {number|null} subId để sau này hủy
+   * @returns {number} subId để sau này hủy
    */
   subscribe(destination, handler) {
-    if (!this.client) {
-      console.warn("MainSocket not connected yet");
-      return null;
-    }
-
     const id = this.nextSubId++;
 
     const subscribeNow = () => {
@@ -98,11 +124,11 @@ class MainSocket {
       this.subscribers.set(id, () => sub.unsubscribe());
     };
 
-    if (this.connected) {
+    if (this.client && this.connected) {
       // đã connect → subscribe ngay
       subscribeNow();
     } else {
-      // chưa connect → đưa vào hàng đợi
+      // chưa connect xong hoặc client chưa tạo → đẩy vào hàng đợi
       this.pendingSubs.push({ id, destination, handler });
     }
 
@@ -110,19 +136,22 @@ class MainSocket {
   }
 
   unsubscribe(subId) {
-    // Nếu vẫn còn pending mà unmount trước khi connect
+    // bỏ pending nếu chưa kịp subscribe
     this.pendingSubs = this.pendingSubs.filter((p) => p.id !== subId);
 
     const unsub = this.subscribers.get(subId);
     if (unsub) {
       try {
         unsub();
-      } catch {}
+      } catch (e) {
+        console.warn(
+          "[WS] Error when unsubscribing (socket may be closing):",
+          e
+        );
+      }
       this.subscribers.delete(subId);
     }
   }
-
-  // notify/chat
 }
 
 export const mainSocket = new MainSocket();

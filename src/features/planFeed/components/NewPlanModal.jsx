@@ -16,7 +16,7 @@ import {
   FaMoneyBillWave,
 } from "react-icons/fa";
 
-import VisibilityDropdown from "../../planBoard/components/VisibilityDropdown";
+import VisibilityDropdown from "../../planBoard/components/modals/VisibilityDropdown";
 import CurrencyDropdown from "./CurrencyDropdown";
 
 import { useSelector } from "react-redux";

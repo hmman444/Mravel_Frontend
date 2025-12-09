@@ -13,31 +13,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { useCatalogPlaces } from "../../catalog/hooks/useCatalogPlaces";
-import { useCatalogHotels } from "../../catalog/hooks/useCatalogHotels";
+import { useCatalogPlaces } from "../../../../features/catalog/hooks/useCatalogPlaces";
+import { useCatalogHotels } from "../../../../features/catalog/hooks/useCatalogHotels";
+import { useCatalogRestaurants } from "../../../../features/catalog/hooks/useCatalogRestaurants";
 import {
-  // gợi ý từ DB cho chỗ khác vẫn dùng suggestPlaces trong slice
-  // riêng modal này dùng geoSuggest:
   suggestGeoLocationsThunk,
   clearGeoSuggest,
-} from "../../catalog/slices/catalogSlice";
+} from "../../../../features/catalog/slices/catalogSlice";
 
 const TABS = [
   { key: "HOTEL", label: "Khách sạn" },
   { key: "PLACE", label: "Địa điểm tham quan" },
+  { key: "RESTAURANT", label: "Quán ăn" },
 ];
 
 const DEFAULT_CENTER = { lat: 16.047079, lon: 108.20623 };
 const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1501117716987-c8e1ecb2108a?w=800&q=80&auto=format&fit=crop";
 
-// key chung cho mọi loại item (hotel/place), tránh phụ thuộc chỉ id/slug
+// key chung cho mọi loại item (hotel/place/restaurant), tránh phụ thuộc chỉ id/slug
 const getItemKey = (item) =>
   item?.id ??
   item?.slug ??
   item?.code ??
   item?.placeId ??
   item?.hotelId ??
+  item?.restaurantId ??
   item?.name ??
   null;
 
@@ -86,8 +87,26 @@ export default function PlacePickerModal({
     fetchPlaces,
   } = useCatalogPlaces();
 
-  const isLoading = activeTab === "HOTEL" ? hotelsLoading : placesLoading;
-  const error = activeTab === "HOTEL" ? hotelsError : placesError;
+  const {
+    items: restaurantItems,
+    loading: restaurantsLoading,
+    error: restaurantsError,
+    fetchRestaurants,
+  } = useCatalogRestaurants();
+
+  const isLoading =
+    activeTab === "HOTEL"
+      ? hotelsLoading
+      : activeTab === "PLACE"
+      ? placesLoading
+      : restaurantsLoading;
+
+  const error =
+    activeTab === "HOTEL"
+      ? hotelsError
+      : activeTab === "PLACE"
+      ? placesError
+      : restaurantsError;
 
   // suggest vị trí tự nhập
   const geoSuggestState = useSelector((s) => s.catalog.geoSuggest);
@@ -120,7 +139,7 @@ export default function PlacePickerModal({
     dispatch(clearGeoSuggest());
   }, [open, initialTab, dispatch]);
 
-  // debounce query cho list HOTEL/PLACE
+  // debounce query cho list HOTEL/PLACE/RESTAURANT
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedQuery(query.trim());
@@ -136,7 +155,7 @@ export default function PlacePickerModal({
     return () => clearTimeout(t);
   }, [customAddress]);
 
-  // gọi API search list theo tab + debouncedQuery khi mở (HOTEL / PLACE)
+  // gọi API search list theo tab + debouncedQuery khi mở (HOTEL / PLACE / RESTAURANT)
   useEffect(() => {
     if (!open) return;
 
@@ -146,14 +165,27 @@ export default function PlacePickerModal({
         size: 10,
         location: debouncedQuery || undefined,
       });
-    } else {
+    } else if (activeTab === "PLACE") {
       fetchPlaces({
         page: 0,
         size: 10,
         q: debouncedQuery || undefined,
       });
+    } else if (activeTab === "RESTAURANT") {
+      fetchRestaurants({
+        page: 0,
+        size: 10,
+        q: debouncedQuery || undefined,
+      });
     }
-  }, [open, activeTab, debouncedQuery, fetchHotels, fetchPlaces]);
+  }, [
+    open,
+    activeTab,
+    debouncedQuery,
+    fetchHotels,
+    fetchPlaces,
+    fetchRestaurants,
+  ]);
 
   // gọi API geoSuggest khi đang ở customMode (nhập vị trí tự do)
   useEffect(() => {
@@ -198,12 +230,14 @@ export default function PlacePickerModal({
       return;
     }
 
-    // HOTEL / PLACE từ catalog
+    // HOTEL / PLACE / RESTAURANT từ catalog
     const tab =
       initialLocation.type === "HOTEL"
         ? "HOTEL"
         : initialLocation.type === "PLACE"
         ? "PLACE"
+        : initialLocation.type === "RESTAURANT"
+        ? "RESTAURANT"
         : initialTab;
     setActiveTab(tab);
     setCustomMode(false);
@@ -228,6 +262,7 @@ export default function PlacePickerModal({
       return "Chọn địa điểm cho chặng di chuyển";
     }
     if (activityType === "STAY") return "Chọn khách sạn";
+    if (activityType === "FOOD") return "Chọn quán ăn / nhà hàng";
     return "Chọn địa điểm cho hoạt động";
   }, [activityType, field]);
 
@@ -241,13 +276,17 @@ export default function PlacePickerModal({
     }
     if (activityType === "STAY")
       return "Chọn khách sạn hoặc nhập địa chỉ chỗ ở tùy ý.";
+    if (activityType === "FOOD")
+      return "Tìm quán ăn, nhà hàng, quán cafe phù hợp với bữa ăn trong lịch trình, hoặc tự nhập vị trí.";
     return "Tìm địa điểm phù hợp với hoạt động, hoặc tự nhập vị trí.";
   }, [activityType, field]);
 
   // base list theo tab
   const baseItems = useMemo(() => {
-    return activeTab === "HOTEL" ? hotelItems || [] : placeItems || [];
-  }, [activeTab, hotelItems, placeItems]);
+    if (activeTab === "HOTEL") return hotelItems || [];
+    if (activeTab === "PLACE") return placeItems || [];
+    return restaurantItems || []; // RESTAURANT
+  }, [activeTab, hotelItems, placeItems, restaurantItems]);
 
   // filter FE
   const effectiveItems = useMemo(() => {
@@ -299,7 +338,7 @@ export default function PlacePickerModal({
     );
   }, [effectiveItems, selectedId, customMode]);
 
-  // scroll to selected item khi mở modal 
+  // scroll to selected item khi mở modal
   useEffect(() => {
     if (!open || customMode || !listRef.current || !selectedId) return;
     if (isLoading) return; // đợi load xong
@@ -379,13 +418,14 @@ export default function PlacePickerModal({
       activityType,
       field,
 
-      type: activeTab, // HOTEL / PLACE
+      type: activeTab, // HOTEL / PLACE / RESTAURANT
       id:
         item.id ??
         item.slug ??
         item.code ??
         item.placeId ??
         item.hotelId ??
+        item.restaurantId ??
         null,
 
       label: item.name,
@@ -418,7 +458,7 @@ export default function PlacePickerModal({
           : null,
 
       placeMeta:
-        activeTab === "PLACE"
+        activeTab === "PLACE" || activeTab === "RESTAURANT"
           ? {
               avgRating: item.avgRating ?? item.rating ?? null,
               reviewsCount: item.reviewsCount ?? item.reviewCount ?? null,
@@ -586,6 +626,52 @@ export default function PlacePickerModal({
     return parts.join(". ");
   }, [selectedItem, activeTab, customMode]);
 
+  // tóm tắt restaurant
+  const restaurantSummary = useMemo(() => {
+    if (!selectedItem || activeTab !== "RESTAURANT" || customMode) return "";
+    const parts = [];
+
+    const avg = selectedItem.avgRating ?? selectedItem.rating ?? null;
+    const count =
+      selectedItem.reviewsCount ?? selectedItem.reviewCount ?? null;
+
+    if (avg) {
+      parts.push(
+        `Được nhiều thực khách đánh giá cao (khoảng ${
+          avg.toFixed ? avg.toFixed(1) : avg
+        }⭐, ${
+          count ? Number(count).toLocaleString("vi-VN") : "nhiều"
+        } lượt đánh giá)`
+      );
+    }
+
+    if (selectedItem.provinceName || selectedItem.cityName) {
+      parts.push(
+        `nằm tại ${
+          selectedItem.districtName
+            ? `${selectedItem.districtName}, `
+            : ""
+        }${selectedItem.cityName || selectedItem.provinceName}`
+      );
+    }
+
+    const tags = selectedItem.tags || [];
+    if (tags.length) {
+      parts.push(
+        `phù hợp với các phong cách ẩm thực như ${tags
+          .slice(0, 3)
+          .join(", ")
+          .toLowerCase()}`
+      );
+    }
+
+    parts.push(
+      "thích hợp để gắn vào các hoạt động ăn uống trong kế hoạch."
+    );
+
+    return parts.join(". ");
+  }, [selectedItem, activeTab, customMode]);
+
   const canSubmit = customMode ? customValid : !!selectedItem;
 
   const handleSubmit = () => {
@@ -610,7 +696,8 @@ export default function PlacePickerModal({
       selectedItem.id ||
       selectedItem.code ||
       selectedItem.placeId ||
-      selectedItem.hotelId);
+      selectedItem.hotelId ||
+      selectedItem.restaurantId);
 
   const handleOpenDetail = () => {
     if (!canOpenDetail || !selectedItem) return;
@@ -620,14 +707,17 @@ export default function PlacePickerModal({
       selectedItem.id ||
       selectedItem.code ||
       selectedItem.placeId ||
-      selectedItem.hotelId;
+      selectedItem.hotelId ||
+      selectedItem.restaurantId;
 
     if (!slugOrId) return;
 
     const url =
       activeTab === "HOTEL"
         ? `/hotels/${encodeURIComponent(slugOrId)}`
-        : `/place/${encodeURIComponent(slugOrId)}`;
+        : activeTab === "PLACE"
+        ? `/place/${encodeURIComponent(slugOrId)}`
+        : `/restaurants/${encodeURIComponent(slugOrId)}`;
 
     window.open(url, "_blank", "noopener,noreferrer");
   };
@@ -700,6 +790,7 @@ export default function PlacePickerModal({
                     >
                       {tab.key === "HOTEL" && "🏨"}
                       {tab.key === "PLACE" && "📍"}
+                      {tab.key === "RESTAURANT" && "🍽️"}
                       <span>{tab.label}</span>
                     </button>
                   ))}
@@ -733,7 +824,9 @@ export default function PlacePickerModal({
                     ? "Gõ địa chỉ để được gợi ý giống Google Maps, sau đó có thể chỉnh lại tên / toạ độ."
                     : activeTab === "HOTEL"
                     ? "Dữ liệu lấy từ API Catalog/hotels, có thể lọc theo từ khoá."
-                    : "Dữ liệu lấy từ API Catalog/places (POI), có thể lọc theo từ khoá."}
+                    : activeTab === "PLACE"
+                    ? "Dữ liệu lấy từ API Catalog/places (POI), có thể lọc theo từ khoá."
+                    : "Dữ liệu lấy từ API Catalog/restaurants, có thể lọc theo từ khoá."}
                 </span>
               </div>
             </div>
@@ -755,6 +848,8 @@ export default function PlacePickerModal({
                           placeholder={
                             activeTab === "HOTEL"
                               ? "Tìm khách sạn theo tên, khu vực..."
+                              : activeTab === "RESTAURANT"
+                              ? "Tìm quán ăn, nhà hàng, quán cafe..."
                               : "Tìm địa điểm tham quan, phố đi bộ..."
                           }
                         />
@@ -935,10 +1030,26 @@ export default function PlacePickerModal({
                             }}
                             dataId={getItemKey(item)}
                           />
-                        ) : (
+                        ) : activeTab === "PLACE" ? (
                           <PlaceListItem
                             key={getItemKey(item)}
                             place={item}
+                            active={
+                              !customMode &&
+                              selectedId &&
+                              selectedId === getItemKey(item)
+                            }
+                            onClick={() => {
+                              setCustomMode(false);
+                              setHasSelectionSource(true);
+                              setSelectedId(getItemKey(item));
+                            }}
+                            dataId={getItemKey(item)}
+                          />
+                        ) : (
+                          <RestaurantListItem
+                            key={getItemKey(item)}
+                            restaurant={item}
                             active={
                               !customMode &&
                               selectedId &&
@@ -1070,7 +1181,8 @@ export default function PlacePickerModal({
                             <HotelPreviewMeta hotel={selectedItem} />
                           )}
 
-                          {activeTab === "PLACE" &&
+                          {(activeTab === "PLACE" ||
+                            activeTab === "RESTAURANT") &&
                             selectedItem.tags &&
                             selectedItem.tags.length > 0 && (
                               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1094,6 +1206,9 @@ export default function PlacePickerModal({
                       <div className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
                         {activeTab === "HOTEL" && hotelSummary && <p>{hotelSummary}</p>}
                         {activeTab === "PLACE" && placeSummary && <p>{placeSummary}</p>}
+                        {activeTab === "RESTAURANT" && restaurantSummary && (
+                          <p>{restaurantSummary}</p>
+                        )}
                       </div>
                     </>
                   ) : (
@@ -1345,6 +1460,78 @@ function PlaceListItem({ place, active, onClick, dataId }) {
               </span>
             ))}
         </div>
+      </div>
+    </button>
+  );
+}
+
+function RestaurantListItem({ restaurant, active, onClick, dataId }) {
+  const avg = restaurant.avgRating ?? restaurant.rating ?? null;
+  const count =
+    restaurant.reviewsCount ?? restaurant.reviewCount ?? null;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-picker-item-id={dataId}
+      className={[
+        "w-full flex items-start gap-3 rounded-2xl border bg-white dark:bg-slate-900/90 overflow-hidden text-left transition shadow-sm hover:shadow-md",
+        active
+          ? "border-sky-500 ring-1 ring-sky-500/50"
+          : "border-slate-200/80 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500",
+      ].join(" ")}
+    >
+      <div className="w-20 h-20 shrink-0 overflow-hidden rounded-2xl">
+        <img
+          src={
+            restaurant.coverImageUrl ||
+            restaurant.thumbnailUrl ||
+            restaurant.imageUrl ||
+            PLACEHOLDER_IMG
+          }
+          alt={restaurant.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="flex-1 py-2 pr-3 min-w-0">
+        <div className="text-xs font-semibold text-slate-900 dark:text-slate-50 truncate">
+          {restaurant.name}
+        </div>
+        <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+          {restaurant.addressLine ||
+            restaurant.fullAddress ||
+            restaurant.address}
+        </div>
+
+        <div className="mt-1 flex items-center gap-1 text-[10px]">
+          {avg && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200">
+              <FaStar className="text-amber-400" size={10} />
+              <span className="font-semibold">
+                {avg.toFixed ? avg.toFixed(1) : avg}
+              </span>
+            </span>
+          )}
+          {count != null && (
+            <span className="text-slate-500 dark:text-slate-400">
+              ({Number(count).toLocaleString("vi-VN")})
+            </span>
+          )}
+        </div>
+
+        {restaurant.tags && restaurant.tags.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1 text-[10px]">
+            {restaurant.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </button>
   );

@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { inputBase, pillBtn, sectionCard } from "./activityStyles";
-import { usePlanBoard } from "../hooks/usePlanBoard";
+import { inputBase, pillBtn, sectionCard } from "../../utils/activityStyles";
+import { usePlanBoard } from "../../hooks/usePlanBoard";
 
 export default function SplitMoneySection({
   // props từ modal

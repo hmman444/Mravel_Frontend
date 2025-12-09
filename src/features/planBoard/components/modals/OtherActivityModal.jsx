@@ -9,17 +9,17 @@ import {
   FaMoneyBillWave,
 } from "react-icons/fa";
 
-import ActivityModalShell from "../ActivityModalShell";
-import SplitMoneySection from "../SplitMoneySection";
-import ExtraCostsSection from "../ExtraCostsSection";
-import PlacePickerModal from "../PlacePickerModal";
+import ActivityModalShell from "./ActivityModalShell";
+import SplitMoneySection from "./SplitMoneySection";
+import ExtraCostsSection from "./ExtraCostsSection";
+import PlacePickerModal from "./PlacePickerModal";
 
-import ActivityTimeRangeSection from "../ActivityTimeRangeSection";
-import ActivityHeaderCostSummary from "../ActivityHeaderCostSummary";
-import ActivityFooterSummary from "../ActivityFooterSummary";
-import ActivityFooterButtons from "../ActivityFooterButtons";
+import ActivityTimeRangeSection from "./ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "./ActivityHeaderCostSummary";
+import ActivityFooterSummary from "./ActivityFooterSummary";
+import ActivityFooterButtons from "./ActivityFooterButtons";
 
-import { inputBase, sectionCard } from "../activityStyles";
+import { inputBase, sectionCard } from "../../utils/activityStyles";
 import { useSplitMoney } from "../../hooks/useSplitMoney";
 import {
   buildInitialExtraCosts,

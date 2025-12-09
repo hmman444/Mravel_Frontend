@@ -11,7 +11,7 @@ import {
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 import AccessRow from "./AccessRow";
 import ConfirmModal from "../../../../components/ConfirmModal";
-import VisibilityDropdown from "../VisibilityDropdown";
+import VisibilityDropdown from "./VisibilityDropdown";
 import { usePlanBoard } from "../../hooks/usePlanBoard";
 import LoadingOverlay from "../../../../components/LoadingOverlay";
 

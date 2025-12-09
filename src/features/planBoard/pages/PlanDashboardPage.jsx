@@ -1,12 +1,14 @@
+// src/features/planBoard/pages/PlanDashboardPage.jsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import PlanLayout from "../components/PlanLayout";
-import PlanSummary from "../components/PlanSummary";
-import PlanBoard from "../components/PlanBoard";
-import PlanMembers from "../components/PlanMembers";
+import PlanSummary from "../components/summary/PlanSummary";
+import PlanBoard from "../components/board/PlanBoard";
+import PlanMembers from "../components/member/PlanMembers";
+import PlanCalendar from "../components/calender/PlanCalendar";
 
 import ShareModal from "../components/modals/ShareModal";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -18,6 +20,7 @@ import { usePlanGeneral } from "../hooks/usePlanGeneral";
 
 import { showSuccess, showError } from "../../../utils/toastUtils";
 import { usePlanBoardRealtime } from "../../../realtime/usePlanBoardRealtime";
+
 export default function PlanDashboardPage() {
   const { planId } = useParams();
   const navigate = useNavigate();
@@ -47,7 +50,7 @@ export default function PlanDashboardPage() {
 
   const { plans } = useMyPlans();
   const { updateTitle } = usePlanGeneral();
-  const [sidebarPlans, setSidebarPlans] = useState([]); 
+  const [sidebarPlans, setSidebarPlans] = useState([]);
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window === "undefined") return "summary";
 
@@ -72,13 +75,13 @@ export default function PlanDashboardPage() {
   const [titleInput, setTitleInput] = useState("");
 
   const canEditGeneral = isOwner || isEditor;
-  
+
   useEffect(() => {
     setSidebarPlans(plans || []);
   }, [plans]);
 
   usePlanBoardRealtime(planId);
-  
+
   useEffect(() => {
     if (!planId) return;
     load();
@@ -94,13 +97,10 @@ export default function PlanDashboardPage() {
       setShowAccessModal(true);
     }
   }, [loading, board, error]);
-  
+
   useEffect(() => {
     if (!planId || !activeTab) return;
-    window.localStorage.setItem(
-      `plan-dashboard-tab-${planId}`,
-      activeTab
-    );
+    window.localStorage.setItem(`plan-dashboard-tab-${planId}`, activeTab);
   }, [activeTab, planId]);
 
   useEffect(() => {
@@ -118,7 +118,9 @@ export default function PlanDashboardPage() {
 
       setSidebarPlans((prev) =>
         prev.map((p) =>
-          String(p.id) === String(planId) ? { ...p, name: trimmed } : p
+        String(p.id) === String(planId)
+          ? { ...p, title: trimmed, name: trimmed } 
+          : p
         )
       );
     } catch {
@@ -167,7 +169,6 @@ export default function PlanDashboardPage() {
     if (!activity) return {};
 
     const {
-      // activity “chuẩn mới” từ các modal như TransportActivityModal
       type,
       title,
       text,
@@ -181,7 +182,7 @@ export default function PlanDashboardPage() {
       cost,
       split,
 
-      // để backward-compatible với các modal cũ (food, stay, …)
+      // legacy
       estimatedCost,
       actualCost,
       note,
@@ -245,39 +246,31 @@ export default function PlanDashboardPage() {
     };
 
     return {
-      // các field “cơ bản” của card
       text: finalText,
       description: finalDescription,
 
-      // giữ cả start/end cũ + startTime/endTime mới cho an toàn
       start: startTime || null,
       end: endTime || null,
       startTime: startTime || null,
       endTime: endTime || null,
       durationMinutes: durationMinutes ?? null,
 
-      // loại activity
       activityType: type || "OTHER",
 
-      // dữ liệu tuỳ biến dưới dạng JSON string
       activityDataJson: JSON.stringify(activityJson),
 
-      // tham gia hoạt động
       participantCount: finalParticipantCount,
       participants: finalParticipants,
 
-      // cost & split gửi đúng lên BE (không bị null nữa)
       cost: normalizedCost,
       split: normalizedSplit,
     };
   };
 
-
   const createActivityCard = async (listId, activityPayload) => {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await createCard(listId, payload);
-
       await load();
       showSuccess("Đã thêm hoạt động");
     } catch (e) {
@@ -290,7 +283,6 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await updateCard(listId, cardId, payload);
-
       await load();
       showSuccess("Đã cập nhật hoạt động");
     } catch (e) {
@@ -302,7 +294,6 @@ export default function PlanDashboardPage() {
   const handleRemoveCard = async ({ listId, cardId }) => {
     try {
       await deleteCard(listId, cardId);
-
       await load();
       showSuccess("Đã xoá thẻ");
     } catch {
@@ -327,7 +318,6 @@ export default function PlanDashboardPage() {
   const handleAddList = async () => {
     try {
       await createList({ title: null });
-
       await load();
       showSuccess("Đã thêm danh sách");
     } catch {
@@ -365,6 +355,15 @@ export default function PlanDashboardPage() {
     );
   }
 
+  // helper: tìm list DAY theo dayDate (yyyy-MM-dd)
+  const findDayListByDate = (dateStr) => {
+    return (
+      board?.lists?.find(
+        (l) => l.type === "DAY" && String(l.dayDate) === String(dateStr)
+      ) || null
+    );
+  };
+
   return (
     <PlanLayout
       activePlanId={planId}
@@ -381,12 +380,12 @@ export default function PlanDashboardPage() {
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
               onBlur={handleSaveTitle}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.currentTarget.blur(); 
-                  }
-                }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }
+              }}
               placeholder="Tiêu đề kế hoạch..."
               className="
                 w-full text-lg font-semibold
@@ -435,7 +434,7 @@ export default function PlanDashboardPage() {
         {[
           { key: "summary", label: "Tổng quan" },
           { key: "board", label: "Bảng lịch trình" },
-          { key: "timeline", label: "Biểu đồ thời gian" },
+          { key: "calendar", label: "Lịch tuần" },
           { key: "members", label: "Thành viên" },
         ].map((t) => {
           const ac = activeTab === t.key;
@@ -478,27 +477,22 @@ export default function PlanDashboardPage() {
             board={board}
             isViewer={isViewer}
             planMembers={planMembers}
-
             handleAddList={handleAddList}
             renameList={renameList}
             deleteList={deleteList}
             clearTrash={clearTrash}
             duplicateList={duplicateList}
-
             // ACTIVITY
             createActivityCard={createActivityCard}
             updateActivityCard={updateActivityCard}
-
             // CARD actions
             handleAddCard={createCard}
             updateCard={updateCard}
             toggleDone={toggleDone}
             duplicateCard={duplicateCard}
             deleteCard={deleteCard}
-
             // DRAG
             handleDragEnd={handleDragEnd}
-
             // UI
             editingListId={editingListId}
             setEditingListId={setEditingListId}
@@ -511,16 +505,70 @@ export default function PlanDashboardPage() {
           />
         )}
 
-        {activeTab === "timeline" && (
-          <div className="p-6 text-center text-gray-500">Chưa phát triển</div>
-        )}
+        {activeTab === "calendar" && (
+          <PlanCalendar
+            board={board}
+            canEdit={canEditGeneral}
+            planMembers={planMembers}
+            
+            createActivityCard={createActivityCard}
+            updateActivityCard={updateActivityCard}
+            
+            onMoveCard={async ({
+              cardId,
+              sourceDate,
+              targetDate,
+              sourceIndex,
+              targetIndex,
+              start,
+              end,
+            }) => {
+              try {
+                const sourceList = findDayListByDate(sourceDate);
+                const targetList = findDayListByDate(targetDate);
 
-        {activeTab === "members" && (
-          <PlanMembers
-            planId = {planId}
+                if (!targetList || !sourceList) {
+                  console.warn(
+                    "Không tìm thấy list DAY khi kéo trong calendar:",
+                    sourceDate,
+                    targetDate
+                  );
+                  return;
+                }
+
+                // 1) cập nhật lại thời gian card theo block kéo
+                await updateCard(targetList.id, cardId, {
+                  startTime: start.toISOString(),
+                  endTime: end.toISOString(),
+                });
+
+                // 2) nếu đổi ngày thì move card sang list mới
+                if (sourceList.id !== targetList.id) {
+                  const payload = {
+                    type: "card",
+                    sourceListId: sourceList.id,
+                    destListId: targetList.id,
+                    sourceIndex,
+                    destIndex: targetIndex,
+                  };
+
+                  try {
+                    await reorder(payload);
+                  } catch (err) {
+                    console.error("Reorder khi kéo calendar lỗi:", err);
+                  }
+                }
+
+                await load();
+              } catch (e) {
+                console.error(e);
+                showError("Không thể cập nhật hoạt động từ calendar");
+              }
+            }}
           />
         )}
 
+        {activeTab === "members" && <PlanMembers planId={planId} />}
       </div>
 
       {/* MODALS */}
@@ -578,7 +626,6 @@ export default function PlanDashboardPage() {
             await deleteList(confirmDeleteList.id);
             await load();
             setConfirmDeleteList(null);
-            
           }}
         />
       )}

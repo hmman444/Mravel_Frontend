@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
-import { inputBase, sectionCard } from "./activityStyles";
+import { inputBase, sectionCard } from "../../utils/activityStyles";
 
 export default function ExtraCostsSection({
   extraCosts,

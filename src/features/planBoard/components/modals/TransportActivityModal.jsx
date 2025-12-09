@@ -11,17 +11,17 @@ import {
 
 import { haversineDistanceKm } from "../../../planBoard/utils/distance";
 
-import ActivityModalShell from "../ActivityModalShell";
-import ExtraCostsSection from "../ExtraCostsSection";
-import SplitMoneySection from "../SplitMoneySection";
-import PlacePickerModal from "../PlacePickerModal";
+import ActivityModalShell from "./ActivityModalShell";
+import ExtraCostsSection from "./ExtraCostsSection";
+import SplitMoneySection from "./SplitMoneySection";
+import PlacePickerModal from "./PlacePickerModal";
 
-import ActivityTimeRangeSection from "../ActivityTimeRangeSection";
-import ActivityHeaderCostSummary from "../ActivityHeaderCostSummary";
-import ActivityFooterSummary from "../ActivityFooterSummary";
-import ActivityFooterButtons from "../ActivityFooterButtons";
+import ActivityTimeRangeSection from "./ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "./ActivityHeaderCostSummary";
+import ActivityFooterSummary from "./ActivityFooterSummary";
+import ActivityFooterButtons from "./ActivityFooterButtons";
 
-import { inputBase, sectionCard, pillBtn } from "../activityStyles";
+import { inputBase, sectionCard, pillBtn } from "../../utils/activityStyles";
 import { useSplitMoney } from "../../hooks/useSplitMoney";
 import {
   buildInitialExtraCosts,

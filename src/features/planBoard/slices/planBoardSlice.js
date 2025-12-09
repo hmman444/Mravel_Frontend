@@ -21,76 +21,10 @@ import {
   handleRequest,
   clearTrash,
 } from "../services/planBoardService";
-
-// helpers
-
-// Chuẩn hóa thời gian để hiển thị ổn định "HH:mm"
-function normalizeTime(value) {
-  if (value == null) return null;
-
-  // Nếu backend đã trả sẵn "HH:mm" → giữ nguyên
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-
-    // dd:dd hoặc d:dd → đảm bảo 2 chữ số giờ
-    const timeMatch = trimmed.match(/^(\d{1,2}):(\d{2})$/);
-    if (timeMatch) {
-      const hh = timeMatch[1].padStart(2, "0");
-      const mm = timeMatch[2];
-      return `${hh}:${mm}`;
-    }
-
-    // Nếu là dạng "0.1" hoặc "0,1" → coi như số giờ (decimal hours)
-    if (trimmed.includes(".") || trimmed.includes(",")) {
-      const hours = Number(trimmed.replace(",", "."));
-      if (!Number.isNaN(hours) && Number.isFinite(hours)) {
-        const totalMinutes = Math.round(hours * 60);
-        const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-        const mm = String(totalMinutes % 60).padStart(2, "0");
-        return `${hh}:${mm}`;
-      }
-    }
-
-    return trimmed;
-  }
-
-  // Nếu là số (0.1, 3.1, ...) → convert từ decimal hours sang HH:mm
-  if (typeof value === "number") {
-    const hours = value;
-    if (!Number.isNaN(hours) && Number.isFinite(hours)) {
-      const totalMinutes = Math.round(hours * 60);
-      const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-      const mm = String(totalMinutes % 60).padStart(2, "0");
-      return `${hh}:${mm}`;
-    }
-  }
-
-  // Fallback
-  return String(value);
-}
-
-// Chuẩn hóa 1 card (chủ yếu là start/end time)
-function normalizeCard(card) {
-  if (!card) return card;
-  return {
-    ...card,
-    startTime: normalizeTime(card.startTime),
-    endTime: normalizeTime(card.endTime),
-  };
-}
-
-// Chuẩn hóa toàn bộ BoardResponse từ server (API hoặc WS)
-function normalizeBoard(rawBoard) {
-  if (!rawBoard) return rawBoard;
-
-  return {
-    ...rawBoard,
-    lists: (rawBoard.lists || []).map((list) => ({
-      ...list,
-      cards: (list.cards || []).map(normalizeCard),
-    })),
-  };
-}
+import {
+  normalizeBoardPayload,
+  normalizeCardTimes,
+} from "../utils/timeUtils";
 
 const initialState = {
   board: null,
@@ -323,11 +257,14 @@ const planBoardSlice = createSlice({
       if (!incoming) return;
 
       const prevBoard = state.board;
-      const preMyRole = prevBoard?.myRole;
+      const prevMyRole = prevBoard?.myRole;
 
-      const normalized = normalizeBoard(incoming);
-      if(preMyRole){
-        normalized.myRole = preMyRole;
+      // Nếu action.payload là wrapper { eventType, board, ... }
+      const rawBoard = incoming.board ?? incoming;
+
+      const normalized = normalizeBoardPayload(rawBoard);
+      if (prevMyRole) {
+        normalized.myRole = prevMyRole;
       }
 
       state.board = normalized;
@@ -342,7 +279,7 @@ const planBoardSlice = createSlice({
       })
       .addCase(loadBoard.fulfilled, (s, a) => {
         s.loading = false;
-        s.board = normalizeBoard(a.payload);
+        s.board = normalizeBoardPayload(a.payload);
       })
       .addCase(loadBoard.rejected, (s, a) => {
         s.loading = false;
@@ -381,7 +318,7 @@ const planBoardSlice = createSlice({
       // Edit card
       .addCase(editCard.fulfilled, (s, a) => {
         const { listId, cardId } = a.meta.arg;
-        const updatedCard = normalizeCard(a.payload);
+        const updatedCard = normalizeCardTimes(a.payload);
         const list = s.board?.lists?.find(
           (l) => String(l.id) === String(listId)
         );
