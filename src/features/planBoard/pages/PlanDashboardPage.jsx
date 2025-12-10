@@ -434,7 +434,7 @@ export default function PlanDashboardPage() {
         {[
           { key: "summary", label: "Tổng quan" },
           { key: "board", label: "Bảng lịch trình" },
-          { key: "calendar", label: "Lịch tuần" },
+          { key: "calendar", label: "Thời gian biểu" },
           { key: "members", label: "Thành viên" },
         ].map((t) => {
           const ac = activeTab === t.key;

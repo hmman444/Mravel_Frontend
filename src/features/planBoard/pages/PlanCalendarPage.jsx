@@ -15,7 +15,6 @@
   export default function PlanCalendarPage() {
     const navigate = useNavigate();
 
-    // Demo plan list (bạn sẽ thay bằng API thật)
     const plans = [
       {
         id: 1,

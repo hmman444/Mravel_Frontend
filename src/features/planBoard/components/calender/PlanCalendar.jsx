@@ -64,7 +64,7 @@ export default function PlanCalendar({
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Lịch tuần
+              Thời gian biểu
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Hiển thị & chỉnh sửa hoạt động theo ngày/giờ từ PlanBoard.
