@@ -26,6 +26,7 @@ import HotelDetailPage from "./features/catalog/pages/HotelDetailPage";
 import RestaurantDetailPage from "./features/catalog/pages/RestaurantDetailPage";
 //User
 import AccountProfilePage from "./features/user/pages/AccountProfilePage";
+import UserPublicProfilePage from "./features/user/pages/UserPublicProfilePage";
 // Admin
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
@@ -86,6 +87,7 @@ function App() {
 
         {/* User routes */}
         <Route path="/account/profile" element={<AccountProfilePage />} />
+        <Route path="/u/:userId" element={<UserPublicProfilePage />} />
 
         {/* General routes */}
         <Route path="/search" element={<SearchPage />} />

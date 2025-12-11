@@ -1,6 +1,6 @@
 // src/features/user/slices/userProfileSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { updateMyProfile } from "../services/userProfileService";
+import { updateMyProfileSensitive } from "../services/userProfileService";
 import { getTokens } from "../../../utils/tokenManager";
 import { setUser } from "../../auth/slices/authSlice";
 
@@ -16,7 +16,7 @@ export const updateUserProfile = createAsyncThunk(
       return rejectWithValue("Không có token, vui lòng đăng nhập lại.");
     }
 
-    const result = await updateMyProfile(payload, accessToken);
+    const result = await updateMyProfileSensitive(payload, accessToken);
 
     if (result.success) {
       // Cập nhật lại auth.user để toàn app dùng chung data mới

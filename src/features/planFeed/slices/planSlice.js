@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchPlans, sendReaction, sendComment, sharePlan } from "../services/planService";
+import { fetchPlans, sendReaction, sendComment, sharePlan, fetchMyPlans } from "../services/planService";
 
 const initialState = {
   items: [],
@@ -7,6 +7,12 @@ const initialState = {
   loading: false,
   hasMore: true,
   page: 1,
+
+  myItems: [],
+  myLoading: false,
+  myHasMore: true,
+  myPage: 1,
+
   error: null,
 };
 
@@ -29,6 +35,14 @@ export const sharePlanInvite = createAsyncThunk("plan/sharePlanInvite", async ({
   const res = await sharePlan(planId, email);
   return { planId, email, data: res };
 });
+
+export const loadMyPlans = createAsyncThunk(
+  "plan/loadMyPlans",
+  async ({ page = 1 }) => {
+    const res = await fetchMyPlans(page, 5);
+    return { data: res, page };
+  }
+);
 
 const planSlice = createSlice({
   name: "plan",
@@ -59,36 +73,68 @@ const planSlice = createSlice({
       })
       .addCase(reactPlan.fulfilled, (state, action) => {
         const { planId, data } = action.payload;
-        const plan = state.items.find((p) => p.id === planId);
-        if (plan) {
-          plan.reactions = data.reactions;
-          plan.reactionUsers = data.reactionUsers;
-        }
+          const update = (p) => {
+            if (!p) return;
+            p.reactions = data.reactions;
+            p.reactionUsers = data.reactionUsers;
+          };
+
+          update(state.items.find(p => p.id === planId));
+          update(state.myItems.find(p => p.id === planId));
       })
       .addCase(commentPlan.fulfilled, (state, action) => {
         const { planId, data } = action.payload;
-        const plan = state.items.find((p) => p.id === planId);
-        if (!plan) return;
 
-        if (data.parentId) {
-          const findParent = (comments, parentId) => {
-            for (const c of comments) {
-              if (c.id === parentId) return c;
-              if (c.replies) {
-                const found = findParent(c.replies, parentId);
-                if (found) return found;
-              }
+        // Hàm tìm parent trong cây comment
+        const findParent = (comments, parentId) => {
+          for (const c of comments) {
+            if (c.id === parentId) return c;
+            if (c.replies) {
+              const found = findParent(c.replies, parentId);
+              if (found) return found;
             }
-            return null;
-          };
-          const parent = findParent(plan.comments, data.parentId);
-          if (parent) {
-            parent.replies = parent.replies || [];
-            parent.replies.push(data);
           }
-        } else {
-          plan.comments.push(data);
-        }
+          return null;
+        };
+
+        // Hàm update comment cho 1 plan
+        const updateComments = (plan) => {
+          if (!plan) return;
+
+          if (data.parentId) {
+            const parent = findParent(plan.comments, data.parentId);
+            if (parent) {
+              parent.replies = parent.replies || [];
+              parent.replies.push(data);
+            }
+          } else {
+            plan.comments.push(data);
+          }
+        };
+
+        // Cập nhật cho feed
+        updateComments(state.items.find((p) => p.id === planId));
+
+        // Cập nhật cho My Plans
+        updateComments(state.myItems.find((p) => p.id === planId));
+      })
+
+      .addCase(loadMyPlans.pending, (state) => {
+        state.myLoading = true;
+      })
+      .addCase(loadMyPlans.fulfilled, (state, action) => {
+        const { data, page } = action.payload;
+        state.myLoading = false;
+        state.myPage = page;
+
+        if (page === 1) state.myItems = data.items;
+        else state.myItems.push(...data.items);
+
+        state.myHasMore = data.hasMore;
+      })
+      .addCase(loadMyPlans.rejected, (state, action) => {
+        state.myLoading = false;
+        state.error = action.error.message;
       });
   },
 });

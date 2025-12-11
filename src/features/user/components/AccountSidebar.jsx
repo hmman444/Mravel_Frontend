@@ -31,7 +31,7 @@ const TIER_EMOJI = {
   PLATINUM: "🏆",
 };
 
-export default function AccountSidebar() {
+export default function AccountSidebar({ selectedTab, onSelectTab }) {
   const { user } = useSelector((state) => state.auth);
   const { handleLogout } = useLogout();
 
@@ -42,13 +42,19 @@ export default function AccountSidebar() {
   const avatarUrl = user?.avatar;
 
   return (
-    <aside className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <aside
+      className="
+        bg-white dark:bg-slate-900 rounded-xl border border-slate-200 
+        dark:border-slate-700 shadow-sm overflow-hidden
+        max-h-[calc(100vh-96px)] overflow-y-auto
+      "
+    >
       {/* Avatar + tên */}
       <div className="px-4 py-4 flex items-center gap-3 border-b border-slate-200 dark:border-slate-700">
         {avatarUrl ? (
           <img
             src={avatarUrl}
-            alt={user?.fullname || "Avatar"}
+            alt={user?.fullname || 'Avatar'}
             className="w-12 h-12 rounded-full object-cover border border-white shadow-sm"
           />
         ) : (
@@ -57,11 +63,12 @@ export default function AccountSidebar() {
           </div>
         )}
 
-        <div>
+        <div className="min-w-0">
           <p className="font-semibold text-sm text-slate-900 dark:text-slate-50 line-clamp-1">
             {user?.fullname || "Người dùng Mravel"}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          {/* EMAIL: không tràn nữa, tự xuống dòng / cắt */}
+          <p className="text-xs text-slate-500 dark:text-slate-400 break-all leading-snug">
             {user?.email || "Tài khoản Mravel"}
           </p>
         </div>
@@ -78,54 +85,33 @@ export default function AccountSidebar() {
 
       {/* Menu */}
       <nav className="py-2 text-sm">
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        >
-          <Ticket className="w-4 h-4 text-sky-500" />
-          <span>0 Điểm</span>
-        </button>
-
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        >
-          <CreditCard className="w-4 h-4 text-sky-500" />
-          <span>Thẻ của tôi</span>
-        </button>
-
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        >
-          <BookmarkCheck className="w-4 h-4 text-sky-500" />
-          <span>Đặt chỗ của tôi</span>
-        </button>
-
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        >
-          <Gift className="w-4 h-4 text-sky-500" />
-          <span>Khuyến mãi</span>
-        </button>
-
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        >
-          <Bell className="w-4 h-4 text-sky-500" />
-          <span>Cài đặt thông báo</span>
-        </button>
-
-        {/* Tài khoản – active giống Traveloka */}
         <div className="mt-1">
           <button
             type="button"
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 border-l-4 border-sky-500 font-semibold"
+            onClick={() => onSelectTab("account")}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 transition
+              ${
+                selectedTab === "account"
+                  ? "text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 border-l-4 border-sky-500 font-semibold"
+                  : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+              }`}
           >
             <Settings className="w-4 h-4 text-sky-500" />
             <span>Tài khoản</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onSelectTab("my-plans")}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 transition
+              ${
+                selectedTab === "my-plans"
+                  ? "text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 border-l-4 border-sky-500 font-semibold"
+                  : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+              }`}
+          >
+            <BookmarkCheck className="w-4 h-4 text-sky-500" />
+            <span>Lịch trình của tôi</span>
           </button>
         </div>
 

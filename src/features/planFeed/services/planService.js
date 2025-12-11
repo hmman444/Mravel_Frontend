@@ -56,3 +56,8 @@ export async function sharePlan(planId, email) {
   const res = await api.post(`${BASE}/${planId}/share`, { email });
   return res.data.data;
 }
+
+export async function fetchMyPlans(page = 1, size = 5) {
+  const res = await api.get(`/plans/me?page=${page}&size=${size}`);
+  return res.data.data;
+}
