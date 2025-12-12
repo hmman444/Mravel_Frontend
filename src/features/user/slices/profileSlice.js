@@ -1,6 +1,6 @@
 // src/features/profile/slices/profileSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getUserProfilePage, updateMyPublicProfile  } from "../../user/services/userProfileService";
+import { getUserProfilePage, updateMyProfile  } from "../../user/services/userProfileService";
 import { reactPlan, commentPlan } from "../../planFeed/slices/planSlice";
 
 export const loadProfilePage = createAsyncThunk(
@@ -12,16 +12,12 @@ export const loadProfilePage = createAsyncThunk(
   }
 );
 
-export const updatePublicProfileThunk = createAsyncThunk(
-  "profile/updatePublic",
+export const updateProfileThunk = createAsyncThunk(
+  "profile/update",
   async (payload, { rejectWithValue }) => {
-    try {
-      const res = await updateMyPublicProfile(payload);
-      if (!res.success) return rejectWithValue(res.message);
-      return res.data.data;
-    } catch (err) {
-      return rejectWithValue("Không thể cập nhật hồ sơ");
-    }
+    const res = await updateMyProfile(payload);
+    if (!res.success) return rejectWithValue(res.message);
+    return res.data;
   }
 );
 
@@ -109,7 +105,7 @@ const profileSlice = createSlice({
           plan.comments.push(data);
         }
       })
-      .addCase(updatePublicProfileThunk.fulfilled, (state, action) => {
+      .addCase(updateProfileThunk.fulfilled, (state, action) => {
         if (state.data?.user) {
           Object.assign(state.data.user, action.payload);
         }

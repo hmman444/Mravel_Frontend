@@ -51,6 +51,7 @@ export default function TransportActivityModal({
   onSubmit,
   editingCard,
   planMembers = [],
+  readOnly = false
 }) {
   const [title, setTitle] = useState("");
   const [fromPlace, setFromPlace] = useState("");
@@ -422,13 +423,25 @@ export default function TransportActivityModal({
     />
   );
 
-  const footerRight = (
+   const footerRight = readOnly ? (
+    <div className="flex items-center justify-end">
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold
+          border border-slate-200 dark:border-slate-700
+          bg-white/80 dark:bg-slate-900/70
+          text-slate-700 dark:text-slate-100
+          hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+      >
+        Đóng
+      </button>
+    </div>
+  ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={
-        editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động di chuyển"
-      }
+      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động di chuyển"}
       submitClassName="bg-gradient-to-r from-sky-500 via-sky-500 to-indigo-500 shadow-lg shadow-sky-500/30"
     />
   );

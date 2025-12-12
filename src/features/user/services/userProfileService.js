@@ -18,37 +18,19 @@ export const getUserProfilePage = async (userId) => {
   }
 };
 
-// sensitive info (DOB, phone, email phụ, ...) – nếu có dùng ở trang cài đặt
-export const updateMyProfileSensitive = async (payload) => {
+export const updateMyProfile = async (payload) => {
   try {
     const res = await api.put("/users/me", payload);
     return { success: true, data: res.data };
   } catch (error) {
-    console.error("❌ updateMyProfileSensitive error:", error.response?.data || error.message);
+    console.error("❌ updateMyProfile error:", error.response?.data || error.message);
     return {
       success: false,
-      message:
-        error.response?.data?.message ||
-        "Không thể cập nhật thông tin tài khoản.",
+      message: error.response?.data?.message || "Không thể cập nhật hồ sơ.",
     };
   }
 };
 
-// Public profile (fullname, username, avatar, cover, bio, city,...)
-export const updateMyPublicProfile = async (payload) => {
-  try {
-    const res = await api.put("/users/me/public-profile", payload);
-    return { success: true, data: res.data };
-  } catch (error) {
-    console.error("❌ updateMyPublicProfile error:", error.response?.data || error.message);
-    return {
-      success: false,
-      message:
-        error.response?.data?.message ||
-        "Không thể cập nhật hồ sơ công khai.",
-    };
-  }
-};
 export const uploadAvatarOrCover = async (file) => {
   const preset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;

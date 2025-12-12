@@ -20,10 +20,11 @@ function gridClass(len) {
   }
 }
 
-export default function PlanMedia({ images = [] }) {
+export default function PlanMedia({ images = [], full = false }) {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  
   const openViewer = (index) => {
     setCurrentIndex(index);
     setViewerOpen(true);
@@ -55,8 +56,8 @@ export default function PlanMedia({ images = [] }) {
   // Hook đã được gọi xong, giờ mới được return conditionally
   if (!images.length) return null;
 
-  const shown = images.slice(0, 6);
-  const remain = images.length - shown.length;
+  const shown = full ? images : images.slice(0, 6);
+  const remain = full ? 0 : images.length - shown.length;
 
   const thumbClass =
     "w-full h-40 md:h-48 object-cover cursor-zoom-in transition-transform duration-200 hover:scale-[1.03]";
@@ -90,7 +91,7 @@ export default function PlanMedia({ images = [] }) {
             );
           }
 
-          if (idx === 5 && remain > 0) {
+          if (!full && idx === 5 && remain > 0) {
             return (
               <button
                 type="button"

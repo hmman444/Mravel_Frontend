@@ -13,37 +13,53 @@ import PostSkeleton from "../../planFeed/components/PostSkeleton";
 
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useFriendActions } from "../hooks/useFriendActions";
-import EditPublicProfileModal from "../components/EditPublicProfileModal";
+import EditProfileModal from "../components/EditProfileModal";
 
 import ProfileHeader from "../components/ProfileHeader";
 import ProfileSidebar from "../components/ProfileSidebar";
 import ProfileFriendsAboutSection from "../components/ProfileFriendsAboutSection";
 import LoadingOverlay from "../../../components/LoadingOverlay";
-
-// map BasicInfo của BE về shape UI
 function buildUserView(profile, photoCount) {
   if (!profile) return null;
 
-  const joinedYear = profile.joinedDate
-    ? String(profile.joinedDate).slice(0, 4)
-    : "2024";
+  const joinedYear =
+    profile.joinedAt?.slice(0, 4) ||
+    (profile.joinedDate ? String(profile.joinedDate).slice(0, 4) : "2025");
 
   return {
     id: profile.id,
     username: profile.username,
     fullname: profile.fullname || profile.fullName,
     avatar: profile.avatar,
+    coverImage: profile.coverImage,
     cover: profile.coverImage,
+
+    // INFO HIỂN THỊ
     bio: profile.bio || "Người dùng chưa thêm giới thiệu.",
     city: profile.city || "Chưa cập nhật",
     country: profile.country || "",
-    hometown: profile.hometown || null,
-    occupation: profile.occupation || null,
-    joinedAt: joinedYear,
+    hometown: profile.hometown || "",
+    occupation: profile.occupation || "",
+
+    membershipTier: profile.membershipTier || null,
+    joinedAt: profile.joinedAt || joinedYear,
+
     totalTrips: null,
     totalPhotos: photoCount ?? 0,
     totalFriends: profile.totalFriends ?? 0,
     mutualFriends: profile.mutualFriends ?? 0,
+
+    gender: profile.gender || "",            // MALE / FEMALE / OTHER / UNKNOWN / null
+    dateOfBirth: profile.dateOfBirth || "",  // "YYYY-MM-DD" hoặc null
+
+    phone1: profile.phone1 || "",
+    phone2: profile.phone2 || "",
+    phone3: profile.phone3 || "",
+
+    secondaryEmail: profile.secondaryEmail || "",
+    tertiaryEmail: profile.tertiaryEmail || "",
+
+    addressLine: profile.addressLine || "",
   };
 }
 
@@ -227,7 +243,7 @@ export default function UserPublicProfilePage() {
       <Footer />
 
       {friendActions.isMe && (
-        <EditPublicProfileModal
+        <EditProfileModal
           open={openEdit}
           onClose={() => setOpenEdit(false)}
           initialData={userView}

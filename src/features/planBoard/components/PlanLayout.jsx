@@ -7,10 +7,13 @@ import SidebarPlans from "./SidebarPlans";
 export default function PlanLayout({
   children,
   activePlanId = null,
-  plans = [],
+  myPlans = [],
+  recentPlans = [],
   onOpenPlanList,
   onOpenCalendar,
   onOpenPlanDashboard,
+  onCopyPlan,
+  onRemoveRecentPlan,
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -23,24 +26,25 @@ export default function PlanLayout({
         <SidebarPlans
           collapsed={collapsed}
           activePlanId={activePlanId}
-          plans={plans}
+          myPlans={myPlans}
+          recentPlans={recentPlans}
           onOpenPlanList={onOpenPlanList}
           onOpenCalendar={onOpenCalendar}
           onOpenPlanDashboard={onOpenPlanDashboard}
+          onCopyPlan={onCopyPlan}
+          onRemoveRecentPlan={onRemoveRecentPlan}
         />
 
         {/* TOGGLE BUTTON */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="
-            fixed top-1/2 z-40 -translate-y-1/2
+          className="fixed top-1/2 z-40 -translate-y-1/2
             h-9 w-9 flex items-center justify-center
             rounded-full border border-gray-200 dark:border-gray-700
             bg-white dark:bg-gray-900
             shadow-md hover:shadow-lg hover:scale-105
             text-xs text-gray-600 dark:text-gray-200
-            transition
-          "
+            transition"
           style={{ left: collapsed ? "18px" : "262px" }}
         >
           {collapsed ? "❯" : "❮"}

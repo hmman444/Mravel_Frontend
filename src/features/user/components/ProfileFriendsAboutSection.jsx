@@ -19,7 +19,6 @@ export default function ProfileFriendsAboutSection({
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
           Giới thiệu
         </h3>
-        {/* sau này có nút chỉnh sửa/see more thì nhét ở đây */}
       </div>
 
       <AboutBlock userView={userView} profile={profile} loading={loading} />
@@ -41,7 +40,7 @@ export default function ProfileFriendsAboutSection({
       {photosFromPlans.length === 0 && !loading ? (
         <p className="text-sm text-slate-400">Chưa có ảnh nào để hiển thị.</p>
       ) : (
-        <PlanMedia images={photosFromPlans} />
+        <PlanMedia images={photosFromPlans} full />
       )}
     </div>
   );

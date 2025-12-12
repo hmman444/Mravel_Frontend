@@ -133,3 +133,19 @@ export const handleRequest = async (planId, reqId, payload) => {
 
   return res.data.data;
 };
+
+export async function fetchRecentPlans() {
+  const res = await api.get(`${BASE}/recent`);
+  return res.data.data; // List<PlanFeedItem>
+}
+
+export async function removeRecentPlan(planId) {
+  const res = await api.delete(`${BASE}/recent/${planId}`);
+  return res.data.data;
+}
+
+// copy public plan
+export async function copyPlan(planId) {
+  const res = await api.post(`${BASE}/${planId}/copy`);
+  return res.data.data; // PlanFeedItem của bản sao
+}

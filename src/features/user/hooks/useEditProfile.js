@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { uploadAvatarOrCover, updateMyPublicProfile } from "../services/userProfileService";
-import { updatePublicProfileThunk } from "../slices/profileSlice";
+import { uploadAvatarOrCover } from "../services/userProfileService";
+import { updateProfileThunk } from "../slices/profileSlice";
 import { showError, showSuccess } from "../../../utils/toastUtils";
 
-export function useEditPublicProfile() {
+export function useEditProfile() {
   const dispatch = useDispatch();
   const [uploading, setUploading] = useState(false);
 
@@ -13,7 +13,7 @@ export function useEditPublicProfile() {
       setUploading(true);
       const url = await uploadAvatarOrCover(file);
       return url;
-    } catch (err) {
+    } catch {
       showError("Không thể upload ảnh.");
       return null;
     } finally {
@@ -23,9 +23,9 @@ export function useEditPublicProfile() {
 
   const saveProfile = async (payload, onDone) => {
     try {
-      const res = await dispatch(updatePublicProfileThunk(payload)).unwrap();
-      showSuccess("Đã cập nhật hồ sơ công khai.");
-      if (onDone) onDone();
+      await dispatch(updateProfileThunk(payload)).unwrap();
+      showSuccess("Đã cập nhật hồ sơ.");
+      onDone?.();
     } catch (err) {
       showError(err || "Không thể cập nhật hồ sơ.");
     }

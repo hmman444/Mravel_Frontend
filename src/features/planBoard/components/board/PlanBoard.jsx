@@ -16,7 +16,7 @@ export default function PlanBoard({
   board,
   isViewer,
   planMembers,
-
+  canEditBoard,
   // LIST
   handleAddList,
   renameList,
@@ -73,7 +73,7 @@ export default function PlanBoard({
   const handleCloseDayMap = () => {
     setDayMapList(null);
   };
-
+  const [readOnlyModal, setReadOnlyModal] = useState(false);
   // trash logic
   const [showTrash, setShowTrash] = useState(false);
   const [confirmClearTrash, setConfirmClearTrash] = useState(false);
@@ -175,6 +175,7 @@ export default function PlanBoard({
     setEditingCard(card);
     setActiveListForActivity(listId);
     setActiveActivityType(type);
+    setReadOnlyModal(isViewer);
     openModal(type);
   };
 
@@ -376,17 +377,20 @@ export default function PlanBoard({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleAddList}
-            className="
-              fixed bottom-6 right-6 z-50 rounded-full p-4 
-              bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
-              shadow-lg shadow-blue-500/40 hover:shadow-xl hover:-translate-y-1 
-              transition-all
-            "
-          >
-            <FaPlus />
-          </button>
+          {canEditBoard && (
+            <button
+              onClick={handleAddList}
+              className="
+                fixed bottom-6 right-6 z-50 rounded-full p-4 
+                bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
+                shadow-lg shadow-blue-500/40 hover:shadow-xl hover:-translate-y-1 
+                transition-all
+              "
+            >
+              <FaPlus />
+            </button>
+          )}
+          
         </div>
       </div>
 
@@ -401,9 +405,13 @@ export default function PlanBoard({
         "
         style={{ paddingBottom: bottomPadding }}
       >
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext 
+          onDragEnd={(result) => {
+            if (!canEditBoard) return;      // <- viewer stop here
+            handleDragEnd?.(result);
+          }}>
           {/* các list ngày – scroll ngang */}
-          <Droppable droppableId="all-lists" direction="horizontal" type="list">
+          <Droppable droppableId="all-lists" direction="horizontal" type="list" isDropDisabled={!canEditBoard}> 
             {(provided) => (
               <div
                 ref={provided.innerRef}
@@ -432,7 +440,7 @@ export default function PlanBoard({
                     duplicateCard={duplicateCard}
                     onActivityTypeSelected={handleActivityPicked}
                     onOpenActivityModal={openEditModal}
-                    canEdit={!isViewer}
+                    canEdit={canEditBoard}
                     onOpenListMap={() => handleOpenDayMap(list, idx)}
                   />
                 ))}
@@ -545,6 +553,7 @@ export default function PlanBoard({
         handleSubmitActivity={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={!canEditBoard}
       />
 
       {confirmClearTrash && (

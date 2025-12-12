@@ -13,7 +13,7 @@ export default function ProfileSidebar({
   onViewFriends,
 }) {
   const navigate = useNavigate();
-
+  const previewPhotos = photosFromPlans.slice(0, 9);
   return (
     <div className="space-y-4 md:sticky md:top-24 self-start">
       {/* About */}
@@ -33,15 +33,6 @@ export default function ProfileSidebar({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="px-2.5 py-1 text-[11px] rounded-full bg-sky-500 text-white hover:bg-sky-600 transition"
-              onClick={() => {
-                console.log("Thêm tất cả ảnh từ lịch trình");
-              }}
-            >
-              Thêm tất cả
-            </button>
-            <button
-              type="button"
               className="text-xs text-sky-600 dark:text-sky-300 hover:underline"
               onClick={onViewPhotos}
             >
@@ -50,16 +41,16 @@ export default function ProfileSidebar({
           </div>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-          {userView?.totalPhotos ?? photosFromPlans.length} ảnh từ các chuyến đi
+          {userView?.totalPhotos ?? previewPhotos.length} ảnh từ các chuyến đi
           gần đây.
         </p>
 
-        {photosFromPlans.length === 0 && !loading ? (
+        {previewPhotos.length === 0 && !loading ? (
           <p className="text-xs text-slate-400">Chưa có ảnh nào được chia sẻ.</p>
         ) : (
           <div className="max-h-64 overflow-y-auto pr-1">
             <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-              {(photosFromPlans.length ? photosFromPlans : Array(6).fill(null)).map(
+              {(previewPhotos.length ? previewPhotos : Array(6).fill(null)).map(
                 (url, idx) => (
                   <div
                     key={idx}

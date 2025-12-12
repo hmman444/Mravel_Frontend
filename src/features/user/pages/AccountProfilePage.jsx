@@ -8,7 +8,6 @@ import AccountInfoCard from "../components/AccountInfoCard";
 import EmailCard from "../components/EmailCard";
 import PhoneCard from "../components/PhoneCard";
 import LinkedAccountsCard from "../components/LinkedAccountsCard";
-import MyPlanListPage from "../pages/MyPlanListPage";
 
 // AccountProfilePage.jsx
 export default function AccountProfilePage() {
@@ -63,7 +62,6 @@ export default function AccountProfilePage() {
               </>
             )}
 
-            {selectedTab === "my-plans" && <MyPlanListPage />}
           </section>
         </div>
       </main>

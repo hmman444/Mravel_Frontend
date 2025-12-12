@@ -17,6 +17,7 @@ export default function ActivityModals({
   handleSubmitActivity,
   editingCard,
   planMembers,
+  readOnly,
 }) {
   return (
     <>
@@ -26,6 +27,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <FoodActivityModal
         open={modalStates.FOOD[0]}
@@ -33,6 +35,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <StayActivityModal
         open={modalStates.STAY[0]}
@@ -40,6 +43,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <SightseeingActivityModal
         open={modalStates.SIGHTSEEING[0]}
@@ -47,6 +51,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <EntertainmentActivityModal
         open={modalStates.ENTERTAIN[0]}
@@ -54,6 +59,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <ShoppingActivityModal
         open={modalStates.SHOPPING[0]}
@@ -61,6 +67,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <CinemaActivityModal
         open={modalStates.CINEMA[0]}
@@ -68,6 +75,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <EventActivityModal
         open={modalStates.EVENT[0]}
@@ -75,6 +83,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
       <OtherActivityModal
         open={modalStates.OTHER[0]}
@@ -82,6 +91,7 @@ export default function ActivityModals({
         onSubmit={handleSubmitActivity}
         editingCard={editingCard}
         planMembers={planMembers}
+        readOnly={readOnly}
       />
     </>
   );

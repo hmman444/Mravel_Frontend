@@ -188,14 +188,89 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
 
   const avgPerDay =
     totalDays && used > 0 ? Math.round(used / totalDays) : null;
-  const avgPerPerson =
-    participantsCount > 0 && used > 0
-      ? Math.round(used / participantsCount)
-      : null;
-  const avgPerPersonPerDay =
-    totalDays && participantsCount > 0 && used > 0
-      ? Math.round(used / (participantsCount * totalDays))
-      : null;
+        
+  const computeDays = (s, e) => {
+    if (!s || !e) return null;
+    return Math.max(
+      1,
+      Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1
+    );
+  };
+
+  const handlePickDates = (s, e, changedField /* "start" | "end" */) => {
+    setStartDate(s);
+    setEndDate(e);
+
+    if (!canEdit || !planId || !s || !e) return;
+
+    const oldS = originalStartRef.current;
+    const oldE = originalEndRef.current;
+
+    if (!oldS || !oldE) {
+      applyDatesChange(s, e);
+      return;
+    }
+
+    const oldDays = computeDays(oldS, oldE);
+    const newDays = computeDays(s, e);
+
+    let shrink = false;
+
+    if (changedField === "end") {
+      if (newDays !== null && oldDays !== null && newDays < oldDays) {
+        shrink = true;
+      }
+    }
+
+    if (shrink) {
+      setPendingDates({ start: s, end: e });
+      setShowConfirmDates(true);
+    } else {
+      applyDatesChange(s, e);
+    }
+  };
+
+  const handleStartDateChange = (newStart) => {
+    if (!newStart) {
+      setStartDate(null);
+      return;
+    }
+
+    const oldS = originalStartRef.current;
+    const oldE = originalEndRef.current;
+
+    let baseStart = oldS ?? startDate;
+    let baseEnd = oldE ?? endDate;
+
+    if (!baseStart || !baseEnd) {
+      handlePickDates(newStart, baseEnd || newStart, "start");
+      return;
+    }
+
+    const oldDays = computeDays(baseStart, baseEnd);
+    if (!oldDays || oldDays <= 0) {
+      handlePickDates(newStart, baseEnd, "start");
+      return;
+    }
+
+    // dời endDate theo duration cũ
+    const newEnd = new Date(newStart.getTime());
+    newEnd.setDate(newEnd.getDate() + (oldDays - 1));
+
+    handlePickDates(newStart, newEnd, "start");
+  };
+
+  const handleEndDateChange = (newEnd) => {
+    if (!newEnd) {
+      setEndDate(null);
+      return;
+    }
+    if (startDate && newEnd < startDate) {
+      showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+      return;
+    }
+    handlePickDates(startDate, newEnd, "end");
+  };
 
   // effect khi plan thay đổi
   useEffect(() => {
@@ -296,41 +371,6 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       showError("Không thể cập nhật ngày");
     } finally {
       setDatesSaving(false);
-    }
-  };
-
-  const computeDays = (s, e) => {
-    if (!s || !e) return null;
-    return Math.max(1, Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1);
-  };
-
-  const handlePickDates = (s, e) => {
-    setStartDate(s);
-    setEndDate(e);
-
-    if (!canEdit || !planId || !s || !e) return;
-
-    const oldS = originalStartRef.current;
-    const oldE = originalEndRef.current;
-
-    if (!oldS || !oldE) {
-      applyDatesChange(s, e);
-      return;
-    }
-
-    const oldDays = computeDays(oldS, oldE);
-    const newDays = computeDays(s, e);
-
-    const shrink =
-      (newDays !== null && oldDays !== null && newDays < oldDays) ||
-      s > oldS ||
-      e < oldE;
-
-    if (shrink) {
-      setPendingDates({ start: s, end: e });
-      setShowConfirmDates(true);
-    } else {
-      applyDatesChange(s, e);
     }
   };
 
@@ -668,8 +708,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 <PlanDateInputs
                   startDate={startDate}
                   endDate={endDate}
-                  setStartDate={(d) => handlePickDates(d, endDate)}
-                  setEndDate={(d) => handlePickDates(startDate, d)}
+                  setStartDate={handleStartDateChange}
+                  setEndDate={handleEndDateChange}
+                  disabled={!canEdit}
                 />
 
                 <div className="flex flex-wrap items-start justify-between gap-3 mt-1">

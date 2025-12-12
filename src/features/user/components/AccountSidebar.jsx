@@ -97,22 +97,10 @@ export default function AccountSidebar({ selectedTab, onSelectTab }) {
               }`}
           >
             <Settings className="w-4 h-4 text-sky-500" />
-            <span>Tài khoản</span>
+            <span>Cài đặt hồ sơ</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => onSelectTab("my-plans")}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 transition
-              ${
-                selectedTab === "my-plans"
-                  ? "text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 border-l-4 border-sky-500 font-semibold"
-                  : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
-          >
-            <BookmarkCheck className="w-4 h-4 text-sky-500" />
-            <span>Lịch trình của tôi</span>
-          </button>
+
         </div>
 
         {/* Đăng xuất */}

@@ -42,6 +42,7 @@ export default function StayActivityModal({
   editingCard,
   planMembers = [],
   stayLocation: stayLocationProp,
+  readOnly 
 }) {
   const [title, setTitle] = useState("");
   const [hotelName, setHotelName] = useState("");
@@ -351,8 +352,22 @@ export default function StayActivityModal({
       }
     />
   );
-
-  const footerRight = (
+  
+   const footerRight = readOnly ? (
+    <div className="flex items-center justify-end">
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold
+          border border-slate-200 dark:border-slate-700
+          bg-white/80 dark:bg-slate-900/70
+          text-slate-700 dark:text-slate-100
+          hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+      >
+        Đóng
+      </button>
+    </div>
+  ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
