@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { vi } from "date-fns/locale";
-import { addMonths } from "date-fns";
+import { addMonths, addDays  } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 
 registerLocale("vi", vi);
@@ -113,26 +113,28 @@ export default function HotelStayDateRangePicker({
             onChange={(dates) => {
               const [start, end] = dates;
 
-              // Lần click đầu: set start, reset end
               if (start && !end) {
-                setStartDate(start);
+                const s = new Date(start);
+                s.setHours(0, 0, 0, 0);
+                setStartDate(s);
                 setEndDate(null);
                 return;
               }
 
-              // Khi đã có cả start và end
               if (start && end) {
                 const s = new Date(start);
-                const e = new Date(end);
+                let e = new Date(end);
                 s.setHours(0, 0, 0, 0);
                 e.setHours(0, 0, 0, 0);
 
-                let diffDays = (e.getTime() - s.getTime()) / MS_PER_DAY;
-                if (diffDays < 0) diffDays = 0;
-                diffDays = Math.round(diffDays);
+                // ✅ ÉP checkout > checkin (tránh case 15->15)
+                if (e.getTime() <= s.getTime()) {
+                  e = addDays(s, 1);
+                  e.setHours(0, 0, 0, 0);
+                }
 
-                const stayDays = diffDays === 0 ? 1 : diffDays + 1;
-                const stayNights = stayDays === 1 ? 1 : stayDays - 1;
+                const diffDays = Math.round((e.getTime() - s.getTime()) / MS_PER_DAY);
+                const stayNights = Math.max(1, diffDays);
 
                 setStartDate(s);
                 setEndDate(e);
@@ -140,7 +142,7 @@ export default function HotelStayDateRangePicker({
                 onChange?.({
                   checkIn: s,
                   checkOut: e,
-                  nights: stayNights, // 1 hoặc hơn
+                  nights: stayNights,
                 });
               }
             }}

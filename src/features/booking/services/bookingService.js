@@ -1,17 +1,18 @@
 // src/features/booking/services/bookingService.js
 import axios from "axios";
+import api from "../../../utils/axiosInstance";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const CATALOG_PREFIX = `${API_URL}/catalog`;
 const HOTEL_INVENTORY_PREFIX = `${CATALOG_PREFIX}/hotels/inventory`;
 
+const BOOKING_PREFIX = "/booking";
+const HOTEL_BOOKING_PREFIX = `${BOOKING_PREFIX}/hotels`;
+
 const toError = (error, fallback = "Lỗi kết nối đến server") => {
   if (error?.response?.data) {
-    const msg =
-      error.response.data.message ||
-      error.response.data.error ||
-      fallback;
+    const msg = error.response.data.message || error.response.data.error || fallback;
     return { success: false, message: msg };
   }
   return { success: false, message: fallback };
@@ -20,7 +21,23 @@ const toError = (error, fallback = "Lỗi kết nối đến server") => {
 const fmt = (d) => {
   if (!d) return "";
   const x = new Date(d);
-  return x.toISOString().slice(0, 10); // YYYY-MM-DD
+  return x.toISOString().slice(0, 10);
+};
+
+export const createHotelBookingAndPay = async (payload) => {
+  try {
+    const res = await api.post(`${HOTEL_BOOKING_PREFIX}`, payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const apiRes = res?.data ?? res;            // ApiResponse hoặc DTO
+    const dto = apiRes?.data ?? apiRes;         // lấy inner data nếu có
+
+    return { success: true, data: dto };
+  } catch (error) {
+    console.error("createHotelBookingAndPay error:", error?.response || error);
+    return toError(error, "Không tạo được thanh toán");
+  }
 };
 
 /**
@@ -52,3 +69,5 @@ export const getHotelAvailability = async ({
     return toError(error, "Không kiểm tra được phòng trống");
   }
 };
+
+export { fmt };

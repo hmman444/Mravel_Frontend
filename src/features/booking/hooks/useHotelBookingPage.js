@@ -1,11 +1,11 @@
 // src/features/booking/hooks/useHotelBookingPage.js
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
 import { fetchHotelDetail } from "../../catalog/slices/catalogSlice";
 import { useHotelPricing } from "./useHotelPricing";
-import { fetchHotelAvailability } from "../slices/bookingSlice";
+import { fetchHotelAvailability, createHotelPayment } from "../slices/bookingSlice";
+import { fmt } from "../services/bookingService";
 
 export function useHotelBookingPage() {
   const [params] = useSearchParams();
@@ -14,100 +14,62 @@ export function useHotelBookingPage() {
   const hotelSlug = params.get("hotelSlug") || "";
   const roomTypeId = params.get("roomTypeId") || "";
   const ratePlanId = params.get("ratePlanId") || "";
-  const { hotelAvailability } = useSelector((s) => s.booking);
 
-  // state ngày / đêm / số phòng
+  const { hotelAvailability, payment } = useSelector((s) => s.booking);
+  const { data: hotel, loading } = useSelector((s) => s.catalog.hotelDetail);
+
+  // ✅ form state
+  const [contactName, setContactName] = useState("Mẫn Huỳnh Minh");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState("nsndman0404@gmail.com");
+  const [note, setNote] = useState("");
+
+  // dates
   const [checkIn, setCheckIn] = useState(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
+    const d = new Date(); d.setHours(0,0,0,0); return d;
   });
-
   const [checkOut, setCheckOut] = useState(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 1);
-    return d;
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+1); return d;
   });
-
   const [nights, setNights] = useState(1);
   const [roomsCount, setRoomsCount] = useState(1);
 
-  const { data: hotel, loading } = useSelector((s) => s.catalog.hotelDetail);
-
-  // load detail khách sạn
   useEffect(() => {
-    if (hotelSlug) {
-      dispatch(fetchHotelDetail(hotelSlug));
-    }
+    if (hotelSlug) dispatch(fetchHotelDetail(hotelSlug));
   }, [dispatch, hotelSlug]);
 
-  // chọn roomType theo id/slug
   const roomType = useMemo(
-    () =>
-      hotel?.roomTypes?.find((rt) => rt.id === roomTypeId) ||
-      hotel?.roomTypes?.find((rt) => rt.slug === roomTypeId),
+    () => hotel?.roomTypes?.find((rt) => rt.id === roomTypeId) || hotel?.roomTypes?.find((rt) => rt.slug === roomTypeId),
     [hotel, roomTypeId]
   );
 
-  // chọn ratePlan theo id/code
   const ratePlan = useMemo(
-    () =>
-      roomType?.ratePlans?.find((rp) => rp.id === ratePlanId) ||
-      roomType?.ratePlans?.find((rp) => rp.code === ratePlanId),
+    () => roomType?.ratePlans?.find((rp) => rp.id === ratePlanId) || roomType?.ratePlans?.find((rp) => rp.code === ratePlanId),
     [roomType, ratePlanId]
   );
 
   const guests = roomType?.maxGuests || 2;
 
-  // Logic giá: nhân theo NGÀY (nights + 1)
-  const daysCount = nights + 1;
-  const { pricingAllRooms } = useHotelPricing(
-    ratePlan,
-    checkIn,
-    checkOut,
-    roomsCount
-    );
-
-  // Tên khách sạn / phòng fallback
-  const hotelName =
-    hotel?.name ||
-    (hotelSlug
-      ? hotelSlug
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase())
-      : "Khách sạn của bạn");
-
-  const roomName = roomType?.name || roomTypeId || "Loại phòng đã chọn";
+  const { pricingAllRooms } = useHotelPricing(ratePlan, checkIn, checkOut, roomsCount);
 
   const handleStayChange = ({ checkIn: ci, checkOut: co, nights: n }) => {
-    setCheckIn(ci);
-    setCheckOut(co);
-    setNights(n);
+    setCheckIn(ci); setCheckOut(co); setNights(n);
   };
 
-  const handleRoomsChange = (value) => {
-    setRoomsCount(value);
-  };
+  const handleRoomsChange = (value) => setRoomsCount(value);
 
-  // gọi availability mỗi lần đổi ngày / số phòng / roomType
   useEffect(() => {
     if (!hotelSlug || !roomTypeId || !checkIn || !checkOut) return;
-
-    // optional: hotel?.id nếu backend cần
-    dispatch(
-      fetchHotelAvailability({
-        hotelId: hotel?.id,
-        hotelSlug,
-        roomTypeId,
-        checkIn,
-        checkOut,
-        rooms: roomsCount,
-      })
-    );
+    dispatch(fetchHotelAvailability({
+      hotelId: hotel?.id,
+      hotelSlug,
+      roomTypeId,
+      checkIn,
+      checkOut,
+      rooms: roomsCount,
+    }));
   }, [dispatch, hotel?.id, hotelSlug, roomTypeId, checkIn, checkOut, roomsCount]);
 
-  // text hiển thị
   const remainingRoomsText = useMemo(() => {
     const rem = hotelAvailability?.data?.remainingRooms;
     if (rem == null) return "Đang kiểm tra phòng trống...";
@@ -117,33 +79,93 @@ export function useHotelBookingPage() {
 
   const isEnoughRooms = hotelAvailability?.data?.isEnough ?? true;
 
+  // ✅ onPay: build payload + call thunk + redirect
+  const onPay = useCallback(async ({ paymentOption }) => {
+    if (!hotel || !roomType || !ratePlan) return;
+
+    const payOption = paymentOption === "DEPOSIT" ? "DEPOSIT" : "FULL";
+
+    const payload = {
+      userId: 1, // tạm
+      contactName,
+      contactPhone,
+      contactEmail,
+      note,
+
+      hotelId: hotel.id,
+      hotelSlug: hotel.slug,
+      hotelName: hotel.name,
+
+      checkInDate: fmt(checkIn),
+      checkOutDate: fmt(checkOut),
+
+      payOption,
+
+      rooms: [
+        {
+          roomTypeId: roomType.id,
+          roomTypeName: roomType.name,
+          ratePlanId: ratePlan.id,
+          ratePlanName: ratePlan.name,
+          quantity: roomsCount,
+          pricePerNight: Number(ratePlan.pricePerNight),
+        },
+      ],
+    };
+
+    const result = await dispatch(createHotelPayment(payload)).unwrap();
+    const url = result?.payUrl || result?.paymentUrl;
+    console.log("payment result:", result);
+    console.log("redirect url:", url);
+
+    if (url) window.location.href = url;
+    else console.warn("Missing pay url:", result);
+  }, [
+    dispatch,
+    hotel, roomType, ratePlan,
+    contactName, contactPhone, contactEmail, note,
+    checkIn, checkOut,
+    roomsCount,
+  ]);
+
+  const hotelName = hotel?.name || hotelSlug || "Khách sạn của bạn";
+  const roomName = roomType?.name || roomTypeId || "Loại phòng đã chọn";
+
   return {
-    // loading
     loading,
 
-    // info phòng
     hotelName,
     roomName,
     guests,
     ratePlan,
 
-    // state ngày / đêm / phòng
     checkIn,
     checkOut,
     nights,
     roomsCount,
 
-    // giá
     pricingAllRooms,
-    daysCount,
 
     remainingRoomsText,
     isEnoughRooms,
-    availabilityLoading: hotelAvailability.loading,
-    availabilityError: hotelAvailability.error,
 
-    // handler
+    payLoading: payment.loading,
+    payError: payment.error,
+
+    // form values
+    contactName,
+    contactPhone,
+    contactEmail,
+    note,
+
+    // handlers
     handleStayChange,
     handleRoomsChange,
+    onContactNameChange: setContactName,
+    onContactPhoneChange: setContactPhone,
+    onContactEmailChange: setContactEmail,
+    onNoteChange: setNote,
+
+    onPay, // ✅ expose
   };
 }

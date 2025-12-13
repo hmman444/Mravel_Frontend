@@ -202,18 +202,6 @@ export const suggestPlaces = async (q, limit = 6) => {
   }
 };
 
-export const suggestGeoLocations = async (q) => {
-  try {
-    if (!q || !q.trim()) {
-      return { success: true, data: [] };
-    }
-    return { success: true, data: [] };
-  } catch (error) {
-    console.error("suggestGeoLocations error:", error?.response || error);
-    return toError(error, "Lỗi gợi ý vị trí ngoài hệ thống");
-  }
-};
-
 /** GET /catalog/places/{slug} */
 export const getPlaceDetail = async (slug) => {
   try {

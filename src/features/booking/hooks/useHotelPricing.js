@@ -3,11 +3,7 @@ import { useMemo } from "react";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-function computeDisplayPrice(
-  rawPrice,
-  { priceIncludesTax, taxPercent, serviceFeePercent },
-  mode
-) {
+function computeDisplayPrice(rawPrice, { priceIncludesTax, taxPercent, serviceFeePercent }, mode) {
   if (rawPrice == null) return null;
 
   const tax = Number(taxPercent || 0);
@@ -27,18 +23,17 @@ function computeDisplayPrice(
 }
 
 /**
- * Tính giá theo NGÀY lưu trú:
- *  - days = max(1, diffDays + 1)
- *    + 15 -> 15  => diff=0  => days=1
- *    + 15 -> 16  => diff=1  => days=2
- *    + 15 -> 17  => diff=2  => days=3
+ * Tính giá theo ĐÊM (nights):
+ * nights = max(1, diffDays)
+ *  - 15 -> 16  => diff=1 => nights=1
+ *  - 15 -> 18  => diff=3 => nights=3
  */
 export function useHotelPricing(ratePlan, checkIn, checkOut, roomsCount) {
   const pricingPerRoom = useMemo(() => {
     if (!ratePlan?.pricePerNight) return null;
 
-    // ====== TÍNH SỐ NGÀY ======
-    let days = 1;
+    // ====== TÍNH SỐ ĐÊM ======
+    let nights = 1;
     if (checkIn && checkOut) {
       const s = new Date(checkIn);
       const e = new Date(checkOut);
@@ -46,8 +41,8 @@ export function useHotelPricing(ratePlan, checkIn, checkOut, roomsCount) {
       e.setHours(0, 0, 0, 0);
 
       const diffDays = (e.getTime() - s.getTime()) / MS_PER_DAY;
-      // nếu chọn ngược (checkout < checkin) thì fallback 1 ngày
-      days = diffDays >= 0 ? Math.round(diffDays) + 1 : 1;
+      const n = diffDays >= 0 ? Math.round(diffDays) : 0;
+      nights = Math.max(1, n);
     }
 
     const raw = Number(ratePlan.pricePerNight);
@@ -66,16 +61,16 @@ export function useHotelPricing(ratePlan, checkIn, checkOut, roomsCount) {
 
     if (perNightIncl == null || perNightExcl == null) return null;
 
-    // 💰 NHÂN THEO SỐ NGÀY
-    const roomPrice = perNightExcl * days;
-    const taxAndFee = (perNightIncl - perNightExcl) * days;
-    const finalTotal = perNightIncl * days;
+    // ✅ NHÂN THEO SỐ ĐÊM (KHÔNG PHẢI SỐ NGÀY)
+    const roomPrice = perNightExcl * nights;
+    const taxAndFee = (perNightIncl - perNightExcl) * nights;
+    const finalTotal = perNightIncl * nights;
 
     const refIncl = rawRef
       ? computeDisplayPrice(rawRef, opts, "INCL_TAX")
       : null;
 
-    const originalTotal = refIncl ? refIncl * days : finalTotal;
+    const originalTotal = refIncl ? refIncl * nights : finalTotal;
 
     return { roomPrice, taxAndFee, finalTotal, originalTotal };
   }, [ratePlan, checkIn, checkOut]);

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getHotelAvailability } from "../services/bookingService";
+import { getHotelAvailability, createHotelBookingAndPay } from "../services/bookingService";
 
 export const fetchHotelAvailability = createAsyncThunk(
   "booking/fetchHotelAvailability",
@@ -10,13 +10,18 @@ export const fetchHotelAvailability = createAsyncThunk(
   }
 );
 
+export const createHotelPayment = createAsyncThunk(
+  "booking/createHotelPayment",
+  async (payload, { rejectWithValue }) => {
+    const res = await createHotelBookingAndPay(payload);
+    if (res.success) return res.data; // { bookingCode, payUrl, ... }
+    return rejectWithValue(res.message || "Lỗi tạo thanh toán");
+  }
+);
+
 const initialState = {
-  hotelAvailability: {
-    loading: false,
-    error: null,
-    data: null,      // { remainingRooms, isEnough, requestedRooms }
-    lastQuery: null,
-  },
+  hotelAvailability: { loading: false, error: null, data: null, lastQuery: null },
+  payment: { loading: false, error: null, data: null },
 };
 
 const bookingSlice = createSlice({
@@ -25,6 +30,7 @@ const bookingSlice = createSlice({
   reducers: {
     clearBookingErrors(state) {
       state.hotelAvailability.error = null;
+      state.payment.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -41,7 +47,20 @@ const bookingSlice = createSlice({
       .addCase(fetchHotelAvailability.rejected, (state, action) => {
         state.hotelAvailability.loading = false;
         state.hotelAvailability.error = action.payload || "Lỗi kiểm tra phòng trống";
-      });
+      })
+      .addCase(createHotelPayment.pending, (state) => {
+        state.payment.loading = true;
+        state.payment.error = null;
+        state.payment.data = null;
+      })
+      .addCase(createHotelPayment.fulfilled, (state, action) => {
+        state.payment.loading = false;
+        state.payment.data = action.payload || null;
+      })
+      .addCase(createHotelPayment.rejected, (state, action) => {
+        state.payment.loading = false;
+        state.payment.error = action.payload || "Lỗi tạo thanh toán";
+      })
   },
 });
 
