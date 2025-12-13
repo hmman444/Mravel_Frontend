@@ -1,25 +1,19 @@
 // src/features/user/services/userProfileService.js
-import axios from "axios";
+import api from "../../../utils/axiosInstance";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-export const updateMyProfile = async (payload, accessToken) => {
+export const updateMyProfile = async (payload) => {
   try {
-    const res = await axios.put(`${API_URL}/users/me`, payload, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+    const res = await api.put("/users/me", payload);
 
-    // Backend user-service trả trực tiếp UserProfileResponse
-    // => wrap lại cho giống style các service khác
     return {
       success: true,
-      data: res.data,
+      data: res.data, 
     };
   } catch (error) {
-    console.error("❌ updateMyProfile error:", error.response?.data || error.message);
+    console.error(
+      "❌ updateMyProfile error:",
+      error.response?.data || error.message
+    );
 
     const message =
       error.response?.data?.message ||

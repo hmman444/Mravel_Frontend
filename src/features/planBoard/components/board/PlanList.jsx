@@ -10,7 +10,7 @@ import PlanCard from "./PlanCard";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-
+import { FaMapMarkerAlt } from "react-icons/fa";
 const ACTIVITY_TYPES = [
   {
     id: "TRANSPORT",
@@ -81,11 +81,9 @@ export default function PlanList({
   list,
   index,
   isTrash,
-  dayNumber,
   editingListId,
   setEditingListId,
   renameList,
-  setEditCard, // chưa dùng, giữ lại
   duplicateCard,
   activeListMenu,
   setActiveListMenu,
@@ -94,11 +92,11 @@ export default function PlanList({
   toggleDone,
   setConfirmDeleteCard,
   setConfirmDeleteList,
-  deleteList,
   duplicateList,
   canEdit = true,
   onActivityTypeSelected,
   onOpenActivityModal,
+  onOpenListMap,
 }) {
   const [tempTitle, setTempTitle] = useState(list.title || "");
   const [showTypePicker, setShowTypePicker] = useState(false);
@@ -157,7 +155,7 @@ export default function PlanList({
               <>
                 <button
                   onClick={() => {
-                    duplicateList(list);
+                    duplicateList(list.id);
                     setActiveListMenu(null);
                   }}
                   className="flex items-center w-full px-3 py-2 text-sm 
@@ -312,10 +310,6 @@ export default function PlanList({
             <div className={headerClass} {...provided.dragHandleProps}>
               <div className="flex items-start justify-between gap-2 w-full">
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    {dayNumber ? `Ngày ${dayNumber}` : "Danh sách"}
-                  </span>
-
                   {editingListId === list.id ? (
                     <input
                       value={tempTitle}
@@ -343,7 +337,21 @@ export default function PlanList({
                     )
                   )}
                 </div>
+                <div className="flex items-center gap-1">
+                  {/* nút xem map ngày */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenListMap?.();
+                    }}
+                    className="p-1.5 rounded-lg text-sky-600 hover:bg-sky-50 dark:text-sky-300 dark:hover:bg-sky-900/40 text-[11px] flex items-center gap-1"
+                  >
+                    <FaMapMarkerAlt className="text-[11px]" />
+                    <span className="hidden lg:inline">Bản đồ</span>
+                  </button>
 
+                </div>
                 <button
                   ref={btnRef}
                   onClick={(e) => {

@@ -1,3 +1,4 @@
+// src/features/planBoard/components/modals/CinemaActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -9,14 +10,24 @@ import {
   FaChair,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import TimePicker from "../../../../components/TimePicker";
 
-import ActivityModalShell from "../ActivityModalShell";
-import SplitMoneySection from "../SplitMoneySection";
-import ExtraCostsSection from "../ExtraCostsSection";
-import PlacePickerModal from "../PlacePickerModal";
-import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
-import { inputBase, sectionCard, pillBtn } from "../activityStyles";
+import ActivityModalShell from "./ActivityModalShell";
+import SplitMoneySection from "./SplitMoneySection";
+import ExtraCostsSection from "./ExtraCostsSection";
+import PlacePickerModal from "./PlacePickerModal";
+
+import ActivityTimeRangeSection from "./ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "./ActivityHeaderCostSummary";
+import ActivityFooterSummary from "./ActivityFooterSummary";
+import ActivityFooterButtons from "./ActivityFooterButtons";
+
+import { inputBase, sectionCard, pillBtn } from "../../utils/activityStyles";
+import { useSplitMoney } from "../../hooks/useSplitMoney";
+import {
+  buildInitialExtraCosts,
+  normalizeExtraCosts,
+  calcExtraTotal,
+} from "../../utils/costUtils";
 
 const FORMATS = [
   { value: "2D", label: "2D" },
@@ -45,6 +56,7 @@ export default function CinemaActivityModal({
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
   const [format, setFormat] = useState("2D");
   const [seats, setSeats] = useState("");
@@ -58,26 +70,15 @@ export default function CinemaActivityModal({
   // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [splitType, setSplitType] = useState("EVEN");
-  const [participantCount, setParticipantCount] = useState("2");
-  const [splitNames, setSplitNames] = useState([]);
-  const [exactAmounts, setExactAmounts] = useState([]);
-
-  // payer: "", "member:<id>", "external"
-  const [payerChoice, setPayerChoice] = useState("");
-  const [payerExternalName, setPayerExternalName] = useState("");
-
-  // ===== PLACE PICKER =====
+  // place picker
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalCinemaLocation, setInternalCinemaLocation] = useState(null);
   const effectiveCinemaLocation = internalCinemaLocation || null;
 
-  // ===== ERRORS =====
+  // errors
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD KHI EDIT =====
+  // ===== LOAD DỮ LIỆU =====
   useEffect(() => {
     if (!open) return;
 
@@ -88,7 +89,6 @@ export default function CinemaActivityModal({
         ? JSON.parse(editingCard.activityDataJson)
         : {};
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {};
 
       setTitle(editingCard.text || "");
       setCinemaName(data.cinemaName || "");
@@ -108,57 +108,15 @@ export default function CinemaActivityModal({
 
       setStartTime(loadedStart);
       setEndTime(loadedEnd);
+      setDurationMinutes(null); // để ActivityTimeRangeSection tính lại
 
       setTicketPrice(
         data.ticketPrice != null ? String(data.ticketPrice) : ""
       );
-      setComboPrice(data.comboPrice != null ? String(data.comboPrice) : "");
+      setComboPrice(
+        data.comboPrice != null ? String(data.comboPrice) : ""
+      );
 
-      // extraCosts: map từ data.extraItems / cost.extraCosts / extraSpend cũ
-      let extras = [];
-      if (
-        data.extraItems &&
-        Array.isArray(data.extraItems) &&
-        data.extraItems.length > 0
-      ) {
-        extras = data.extraItems.map((it) => ({
-          reason: it.reason || it.note || "Chi phí phát sinh",
-          type: it.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            it.actualAmount != null
-              ? it.actualAmount
-              : it.amount != null
-              ? Number(it.amount)
-              : 0,
-        }));
-      } else if (
-        cost.extraCosts &&
-        Array.isArray(cost.extraCosts) &&
-        cost.extraCosts.length > 0
-      ) {
-        extras = cost.extraCosts.map((e) => ({
-          reason: e.reason || "Chi phí phát sinh",
-          type: e.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            e.actualAmount != null && e.actualAmount !== ""
-              ? Number(e.actualAmount)
-              : 0,
-        }));
-      } else if (data.extraSpend != null) {
-        extras = [
-          {
-            reason: "Chi phí phát sinh",
-            type: "OTHER",
-            estimatedAmount: null,
-            actualAmount: Number(data.extraSpend) || 0,
-          },
-        ];
-      }
-      setExtraCosts(extras);
-
-      // THỰC TẾ: ưu tiên activityData, sau đó cost.actualCost
       if (data.actualCost != null) {
         setActualCost(String(data.actualCost));
       } else if (cost.actualCost != null) {
@@ -175,69 +133,13 @@ export default function CinemaActivityModal({
 
       setNote(editingCard.description || "");
 
+      // extraCosts: dùng helper chung
+      setExtraCosts(buildInitialExtraCosts(data, cost));
+
       if (data.cinemaLocation) {
         setInternalCinemaLocation(data.cinemaLocation);
       } else {
         setInternalCinemaLocation(null);
-      }
-
-      // ===== LOAD SPLIT =====
-      if (split.splitType && split.splitType !== "NONE") {
-        setSplitEnabled(true);
-        setSplitType(split.splitType);
-
-        const pc =
-          cost.participantCount ||
-          (split.splitMembers && split.splitMembers.length) ||
-          (split.splitDetails && split.splitDetails.length) ||
-          editingCard.participantCount ||
-          2;
-
-        setParticipantCount(String(pc));
-
-        let names = [];
-        if (split.splitMembers && split.splitMembers.length) {
-          names = split.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
-
-        if (split.splitType === "EXACT" && split.splitDetails) {
-          setExactAmounts(
-            split.splitDetails.map((d) =>
-              d.amount != null ? String(d.amount) : ""
-            )
-          );
-        } else {
-          setExactAmounts([]);
-        }
-
-        setPayerChoice("");
-        setPayerExternalName("");
-        if (split.payerId) {
-          setPayerChoice(`member:${split.payerId}`);
-        } else if (split.payments && split.payments.length > 0) {
-          const first = split.payments[0];
-          const payer = first && first.payer;
-          if (payer) {
-            if (payer.external || !payer.memberId) {
-              setPayerChoice("external");
-              setPayerExternalName(payer.displayName || "");
-            } else if (payer.memberId) {
-              setPayerChoice(`member:${payer.memberId}`);
-            }
-          }
-        }
-      } else {
-        setSplitEnabled(false);
-        setSplitType("EVEN");
-        setParticipantCount("2");
-        setSplitNames([]);
-        setExactAmounts([]);
-        setPayerChoice("");
-        setPayerExternalName("");
       }
     } else {
       // reset khi tạo mới
@@ -250,6 +152,7 @@ export default function CinemaActivityModal({
 
       setStartTime("");
       setEndTime("");
+      setDurationMinutes(null);
 
       setTicketPrice("");
       setComboPrice("");
@@ -258,19 +161,11 @@ export default function CinemaActivityModal({
       setNote("");
       setExtraCosts([]);
 
-      setSplitEnabled(false);
-      setSplitType("EVEN");
-      setParticipantCount("2");
-      setSplitNames([]);
-      setExactAmounts([]);
-      setPayerChoice("");
-      setPayerExternalName("");
-
       setInternalCinemaLocation(null);
     }
   }, [open, editingCard]);
 
-  // SYNC location từ PlacePicker vào rạp + địa chỉ
+  // sync location từ PlacePicker vào rạp + địa chỉ
   useEffect(() => {
     if (!effectiveCinemaLocation) return;
 
@@ -301,10 +196,7 @@ export default function CinemaActivityModal({
   }, [ticketPrice, comboPrice]);
 
   const extraTotal = useMemo(
-    () =>
-      extraCosts
-        .map((e) => Number(e.actualAmount) || 0)
-        .reduce((a, b) => a + b, 0),
+    () => calcExtraTotal(extraCosts),
     [extraCosts]
   );
 
@@ -316,82 +208,39 @@ export default function CinemaActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ===== DURATION =====
-  const computeDurationMinutes = () => {
-    if (!startTime || !endTime) return null;
-    const [sh, sm] = startTime.split(":").map(Number);
-    const [eh, em] = endTime.split(":").map(Number);
-    if (
-      Number.isNaN(sh) ||
-      Number.isNaN(sm) ||
-      Number.isNaN(eh) ||
-      Number.isNaN(em)
-    ) {
-      return null;
-    }
-    let diff = eh * 60 + em - (sh * 60 + sm);
-    if (diff <= 0) return null;
-    return diff;
-  };
-
-  const durationMinutes = computeDurationMinutes();
-
-  // ===== SPLIT UTILS =====
-  const handleParticipantCount = (value) => {
-    setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
-
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-  };
-
-  const splitBase = useMemo(
-    () =>
-      buildSplitBase({
-        splitEnabled,
-        splitType,
-        participantCount,
-        splitNames,
-        exactAmounts,
-        payerChoice,
-        payerExternalName,
-        planMembers,
-        parsedActual,
-      }),
-    [
-      splitEnabled,
-      splitType,
-      participantCount,
-      splitNames,
-      exactAmounts,
-      payerChoice,
-      payerExternalName,
-      planMembers,
-      parsedActual,
-    ]
-  );
+  // ===== HOOK CHIA TIỀN CHUNG =====
+  const splitHook = useSplitMoney({
+    editingCard,
+    planMembers,
+    parsedActual,
+  });
 
   const {
+    splitEnabled,
+    setSplitEnabled,
+    splitType,
+    setSplitType,
+    participantCount,
+    handleParticipantCount,
+    splitNames,
+    setSplitNames,
+    exactAmounts,
+    setExactAmounts,
+    payerChoice,
+    setPayerChoice,
+    payerExternalName,
+    setPayerExternalName,
+    selectedMemberIds,
+    setSelectedMemberIds,
     parsedParticipants,
     participants,
     split: splitPayload,
     evenShare,
     evenRemainder,
     totalExact,
-  } = splitBase;
+  } = splitHook;
 
-  // ===== EXTRA COSTS HANDLER =====
+  // ===== EXTRA COST CRUD =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -407,44 +256,29 @@ export default function CinemaActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD (cost + split + participants) =====
+  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
-    const normalizedExtraCosts = extraCosts
-      .map((e) => ({
-        reason: e.reason || "Chi phí phát sinh",
-        type: e.type || "OTHER",
-        estimatedAmount: null,
-        actualAmount:
-          e.actualAmount !== undefined &&
-          e.actualAmount !== null &&
-          e.actualAmount !== ""
-            ? Number(e.actualAmount)
-            : 0,
-      }))
-      .filter(
-        (e) =>
-          (e.actualAmount && e.actualAmount > 0) ||
-          (e.reason && e.reason.trim() !== "")
-      );
+    const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
+    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
-    const extraTotalNormalized = normalizedExtraCosts
-      .map((e) => e.actualAmount || 0)
-      .reduce((a, b) => a + b, 0);
+    const normalizedParticipants = participants.map((p) =>
+      typeof p === "number" ? p : p?.memberId
+    );
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedCost > 0 ? estimatedCost : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      participants: normalizedParticipants,
       extraCosts: normalizedExtraCosts,
     };
 
     return {
       cost,
       split: splitPayload,
-      participants,
+      participants: normalizedParticipants,
       normalizedExtraCosts,
       extraTotal: extraTotalNormalized,
     };
@@ -512,89 +346,59 @@ export default function CinemaActivityModal({
   };
 
   // ===== HEADER / FOOTER =====
-  const headerRight =
-    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
-      <div className="hidden sm:flex flex-col items-end text-xs">
-        {parsedActual > 0 && (
-          <>
-            <span className="text-slate-500 dark:text-slate-400">
-              Tổng chi dùng để chia
-            </span>
-            <span className="text-sm font-semibold text-rose-600 dark:text-rose-400">
-              {parsedActual.toLocaleString("vi-VN")}đ
-            </span>
-          </>
-        )}
-        {budgetAmount && Number(budgetAmount) > 0 && (
-          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            Ngân sách:{" "}
-            <b className="text-slate-700 dark:text-slate-100">
-              {Number(budgetAmount).toLocaleString("vi-VN")}đ
-            </b>
-          </span>
-        )}
-      </div>
-    ) : null;
+  const headerRight = (
+    <ActivityHeaderCostSummary
+      parsedActual={parsedActual}
+      budgetAmount={budgetAmount}
+      accentClass="text-rose-600 dark:text-rose-400"
+    />
+  );
 
   const footerLeft = (
-    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
-      <span>
-        {movieName
-          ? `Xem phim: ${movieName}`
-          : "Điền tên phim và rạp để lưu hoạt động xem phim."}
-      </span>
-      {(effectiveCinemaLocation || cinemaName) && (
-        <span>
-          Rạp:{" "}
-          <b>
-            {effectiveCinemaLocation?.label ||
+    <ActivityFooterSummary
+      labelPrefix="Xem phim"
+      name={movieName}
+      emptyLabelText="Điền tên phim và rạp để lưu hoạt động xem phim."
+      locationText={
+        effectiveCinemaLocation ||
+        cinemaName ||
+        address
+          ? `Rạp: ${
+              effectiveCinemaLocation?.label ||
               effectiveCinemaLocation?.name ||
-              cinemaName}
-          </b>
-        </span>
-      )}
-      {(effectiveCinemaLocation || address) && (
-        <span>
-          Địa chỉ:{" "}
-          <b>
-            {effectiveCinemaLocation?.address ||
+              cinemaName ||
+              "Chưa rõ rạp"
+            }${
+              effectiveCinemaLocation?.address ||
               effectiveCinemaLocation?.fullAddress ||
-              address}
-          </b>
-        </span>
-      )}
-      {startTime && endTime && durationMinutes != null && !errors.time && (
-        <span>
-          Suất:{" "}
-          <b>
-            {startTime} - {endTime} ({durationMinutes} phút)
-          </b>
-        </span>
-      )}
-    </div>
+              address
+                ? ` – Địa chỉ: ${
+                    effectiveCinemaLocation?.address ||
+                    effectiveCinemaLocation?.fullAddress ||
+                    address
+                  }`
+                : ""
+            }`
+          : ""
+      }
+      timeText={
+        startTime &&
+        endTime &&
+        durationMinutes != null &&
+        !errors.time
+          ? `Suất: ${startTime} - ${endTime} (${durationMinutes} phút)`
+          : ""
+      }
+    />
   );
 
   const footerRight = (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
-        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
-        dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-      >
-        Hủy
-      </button>
-      <button
-        onClick={handleSubmit}
-        type="button"
-        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 
-        text-white text-xs sm:text-sm font-semibold shadow-lg shadow-rose-500/30 hover:shadow-xl
-        hover:brightness-105 active:scale-[0.98] transition"
-      >
-        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động xem phim"}
-      </button>
-    </div>
+    <ActivityFooterButtons
+      onCancel={onClose}
+      onSubmit={handleSubmit}
+      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động xem phim"}
+      submitClassName="bg-gradient-to-r from-rose-500 to-pink-500 shadow-lg shadow-rose-500/30"
+    />
   );
 
   return (
@@ -752,83 +556,25 @@ export default function CinemaActivityModal({
               )}
             </div>
 
-            {/* Thời gian chiếu: bắt đầu / kết thúc */}
+            {/* Thời gian chiếu: dùng ActivityTimeRangeSection */}
             <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Thời gian chiếu
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-rose-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Bắt đầu
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={startTime}
-                      onChange={(val) => {
-                        setStartTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="rose"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-rose-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Kết thúc
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={endTime}
-                      onChange={(val) => {
-                        setEndTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="rose"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {errors.time && (
-                <p className="mt-1.5 text-[11px] text-rose-500">
-                  {errors.time}
-                </p>
-              )}
-
-              {durationMinutes != null && !errors.time && (
-                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  Thời lượng ước tính:{" "}
-                  <span className="font-semibold">{durationMinutes} phút</span>
-                </p>
-              )}
+              <ActivityTimeRangeSection
+                sectionLabel="Thời gian chiếu"
+                startLabel="Bắt đầu"
+                endLabel="Kết thúc"
+                color="rose"
+                iconClassName="text-rose-500"
+                startTime={startTime}
+                endTime={endTime}
+                onStartTimeChange={(val) => setStartTime(val)}
+                onEndTimeChange={(val) => setEndTime(val)}
+                error={errors.time}
+                onErrorChange={(msg) =>
+                  setErrors((prev) => ({ ...prev, time: msg }))
+                }
+                onDurationChange={(mins) => setDurationMinutes(mins)}
+                durationHintPrefix="Thời lượng ước tính"
+              />
             </div>
           </div>
         </section>
@@ -1065,6 +811,8 @@ export default function CinemaActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 

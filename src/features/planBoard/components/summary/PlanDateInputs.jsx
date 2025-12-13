@@ -1,7 +1,7 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
-import { showError } from "../../../utils/toastUtils";
+import { showError } from "../../../../utils/toastUtils";
 
 export default function PlanDateInputs({
   startDate,
@@ -68,7 +68,7 @@ export default function PlanDateInputs({
               overflow-hidden bg-white dark:bg-gray-800 animate-fadeIn
             "
             dayClassName={(date) =>
-              `w-9 h-9 flex items-center justify-center rounded-lg text-sm transition
+              `w-9 h-8 flex items-center justify-center rounded-lg text-sm transition
                ${
                  date.getTime() === startDate?.getTime()
                    ? "bg-blue-500 text-white"
@@ -127,7 +127,7 @@ export default function PlanDateInputs({
               overflow-hidden bg-white dark:bg-gray-800 animate-fadeIn
             "
             dayClassName={(date) =>
-              `w-9 h-9 flex items-center justify-center rounded-lg text-sm transition
+              `w-9 h-8 flex items-center justify-center rounded-lg text-sm transition
                ${
                  date.getTime() === endDate?.getTime()
                    ? "bg-blue-500 text-white"

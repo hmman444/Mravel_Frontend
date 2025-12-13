@@ -1,21 +1,33 @@
+// src/features/planBoard/components/modals/TransportActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import {
   FaTimes,
   FaRoute,
-  FaClock,
   FaMapMarkerAlt,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import TimePicker from "../../../../components/TimePicker";
+
 import { haversineDistanceKm } from "../../../planBoard/utils/distance";
-import ActivityModalShell from "../ActivityModalShell";
-import ExtraCostsSection from "../ExtraCostsSection";
-import SplitMoneySection from "../SplitMoneySection";
-import { inputBase, sectionCard, pillBtn } from "../activityStyles";
-import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
-import PlacePickerModal from "../PlacePickerModal";
+
+import ActivityModalShell from "./ActivityModalShell";
+import ExtraCostsSection from "./ExtraCostsSection";
+import SplitMoneySection from "./SplitMoneySection";
+import PlacePickerModal from "./PlacePickerModal";
+
+import ActivityTimeRangeSection from "./ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "./ActivityHeaderCostSummary";
+import ActivityFooterSummary from "./ActivityFooterSummary";
+import ActivityFooterButtons from "./ActivityFooterButtons";
+
+import { inputBase, sectionCard, pillBtn } from "../../utils/activityStyles";
+import { useSplitMoney } from "../../hooks/useSplitMoney";
+import {
+  buildInitialExtraCosts,
+  normalizeExtraCosts,
+  calcExtraTotal,
+} from "../../utils/costUtils";
 
 const TRANSPORT_METHODS = [
   { value: "taxi", label: "Taxi / Grab" },
@@ -48,26 +60,17 @@ export default function TransportActivityModal({
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
-  const [estimatedCost, setEstimatedCost] = useState("");
+  const [estimatedCostInput, setEstimatedCostInput] = useState("");
   const [budgetAmount, setBudgetAmount] = useState("");
   const [actualCost, setActualCost] = useState("");
 
   const [extraCosts, setExtraCosts] = useState([]);
   const [note, setNote] = useState("");
 
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [splitType, setSplitType] = useState("EVEN");
-  const [participantCount, setParticipantCount] = useState("2");
-  const [splitNames, setSplitNames] = useState([]);
-  const [exactAmounts, setExactAmounts] = useState([]);
-
-  const [payerChoice, setPayerChoice] = useState("");
-  const [payerExternalName, setPayerExternalName] = useState("");
-
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER LOCAL =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [placePickerField, setPlacePickerField] = useState(null); // "from" | "to"
   const [internalFromLocation, setInternalFromLocation] = useState(null);
@@ -76,7 +79,7 @@ export default function TransportActivityModal({
   const effectiveFromLocation = internalFromLocation || null;
   const effectiveToLocation = internalToLocation || null;
 
-  // ===== LOAD DATA =====
+  // ===== LOAD DỮ LIỆU KHI MỞ MODAL =====
   useEffect(() => {
     if (!open) return;
 
@@ -87,21 +90,45 @@ export default function TransportActivityModal({
         ? JSON.parse(editingCard.activityDataJson)
         : {};
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {};
+      const split = editingCard.split || {}; // useSplitMoney sẽ xử lý
 
       setTitle(editingCard.text || "");
+
       setFromPlace(data.fromPlace || "");
       setToPlace(data.toPlace || "");
       setStops(data.stops || []);
       setMethod(data.method || "taxi");
 
-      setStartTime(editingCard.startTime || "");
-      setEndTime(editingCard.endTime || "");
+      const loadedStart =
+        editingCard.startTime || data.startTime || data.time || "";
+      const loadedEnd =
+        editingCard.endTime ||
+        data.endTime ||
+        editingCard.startTime ||
+        data.time ||
+        "";
 
-      setEstimatedCost(
-        cost.estimatedCost !== undefined && cost.estimatedCost !== null
-          ? String(cost.estimatedCost)
-          : ""
+      setStartTime(loadedStart);
+      setEndTime(loadedEnd);
+      setDurationMinutes(null); // tính lại bằng ActivityTimeRangeSection
+
+      // Chi phí ước lượng (cước chính) — giữ logic cũ: lấy từ cost.estimatedCost hoặc activityData.estimatedCost
+      const baseFromData =
+        data.estimatedBase != null
+          ? data.estimatedBase
+          : data.estimatedCost != null
+          ? data.estimatedCost
+          : null;
+
+      const base =
+        baseFromData != null
+          ? baseFromData
+          : cost.estimatedCost != null
+          ? cost.estimatedCost
+          : null;
+
+      setEstimatedCostInput(
+        base !== null && base !== undefined ? String(base) : ""
       );
 
       setBudgetAmount(
@@ -118,72 +145,13 @@ export default function TransportActivityModal({
         setActualCost("");
       }
 
-      setExtraCosts(cost.extraCosts || []);
+      setExtraCosts(buildInitialExtraCosts(data, cost));
 
       setNote(editingCard.description || "");
 
       // load from/to location đã lưu trong activityData
       setInternalFromLocation(data.fromLocation || null);
       setInternalToLocation(data.toLocation || null);
-
-      // ===== LOAD SPLIT =====
-      if (split.splitType && split.splitType !== "NONE") {
-        setSplitEnabled(true);
-        setSplitType(split.splitType);
-
-        const pc =
-          cost.participantCount ||
-          (split.splitMembers && split.splitMembers.length) ||
-          (split.splitDetails && split.splitDetails.length) ||
-          editingCard.participantCount ||
-          2;
-
-        setParticipantCount(String(pc));
-
-        let names = [];
-        if (split.splitMembers && split.splitMembers.length) {
-          names = split.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
-
-        if (split.splitType === "EXACT" && split.splitDetails) {
-          setExactAmounts(
-            split.splitDetails.map((d) =>
-              d.amount != null ? String(d.amount) : ""
-            )
-          );
-        } else {
-          setExactAmounts([]);
-        }
-
-        setPayerChoice("");
-        setPayerExternalName("");
-        if (split.payerId) {
-          setPayerChoice(`member:${split.payerId}`);
-        } else if (split.payments && split.payments.length > 0) {
-          const first = split.payments[0];
-          const payer = first && first.payer;
-          if (payer) {
-            if (payer.external || !payer.memberId) {
-              setPayerChoice("external");
-              setPayerExternalName(payer.displayName || "");
-            } else if (payer.memberId) {
-              setPayerChoice(`member:${payer.memberId}`);
-            }
-          }
-        }
-      } else {
-        setSplitEnabled(false);
-        setSplitType("EVEN");
-        setParticipantCount("2");
-        setSplitNames([]);
-        setExactAmounts([]);
-        setPayerChoice("");
-        setPayerExternalName("");
-      }
     } else {
       // reset khi tạo mới
       setTitle("");
@@ -194,20 +162,13 @@ export default function TransportActivityModal({
 
       setStartTime("");
       setEndTime("");
+      setDurationMinutes(null);
 
-      setEstimatedCost("");
+      setEstimatedCostInput("");
       setBudgetAmount("");
       setActualCost("");
       setExtraCosts([]);
       setNote("");
-
-      setSplitEnabled(false);
-      setSplitType("EVEN");
-      setParticipantCount("2");
-      setSplitNames([]);
-      setExactAmounts([]);
-      setPayerChoice("");
-      setPayerExternalName("");
 
       setInternalFromLocation(null);
       setInternalToLocation(null);
@@ -216,26 +177,32 @@ export default function TransportActivityModal({
     }
   }, [open, editingCard]);
 
-  // đồng bộ text nếu có location (giống Stay)
+  // Đồng bộ text nếu có location (giống Stay)
   useEffect(() => {
     if (effectiveFromLocation) {
       const label =
         effectiveFromLocation.label ||
         effectiveFromLocation.name ||
         effectiveFromLocation.address ||
+        effectiveFromLocation.fullAddress ||
         "";
       if (label) setFromPlace(label);
     }
+  }, [effectiveFromLocation]);
+
+  useEffect(() => {
     if (effectiveToLocation) {
       const label =
         effectiveToLocation.label ||
         effectiveToLocation.name ||
         effectiveToLocation.address ||
+        effectiveToLocation.fullAddress ||
         "";
       if (label) setToPlace(label);
     }
-  }, [effectiveFromLocation, effectiveToLocation]);
+  }, [effectiveToLocation]);
 
+  // ===== GHÉ NGANG =====
   const addStop = () => setStops((prev) => [...prev, ""]);
 
   const changeStop = (v, idx) => {
@@ -248,7 +215,7 @@ export default function TransportActivityModal({
     setStops((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // ===== EXTRA COSTS HANDLER =====
+  // ===== EXTRA COSTS =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -264,62 +231,61 @@ export default function TransportActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== CHIA TIỀN =====
-  const handleParticipantCount = (value) => {
-    setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
+  // ===== TÍNH CHI PHÍ =====
+  const baseEstimated = useMemo(
+    () => Number(estimatedCostInput || 0),
+    [estimatedCostInput]
+  );
 
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
+  const extraTotal = useMemo(
+    () => calcExtraTotal(extraCosts),
+    [extraCosts]
+  );
 
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-  };
+  const estimatedTotal = useMemo(
+    () => baseEstimated + extraTotal,
+    [baseEstimated, extraTotal]
+  );
 
-  // ===== TÍNH TIỀN =====
-  const baseEstimated = Number(estimatedCost || 0);
-
-  const extraTotal = extraCosts
-    .map((e) => Number(e.actualAmount) || 0)
-    .reduce((a, b) => a + b, 0);
-
-  const estimatedTotal = baseEstimated + extraTotal;
-
-  const parsedActual = (() => {
+  const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
     if (a > 0) return a;
     return estimatedTotal;
-  })();
+  }, [actualCost, estimatedTotal]);
 
-  // ===== THỜI GIAN =====
-  const computeDurationMinutes = () => {
-    if (!startTime || !endTime) return null;
-    const [sh, sm] = startTime.split(":").map(Number);
-    const [eh, em] = endTime.split(":").map(Number);
-    if (
-      Number.isNaN(sh) ||
-      Number.isNaN(sm) ||
-      Number.isNaN(eh) ||
-      Number.isNaN(em)
-    ) {
-      return null;
-    }
-    let diff = eh * 60 + em - (sh * 60 + sm);
-    if (diff <= 0) return null;
-    return diff;
-  };
+  // ===== HOOK CHIA TIỀN DÙNG CHUNG =====
+  const splitHook = useSplitMoney({
+    editingCard,
+    planMembers,
+    parsedActual,
+  });
 
-  const durationMinutes = computeDurationMinutes();
+  const {
+    splitEnabled,
+    setSplitEnabled,
+    splitType,
+    setSplitType,
+    participantCount,
+    handleParticipantCount,
+    splitNames,
+    setSplitNames,
+    exactAmounts,
+    setExactAmounts,
+    payerChoice,
+    setPayerChoice,
+    payerExternalName,
+    setPayerExternalName,
+    selectedMemberIds,
+    setSelectedMemberIds,
+    parsedParticipants,
+    participants,
+    split: splitPayload,
+    evenShare,
+    evenRemainder,
+    totalExact,
+  } = splitHook;
 
-  // ===== KHOẢNG CÁCH & GOOGLE MAPS =====
+  // ===== DISTANCE / GOOGLE MAPS =====
   const distanceKm = useMemo(() => {
     if (!effectiveFromLocation || !effectiveToLocation) return null;
     return haversineDistanceKm(
@@ -337,81 +303,35 @@ export default function TransportActivityModal({
         )}&travelmode=driving`
       : null;
 
-  const splitBase = useMemo(
-    () =>
-      buildSplitBase({
-        splitEnabled,
-        splitType,
-        participantCount,
-        splitNames,
-        exactAmounts,
-        payerChoice,
-        payerExternalName,
-        planMembers,
-        parsedActual,
-      }),
-    [
-      splitEnabled,
-      splitType,
-      participantCount,
-      splitNames,
-      exactAmounts,
-      payerChoice,
-      payerExternalName,
-      planMembers,
-      parsedActual,
-    ]
-  );
-
-  const {
-    parsedParticipants,
-    participants,
-    split: splitPayload,
-    evenShare,
-    evenRemainder,
-    totalExact,
-  } = splitBase;
-
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
-    const normalizedExtraCosts = extraCosts
-      .map((e) => ({
-        reason: e.reason || "",
-        type: e.type || "OTHER",
-        estimatedAmount: null,
-        actualAmount:
-          e.actualAmount !== undefined &&
-          e.actualAmount !== null &&
-          e.actualAmount !== ""
-            ? Number(e.actualAmount)
-            : 0,
-      }))
-      .filter(
-        (e) =>
-          (e.actualAmount && e.actualAmount > 0) ||
-          (e.reason && e.reason.trim() !== "")
-      );
+    const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
+    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
+
+    const normalizedParticipants = participants.map((p) =>
+      typeof p === "number" ? p : p.memberId
+    );
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedTotal || null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      participants: normalizedParticipants,
       extraCosts: normalizedExtraCosts,
     };
 
     return {
       cost,
       split: splitPayload,
-      participants,
-      extraTotal,
-      estimatedTotal,
+      participants: normalizedParticipants,
       normalizedExtraCosts,
+      extraTotal: extraTotalNormalized,
     };
   };
 
+  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -423,11 +343,8 @@ export default function TransportActivityModal({
       newErrors.to = "Vui lòng chọn điểm đến.";
     }
 
-    if (startTime && endTime) {
-      // nếu đã chọn cả 2 thì bắt buộc kết thúc > bắt đầu
-      if (durationMinutes == null) {
-        newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
-    }
+    if (startTime && endTime && durationMinutes == null) {
+      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -437,7 +354,7 @@ export default function TransportActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, extraTotal, estimatedTotal } =
+    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
       buildPayload();
 
     onSubmit?.({
@@ -461,6 +378,10 @@ export default function TransportActivityModal({
         estimatedCost: estimatedTotal || null,
         actualCost: actualCost ? Number(actualCost) : null,
         extraTotal: extraTotal || null,
+        extraItems: normalizedExtraCosts,
+        time: startTime || "",
+        startTime,
+        endTime,
       },
       cost,
       split,
@@ -470,77 +391,49 @@ export default function TransportActivityModal({
   };
 
   // ===== HEADER / FOOTER =====
-  const headerRight =
-    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
-      <div className="hidden sm:flex flex-col items-end text-xs">
-        {parsedActual > 0 && (
-          <>
-            <span className="text-slate-500 dark:text-slate-400">
-              Tổng chi dùng để chia
-            </span>
-            <span className="text-sm font-semibold text-sky-600 dark:text-sky-400">
-              {parsedActual.toLocaleString("vi-VN")}đ
-            </span>
-          </>
-        )}
-        {budgetAmount && Number(budgetAmount) > 0 && (
-          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            Ngân sách:{" "}
-            <b className="text-slate-700 dark:text-slate-100">
-              {Number(budgetAmount).toLocaleString("vi-VN")}đ
-            </b>
-          </span>
-        )}
-      </div>
-    ) : null;
+  const headerRight = (
+    <ActivityHeaderCostSummary
+      parsedActual={parsedActual}
+      budgetAmount={budgetAmount}
+      accentClass="text-sky-600 dark:text-sky-400"
+    />
+  );
 
   const footerLeft = (
-    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
-      <span>
-        {fromPlace && toPlace
-          ? `Di chuyển: ${fromPlace} → ${toPlace}`
-          : "Điền đầy đủ điểm đi và điểm đến để lưu hoạt động."}
-      </span>
-      {distanceKm != null && (
-        <span>
-          Khoảng cách ước tính: <b>{distanceKm.toFixed(1)} km</b>
-        </span>
-      )}
-      {startTime && endTime && durationMinutes != null && (
-        <span>
-          Thời gian:{" "}
-          <b>
-            {startTime} - {endTime} ({durationMinutes} phút)
-          </b>
-        </span>
-      )}
-    </div>
+    <ActivityFooterSummary
+      labelPrefix="Di chuyển"
+      name={
+        fromPlace && toPlace ? `${fromPlace} → ${toPlace} (Khoảng cách ước tính: ${distanceKm.toFixed(1)} km)` : ""
+      }
+      emptyLabelText="Điền đầy đủ điểm đi và điểm đến để lưu hoạt động."
+      locationText={
+        distanceKm != null
+          ? ` ${effectiveFromLocation.address} → ${effectiveToLocation.address}`
+          : ""
+      }
+      timeText={
+        startTime &&
+        endTime &&
+        durationMinutes != null &&
+        !errors.time
+          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          : ""
+      }
+    />
   );
 
   const footerRight = (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
-        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
-         dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-      >
-        Hủy
-      </button>
-      <button
-        onClick={handleSubmit}
-        type="button"
-        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 via-sky-500
-         to-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-sky-500/30 hover:shadow-xl
-          hover:brightness-105 active:scale-[0.98] transition"
-      >
-        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động di chuyển"}
-      </button>
-    </div>
+    <ActivityFooterButtons
+      onCancel={onClose}
+      onSubmit={handleSubmit}
+      submitLabel={
+        editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động di chuyển"
+      }
+      submitClassName="bg-gradient-to-r from-sky-500 via-sky-500 to-indigo-500 shadow-lg shadow-sky-500/30"
+    />
   );
 
-  // ====== ANCHOR POINT CHO PLACE PICKER ======
+  // Anchor cho PlacePicker (focus vào đầu/cuối route)
   let anchorPoint = null;
   if (placePickerField === "from" && effectiveToLocation?.lat != null) {
     anchorPoint = {
@@ -573,7 +466,7 @@ export default function TransportActivityModal({
         icon={{
           main: <FaRoute />,
           close: <FaTimes size={14} />,
-          bg: "from-sky-500  to-indigo-500",
+          bg: "from-sky-500 to-indigo-500",
         }}
         title="Hoạt động di chuyển"
         typeLabel="Transport"
@@ -588,8 +481,7 @@ export default function TransportActivityModal({
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Thông tin chung
             </label>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500
-           dark:text-slate-400">
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
               Tên + điểm đi/đến + điểm ghé
             </span>
           </div>
@@ -597,7 +489,7 @@ export default function TransportActivityModal({
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động
+                Tên hoạt động (tuỳ chọn)
               </label>
               <input
                 value={title}
@@ -620,8 +512,7 @@ export default function TransportActivityModal({
                     setPlacePickerField("from");
                     setPlacePickerOpen(true);
                   }}
-                  className={`
-                    group mt-1 w-full rounded-2xl border px-3 py-2.5
+                  className={`group mt-1 w-full rounded-2xl border px-3 py-2.5
                     flex items-start gap-3 text-left
                     bg-white/90 dark:bg-slate-900/80
                     border-slate-200/80 dark:border-slate-700
@@ -632,8 +523,7 @@ export default function TransportActivityModal({
                       errors.from
                         ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
                         : ""
-                    }
-                  `}
+                    }`}
                 >
                   <div
                     className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
@@ -720,8 +610,7 @@ export default function TransportActivityModal({
                     setPlacePickerField("to");
                     setPlacePickerOpen(true);
                   }}
-                  className={`
-                    group mt-1 w-full rounded-2xl border px-3 py-2.5
+                  className={`group mt-1 w-full rounded-2xl border px-3 py-2.5
                     flex items-start gap-3 text-left
                     bg-white/90 dark:bg-slate-900/80
                     border-slate-200/80 dark:border-slate-700
@@ -732,8 +621,7 @@ export default function TransportActivityModal({
                       errors.to
                         ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
                         : ""
-                    }
-                  `}
+                    }`}
                 >
                   <div
                     className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
@@ -824,6 +712,7 @@ export default function TransportActivityModal({
               )}
             </div>
 
+            {/* GHÉ NGANG */}
             <div className="pt-1 mt-2">
               <div className="flex items-center justify-between gap-2">
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
@@ -877,6 +766,7 @@ export default function TransportActivityModal({
           </div>
 
           <div className={sectionCard + " space-y-3"}>
+            {/* Phương tiện */}
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 Phương tiện
@@ -899,89 +789,24 @@ export default function TransportActivityModal({
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Thời gian
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/80 border border-slate-200/80
-                    dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={`${
-                      errors.time ? "text-rose-500" : "text-sky-500"
-                    }`}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Bắt đầu
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={startTime}
-                      onChange={(val) => {
-                        setStartTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="sky"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/80 border border-slate-200/80 
-                    dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={`${
-                      errors.time ? "text-rose-500" : "text-sky-500"
-                    }`}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Kết thúc
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={endTime}
-                      onChange={(val) => {
-                        setEndTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="sky"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {errors.time && (
-                <p className="mt-1.5 text-[11px] text-rose-500">
-                  {errors.time}
-                </p>
-              )}
-
-              {durationMinutes != null && !errors.time && (
-                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  Thời lượng dự kiến:{" "}
-                  <span className="font-semibold">{durationMinutes} phút</span>
-                </p>
-              )}
-            </div>
+            {/* Thời gian: dùng ActivityTimeRangeSection */}
+            <ActivityTimeRangeSection
+              sectionLabel="Thời gian di chuyển"
+              startLabel="Bắt đầu"
+              endLabel="Kết thúc"
+              color="sky"
+              iconClassName="text-sky-500"
+              startTime={startTime}
+              endTime={endTime}
+              onStartTimeChange={(val) => setStartTime(val)}
+              onEndTimeChange={(val) => setEndTime(val)}
+              error={errors.time}
+              onErrorChange={(msg) =>
+                setErrors((prev) => ({ ...prev, time: msg }))
+              }
+              onDurationChange={(mins) => setDurationMinutes(mins)}
+              durationHintPrefix="Thời lượng dự kiến"
+            />
           </div>
         </section>
 
@@ -997,6 +822,7 @@ export default function TransportActivityModal({
           </div>
 
           <div className={sectionCard + " space-y-4"}>
+            {/* Ước lượng + ngân sách */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
@@ -1007,8 +833,8 @@ export default function TransportActivityModal({
                   <input
                     type="number"
                     min="0"
-                    value={estimatedCost}
-                    onChange={(e) => setEstimatedCost(e.target.value)}
+                    value={estimatedCostInput}
+                    onChange={(e) => setEstimatedCostInput(e.target.value)}
                     className={`${inputBase} flex-1`}
                     placeholder="VD: 50.000"
                   />
@@ -1035,16 +861,16 @@ export default function TransportActivityModal({
               </div>
             </div>
 
-            <div>
-              <ExtraCostsSection
-                extraCosts={extraCosts}
-                addExtraCost={addExtraCost}
-                updateExtraCost={updateExtraCost}
-                removeExtraCost={removeExtraCost}
-                extraTypes={EXTRA_TYPES}
-              />
-            </div>
+            {/* Extra costs */}
+            <ExtraCostsSection
+              extraCosts={extraCosts}
+              addExtraCost={addExtraCost}
+              updateExtraCost={updateExtraCost}
+              removeExtraCost={removeExtraCost}
+              extraTypes={EXTRA_TYPES}
+            />
 
+            {/* Chi phí thực tế */}
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 Tổng chi phí thực tế cho chuyến này (nếu có)
@@ -1067,6 +893,7 @@ export default function TransportActivityModal({
               </p>
             </div>
 
+            {/* Tóm tắt chi phí */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
                 Cước chính ước lượng:{" "}
@@ -1129,6 +956,8 @@ export default function TransportActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 

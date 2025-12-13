@@ -1,3 +1,4 @@
+// src/features/planBoard/components/modals/ShoppingActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -8,16 +9,25 @@ import {
   FaMoneyBillWave,
   FaPlus,
   FaTrashAlt,
-  FaClock,
 } from "react-icons/fa";
-import TimePicker from "../../../../components/TimePicker";
 
-import ActivityModalShell from "../ActivityModalShell";
-import SplitMoneySection from "../SplitMoneySection";
-import ExtraCostsSection from "../ExtraCostsSection";
-import PlacePickerModal from "../PlacePickerModal";
-import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
-import { inputBase, sectionCard } from "../activityStyles";
+import ActivityModalShell from "./ActivityModalShell";
+import SplitMoneySection from "./SplitMoneySection";
+import ExtraCostsSection from "./ExtraCostsSection";
+import PlacePickerModal from "./PlacePickerModal";
+
+import ActivityTimeRangeSection from "./ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "./ActivityHeaderCostSummary";
+import ActivityFooterSummary from "./ActivityFooterSummary";
+import ActivityFooterButtons from "./ActivityFooterButtons";
+
+import { inputBase, sectionCard } from "../../utils/activityStyles";
+import { useSplitMoney } from "../../hooks/useSplitMoney";
+import {
+  buildInitialExtraCosts,
+  normalizeExtraCosts,
+  calcExtraTotal,
+} from "../../utils/costUtils";
 
 const EXTRA_TYPES = [
   { value: "SHIPPING", label: "Phí ship" },
@@ -41,33 +51,21 @@ export default function ShoppingActivityModal({
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
   const [budgetAmount, setBudgetAmount] = useState("");
   const [actualCost, setActualCost] = useState("");
 
-  // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ==== CHIA TIỀN ====
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [splitType, setSplitType] = useState("EVEN");
-  const [participantCount, setParticipantCount] = useState("2");
-  const [splitNames, setSplitNames] = useState([]);
-  const [exactAmounts, setExactAmounts] = useState([]);
-
-  const [payerChoice, setPayerChoice] = useState("");
-  const [payerExternalName, setPayerExternalName] = useState("");
-
-  // ==== ERRORS ====
   const [errors, setErrors] = useState({});
 
-  // ==== PLACE PICKER ====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalShoppingLocation, setInternalShoppingLocation] =
     useState(null);
   const effectiveShoppingLocation = internalShoppingLocation || null;
 
-  // ==== LOAD DATA ====
+  // ===== LOAD DỮ LIỆU =====
   useEffect(() => {
     if (!open) return;
 
@@ -78,6 +76,7 @@ export default function ShoppingActivityModal({
         ? JSON.parse(editingCard.activityDataJson)
         : {};
       const cost = editingCard.cost || {};
+
       const split = editingCard.split || {};
 
       setTitle(editingCard.text || "");
@@ -97,16 +96,18 @@ export default function ShoppingActivityModal({
       );
       setNote(editingCard.description || "");
 
-      setStartTime(
-        editingCard.startTime || data.startTime || data.time || ""
-      );
-      setEndTime(
+      const loadedStart =
+        editingCard.startTime || data.startTime || data.time || "";
+      const loadedEnd =
         editingCard.endTime ||
-          data.endTime ||
-          editingCard.startTime ||
-          data.time ||
-          ""
-      );
+        data.endTime ||
+        editingCard.startTime ||
+        data.time ||
+        "";
+
+      setStartTime(loadedStart);
+      setEndTime(loadedEnd);
+      setDurationMinutes(null); // để ActivityTimeRangeSection tính lại
 
       if (cost.budgetAmount != null) {
         setBudgetAmount(String(cost.budgetAmount));
@@ -122,113 +123,13 @@ export default function ShoppingActivityModal({
         setActualCost("");
       }
 
-      // extraCosts: map từ nhiều format cũ về format chung
-      let extras = [];
-      if (
-        data.extraItems &&
-        Array.isArray(data.extraItems) &&
-        data.extraItems.length > 0
-      ) {
-        extras = data.extraItems.map((it) => ({
-          reason: it.reason || it.note || "Chi phí phụ",
-          type: it.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            it.actualAmount != null
-              ? it.actualAmount
-              : it.amount != null
-              ? Number(it.amount)
-              : 0,
-        }));
-      } else if (
-        cost.extraCosts &&
-        Array.isArray(cost.extraCosts) &&
-        cost.extraCosts.length > 0
-      ) {
-        extras = cost.extraCosts.map((e) => ({
-          reason: e.reason || "Chi phí phụ",
-          type: e.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            e.actualAmount != null && e.actualAmount !== ""
-              ? Number(e.actualAmount)
-              : 0,
-        }));
-      } else if (data.extraSpend != null) {
-        extras = [
-          {
-            reason: "Chi phí phụ",
-            type: "OTHER",
-            estimatedAmount: null,
-            actualAmount: Number(data.extraSpend) || 0,
-          },
-        ];
-      }
-      setExtraCosts(extras);
+      // extraCosts: dùng helper chung
+      setExtraCosts(buildInitialExtraCosts(data, cost));
 
       if (data.shoppingLocation) {
         setInternalShoppingLocation(data.shoppingLocation);
       } else {
         setInternalShoppingLocation(null);
-      }
-
-      // ===== LOAD SPLIT =====
-      if (split.splitType && split.splitType !== "NONE") {
-        setSplitEnabled(true);
-        setSplitType(split.splitType);
-
-        const pc =
-          cost.participantCount ||
-          split.splitMembers?.length ||
-          split.splitDetails?.length ||
-          editingCard.participantCount ||
-          2;
-
-        setParticipantCount(String(pc));
-
-        let names = [];
-        if (split.splitMembers?.length) {
-          names = split.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
-
-        if (split.splitType === "EXACT" && split.splitDetails) {
-          setExactAmounts(
-            split.splitDetails.map((d) =>
-              d.amount != null ? String(d.amount) : ""
-            )
-          );
-        } else {
-          setExactAmounts([]);
-        }
-
-        setPayerChoice("");
-        setPayerExternalName("");
-        if (split.payerId) {
-          setPayerChoice(`member:${split.payerId}`);
-        } else if (split.payments && split.payments.length > 0) {
-          const first = split.payments[0];
-          const payer = first?.payer;
-          if (payer) {
-            if (payer.external || !payer.memberId) {
-              setPayerChoice("external");
-              setPayerExternalName(payer.displayName || "");
-            } else if (payer.memberId) {
-              setPayerChoice(`member:${payer.memberId}`);
-            }
-          }
-        }
-      } else {
-        setSplitEnabled(false);
-        setSplitType("EVEN");
-        setParticipantCount("2");
-        setSplitNames([]);
-        setExactAmounts([]);
-        setPayerChoice("");
-        setPayerExternalName("");
       }
     } else {
       // reset new
@@ -240,18 +141,11 @@ export default function ShoppingActivityModal({
 
       setStartTime("");
       setEndTime("");
+      setDurationMinutes(null);
 
       setBudgetAmount("");
       setActualCost("");
       setExtraCosts([]);
-
-      setSplitEnabled(false);
-      setSplitType("EVEN");
-      setParticipantCount("2");
-      setSplitNames([]);
-      setExactAmounts([]);
-      setPayerChoice("");
-      setPayerExternalName("");
 
       setInternalShoppingLocation(null);
     }
@@ -281,7 +175,7 @@ export default function ShoppingActivityModal({
     }
   }, [effectiveShoppingLocation]);
 
-  // ==== ITEMS UTILS ====
+  // ===== DANH SÁCH MÓN HÀNG =====
   const handleAddItem = () => {
     setItems((prev) => [...prev, { name: "", price: "" }]);
   };
@@ -298,7 +192,7 @@ export default function ShoppingActivityModal({
     setItems((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // ==== EXTRA COSTS HANDLER ====
+  // ===== EXTRA COSTS CRUD =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -314,7 +208,7 @@ export default function ShoppingActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ==== COST LOGIC ====
+  // ===== TÍNH CHI PHÍ =====
   const totalItemCost = useMemo(
     () =>
       items.reduce((sum, it) => {
@@ -325,10 +219,7 @@ export default function ShoppingActivityModal({
   );
 
   const extraTotal = useMemo(
-    () =>
-      extraCosts
-        .map((e) => Number(e.actualAmount) || 0)
-        .reduce((a, b) => a + b, 0),
+    () => calcExtraTotal(extraCosts),
     [extraCosts]
   );
 
@@ -343,130 +234,81 @@ export default function ShoppingActivityModal({
     return estimatedCost;
   }, [actualCost, estimatedCost]);
 
-  // ==== SPLIT UTILS (dùng buildSplitBase) ====
-  const handleParticipantCount = (value) => {
-    setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
-
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-  };
-
-  const splitBase = useMemo(
-    () =>
-      buildSplitBase({
-        splitEnabled,
-        splitType,
-        participantCount,
-        splitNames,
-        exactAmounts,
-        payerChoice,
-        payerExternalName,
-        planMembers,
-        parsedActual,
-      }),
-    [
-      splitEnabled,
-      splitType,
-      participantCount,
-      splitNames,
-      exactAmounts,
-      payerChoice,
-      payerExternalName,
-      planMembers,
-      parsedActual,
-    ]
-  );
+  // ===== HOOK CHIA TIỀN CHUNG =====
+  const splitHook = useSplitMoney({
+    editingCard,
+    planMembers,
+    parsedActual,
+  });
 
   const {
+    splitEnabled,
+    setSplitEnabled,
+    splitType,
+    setSplitType,
+    participantCount,
+    handleParticipantCount,
+    splitNames,
+    setSplitNames,
+    exactAmounts,
+    setExactAmounts,
+    payerChoice,
+    setPayerChoice,
+    payerExternalName,
+    setPayerExternalName,
+    selectedMemberIds,
+    setSelectedMemberIds,
     parsedParticipants,
     participants,
     split: splitPayload,
     evenShare,
     evenRemainder,
     totalExact,
-  } = splitBase;
+  } = splitHook;
 
-  // ==== THỜI LƯỢNG ====
-  const computeDurationMinutes = () => {
-    if (!startTime || !endTime) return null;
-    const [sh, sm] = startTime.split(":").map(Number);
-    const [eh, em] = endTime.split(":").map(Number);
-    if (
-      Number.isNaN(sh) ||
-      Number.isNaN(sm) ||
-      Number.isNaN(eh) ||
-      Number.isNaN(em)
-    ) {
-      return null;
-    }
-    let diff = eh * 60 + em - (sh * 60 + sm);
-    if (diff <= 0) return null;
-    return diff;
-  };
-
-  const durationMinutes = computeDurationMinutes();
-
-  // ==== BUILD PAYLOAD ====
+  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
-    const normalizedExtraCosts = extraCosts
-      .map((e) => ({
-        reason: e.reason || "Chi phí phụ",
-        type: e.type || "OTHER",
-        estimatedAmount: null,
-        actualAmount:
-          e.actualAmount !== undefined &&
-          e.actualAmount !== null &&
-          e.actualAmount !== ""
-            ? Number(e.actualAmount)
-            : 0,
-      }))
-      .filter(
-        (e) =>
-          (e.actualAmount && e.actualAmount > 0) ||
-          (e.reason && e.reason.trim() !== "")
-      );
+    const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
+    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
-    const extraTotalNormalized = normalizedExtraCosts
-      .map((e) => e.actualAmount || 0)
-      .reduce((a, b) => a + b, 0);
+    const filteredItems = items
+      .filter((it) => it.name.trim() || it.price)
+      .map((it) => ({
+        name: it.name.trim(),
+        price: it.price ? Number(it.price) : 0,
+      }));
+
+    const normalizedParticipants = participants.map((p) =>
+      typeof p === "number" ? p : p?.memberId
+    );
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedCost > 0 ? estimatedCost : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      participants: normalizedParticipants,
       extraCosts: normalizedExtraCosts,
     };
 
     return {
       cost,
       split: splitPayload,
-      participants,
+      participants: normalizedParticipants,
       normalizedExtraCosts,
       extraTotal: extraTotalNormalized,
+      filteredItems,
     };
   };
 
-  // ==== SUBMIT ====
+  // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
     if (!storeName.trim()) {
-      newErrors.storeName = "Vui lòng nhập hoặc chọn cửa hàng / địa điểm mua sắm.";
+      newErrors.storeName =
+        "Vui lòng nhập hoặc chọn cửa hàng / địa điểm mua sắm.";
     }
 
     if (startTime && endTime && durationMinutes == null) {
@@ -480,15 +322,14 @@ export default function ShoppingActivityModal({
 
     setErrors({});
 
-    const filteredItems = items
-      .filter((it) => it.name.trim() || it.price)
-      .map((it) => ({
-        name: it.name.trim(),
-        price: it.price ? Number(it.price) : 0,
-      }));
-
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const {
+      cost,
+      split,
+      participants,
+      normalizedExtraCosts,
+      extraTotal,
+      filteredItems,
+    } = buildPayload();
 
     onSubmit?.({
       type: "SHOPPING",
@@ -522,80 +363,47 @@ export default function ShoppingActivityModal({
     onClose?.();
   };
 
-  // ==== HEADER / FOOTER ====
-  const headerRight =
-    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
-      <div className="hidden sm:flex flex-col items-end text-xs">
-        {parsedActual > 0 && (
-          <>
-            <span className="text-slate-500 dark:text-slate-400">
-              Tổng chi dùng để chia
-            </span>
-            <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">
-              {parsedActual.toLocaleString("vi-VN")}đ
-            </span>
-          </>
-        )}
-        {budgetAmount && Number(budgetAmount) > 0 && (
-          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            Ngân sách:{" "}
-            <b className="text-slate-700 dark:text-slate-100">
-              {Number(budgetAmount).toLocaleString("vi-VN")}đ
-            </b>
-          </span>
-        )}
-      </div>
-    ) : null;
+  // ===== HEADER / FOOTER =====
+  const headerRight = (
+    <ActivityHeaderCostSummary
+      parsedActual={parsedActual}
+      budgetAmount={budgetAmount}
+      accentClass="text-pink-600 dark:text-pink-400"
+    />
+  );
 
   const footerLeft = (
-    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
-      <span>
-        {storeName
-          ? `Mua sắm tại: ${storeName}`
-          : "Điền/chọn tên cửa hàng / khu mua sắm để lưu hoạt động."}
-      </span>
-      {(effectiveShoppingLocation || address) && (
-        <span>
-          Địa điểm:{" "}
-          <b>
-            {effectiveShoppingLocation?.address ||
+    <ActivityFooterSummary
+      labelPrefix="Mua sắm tại"
+      name={storeName}
+      emptyLabelText="Điền/chọn tên cửa hàng / khu mua sắm để lưu hoạt động."
+      locationText={
+        (effectiveShoppingLocation || address)
+          ? `Địa điểm: ${
+              effectiveShoppingLocation?.address ||
               effectiveShoppingLocation?.fullAddress ||
-              address}
-          </b>
-        </span>
-      )}
-      {startTime && endTime && durationMinutes != null && !errors.time && (
-        <span>
-          Thời gian:{" "}
-          <b>
-            {startTime} - {endTime} ({durationMinutes} phút)
-          </b>
-        </span>
-      )}
-    </div>
+              address
+            }`
+          : ""
+      }
+      timeText={
+        startTime &&
+        endTime &&
+        durationMinutes != null &&
+        !errors.time
+          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          : ""
+      }
+    />
   );
 
   const footerRight = (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
-        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
-        dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-      >
-        Hủy
-      </button>
-      <button
-        onClick={handleSubmit}
-        type="button"
-        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 
-        text-white text-xs sm:text-sm font-semibold shadow-lg shadow-pink-500/30 hover:shadow-xl
-        hover:brightness-105 active:scale-[0.98] transition"
-      >
-        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động mua sắm"}
-      </button>
-    </div>
+    <ActivityFooterButtons
+      onCancel={onClose}
+      onSubmit={handleSubmit}
+      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động mua sắm"}
+      submitClassName="bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg shadow-pink-500/30"
+    />
   );
 
   return (
@@ -727,83 +535,25 @@ export default function ShoppingActivityModal({
               )}
             </div>
 
-            {/* Thời gian mua sắm */}
+            {/* Thời gian mua sắm: dùng ActivityTimeRangeSection */}
             <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Thời gian mua sắm
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-pink-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Bắt đầu
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={startTime}
-                      onChange={(val) => {
-                        setStartTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="pink"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-pink-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Kết thúc
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={endTime}
-                      onChange={(val) => {
-                        setEndTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="pink"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {errors.time && (
-                <p className="mt-1.5 text-[11px] text-rose-500">
-                  {errors.time}
-                </p>
-              )}
-
-              {durationMinutes != null && !errors.time && (
-                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  Thời lượng ước tính:{" "}
-                  <span className="font-semibold">{durationMinutes} phút</span>
-                </p>
-              )}
+              <ActivityTimeRangeSection
+                sectionLabel="Thời gian mua sắm"
+                startLabel="Bắt đầu"
+                endLabel="Kết thúc"
+                color="pink"
+                iconClassName="text-pink-500"
+                startTime={startTime}
+                endTime={endTime}
+                onStartTimeChange={(val) => setStartTime(val)}
+                onEndTimeChange={(val) => setEndTime(val)}
+                error={errors.time}
+                onErrorChange={(msg) =>
+                  setErrors((prev) => ({ ...prev, time: msg }))
+                }
+                onDurationChange={(mins) => setDurationMinutes(mins)}
+                durationHintPrefix="Thời lượng ước tính"
+              />
             </div>
           </div>
         </section>
@@ -989,6 +739,8 @@ export default function ShoppingActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 

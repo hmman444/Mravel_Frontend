@@ -1,3 +1,4 @@
+// src/features/planBoard/components/modals/FoodActivityModal.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -5,17 +6,23 @@ import {
   FaTimes,
   FaUtensils,
   FaMapMarkerAlt,
-  FaClock,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import TimePicker from "../../../../components/TimePicker";
-import { buildSplitBase } from "../../../planBoard/utils/splitUtils";
-
-import ActivityModalShell from "../ActivityModalShell";
-import SplitMoneySection from "../SplitMoneySection";
-import ExtraCostsSection from "../ExtraCostsSection";
-import PlacePickerModal from "../PlacePickerModal";
-import { inputBase, sectionCard } from "../activityStyles";
+import ActivityModalShell from "./ActivityModalShell";
+import SplitMoneySection from "./SplitMoneySection";
+import ExtraCostsSection from "./ExtraCostsSection";
+import PlacePickerModal from "./PlacePickerModal";
+import ActivityTimeRangeSection from "./ActivityTimeRangeSection";
+import ActivityHeaderCostSummary from "./ActivityHeaderCostSummary";
+import ActivityFooterSummary from "./ActivityFooterSummary";
+import ActivityFooterButtons from "./ActivityFooterButtons";
+import { inputBase, sectionCard } from "../../utils/activityStyles";
+import { useSplitMoney } from "../../hooks/useSplitMoney";
+import {
+  buildInitialExtraCosts,
+  normalizeExtraCosts,
+  calcExtraTotal,
+} from "../../utils/costUtils";
 
 const EXTRA_TYPES = [
   { value: "SERVICE_FEE", label: "Phí dịch vụ" },
@@ -37,6 +44,7 @@ export default function FoodActivityModal({
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
   const [pricePerPerson, setPricePerPerson] = useState("");
   const [peopleCount, setPeopleCount] = useState("2");
@@ -44,28 +52,15 @@ export default function FoodActivityModal({
   const [actualCost, setActualCost] = useState("");
   const [note, setNote] = useState("");
 
-  // extraCosts dùng chung format với Transport / Stay
   const [extraCosts, setExtraCosts] = useState([]);
 
-  // ===== CHIA TIỀN =====
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [splitType, setSplitType] = useState("EVEN");
-  const [participantCount, setParticipantCount] = useState("2");
-  const [splitNames, setSplitNames] = useState([]);
-  const [exactAmounts, setExactAmounts] = useState([]);
-
-  const [payerChoice, setPayerChoice] = useState("");
-  const [payerExternalName, setPayerExternalName] = useState("");
-
-  // ===== ERRORS =====
   const [errors, setErrors] = useState({});
 
-  // ===== PLACE PICKER =====
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalFoodLocation, setInternalFoodLocation] = useState(null);
   const effectiveFoodLocation = internalFoodLocation || null;
 
-  // ===== LOAD KHI EDIT / RESET =====
+  // ===== LOAD DỮ LIỆU KHI MỞ MODAL =====
   useEffect(() => {
     if (!open) return;
 
@@ -76,7 +71,7 @@ export default function FoodActivityModal({
         ? JSON.parse(editingCard.activityDataJson)
         : {};
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {};
+      const split = editingCard.split || {}; // hiện tại useSplitMoney tự xử lý
 
       setTitle(editingCard.text || "");
       setRestaurantName(data.restaurantName || "");
@@ -93,6 +88,7 @@ export default function FoodActivityModal({
 
       setStartTime(loadedStart);
       setEndTime(loadedEnd);
+      setDurationMinutes(null); // sẽ được tính lại bởi ActivityTimeRangeSection
 
       setPricePerPerson(
         data.pricePerPerson != null ? String(data.pricePerPerson) : ""
@@ -102,51 +98,7 @@ export default function FoodActivityModal({
         data.peopleCount != null ? String(data.peopleCount) : "2"
       );
 
-      // ---- EXTRA COSTS ----
-      let extras = [];
-
-      if (
-        data.extraItems &&
-        Array.isArray(data.extraItems) &&
-        data.extraItems.length > 0
-      ) {
-        extras = data.extraItems.map((it) => ({
-          reason: it.reason || it.note || "Chi phí phụ",
-          type: it.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            it.actualAmount != null
-              ? it.actualAmount
-              : it.amount != null
-              ? Number(it.amount)
-              : 0,
-        }));
-      } else if (
-        cost.extraCosts &&
-        Array.isArray(cost.extraCosts) &&
-        cost.extraCosts.length > 0
-      ) {
-        extras = cost.extraCosts.map((e) => ({
-          reason: e.reason || "Chi phí phụ",
-          type: e.type || "OTHER",
-          estimatedAmount: null,
-          actualAmount:
-            e.actualAmount != null && e.actualAmount !== ""
-              ? Number(e.actualAmount)
-              : 0,
-        }));
-      } else if (data.extraSpend != null) {
-        extras = [
-          {
-            reason: "Chi phí phụ",
-            type: "OTHER",
-            estimatedAmount: null,
-            actualAmount: Number(data.extraSpend) || 0,
-          },
-        ];
-      }
-
-      setExtraCosts(extras);
+      setExtraCosts(buildInitialExtraCosts(data, cost));
 
       if (cost.budgetAmount != null) {
         setBudgetAmount(String(cost.budgetAmount));
@@ -164,80 +116,20 @@ export default function FoodActivityModal({
 
       setNote(editingCard.description || "");
 
-      // location từ activityData mới (nếu đã từng lưu object)
       if (data.restaurantLocation) {
         setInternalFoodLocation(data.restaurantLocation);
       } else {
         setInternalFoodLocation(null);
       }
-
-      // ===== LOAD SPLIT dùng logic chung =====
-      if (split.splitType && split.splitType !== "NONE") {
-        setSplitEnabled(true);
-        setSplitType(split.splitType);
-
-        const pc =
-          cost.participantCount ||
-          split.splitMembers?.length ||
-          split.splitDetails?.length ||
-          data.peopleCount ||
-          editingCard.participantCount ||
-          2;
-
-        setParticipantCount(String(pc));
-
-        let names = [];
-        if (split.splitMembers?.length) {
-          names = split.splitMembers.map((m) => m.displayName || "");
-        }
-        if (names.length < pc) {
-          names = [...names, ...Array(pc - names.length).fill("")];
-        }
-        setSplitNames(names);
-
-        if (split.splitType === "EXACT" && split.splitDetails) {
-          setExactAmounts(
-            split.splitDetails.map((d) =>
-              d.amount != null ? String(d.amount) : ""
-            )
-          );
-        } else {
-          setExactAmounts([]);
-        }
-
-        setPayerChoice("");
-        setPayerExternalName("");
-        if (split.payerId) {
-          setPayerChoice(`member:${split.payerId}`);
-        } else if (split.payments && split.payments.length > 0) {
-          const first = split.payments[0];
-          const payer = first?.payer;
-          if (payer) {
-            if (payer.external || !payer.memberId) {
-              setPayerChoice("external");
-              setPayerExternalName(payer.displayName || "");
-            } else if (payer.memberId) {
-              setPayerChoice(`member:${payer.memberId}`);
-            }
-          }
-        }
-      } else {
-        setSplitEnabled(false);
-        setSplitType("EVEN");
-        setParticipantCount("2");
-        setSplitNames([]);
-        setExactAmounts([]);
-        setPayerChoice("");
-        setPayerExternalName("");
-      }
     } else {
-      // RESET khi mở mới
+      // RESET khi mở modal mới
       setTitle("");
       setRestaurantName("");
       setLocation("");
 
       setStartTime("");
       setEndTime("");
+      setDurationMinutes(null);
 
       setPricePerPerson("");
       setPeopleCount("2");
@@ -245,14 +137,6 @@ export default function FoodActivityModal({
       setActualCost("");
       setNote("");
       setExtraCosts([]);
-
-      setSplitEnabled(false);
-      setSplitType("EVEN");
-      setParticipantCount("2");
-      setSplitNames([]);
-      setExactAmounts([]);
-      setPayerChoice("");
-      setPayerExternalName("");
 
       setInternalFoodLocation(null);
     }
@@ -277,7 +161,7 @@ export default function FoodActivityModal({
     }
   }, [effectiveFoodLocation]);
 
-  // ===== DỰ KIẾN & TỔNG =====
+  // ===== TÍNH TOÁN CHI PHÍ CƠ BẢN =====
   const totalEstimated = useMemo(() => {
     const p = Number(pricePerPerson || 0);
     const c = Number(peopleCount || 0);
@@ -285,10 +169,7 @@ export default function FoodActivityModal({
   }, [pricePerPerson, peopleCount]);
 
   const extraTotal = useMemo(
-    () =>
-      extraCosts
-        .map((e) => Number(e.actualAmount) || 0)
-        .reduce((a, b) => a + b, 0),
+    () => calcExtraTotal(extraCosts),
     [extraCosts]
   );
 
@@ -303,82 +184,39 @@ export default function FoodActivityModal({
     return estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== DURATION =====
-  const computeDurationMinutes = () => {
-    if (!startTime || !endTime) return null;
-    const [sh, sm] = startTime.split(":").map(Number);
-    const [eh, em] = endTime.split(":").map(Number);
-    if (
-      Number.isNaN(sh) ||
-      Number.isNaN(sm) ||
-      Number.isNaN(eh) ||
-      Number.isNaN(em)
-    ) {
-      return null;
-    }
-    let diff = eh * 60 + em - (sh * 60 + sm);
-    if (diff <= 0) return null;
-    return diff;
-  };
-
-  const durationMinutes = computeDurationMinutes();
-
-  // ===== SPLIT UTILS (dùng chung buildSplitBase) =====
-  const handleParticipantCount = (value) => {
-    setParticipantCount(value);
-    const n = Math.max(1, Number(value) || 1);
-
-    setSplitNames((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-
-    setExactAmounts((prev) => {
-      const arr = [...prev];
-      if (arr.length < n) return [...arr, ...Array(n - arr.length).fill("")];
-      if (arr.length > n) return arr.slice(0, n);
-      return arr;
-    });
-  };
-
-  const splitBase = useMemo(
-    () =>
-      buildSplitBase({
-        splitEnabled,
-        splitType,
-        participantCount,
-        splitNames,
-        exactAmounts,
-        payerChoice,
-        payerExternalName,
-        planMembers,
-        parsedActual,
-      }),
-    [
-      splitEnabled,
-      splitType,
-      participantCount,
-      splitNames,
-      exactAmounts,
-      payerChoice,
-      payerExternalName,
-      planMembers,
-      parsedActual,
-    ]
-  );
+  // ===== HOOK CHIA TIỀN DÙNG CHUNG =====
+  const splitHook = useSplitMoney({
+    editingCard,
+    planMembers,
+    parsedActual,
+  });
 
   const {
+    splitEnabled,
+    setSplitEnabled,
+    splitType,
+    setSplitType,
+    participantCount,
+    handleParticipantCount,
+    splitNames,
+    setSplitNames,
+    exactAmounts,
+    setExactAmounts,
+    payerChoice,
+    setPayerChoice,
+    payerExternalName,
+    setPayerExternalName,
+    selectedMemberIds,
+    setSelectedMemberIds,
     parsedParticipants,
     participants,
     split: splitPayload,
     evenShare,
     evenRemainder,
     totalExact,
-  } = splitBase;
+  } = splitHook;
 
-  // ===== EXTRA COSTS HANDLER =====
+  // ===== EXTRA COSTS HANDLERS =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -394,37 +232,20 @@ export default function FoodActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
+  // ===== BUILD PAYLOAD ĐỂ GỬI LÊN BE =====
   const buildPayload = () => {
-    const normalizedExtraCosts = extraCosts
-      .map((e) => ({
-        reason: e.reason || "Chi phí phụ",
-        type: e.type || "OTHER",
-        estimatedAmount: null,
-        actualAmount:
-          e.actualAmount !== undefined &&
-          e.actualAmount !== null &&
-          e.actualAmount !== ""
-            ? Number(e.actualAmount)
-            : 0,
-      }))
-      .filter(
-        (e) =>
-          (e.actualAmount && e.actualAmount > 0) ||
-          (e.reason && e.reason.trim() !== "")
-      );
-
-    const extraTotalNormalized = normalizedExtraCosts
-      .map((e) => e.actualAmount || 0)
-      .reduce((a, b) => a + b, 0);
+    const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
+    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedTotal || null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
-      participantCount: splitEnabled ? parsedParticipants : null,
-      participants,
+      participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
+      participants: participants.map((p) =>
+        typeof p === "number" ? p : p.memberId
+      ),
       extraCosts: normalizedExtraCosts,
     };
 
@@ -469,7 +290,9 @@ export default function FoodActivityModal({
       durationMinutes: durationMinutes ?? null,
       participantCount:
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
-      participants,
+      participants: participants.map((p) =>
+        typeof p === "number" ? p : p.memberId
+      ),
       activityData: {
         restaurantName,
         location,
@@ -491,80 +314,44 @@ export default function FoodActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER CHO SHELL =====
-  const headerRight =
-    parsedActual > 0 || (budgetAmount && Number(budgetAmount) > 0) ? (
-      <div className="hidden sm:flex flex-col items-end text-xs">
-        {parsedActual > 0 && (
-          <>
-            <span className="text-slate-500 dark:text-slate-400">
-              Tổng chi dùng để chia
-            </span>
-            <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
-              {parsedActual.toLocaleString("vi-VN")}đ
-            </span>
-          </>
-        )}
-        {budgetAmount && Number(budgetAmount) > 0 && (
-          <span className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            Ngân sách:{" "}
-            <b className="text-slate-700 dark:text-slate-100">
-              {Number(budgetAmount).toLocaleString("vi-VN")}đ
-            </b>
-          </span>
-        )}
-      </div>
-    ) : null;
+  // ===== HEADER / FOOTER (DÙNG COMPONENT CHUNG) =====
+  const headerRight = (
+    <ActivityHeaderCostSummary
+      parsedActual={parsedActual}
+      budgetAmount={budgetAmount}
+      accentClass="text-orange-600 dark:text-orange-400"
+    />
+  );
 
   const footerLeft = (
-    <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
-      <span>
-        {restaurantName
-          ? `Ăn uống: ${restaurantName}`
-          : "Điền/chọn tên quán để lưu hoạt động ăn uống."}
-      </span>
-      {(effectiveFoodLocation || location) && (
-        <span>
-          Địa điểm:{" "}
-          <b>
-            {effectiveFoodLocation?.address ||
-              effectiveFoodLocation?.fullAddress ||
-              location}
-          </b>
-        </span>
-      )}
-      {startTime && endTime && durationMinutes != null && !errors.time && (
-        <span>
-          Thời gian:{" "}
-          <b>
-            {startTime} - {endTime} ({durationMinutes} phút)
-          </b>
-        </span>
-      )}
-    </div>
+    <ActivityFooterSummary
+      labelPrefix="Ăn uống"
+      name={restaurantName}
+      emptyLabelText="Điền/chọn tên quán để lưu hoạt động ăn uống."
+      locationText={
+        effectiveFoodLocation?.address ||
+        effectiveFoodLocation?.fullAddress ||
+        location ||
+        ""
+      }
+      timeText={
+        startTime &&
+        endTime &&
+        durationMinutes != null &&
+        !errors.time
+          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          : ""
+      }
+    />
   );
 
   const footerRight = (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium 
-        border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
-         dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-      >
-        Hủy
-      </button>
-      <button
-        onClick={handleSubmit}
-        type="button"
-        className="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 
-        text-white text-xs sm:text-sm font-semibold shadow-lg shadow-orange-500/30 hover:shadow-xl
-        hover:brightness-105 active:scale-[0.98] transition"
-      >
-        {editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động ăn uống"}
-      </button>
-    </div>
+    <ActivityFooterButtons
+      onCancel={onClose}
+      onSubmit={handleSubmit}
+      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động ăn uống"}
+      submitClassName="bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30"
+    />
   );
 
   return (
@@ -586,7 +373,7 @@ export default function FoodActivityModal({
       >
         {/* THÔNG TIN CHUNG */}
         <section className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex_wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Thông tin chung
             </label>
@@ -617,8 +404,7 @@ export default function FoodActivityModal({
               <button
                 type="button"
                 onClick={() => setPlacePickerOpen(true)}
-                className={`
-                  group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
+                className={`group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
                   border-slate-200/80 dark:border-slate-700 px-3 py-2.5
                   flex items-start gap-3 text-left
                   hover:border-orange-400 hover:shadow-md hover:bg-orange-50/70
@@ -628,8 +414,7 @@ export default function FoodActivityModal({
                     errors.restaurantName
                       ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
                       : ""
-                  }
-                `}
+                  }`}
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
@@ -677,7 +462,8 @@ export default function FoodActivityModal({
                         Chọn quán trên bản đồ
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, tìm quán ăn/cafe và chọn làm địa điểm.
+                        Nhấn để mở bản đồ, tìm quán ăn/cafe và chọn làm địa
+                        điểm.
                       </p>
                     </>
                   )}
@@ -696,88 +482,28 @@ export default function FoodActivityModal({
               )}
             </div>
 
-            {/* Thời gian ăn: bắt đầu / kết thúc */}
-            <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Thời gian ăn uống
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-orange-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Bắt đầu
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={startTime}
-                      onChange={(val) => {
-                        setStartTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="orange"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`
-                    flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm
-                    ${
-                      errors.time
-                        ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaClock
-                    className={errors.time ? "text-rose-500" : "text-orange-500"}
-                  />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
-                    Kết thúc
-                  </span>
-                  <div className="flex-1 flex justify-end">
-                    <TimePicker
-                      value={endTime}
-                      onChange={(val) => {
-                        setEndTime(val);
-                        setErrors((prev) => ({ ...prev, time: "" }));
-                      }}
-                      error={Boolean(errors.time)}
-                      color="orange"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {errors.time && (
-                <p className="mt-1.5 text-[11px] text-rose-500">
-                  {errors.time}
-                </p>
-              )}
-
-              {durationMinutes != null && !errors.time && (
-                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  Thời lượng ước tính:{" "}
-                  <span className="font-semibold">{durationMinutes} phút</span>
-                </p>
-              )}
-            </div>
+            {/* Thời gian ăn: dùng ActivityTimeRangeSection */}
+            <ActivityTimeRangeSection
+              sectionLabel="Thời gian ăn uống"
+              startLabel="Bắt đầu"
+              endLabel="Kết thúc"
+              color="orange"
+              iconClassName="text-orange-500"
+              startTime={startTime}
+              endTime={endTime}
+              onStartTimeChange={(val) => setStartTime(val)}
+              onEndTimeChange={(val) => setEndTime(val)}
+              error={errors.time}
+              onErrorChange={(msg) =>
+                setErrors((prev) => ({ ...prev, time: msg }))
+              }
+              onDurationChange={(mins) => setDurationMinutes(mins)}
+              durationHintPrefix="Thời lượng ước tính"
+            />
           </div>
         </section>
 
-        {/* GIÁ / SỐ NGƯỜI / EXTRA / NGÂN SÁCH / THỰC TẾ + TÓM TẮT */}
+        {/* CHI PHÍ BỮA ĂN */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
@@ -823,7 +549,7 @@ export default function FoodActivityModal({
               </div>
             </div>
 
-            {/* CHI PHÍ PHÁT SINH – dùng ExtraCostsSection chung */}
+            {/* Chi phí phát sinh */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -877,7 +603,7 @@ export default function FoodActivityModal({
               </div>
             </div>
 
-            {/* TÓM TẮT CHI PHÍ */}
+            {/* Tóm tắt chi phí */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
                 Dự kiến theo đầu người:{" "}
@@ -940,6 +666,8 @@ export default function FoodActivityModal({
             evenShare={evenShare}
             evenRemainder={evenRemainder}
             totalExact={totalExact}
+            selectedMemberIds={selectedMemberIds}
+            setSelectedMemberIds={setSelectedMemberIds}
           />
         </section>
 
