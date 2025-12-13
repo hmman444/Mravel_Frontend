@@ -23,7 +23,7 @@ import {
   duplicateCardThunk,
   copyPlanThunk
 } from "../slices/planBoardSlice";
-import { updateVisibility } from "../services/planBoardService";
+import { updateVisibility, deletePlan  } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
 // api error handling with toast
@@ -204,6 +204,7 @@ export function usePlanBoard(planId) {
         const result = await dispatch(
           sendAccessRequest({ planId, type })
         ).unwrap();
+        showSuccess("Gửi yêu cầu thành công");
         return result;
       } catch (err) {
         console.log(err);
@@ -229,6 +230,12 @@ export function usePlanBoard(planId) {
           }
         })(),
         "Không thể xử lý yêu cầu"
+      ),
+
+    deletePlan: (targetPlanId) =>
+      tryCall(
+        deletePlan(targetPlanId),
+        "Không thể xoá lịch trình"
       ),
   };
 }

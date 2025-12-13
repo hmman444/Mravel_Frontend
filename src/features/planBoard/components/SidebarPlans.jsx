@@ -19,6 +19,7 @@ export default function SidebarPlans({
   onOpenPlanDashboard,
   onCopyPlan,
   onRemoveRecentPlan,
+  onDeletePlan,
 }) {
   const [myOpen, setMyOpen] = useState(true);
   const [recentOpen, setRecentOpen] = useState(true);
@@ -130,6 +131,7 @@ export default function SidebarPlans({
                     active={activeIdStr === String(plan.id)}
                     onOpenDashboard={() => onOpenPlanDashboard?.(plan)}
                     onCopyPlan={onCopyPlan}
+                    onAskDeletePlan={onDeletePlan}
                   />
                 ))}
               </div>
@@ -211,11 +213,13 @@ function SidebarItem({ icon, label, collapsed, onClick }) {
 }
 
 // Row "Lịch trình của bạn" (có menu ...)
-function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan }) {
+function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan, onAskDeletePlan }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const title = plan.title || plan.name || "Chưa đặt tên";
   const role = plan.myRole || "";
+  const canDelete = role === "OWNER";
+
   const roleLabelMap = {
     OWNER: "Chủ sở hữu",
     EDITOR: "Chỉnh sửa",
@@ -318,6 +322,20 @@ function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan }) {
               Tạo bản sao
             </button>
           )}
+          {canDelete && onAskDeletePlan && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2 text-xs
+                text-red-600 dark:text-red-400
+                hover:bg-red-50 dark:hover:bg-red-900/30"
+              onClick={() => {
+                onAskDeletePlan?.(plan);
+                setMenuOpen(false);
+              }}
+            >
+              Xoá lịch trình
+            </button>
+          )}
         </PlanRowMenu>
       )}
     </div>
@@ -334,7 +352,6 @@ function PlanRowRecent({
   onRemoveRecentPlan,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-
   const title = plan.title || plan.name || "Chưa đặt tên";
 
   const handleRowClick = () => {
@@ -344,13 +361,17 @@ function PlanRowRecent({
 
   return (
     <div className="relative">
-      <button
-        type="button"
+      {/* ROW – dùng div thay vì button */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={handleRowClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") handleRowClick();
+        }}
         className={`
           w-full flex items-center justify-between px-3 py-2 rounded-lg
-          text-left cursor-pointer group
-          text-[13px]
+          text-left cursor-pointer group text-[13px]
           ${
             active
               ? "bg-blue-600 text-white shadow-md shadow-blue-500/40"
@@ -373,6 +394,7 @@ function PlanRowRecent({
           )}
         </div>
 
+        {/* nút ... là sibling, không còn lồng button */}
         {!collapsed && (
           <button
             type="button"
@@ -386,29 +408,27 @@ function PlanRowRecent({
               hover:bg-slate-200/70 dark:hover:bg-gray-700/70
               transition
             `}
+            aria-label="Mở menu"
           >
             <HiEllipsisVertical size={16} />
           </button>
         )}
-      </button>
+      </div>
 
       {menuOpen && !collapsed && (
-        <PlanRowMenu
-          position="above"
-          onClickOutside={() => setMenuOpen(false)}
-        >
+        <PlanRowMenu position="above" onClickOutside={() => setMenuOpen(false)}>
           {onCopyPlan && (
             <button
               type="button"
               className="w-full text-left px-3 py-2 text-xs
                 text-gray-700 dark:text-gray-100
-                hover:bg-slate-100 dark:hover:bg-gray-800 flex items-center justify-between"
+                hover:bg-slate-100 dark:hover:bg-gray-800"
               onClick={() => {
                 onCopyPlan?.(plan);
                 setMenuOpen(false);
               }}
             >
-              <span>Tạo bản sao</span>
+              Tạo bản sao
             </button>
           )}
 
@@ -431,6 +451,7 @@ function PlanRowRecent({
     </div>
   );
 }
+
 
 // Popup menu chung cho các row
 function PlanRowMenu({ children, position = "above", onClickOutside }) {

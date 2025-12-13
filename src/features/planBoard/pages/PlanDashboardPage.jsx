@@ -48,13 +48,13 @@ export default function PlanDashboardPage() {
     planMembers,
     duplicateCard,
     copyPlan,
+    deletePlan
   } = usePlanBoard(planId);
 
   const { plans: myPlans, reload: reloadMyPlans } = useMyPlans();
   const { recentPlans, reloadRecent, removeRecent } = useRecentPlans();
 
   const { updateTitle } = usePlanGeneral();
-  const [sidebarPlans, setSidebarPlans] = useState([]);
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window === "undefined") return "summary";
 
@@ -354,7 +354,7 @@ export default function PlanDashboardPage() {
     try {
       setAccessLoadingType("VIEW");
       await requestAccess("VIEW");
-      showSuccess("Đã gửi yêu cầu quyền xem");
+      
     } finally {
       setAccessLoadingType(null);
     }
@@ -364,7 +364,7 @@ export default function PlanDashboardPage() {
     try {
       setAccessLoadingType("EDIT");
       await requestAccess("EDIT");
-      showSuccess("Đã gửi yêu cầu quyền chỉnh sửa");
+      
     } finally {
       setAccessLoadingType(null);
     }
@@ -377,6 +377,25 @@ export default function PlanDashboardPage() {
       </div>
     );
   }
+
+  const handleDeletePlanFromSidebar = async (plan) => {
+    try {
+      await deletePlan(plan.id);
+      showSuccess("Đã xoá lịch trình");
+
+      // reload lists
+      await reloadMyPlans?.();
+      await reloadRecent?.();
+
+      // nếu đang ở đúng plan vừa xóa -> đá về My Plans
+      if (String(planId) === String(plan.id)) {
+        navigate("/plans/my-plans");
+      }
+    } catch (e) {
+      console.error(e);
+      showError("Không thể xoá lịch trình");
+    }
+  };
 
   const handleRemoveRecentFromSidebar = async (plan) => {
     await removeRecent(plan.id);
@@ -394,10 +413,11 @@ export default function PlanDashboardPage() {
         myPlans={myPlans}
         recentPlans={recentPlans}
         onOpenPlanList={() => navigate("/plans/my-plans")}
-        onOpenCalendar={() => navigate("/plans/calendar")}
+        onOpenCalendar={() => navigate("/plans/timeline")}
         onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
         onCopyPlan={handleCopyFromSidebar}
         onRemoveRecentPlan={handleRemoveRecentFromSidebar}
+        onDeletePlan={handleDeletePlanFromSidebar}
       >
         <AccessRequestModal
           isOpen={true}
@@ -428,10 +448,11 @@ export default function PlanDashboardPage() {
       myPlans={myPlans}
       recentPlans={recentPlans}
       onOpenPlanList={() => navigate("/plans/my-plans")}
-      onOpenCalendar={() => navigate("/plans/calendar")}
+      onOpenCalendar={() => navigate("/plans/timeline")}
       onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
       onCopyPlan={handleCopyFromSidebar}
       onRemoveRecentPlan={handleRemoveRecentFromSidebar}
+      onDeletePlan={handleDeletePlanFromSidebar}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4 gap-3">

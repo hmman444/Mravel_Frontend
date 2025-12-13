@@ -84,7 +84,7 @@ export default function Navbar() {
         </Link>
 
         {/* NAV LINKS */}
-        <nav className="hidden md:flex gap-6 font-medium text-sm">
+        <nav className="hidden md:flex gap-6 font-medium text-base">
           <Link className="hover:text-sky-500 transition" to="/hotels">
             Khách sạn
           </Link>

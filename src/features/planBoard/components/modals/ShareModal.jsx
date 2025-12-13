@@ -1,13 +1,8 @@
 // src/features/planBoard/components/modals/ShareModal.jsx
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  FaTimes,
-  FaCopy,
-  FaUserCircle,
-  FaShareAlt,
-} from "react-icons/fa";
+import { useEffect, useMemo, useState } from "react";
+import { FaTimes, FaCopy, FaUserCircle, FaShareAlt } from "react-icons/fa";
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 import AccessRow from "./AccessRow";
 import ConfirmModal from "../../../../components/ConfirmModal";
@@ -34,12 +29,15 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     actionLoading,
   } = usePlanBoard(planId);
 
-  const canInvite = isOwner;
-  const canChangeVisibility = isOwner;
-  const canSeeRequests = isOwner;
+  // ✅ guest = xem được board nhưng không phải member (myRole = null)
+  // hook của bạn hiện đang expose isOwner/isEditor/isViewer; nếu cả 3 đều false => guest
+  const isGuestViewer = !isOwner && !isEditor && !isViewer;
 
-  const currentUserId =
-    share?.members?.find((m) => m.isCurrentUser)?.userId ?? null;
+  // Quyền trong modal (giống PlanDashboardPage: chỉ member mới sửa)
+  const canInvite = isOwner; // chỉ owner mới invite
+  const canChangeVisibility = isOwner; // chỉ owner đổi visibility
+  const canSeeRequests = isOwner; // chỉ owner xem requests
+  const canManageMembers = isOwner || isEditor; // editor có thể remove (tuỳ logic row)
 
   const [phase, setPhase] = useState("default");
   const [mounted, setMounted] = useState(false);
@@ -60,13 +58,30 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [requestRoles, setRequestRoles] = useState({});
 
+  // ✅ nếu BE không cho guest gọi shareInfo -> fallback modal vẫn chạy
+  const [shareError, setShareError] = useState(null);
+
+  const currentUserId = useMemo(() => {
+    return share?.members?.find((m) => m.isCurrentUser)?.userId ?? null;
+  }, [share]);
+
   useEffect(() => {
     if (!isOpen) return;
-    loadShare();
+
     setPhase("default");
     setActiveMenu(null);
     setActiveTab("members");
     setMounted(true);
+    setShareError(null);
+
+    // load share info (có thể fail 403 nếu BE chặn guest)
+    (async () => {
+      try {
+        await loadShare();
+      } catch (e) {
+        setShareError(e);
+      }
+    })();
   }, [isOpen]);
 
   useEffect(() => {
@@ -88,7 +103,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     const buildName = (m) =>
       m.isCurrentUser ? `${m.fullname || m.email} (Bạn)` : m.fullname || m.email;
 
-    const owner = share.members.find((m) => m.role === "OWNER");
+    const owner = share.members?.find((m) => m.role === "OWNER");
 
     const ownerRow = owner
       ? {
@@ -100,7 +115,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
         }
       : null;
 
-    const memberRows = share.members
+    const memberRows = (share.members || [])
       .filter((m) => m.role !== "OWNER")
       .map((m) => ({
         ...m,
@@ -110,7 +125,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
         pending: false,
       }));
 
-    const inviteRows = share.invites.map((i) => ({
+    const inviteRows = (share.invites || []).map((i) => ({
       ...i,
       name: i.email,
       pending: true,
@@ -143,12 +158,16 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   };
 
   const handleChangeRole = async (user, newDisplayRole) => {
+    if (!canManageMembers) return;
     if (user.pending || user.owner) return;
 
     const map = { "Người xem": "VIEWER", "Người chỉnh sửa": "EDITOR" };
     const backend = map[newDisplayRole];
     if (!backend) return;
 
+    // giữ rule cũ của bạn:
+    // - viewer không được đổi ai
+    // - editor không được đổi role người khác (chỉ owner được)
     if (isViewer) return;
     if (isEditor && user.userId !== currentUserId) return;
 
@@ -166,6 +185,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   };
 
   const openRemoveDialog = (u) => {
+    if (!canManageMembers) return;
     setUserToRemove(u);
     setConfirmRemoveOpen(true);
   };
@@ -182,11 +202,12 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   };
 
   const handleVisibilityChange = async (v) => {
+    if (!canChangeVisibility) return;
     setVisibility(v);
     try {
       await updateVisibility(v);
     } catch {
-      setVisibility(share.visibility);
+      setVisibility(share?.visibility || "PRIVATE");
       showError("Không thể cập nhật hiển thị");
     }
   };
@@ -202,10 +223,18 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     }
   };
 
+  const handleRequestView = async () => {
+    try {
+      await requestAccess("VIEW");
+      onClose();
+    } catch {
+      showError("Lỗi khi gửi yêu cầu");
+    }
+  };
+
   const handleRequestEdit = async () => {
     try {
       await requestAccess("EDIT");
-      showSuccess("Đã gửi yêu cầu quyền chỉnh sửa");
       onClose();
     } catch {
       showError("Lỗi khi gửi yêu cầu");
@@ -256,7 +285,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
           </button>
 
           <div className="p-6 max-h-[78vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300/80 scrollbar-track-transparent dark:scrollbar-thumb-slate-700/80">
-            {/* HEADER TITLE */}
+            {/* HEADER */}
             {phase === "default" && (
               <div className="flex items-start gap-3 mb-5">
                 <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-300 flex items-center justify-center">
@@ -276,6 +305,34 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
               </div>
             )}
 
+            {/* ✅ Banner chế độ chỉ xem (guest) */}
+            {phase === "default" && isGuestViewer && (
+              <div className="mb-4 rounded-xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/80 dark:bg-amber-900/10 p-3">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                  Bạn đang xem ở chế độ chỉ xem
+                </p>
+                <p className="text-xs text-amber-700/80 dark:text-amber-200/70 mt-1">
+                  Lịch trình này cho phép xem (Public/Friends) nhưng bạn không phải thành viên, nên không thể chỉnh sửa hoặc quản lý chia sẻ.
+                </p>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={handleRequestView}
+                    className="
+                      px-3.5 py-2 rounded-xl text-xs font-semibold
+                      bg-gradient-to-r from-blue-500 to-indigo-500
+                      text-white shadow-sm hover:shadow-md hover:brightness-110
+                      transition
+                    "
+                  >
+                    Yêu cầu trở thành thành viên (Xem)
+                  </button>
+
+                </div>
+              </div>
+            )}
+
+            {/* INVITE PHASE */}
             {phase === "invite" && (
               <div className="mb-5">
                 <button
@@ -357,6 +414,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
               </div>
             )}
 
+            {/* DEFAULT PHASE */}
             {phase === "default" && (
               <>
                 {/* VISIBILITY + INVITE */}
@@ -371,14 +429,16 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       </span>
                     </div>
 
-                    <div className={!canChangeVisibility ? "opacity-60" : ""}>
-                      <VisibilityDropdown
-                        value={visibility}
-                        onChange={handleVisibilityChange}
-                      />
+                    {/* ✅ nếu không phải owner => disable thật sự */}
+                    <div
+                      className={!canChangeVisibility ? "opacity-60 pointer-events-none" : ""}
+                      title={!canChangeVisibility ? "Chỉ chủ sở hữu mới đổi quyền hiển thị" : ""}
+                    >
+                      <VisibilityDropdown value={visibility} onChange={handleVisibilityChange} />
                     </div>
                   </div>
 
+                  {/* ✅ Chỉ owner mới thấy phần invite */}
                   {canInvite && (
                     <div className="mt-2">
                       <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
@@ -392,19 +452,13 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                               setEmailInput(e.target.value);
                               setEmailValid(true);
                             }}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" && handleAddEmail()
-                            }
+                            onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
                             placeholder="Nhập email người được mời..."
                             className={`
                               w-full px-4 py-2.5 rounded-xl text-sm
                               bg-slate-50/90 dark:bg-slate-900/80
                               border
-                              ${
-                                emailValid
-                                  ? "border-slate-200 dark:border-slate-700"
-                                  : "border-rose-500"
-                              }
+                              ${emailValid ? "border-slate-200 dark:border-slate-700" : "border-rose-500"}
                               shadow-sm focus:outline-none focus:ring-[1.5px]
                               focus:ring-blue-400/80
                             `}
@@ -433,6 +487,13 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       </div>
                     </div>
                   )}
+
+                  {/* ✅ Nếu là guest, show tip */}
+                  {isGuestViewer && (
+                    <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                      Bạn có thể sao chép liên kết để chia sẻ. Quản lý thành viên/chia sẻ chỉ dành cho thành viên của lịch trình.
+                    </div>
+                  )}
                 </div>
 
                 {/* TABS */}
@@ -443,27 +504,24 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       className={`
                         px-3.5 py-1.5 rounded-full text-xs font-medium
                         transition-all
-                        ${
-                          activeTab === "members"
-                            ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                        }
+                        ${activeTab === "members"
+                          ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}
                       `}
                     >
-                      Thành viên ({accessList.length})
+                      Thành viên ({share ? accessList.length : "—"})
                     </button>
 
+                    {/* ✅ chỉ owner mới có tab requests */}
                     {canSeeRequests && (
                       <button
                         onClick={() => setActiveTab("requests")}
                         className={`
                           px-3.5 py-1.5 rounded-full text-xs font-medium
                           transition-all
-                          ${
-                            activeTab === "requests"
-                              ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
-                              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                          }
+                          ${activeTab === "requests"
+                            ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}
                         `}
                       >
                         Yêu cầu
@@ -480,48 +538,65 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                 {/* MEMBERS TAB */}
                 {activeTab === "members" && (
                   <div className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-2.5 space-y-1.5 mb-5">
-                    {accessList.length === 0 && (
+                    {/* ✅ fallback khi loadShare fail */}
+                    {!share && shareError && (
                       <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                        Chưa có thành viên nào khác ngoài bạn.
+                        Không thể tải danh sách thành viên. Bạn vẫn có thể sao chép liên kết hoặc gửi yêu cầu quyền.
                       </div>
                     )}
 
-                    {accessList.map((u, i) => {
-                      const isSelf =
-                        u.userId && currentUserId && u.userId === currentUserId;
+                    {!share && !shareError && (
+                      <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
+                        Đang tải danh sách thành viên...
+                      </div>
+                    )}
 
-                      let canChangeRoleRow = false;
-                      let canRemoveRow = false;
+                    {share && accessList.length === 0 && (
+                      <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
+                        Chưa có thành viên nào.
+                      </div>
+                    )}
 
-                      if (isOwner) {
-                        if (!u.owner && !u.pending) {
-                          canChangeRoleRow = true;
-                          canRemoveRow = true;
+                    {share &&
+                      accessList.map((u, i) => {
+                        const isSelf =
+                          u.userId && currentUserId && u.userId === currentUserId;
+
+                        let canChangeRoleRow = false;
+                        let canRemoveRow = false;
+
+                        // ✅ guest: không có action
+                        if (!isGuestViewer) {
+                          if (isOwner) {
+                            if (!u.owner && !u.pending) {
+                              canChangeRoleRow = true;
+                              canRemoveRow = true;
+                            }
+                          } else if (isEditor) {
+                            if (!u.owner && !isSelf) {
+                              canRemoveRow = !u.pending;
+                            }
+                          }
                         }
-                      } else if (isEditor) {
-                        if (!u.owner && !isSelf) {
-                          canRemoveRow = !u.pending;
-                        }
-                      }
 
-                      return (
-                        <AccessRow
-                          key={i}
-                          user={u}
-                          activeMenu={activeMenu}
-                          setActiveMenu={setActiveMenu}
-                          onChangeRole={(r) => handleChangeRole(u, r)}
-                          onRemoveUser={openRemoveDialog}
-                          canChangeRole={canChangeRoleRow}
-                          canRemove={canRemoveRow}
-                        />
-                      );
-                    })}
+                        return (
+                          <AccessRow
+                            key={i}
+                            user={u}
+                            activeMenu={activeMenu}
+                            setActiveMenu={setActiveMenu}
+                            onChangeRole={(r) => handleChangeRole(u, r)}
+                            onRemoveUser={openRemoveDialog}
+                            canChangeRole={canChangeRoleRow}
+                            canRemove={canRemoveRow}
+                          />
+                        );
+                      })}
                   </div>
                 )}
 
                 {/* REQUESTS TAB */}
-                {activeTab === "requests" && (
+                {activeTab === "requests" && canSeeRequests && (
                   <div className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-3 space-y-3 mb-5">
                     {requests?.length === 0 && (
                       <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -556,13 +631,10 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                             {r.fullname || r.email}
                           </p>
-                          <p className="text-xs text-slate-500 truncate">
-                            {r.email}
-                          </p>
+                          <p className="text-xs text-slate-500 truncate">{r.email}</p>
                           <p className="mt-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
                             <span className="text-[10px]">•</span>
-                            Yêu cầu quyền{" "}
-                            {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
+                            Yêu cầu quyền {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
                           </p>
                         </div>
 
@@ -582,6 +654,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
 
                 {/* FOOTER ACTIONS */}
                 <div className="flex justify-end gap-2 mt-2 pt-3 border-t border-slate-200/70 dark:border-slate-800">
+                  {/* ✅ viewer member -> request edit (cũ) */}
                   {isViewer && (
                     <button
                       onClick={handleRequestEdit}
@@ -596,6 +669,22 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       "
                     >
                       {loading ? "Đang gửi yêu cầu..." : "Yêu cầu quyền chỉnh sửa"}
+                    </button>
+                  )}
+
+                  {/* ✅ guest -> cũng cho request edit (giống PlanDashboardPage: xem được nhưng không sửa) */}
+                  {isGuestViewer && (
+                    <button
+                      onClick={handleRequestEdit}
+                      className="
+                        mr-auto px-4 py-2 rounded-xl text-xs sm:text-sm
+                        border border-blue-500/80 text-blue-600 dark:text-blue-400
+                        bg-blue-50/60 dark:bg-blue-900/10
+                        hover:bg-blue-100 dark:hover:bg-blue-900/30
+                        transition
+                      "
+                    >
+                      Yêu cầu quyền chỉnh sửa
                     </button>
                   )}
 
@@ -685,8 +774,7 @@ function RequestAction({
   const [roleOpen, setRoleOpen] = useState(false);
 
   const currentRole =
-    requestRoles[request.id] ||
-    (request.type === "EDIT" ? "EDITOR" : "VIEWER");
+    requestRoles[request.id] || (request.type === "EDIT" ? "EDITOR" : "VIEWER");
 
   const ROLE_LABEL = {
     VIEWER: "Quyền xem",
@@ -695,7 +783,6 @@ function RequestAction({
 
   return (
     <div className="flex flex-col items-end gap-2 min-w-[160px] relative">
-      {/* dropdown chọn role duyệt */}
       <button
         onClick={() => setRoleOpen(!roleOpen)}
         className="
@@ -708,11 +795,7 @@ function RequestAction({
         "
       >
         {ROLE_LABEL[currentRole]}
-        <span
-          className={`text-[9px] transition-transform ${
-            roleOpen ? "rotate-180" : ""
-          }`}
-        >
+        <span className={`text-[9px] transition-transform ${roleOpen ? "rotate-180" : ""}`}>
           ▼
         </span>
       </button>
@@ -734,11 +817,9 @@ function RequestAction({
             className={`
               w-full text-left px-4 py-2 text-xs
               hover:bg-slate-100 dark:hover:bg-slate-800
-              ${
-                currentRole === "VIEWER"
-                  ? "text-blue-600 font-semibold"
-                  : "text-slate-700 dark:text-slate-200"
-              }
+              ${currentRole === "VIEWER"
+                ? "text-blue-600 font-semibold"
+                : "text-slate-700 dark:text-slate-200"}
             `}
           >
             Quyền xem
@@ -752,11 +833,9 @@ function RequestAction({
             className={`
               w-full text-left px-4 py-2 text-xs
               hover:bg-slate-100 dark:hover:bg-slate-800
-              ${
-                currentRole === "EDITOR"
-                  ? "text-blue-600 font-semibold"
-                  : "text-slate-700 dark:text-slate-200"
-              }
+              ${currentRole === "EDITOR"
+                ? "text-blue-600 font-semibold"
+                : "text-slate-700 dark:text-slate-200"}
             `}
           >
             Quyền chỉnh sửa

@@ -15,8 +15,8 @@ import SearchPage from "./features/search/pages/SearchPage";
 // Plans
 import PlanListPage from "./features/planFeed/pages/PlanListPage";
 import PlanDashboardPage from "./features/planBoard/pages/PlanDashboardPage";
-import PlanCalendarPage from "./features/planBoard/pages/PlanCalendarPage";
 import ListPlanPage from "./features/planBoard/pages/ListPlanPage";
+import PlanTimeLinePage from "./features/planBoard/pages/PlanTimeLinePage";
 //Catalog
 import PlaceDetailPage from "./features/catalog/pages/PlaceDetailPage";
 import LocationResultsPage from "./features/catalog/pages/LocationResultsPage";
@@ -74,8 +74,8 @@ function App() {
         <Route path="/plans" element={<PlanListPage />} />
         <Route path="/plans/:planId" element={<PlanDashboardPage />} />
         <Route path="/plans/join" element={<JoinPlanPage />} />
-        <Route path="/plans/calendar" element={<PlanCalendarPage />} />
         <Route path="/plans/my-plans" element={<ListPlanPage />} />
+        <Route path="/plans/timeline" element={<PlanTimeLinePage  />} />
 
         {/* Catalog routes */}       
         <Route path="/place/:slug" element={<PlaceDetailPage />} />

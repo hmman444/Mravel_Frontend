@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "./SidebarPlans";
+import ConfirmModal from "../../../components/ConfirmModal";
 
 export default function PlanLayout({
   children,
@@ -14,15 +15,18 @@ export default function PlanLayout({
   onOpenPlanDashboard,
   onCopyPlan,
   onRemoveRecentPlan,
+
+  onDeletePlan, // (plan) => Promise
 }) {
   const [collapsed, setCollapsed] = useState(false);
+
+  const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
       <Navbar fixedWhite />
 
       <div className="flex pt-12 relative">
-        {/* SIDEBAR */}
         <SidebarPlans
           collapsed={collapsed}
           activePlanId={activePlanId}
@@ -33,9 +37,10 @@ export default function PlanLayout({
           onOpenPlanDashboard={onOpenPlanDashboard}
           onCopyPlan={onCopyPlan}
           onRemoveRecentPlan={onRemoveRecentPlan}
+
+          onDeletePlan={(plan) => setConfirmDeletePlan(plan)}
         />
 
-        {/* TOGGLE BUTTON */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="fixed top-1/2 z-40 -translate-y-1/2
@@ -50,7 +55,6 @@ export default function PlanLayout({
           {collapsed ? "❯" : "❮"}
         </button>
 
-        {/* MAIN CONTENT */}
         <main
           className={`
             flex-1 min-h-[calc(100vh-4rem)]
@@ -64,6 +68,25 @@ export default function PlanLayout({
           </div>
         </main>
       </div>
+
+      {confirmDeletePlan && (
+        <ConfirmModal
+          open={true}
+          title="Xoá lịch trình"
+          message={`Xác nhận xoá "${confirmDeletePlan.title || "Chưa đặt tên"}"? Hành động này không thể hoàn tác.`}
+          confirmText="Xoá"
+          onClose={() => setConfirmDeletePlan(null)}
+          onConfirm={async () => {
+            try {
+              console.log("Confirm delete:", confirmDeletePlan);
+    console.log("onDeletePlan exists:", !!onDeletePlan);
+              await onDeletePlan?.(confirmDeletePlan);
+            } finally {
+              setConfirmDeletePlan(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

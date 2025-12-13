@@ -149,3 +149,8 @@ export async function copyPlan(planId) {
   const res = await api.post(`${BASE}/${planId}/copy`);
   return res.data.data; // PlanFeedItem của bản sao
 }
+
+export async function deletePlan(planId) {
+  const res = await api.delete(`${BASE}/${planId}`);
+  return res.data.data; 
+}
