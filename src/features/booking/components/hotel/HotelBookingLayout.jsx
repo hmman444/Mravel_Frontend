@@ -5,6 +5,7 @@ import HotelBookingPriceSummaryCard from "./HotelBookingPriceSummaryCard";
 import HotelBookingPolicyCard from "./HotelBookingPolicyCard";
 
 export default function HotelBookingLayout({
+  // data
   loading,
   hotelName,
   roomName,
@@ -17,9 +18,24 @@ export default function HotelBookingLayout({
   pricingAllRooms,
   remainingRoomsText,
   isEnoughRooms,
-  // handlers
+
+  // handlers dates/rooms
   onStayChange,
   onRoomsChange,
+
+  // ✅ form props
+  contactName,
+  contactPhone,
+  contactEmail,
+  note,
+  onContactNameChange,
+  onContactPhoneChange,
+  onContactEmailChange,
+  onNoteChange,
+
+  // ✅ pay props
+  onPay,
+  payLoading,
 }) {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-10 pt-6 md:px-6 md:pt-8">
@@ -29,8 +45,8 @@ export default function HotelBookingLayout({
           Hoàn tất đặt phòng
         </h1>
         <p className="mt-1 text-xs text-gray-600 md:text-sm">
-          Vui lòng kiểm tra lại thông tin liên hệ và chi tiết đặt phòng
-          trước khi thanh toán.
+          Vui lòng kiểm tra lại thông tin liên hệ và chi tiết đặt phòng trước khi
+          thanh toán.
         </p>
       </div>
 
@@ -39,8 +55,15 @@ export default function HotelBookingLayout({
         {/* LEFT: FORM */}
         <div className="space-y-6">
           <HotelBookingForm
-            defaultName="Mẫn Huỳnh Minh"
-            defaultEmail="nsndman0404@gmail.com"
+            contactName={contactName}
+            contactPhone={contactPhone}
+            contactEmail={contactEmail}
+            note={note}
+            onContactNameChange={onContactNameChange}
+            onContactPhoneChange={onContactPhoneChange}
+            onContactEmailChange={onContactEmailChange}
+            onNoteChange={onNoteChange}
+            // giữ nguyên:
             checkIn={checkIn}
             checkOut={checkOut}
             nights={nights}
@@ -51,7 +74,7 @@ export default function HotelBookingLayout({
           <HotelBookingPolicyCard />
         </div>
 
-        {/* RIGHT: SUMMARY + POLICY + PRICE */}
+        {/* RIGHT: SUMMARY + PRICE */}
         <div className="space-y-4">
           <HotelBookingSelectedRoomCard
             hotelName={hotelName}
@@ -75,14 +98,15 @@ export default function HotelBookingLayout({
             originalTotal={pricingAllRooms?.originalTotal}
             finalTotal={pricingAllRooms?.finalTotal}
             paymentType={ratePlan?.paymentType}
+            onPay={onPay}
+            disabled={!isEnoughRooms}
+            loading={!!payLoading}
           />
         </div>
       </div>
 
       {loading && (
-        <p className="mt-4 text-xs text-gray-500">
-          Đang tải thông tin phòng...
-        </p>
+        <p className="mt-4 text-xs text-gray-500">Đang tải thông tin phòng...</p>
       )}
     </div>
   );

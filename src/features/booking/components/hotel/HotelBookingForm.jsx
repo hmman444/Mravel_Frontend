@@ -8,33 +8,29 @@ import "react-datepicker/dist/react-datepicker.css";
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export default function HotelBookingForm({
-  defaultName = "",
-  defaultEmail = "",
+  contactName,
+  contactPhone,
+  contactEmail,
+  note,
+  onContactNameChange,
+  onContactPhoneChange,
+  onContactEmailChange,
+  onNoteChange,
+
   checkIn,
   checkOut,
   nights,
   roomsCount = 1,
-  onStayChange,   // ({ checkIn, checkOut, nights })
-  onRoomsChange,  // (roomsCount)
+  onStayChange,
+  onRoomsChange,
 }) {
-  const [contactName, setContactName] = useState(defaultName);
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState(defaultEmail);
   const [nameError, setNameError] = useState("");
   const NOTE_MAX = 200;
-  const [note, setNote] = useState("");
 
   const handleNameBlur = () => {
-    if (!contactName.trim()) {
-      setNameError("Vui lòng nhập họ tên.");
-      return;
-    }
+    if (!contactName?.trim()) return setNameError("Vui lòng nhập họ tên.");
     const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
-    if (!nameRegex.test(contactName.trim())) {
-      setNameError("Rất tiếc, vui lòng chỉ nhập chữ (a-z).");
-    } else {
-      setNameError("");
-    }
+    setNameError(nameRegex.test(contactName.trim()) ? "" : "Rất tiếc, vui lòng chỉ nhập chữ (a-z).");
   };
 
   // Tính số ngày hiển thị từ checkIn/checkOut:
@@ -83,7 +79,7 @@ export default function HotelBookingForm({
           <input
             type="text"
             value={contactName}
-            onChange={(e) => setContactName(e.target.value)}
+            onChange={(e) => onContactNameChange?.(e.target.value)}
             onBlur={handleNameBlur}
             className={[
               "w-full rounded-lg border px-3 py-2 text-sm md:text-base outline-none",
@@ -111,7 +107,7 @@ export default function HotelBookingForm({
               <input
                 type="tel"
                 value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
+                onChange={(e) => onContactPhoneChange?.(e.target.value)}
                 className="h-9 w-full border-none bg-transparent text-sm outline-none md:h-10"
                 placeholder="VD: 0901234567"
               />
@@ -131,7 +127,7 @@ export default function HotelBookingForm({
               <input
                 type="email"
                 value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
+                onChange={(e) => onContactEmailChange?.(e.target.value)}
                 className="h-9 w-full border-none bg-transparent text-sm outline-none md:h-10"
                 placeholder="email@example.com"
               />
@@ -199,7 +195,7 @@ export default function HotelBookingForm({
           <textarea
             value={note}
             maxLength={NOTE_MAX}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(e) => onNoteChange?.(e.target.value)}
             rows={4}
             className={[
               "w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2",

@@ -15,7 +15,10 @@ export default function HotelBookingPriceSummaryCard({
   finalTotal,
   nights = 1,
   roomsCount = 1,
-  paymentType, // 👈 thêm prop này
+  paymentType,
+  onPay,
+  disabled = false,
+  loading = false,
 }) {
   const [paymentOption, setPaymentOption] = useState("FULL"); // FULL | DEPOSIT
 
@@ -146,9 +149,14 @@ export default function HotelBookingPriceSummaryCard({
         {/* Button */}
         <button
           type="button"
-          className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[#007bff] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#ff6b1a]"
+          disabled={disabled || loading}
+          onClick={() => onPay?.({ paymentOption })}
+          className={[
+            "mt-3 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition",
+            disabled || loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#007bff] hover:bg-[#ff6b1a]",
+          ].join(" ")}
         >
-          Thanh toán
+          {loading ? "Đang chuyển đến MoMo..." : "Thanh toán"}
         </button>
 
         <p className="mt-2 text-[11px] leading-snug text-gray-500">

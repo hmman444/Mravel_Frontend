@@ -26,6 +26,18 @@ export default function HotelBookingPage() {
     isEnoughRooms,
     handleStayChange,
     handleRoomsChange,
+
+    contactName,
+    contactPhone,
+    contactEmail,
+    note,
+    onContactNameChange,
+    onContactPhoneChange,
+    onContactEmailChange,
+    onNoteChange,
+
+    onPay,
+    payLoading,
   } = useHotelBookingPage();
 
   return (
@@ -49,6 +61,18 @@ export default function HotelBookingPage() {
           isEnoughRooms={isEnoughRooms}
           onStayChange={handleStayChange}
           onRoomsChange={handleRoomsChange}
+
+          // ✅ thêm
+          contactName={contactName}
+          contactPhone={contactPhone}
+          contactEmail={contactEmail}
+          note={note}
+          onContactNameChange={onContactNameChange}
+          onContactPhoneChange={onContactPhoneChange}
+          onContactEmailChange={onContactEmailChange}
+          onNoteChange={onNoteChange}
+          onPay={onPay}
+          payLoading={payLoading}
         />
       </main>
 
