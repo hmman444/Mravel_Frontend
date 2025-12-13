@@ -40,6 +40,8 @@ import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 
 import { useMainSocket } from "./realtime/useMainSocket";
+//Booking
+import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 function App() {
@@ -91,6 +93,9 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="*" element={<HomePage />} />
+
+        {/* Booking routes */}
+        <Route path="/booking/hotel" element={<HotelBookingPage />} />
 
         {/* Coming soon routes */}
         <Route path="/maybe" element={<FeatureComingSoonPage />} />
