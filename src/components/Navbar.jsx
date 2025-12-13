@@ -95,7 +95,7 @@ export default function Navbar() {
             Lịch trình
           </Link>
           <Link className="hover:text-sky-500 transition" to="/maybe">
-            Đã đặt
+            Đặt dịch vụ
           </Link>
           <Link className="hover:text-sky-500 transition" to="/maybe">
             Hợp tác

@@ -38,6 +38,8 @@ import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartn
 import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
+//Booking
+import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 function App() {
@@ -88,6 +90,9 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="*" element={<HomePage />} />
+
+        {/* Booking routes */}
+        <Route path="/booking/hotel" element={<HotelBookingPage />} />
 
         {/* Coming soon routes */}
         <Route path="/maybe" element={<FeatureComingSoonPage />} />
