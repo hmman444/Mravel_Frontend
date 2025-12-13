@@ -42,6 +42,7 @@ import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 import { useMainSocket } from "./realtime/useMainSocket";
 //Booking
 import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
+import MyBookingsPage from "./features/booking/pages/MyBookingsPage";
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 function App() {
@@ -96,6 +97,7 @@ function App() {
 
         {/* Booking routes */}
         <Route path="/booking/hotel" element={<HotelBookingPage />} />
+        <Route path="/my-bookings" element={<MyBookingsPage />} />
 
         {/* Coming soon routes */}
         <Route path="/maybe" element={<FeatureComingSoonPage />} />
