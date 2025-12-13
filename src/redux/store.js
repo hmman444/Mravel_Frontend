@@ -7,6 +7,8 @@ import userProfileReducer from "../features/user/slices/userProfileSlice";
 import planListReducer from "../features/planBoard/slices/planListSlice";
 import planGeneralReducer from "../features/planBoard/slices/planGeneralSlice";
 import bookingReducer from "../features/booking/slices/bookingSlice";
+import bookingPublicReducer from "../features/booking/slices/bookingPublicSlice";
+import bookingPrivateReducer from "../features/booking/slices/bookingPrivateSlice";
 import { injectStore } from "./storeInjector";
 
 export const store = configureStore({
@@ -18,6 +20,8 @@ export const store = configureStore({
     userProfile: userProfileReducer,
     planList: planListReducer,
     planGeneral: planGeneralReducer,
+    bookingPublic: bookingPublicReducer,
+    bookingPrivate: bookingPrivateReducer,
     booking: bookingReducer,
   },
   middleware: (getDefaultMiddleware) =>

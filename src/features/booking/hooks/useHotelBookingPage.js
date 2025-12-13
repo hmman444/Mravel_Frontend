@@ -6,6 +6,7 @@ import { fetchHotelDetail } from "../../catalog/slices/catalogSlice";
 import { useHotelPricing } from "./useHotelPricing";
 import { fetchHotelAvailability, createHotelPayment } from "../slices/bookingSlice";
 import { fmt } from "../services/bookingService";
+import { fetchCurrentUser } from "../../auth/slices/authSlice";
 
 export function useHotelBookingPage() {
   const [params] = useSearchParams();
@@ -18,11 +19,31 @@ export function useHotelBookingPage() {
   const { hotelAvailability, payment } = useSelector((s) => s.booking);
   const { data: hotel, loading } = useSelector((s) => s.catalog.hotelDetail);
 
+  // ✅ auth state
+  const { accessToken, user } = useSelector((s) => s.auth);
+  const isLoggedIn = !!accessToken;
+  const userId = isLoggedIn ? (user?.id ?? null) : null;
+
+  // ✅ nếu có token mà chưa load user => gọi /auth/me
+  useEffect(() => {
+    if (isLoggedIn && !user) {
+      dispatch(fetchCurrentUser());
+    }
+  }, [dispatch, isLoggedIn, user]);
+
   // ✅ form state
   const [contactName, setContactName] = useState("Mẫn Huỳnh Minh");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("nsndman0404@gmail.com");
   const [note, setNote] = useState("");
+
+  // ✅ optional: nếu logged-in và có user, autofill contact
+  useEffect(() => {
+    if (!user) return;
+    // tùy field backend trả về. Bạn chỉnh lại cho đúng tên field user của bạn.
+    if (!contactName) setContactName(user.fullname || user.name || "");
+    if (!contactEmail) setContactEmail(user.email || "");
+  }, [user]); // eslint-disable-line
 
   // dates
   const [checkIn, setCheckIn] = useState(() => {
@@ -79,14 +100,15 @@ export function useHotelBookingPage() {
 
   const isEnoughRooms = hotelAvailability?.data?.isEnough ?? true;
 
-  // ✅ onPay: build payload + call thunk + redirect
   const onPay = useCallback(async ({ paymentOption }) => {
     if (!hotel || !roomType || !ratePlan) return;
 
     const payOption = paymentOption === "DEPOSIT" ? "DEPOSIT" : "FULL";
 
     const payload = {
-      userId: 1, // tạm
+      // ✅ đây là điểm bạn cần:
+      userId, // logged-in => number, guest => null
+
       contactName,
       contactPhone,
       contactEmail,
@@ -115,14 +137,11 @@ export function useHotelBookingPage() {
 
     const result = await dispatch(createHotelPayment(payload)).unwrap();
     const url = result?.payUrl || result?.paymentUrl;
-    console.log("payment result:", result);
-    console.log("redirect url:", url);
-
     if (url) window.location.href = url;
-    else console.warn("Missing pay url:", result);
   }, [
     dispatch,
     hotel, roomType, ratePlan,
+    userId,
     contactName, contactPhone, contactEmail, note,
     checkIn, checkOut,
     roomsCount,
@@ -133,32 +152,30 @@ export function useHotelBookingPage() {
 
   return {
     loading,
-
     hotelName,
     roomName,
     guests,
     ratePlan,
-
     checkIn,
     checkOut,
     nights,
     roomsCount,
-
     pricingAllRooms,
-
     remainingRoomsText,
     isEnoughRooms,
+
+    // ✅ expose thêm nếu bạn muốn show UI
+    isLoggedIn,
+    user,
 
     payLoading: payment.loading,
     payError: payment.error,
 
-    // form values
     contactName,
     contactPhone,
     contactEmail,
     note,
 
-    // handlers
     handleStayChange,
     handleRoomsChange,
     onContactNameChange: setContactName,
@@ -166,6 +183,6 @@ export function useHotelBookingPage() {
     onContactEmailChange: setContactEmail,
     onNoteChange: setNote,
 
-    onPay, // ✅ expose
+    onPay,
   };
 }
