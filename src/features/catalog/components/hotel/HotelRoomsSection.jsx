@@ -1,6 +1,7 @@
 // src/features/hotels/components/hotel/HotelRoomsSection.jsx
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   ChevronRight,
@@ -108,6 +109,7 @@ export default function HotelRoomsSection({ hotel }) {
           <RoomTypeRow
             key={rt.id || rt.name}
             roomType={rt}
+            hotel={hotel}
             priceMode={priceMode}
             activeFilters={activeFilters}
             onViewDetail={() => setSelectedRoomType(rt)}
@@ -132,7 +134,7 @@ export default function HotelRoomsSection({ hotel }) {
 
 /* ======================= SUB COMPONENTS ======================= */
 
-function RoomTypeRow({ roomType, priceMode, activeFilters, onViewDetail }) {
+function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }) {
   const {
     name,
     shortDescription,
@@ -361,6 +363,8 @@ function RoomTypeRow({ roomType, priceMode, activeFilters, onViewDetail }) {
                   ratePlan={rp}
                   guests={guests}
                   priceMode={priceMode}
+                  hotel={hotel}
+                  roomType={roomType}
                 />
               ))
             ) : (
@@ -647,7 +651,8 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
   );
 }
 
-function RatePlanRow({ ratePlan, guests, priceMode }) {
+function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
+  const navigate = useNavigate();
   const {
     name,
     boardType,
@@ -657,11 +662,10 @@ function RatePlanRow({ ratePlan, guests, priceMode }) {
     pricePerNight,
     referencePricePerNight,
     promoLabel,
-    showLowAvailability,
     priceIncludesTax,
     taxPercent,
     serviceFeePercent,
-    availableRooms,
+    // availableRooms, // ĐÃ BỎ
   } = ratePlan;
 
   const rawPrice =
@@ -727,13 +731,13 @@ function RatePlanRow({ ratePlan, guests, priceMode }) {
       ? "Đã bao gồm thuế và phí"
       : "Chưa bao gồm thuế và phí";
 
-  let availabilityText = null;
-  if (typeof availableRooms === "number" && availableRooms > 0) {
-    availabilityText =
-      availableRooms === 1
-        ? "Chỉ còn 1 phòng"
-        : `Chỉ còn ${availableRooms} phòng`;
-  }
+  const goBooking = () => {
+    navigate(
+      `/booking/hotel?hotelSlug=${encodeURIComponent(
+        hotel.slug
+      )}&roomTypeId=${roomType.id}&ratePlanId=${ratePlan.id}`
+    );
+  };
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-xs md:text-sm">
@@ -810,22 +814,11 @@ function RatePlanRow({ ratePlan, guests, priceMode }) {
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-lg bg-[#007bff] px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-[#ff6b1a] md:text-sm"
+            onClick={goBooking}
           >
             Chọn
             <ChevronRight className="ml-1 h-3 w-3" />
           </button>
-
-          {availabilityText && (
-            <div className="text-[11px] font-semibold text-red-500">
-              {availabilityText}
-            </div>
-          )}
-
-          {showLowAvailability && !availabilityText && (
-            <div className="text-[11px] font-semibold text-red-500">
-              Chỉ còn 1 phòng
-            </div>
-          )}
         </div>
       </div>
     </div>
