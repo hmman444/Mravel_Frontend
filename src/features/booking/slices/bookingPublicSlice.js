@@ -39,12 +39,13 @@ const slice = createSlice({
   name: "bookingPublic",
   initialState: {
     my: { loading: false, error: null, items: [] },
-    lookup: { loading: false, error: null, result: null },
+    lookup: { loading: false, error: null, result: null, scope: "PUBLIC" },
   },
   reducers: {
     clearLookup(state) {
       state.lookup.result = null;
       state.lookup.error = null;
+      state.lookup.scope = "PUBLIC";
     },
   },
   extraReducers: (b) => {

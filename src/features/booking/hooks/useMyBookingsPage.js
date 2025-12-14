@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+// ===== HOTEL (cũ) =====
 import {
   fetchGuestMyBookings,
   lookupBookingPublic,
@@ -12,136 +15,204 @@ import {
   claimMyGuestBookings,
 } from "../slices/bookingPrivateSlice";
 
-import { useNavigate } from "react-router-dom";
+// ===== RESTAURANT (mới) =====
+import {
+  fetchGuestMyRestaurantBookings,
+  lookupRestaurantBookingPublic,
+  clearRestaurantGuestDevice,
+  clearRestaurantLookup,
+} from "../slices/bookingRestaurantPublicSlice";
+
+import {
+  fetchMyUserRestaurantBookings,
+  claimMyGuestRestaurantBookings,
+} from "../slices/bookingRestaurantPrivateSlice";
 
 export function useMyBookingsPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // ====== AUTH ======
+  const [type, setType] = useState("HOTEL");
+  const [tab, setTab] = useState("DEVICE");
+
+  // AUTH
   const { user, accessToken } = useSelector((s) => s.auth || {});
   const isLoggedIn = !!accessToken && !!user?.id;
 
-  // ====== PUBLIC (DEVICE + LOOKUP) ======
-  const my = useSelector((s) => s.bookingPublic?.my);
-  const lookup = useSelector((s) => s.bookingPublic?.lookup);
+  // HOTEL selectors
+  const hotelMy = useSelector((s) => s.bookingPublic?.my);
+  const hotelLookup = useSelector((s) => s.bookingPublic?.lookup);
+  const hotelAcc = useSelector((s) => s.bookingPrivate?.my);
+  const hotelClaim = useSelector((s) => s.bookingPrivate?.claim);
 
-  // ====== PRIVATE (ACCOUNT) ======
-  const myAcc = useSelector((s) => s.bookingPrivate?.my);
-  const claim = useSelector((s) => s.bookingPrivate?.claim);
+  // REST selectors
+  const restMy = useSelector((s) => s.bookingRestaurantPublic?.my);
+  const restLookup = useSelector((s) => s.bookingRestaurantPublic?.lookup);
+  const restAcc = useSelector((s) => s.bookingRestaurantPrivate?.my);
+  const restClaim = useSelector((s) => s.bookingRestaurantPrivate?.claim);
 
-  // ✅ 3 tabs: DEVICE | ACCOUNT | LOOKUP
-  const [tab, setTab] = useState("DEVICE");
+  const lookupScope =
+    type === "RESTAURANT" ? (restLookup?.scope || "PUBLIC") : "PUBLIC";
 
-  // lookup form state
+  // ===== lookup form state (dùng chung) =====
   const [bookingCode, setBookingCode] = useState("");
   const [phoneLast4, setPhoneLast4] = useState("");
   const [email, setEmail] = useState("");
 
-  // ✅ luôn load guest bookings (tab thiết bị)
+  const codeUpper = bookingCode.trim().toUpperCase();
+  const lookupType = codeUpper.startsWith("RB-") ? "RESTAURANT" : "HOTEL";
+
+  // ✅ luôn load DEVICE list cho CẢ 2 loại (để chuyển tab nhỏ không cần call lại)
   useEffect(() => {
     dispatch(fetchGuestMyBookings());
+    dispatch(fetchGuestMyRestaurantBookings());
   }, [dispatch]);
 
-  // ✅ khi chuyển sang ACCOUNT và đã login => load user bookings
+  // ✅ khi vào ACCOUNT và đã login => load CẢ 2 loại để lấy count + render nhanh
   useEffect(() => {
     if (tab !== "ACCOUNT") return;
     if (!isLoggedIn) return;
+
     dispatch(fetchMyUserBookings(user.id));
+    dispatch(fetchMyUserRestaurantBookings());
   }, [dispatch, tab, isLoggedIn, user?.id]);
 
-  // ====== Actions ======
+  // ===== Actions (DEVICE) =====
   const onRefreshDevice = useCallback(() => {
-    dispatch(fetchGuestMyBookings());
-  }, [dispatch]);
+    if (type === "HOTEL") dispatch(fetchGuestMyBookings());
+    else dispatch(fetchGuestMyRestaurantBookings());
+  }, [dispatch, type]);
 
   const onClearDevice = useCallback(async () => {
-    await dispatch(clearGuestDevice()).unwrap();
-    dispatch(fetchGuestMyBookings());
-  }, [dispatch]);
+    if (type === "HOTEL") {
+      await dispatch(clearGuestDevice()).unwrap();
+      dispatch(fetchGuestMyBookings());
+    } else {
+      await dispatch(clearRestaurantGuestDevice()).unwrap();
+      dispatch(fetchGuestMyRestaurantBookings());
+    }
+  }, [dispatch, type]);
 
+  // ===== Actions (ACCOUNT) =====
   const onRefreshAccount = useCallback(() => {
     if (!isLoggedIn) return;
-    dispatch(fetchMyUserBookings(user.id));
-  }, [dispatch, isLoggedIn, user?.id]);
 
+    if (type === "HOTEL") dispatch(fetchMyUserBookings(user.id));
+    else dispatch(fetchMyUserRestaurantBookings());
+  }, [dispatch, type, isLoggedIn, user?.id]);
+
+  // ===== Claim (gộp guest -> account) =====
   const onClaimToAccount = useCallback(async () => {
     if (!isLoggedIn) {
       navigate(`/login?redirect=${encodeURIComponent("/my-bookings")}`);
       return;
     }
-    await dispatch(claimMyGuestBookings(user.id)).unwrap();
 
-    // reload cả 2 bên để UI thấy “chuyển” ngay
-    dispatch(fetchMyUserBookings(user.id));
-    dispatch(fetchGuestMyBookings());
-  }, [dispatch, isLoggedIn, user?.id, navigate]);
+    if (type === "HOTEL") {
+      await dispatch(claimMyGuestBookings(user.id)).unwrap();
+      dispatch(fetchMyUserBookings(user.id));
+      dispatch(fetchGuestMyBookings());
+    } else {
+      await dispatch(claimMyGuestRestaurantBookings()).unwrap();
+      dispatch(fetchMyUserRestaurantBookings());
+      dispatch(fetchGuestMyRestaurantBookings());
+    }
+  }, [dispatch, type, isLoggedIn, user?.id, navigate]);
 
+  // ===== Lookup submit =====
   const onSubmitLookup = useCallback(async () => {
     const payload = {
       bookingCode: bookingCode.trim(),
       phoneLast4: phoneLast4.trim(),
       email: email?.trim() || null,
     };
-    await dispatch(lookupBookingPublic(payload)).unwrap();
+
+    const codeUpper = payload.bookingCode.toUpperCase();
+    const t = codeUpper.startsWith("RB-") ? "RESTAURANT" : "HOTEL";
+
+    if (t === "RESTAURANT") {
+      await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
+    } else {
+      await dispatch(lookupBookingPublic(payload)).unwrap();
+    }
   }, [dispatch, bookingCode, phoneLast4, email]);
 
   const onClearLookupResult = useCallback(() => {
-    dispatch(clearLookup());
-  }, [dispatch]);
+    if (lookupType === "HOTEL") dispatch(clearLookup());
+    else dispatch(clearRestaurantLookup());
+  }, [dispatch, lookupType]);
 
-  // ====== Counts ======
-  const deviceCount = useMemo(
-    () => (my?.items?.length ? my.items.length : 0),
-    [my?.items]
-  );
+  // ===== Counts (để show nhỏ phía dưới) =====
+  const deviceHotelCount = useMemo(() => hotelMy?.items?.length || 0, [hotelMy?.items]);
+  const deviceRestCount = useMemo(() => restMy?.items?.length || 0, [restMy?.items]);
+  const accountHotelCount = useMemo(() => hotelAcc?.items?.length || 0, [hotelAcc?.items]);
+  const accountRestCount = useMemo(() => restAcc?.items?.length || 0, [restAcc?.items]);
 
-  const accountCount = useMemo(
-    () => (myAcc?.items?.length ? myAcc.items.length : 0),
-    [myAcc?.items]
-  );
+  // ===== Active list theo type =====
+  const deviceItems = type === "HOTEL" ? (hotelMy?.items || []) : (restMy?.items || []);
+  const deviceLoading = type === "HOTEL" ? !!hotelMy?.loading : !!restMy?.loading;
+  const deviceError = type === "HOTEL" ? hotelMy?.error : restMy?.error;
+
+  const accountItems = type === "HOTEL" ? (hotelAcc?.items || []) : (restAcc?.items || []);
+  const accountLoading = type === "HOTEL" ? !!hotelAcc?.loading : !!restAcc?.loading;
+  const accountError = type === "HOTEL" ? hotelAcc?.error : restAcc?.error;
+
+  const claimLoading = type === "HOTEL" ? !!hotelClaim?.loading : !!restClaim?.loading;
+  const claimError = type === "HOTEL" ? hotelClaim?.error : restClaim?.error;
+
+  const lookupLoading = type === "HOTEL" ? !!hotelLookup?.loading : !!restLookup?.loading;
+  const lookupError = type === "HOTEL" ? hotelLookup?.error : restLookup?.error;
+  const lookupResult = type === "HOTEL" ? hotelLookup?.result : restLookup?.result;
 
   return {
-    // tabs
+    // main tabs
     tab,
     setTab,
+
+    // sub type
+    type,
+    setType,
 
     // auth
     isLoggedIn,
     user,
 
-    // DEVICE tab
-    deviceCount,
-    deviceLoading: !!my?.loading,
-    deviceError: my?.error,
-    deviceItems: my?.items || [],
+    // counts
+    deviceHotelCount,
+    deviceRestCount,
+    accountHotelCount,
+    accountRestCount,
+
+    // DEVICE
+    deviceLoading,
+    deviceError,
+    deviceItems,
     onRefreshDevice,
     onClearDevice,
 
-    // ACCOUNT tab
-    accountCount,
-    accountLoading: !!myAcc?.loading,
-    accountError: myAcc?.error,
-    accountItems: myAcc?.items || [],
+    // ACCOUNT
+    accountLoading,
+    accountError,
+    accountItems,
     onRefreshAccount,
 
-    // claim button
-    claimLoading: !!claim?.loading,
-    claimError: claim?.error,
-    claimClaimed: claim?.claimed ?? 0,
+    // claim
+    claimLoading,
+    claimError,
     onClaimToAccount,
 
-    // LOOKUP tab
+    // LOOKUP
     bookingCode,
     phoneLast4,
     email,
     setBookingCode,
     setPhoneLast4,
     setEmail,
-    lookupLoading: !!lookup?.loading,
-    lookupError: lookup?.error,
-    lookupResult: lookup?.result,
+    lookupLoading,
+    lookupError,
+    lookupResult,
     onSubmitLookup,
     onClearLookupResult,
+    lookupScope,
   };
 }
