@@ -102,7 +102,6 @@ export function useSplitMoney({ editingCard, planMembers = [], parsedActual }) {
       setExactAmounts([]);
       setPayerChoice("");
       setPayerExternalName("");
-      // selectedMemberIds giữ như trên (hoặc bạn muốn clear luôn thì set [] ở đây)
     }
   }, [editingCard]);
 

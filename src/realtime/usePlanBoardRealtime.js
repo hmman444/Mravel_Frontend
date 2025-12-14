@@ -7,8 +7,16 @@ import {
   loadBoard,
 } from "../features/planBoard/slices/planBoardSlice";
 
+
 export function usePlanBoardRealtime(planId) {
   const dispatch = useDispatch();
+
+  const stripRole = (b) => {
+    if (!b || typeof b !== "object") return b;
+    const clone = { ...b };
+    delete clone.myRole; // <<< quan trọng
+    return clone;
+  };
 
   const accessToken = useSelector(
     (s) => s.auth?.accessToken || s.auth?.token || s.auth?.user?.accessToken
@@ -54,14 +62,14 @@ export function usePlanBoardRealtime(planId) {
         }
 
         if (board) {
-          dispatch(syncBoardFromRealtime(board));
+          dispatch(syncBoardFromRealtime(stripRole(board)));
         }
 
         return;
       }
 
       // Fallback: nếu backend chỉ gửi BoardResponse
-      dispatch(syncBoardFromRealtime(payload));
+      dispatch(syncBoardFromRealtime(stripRole(payload)));
     });
 
     return () => {

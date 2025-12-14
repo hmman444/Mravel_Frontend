@@ -155,3 +155,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+export const isApiRefreshing = () => isRefreshing;

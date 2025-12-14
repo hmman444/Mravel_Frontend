@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { MapPinIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 
 import PlanHeader from "./PlanHeader";
@@ -12,6 +12,8 @@ import { truncate } from "../utils/utils";
 export default function PlanPostCard({ plan, me, onOpenDetail }) {
   const { sendReact, sendComment } = usePlans();
   const commentRef = useRef(null);
+  const [showDestPopup, setShowDestPopup] = useState(false);
+
   const desc = truncate(plan.description || "", 200);
 
   const myReaction = useMemo(() => {
@@ -30,6 +32,25 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
     alert("Đã sao chép liên kết!");
   };
 
+  // === Destinations ===
+  const destinationNames = useMemo(
+    () =>
+      (plan.destinations || [])
+        .map((d) => d?.name?.trim())
+        .filter(Boolean),
+    [plan.destinations]
+  );
+
+  const destinationSummary = useMemo(() => {
+    if (!destinationNames.length) return "Chưa chọn điểm đến";
+    if (destinationNames.length <= 2) return destinationNames.join(", ");
+    return `${destinationNames.slice(0, 2).join(", ")} +${
+      destinationNames.length - 2
+    }`;
+  }, [destinationNames]);
+
+  const hasDestinations = destinationNames.length > 0;
+
   return (
     <article
       className="
@@ -38,7 +59,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         shadow-lg shadow-gray-200/60 dark:shadow-black/40
         p-4 sm:p-5
         transition-transform duration-200
-         hover:shadow-xl
+        hover:shadow-xl
       "
     >
       <PlanHeader
@@ -66,14 +87,62 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
           flex flex-wrap items-center gap-3
         "
       >
+        {/* Ngày đi */}
         <span className="flex items-center gap-1.5">
           <CalendarDaysIcon className="w-4 h-4" />
           {plan.startDate} – {plan.endDate} • {plan.days} ngày
         </span>
-        <span className="flex items-center gap-1.5">
-          <MapPinIcon className="w-4 h-4" />
-          {plan.destinations?.length || 0} điểm đến
-        </span>
+
+        {/* Điểm đến + popup */}
+        <div className="relative">
+          <button
+            type="button"
+            className="
+              flex items-center gap-1.5
+              px-2 py-1 rounded-full
+              hover:bg-sky-50 dark:hover:bg-sky-900/40
+              transition-colors
+            "
+            onMouseEnter={() => setShowDestPopup(true)}
+            onMouseLeave={() => setShowDestPopup(false)}
+            onClick={() => setShowDestPopup((v) => !v)}
+          >
+            <MapPinIcon className="w-4 h-4" />
+            <span className="truncate max-w-[180px] sm:max-w-[220px]">
+              {plan.destinations?.length || 0} điểm đến
+            </span>
+          </button>
+
+          {showDestPopup && hasDestinations && (
+            <div
+              className="
+                absolute z-30 mt-1 left-0
+                w-56 sm:w-64
+                rounded-xl border border-gray-200 dark:border-gray-700
+                bg-white dark:bg-gray-900
+                shadow-xl shadow-gray-300/60 dark:shadow-black/60
+                p-2
+              "
+              onMouseEnter={() => setShowDestPopup(true)}
+              onMouseLeave={() => setShowDestPopup(false)}
+            >
+              <div className="px-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Điểm đến trong kế hoạch
+              </div>
+              <ul className="max-h-56 overflow-y-auto text-xs text-gray-700 dark:text-gray-200">
+                {destinationNames.map((name, idx) => (
+                  <li
+                    key={`${name}-${idx}`}
+                    className="flex items-start gap-2 px-1 py-1.5 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/40"
+                  >
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-sky-500" />
+                    <span className="leading-snug">{name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
 
       {!!plan.description && (

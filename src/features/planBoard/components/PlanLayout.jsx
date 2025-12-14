@@ -3,50 +3,58 @@
 import { useState } from "react";
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "./SidebarPlans";
+import ConfirmModal from "../../../components/ConfirmModal";
 
 export default function PlanLayout({
   children,
   activePlanId = null,
-  plans = [],
+  myPlans = [],
+  recentPlans = [],
   onOpenPlanList,
   onOpenCalendar,
   onOpenPlanDashboard,
+  onCopyPlan,
+  onRemoveRecentPlan,
+
+  onDeletePlan, // (plan) => Promise
 }) {
   const [collapsed, setCollapsed] = useState(false);
+
+  const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
       <Navbar fixedWhite />
 
       <div className="flex pt-12 relative">
-        {/* SIDEBAR */}
         <SidebarPlans
           collapsed={collapsed}
           activePlanId={activePlanId}
-          plans={plans}
+          myPlans={myPlans}
+          recentPlans={recentPlans}
           onOpenPlanList={onOpenPlanList}
           onOpenCalendar={onOpenCalendar}
           onOpenPlanDashboard={onOpenPlanDashboard}
+          onCopyPlan={onCopyPlan}
+          onRemoveRecentPlan={onRemoveRecentPlan}
+
+          onDeletePlan={(plan) => setConfirmDeletePlan(plan)}
         />
 
-        {/* TOGGLE BUTTON */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="
-            fixed top-1/2 z-40 -translate-y-1/2
+          className="fixed top-1/2 z-40 -translate-y-1/2
             h-9 w-9 flex items-center justify-center
             rounded-full border border-gray-200 dark:border-gray-700
             bg-white dark:bg-gray-900
             shadow-md hover:shadow-lg hover:scale-105
             text-xs text-gray-600 dark:text-gray-200
-            transition
-          "
+            transition"
           style={{ left: collapsed ? "18px" : "262px" }}
         >
           {collapsed ? "❯" : "❮"}
         </button>
 
-        {/* MAIN CONTENT */}
         <main
           className={`
             flex-1 min-h-[calc(100vh-4rem)]
@@ -60,6 +68,25 @@ export default function PlanLayout({
           </div>
         </main>
       </div>
+
+      {confirmDeletePlan && (
+        <ConfirmModal
+          open={true}
+          title="Xoá lịch trình"
+          message={`Xác nhận xoá "${confirmDeletePlan.title || "Chưa đặt tên"}"? Hành động này không thể hoàn tác.`}
+          confirmText="Xoá"
+          onClose={() => setConfirmDeletePlan(null)}
+          onConfirm={async () => {
+            try {
+              console.log("Confirm delete:", confirmDeletePlan);
+    console.log("onDeletePlan exists:", !!onDeletePlan);
+              await onDeletePlan?.(confirmDeletePlan);
+            } finally {
+              setConfirmDeletePlan(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

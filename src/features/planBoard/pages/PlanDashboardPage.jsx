@@ -17,7 +17,7 @@ import AccessRequestModal from "../components/modals/AccessRequestModal";
 import { useMyPlans } from "../hooks/useMyPlans";
 import { usePlanBoard } from "../hooks/usePlanBoard";
 import { usePlanGeneral } from "../hooks/usePlanGeneral";
-
+import { useRecentPlans } from "../hooks/useRecentPlans";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 import { usePlanBoardRealtime } from "../../../realtime/usePlanBoardRealtime";
 
@@ -29,6 +29,7 @@ export default function PlanDashboardPage() {
     board,
     loading,
     error,
+    errorStatus,
     load,
     createList,
     renameList,
@@ -46,11 +47,14 @@ export default function PlanDashboardPage() {
     isOwner,
     planMembers,
     duplicateCard,
+    copyPlan,
+    deletePlan
   } = usePlanBoard(planId);
 
-  const { plans } = useMyPlans();
+  const { plans: myPlans, reload: reloadMyPlans } = useMyPlans();
+  const { recentPlans, reloadRecent, removeRecent } = useRecentPlans();
+
   const { updateTitle } = usePlanGeneral();
-  const [sidebarPlans, setSidebarPlans] = useState([]);
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window === "undefined") return "summary";
 
@@ -76,10 +80,6 @@ export default function PlanDashboardPage() {
 
   const canEditGeneral = isOwner || isEditor;
 
-  useEffect(() => {
-    setSidebarPlans(plans || []);
-  }, [plans]);
-
   usePlanBoardRealtime(planId);
 
   useEffect(() => {
@@ -99,6 +99,12 @@ export default function PlanDashboardPage() {
   }, [loading, board, error]);
 
   useEffect(() => {
+    if (!loading && !board && errorStatus === 403) {
+      setShowAccessModal(true);
+    }
+  }, [loading, board, errorStatus]);
+
+  useEffect(() => {
     if (!planId || !activeTab) return;
     window.localStorage.setItem(`plan-dashboard-tab-${planId}`, activeTab);
   }, [activeTab, planId]);
@@ -116,18 +122,37 @@ export default function PlanDashboardPage() {
       await updateTitle(planId, trimmed).unwrap();
       showSuccess("Đã cập nhật tiêu đề");
 
-      setSidebarPlans((prev) =>
-        prev.map((p) =>
-        String(p.id) === String(planId)
-          ? { ...p, title: trimmed, name: trimmed } 
-          : p
-        )
-      );
+      if (reloadMyPlans) {
+        await reloadMyPlans();
+      }
+      if (reloadRecent){
+        await reloadRecent();
+      }
     } catch {
       showError("Không thể cập nhật tiêu đề");
       setTitleInput(board.planTitle || "");
     }
   };
+
+  const handleCopyFromSidebar = async (plan) => {
+    try {
+      const copied = await copyPlan(plan.id);
+      if (copied?.id){
+        showSuccess("Đã tạo bản sao lịch trình");
+        if (reloadMyPlans) {
+          await reloadMyPlans();
+        }
+        if (reloadRecent){
+          await reloadRecent();
+        }
+        navigate(`/plans/${copied.id}`);
+      } else {
+        showError("Không thể tạo bản sao lịch trình");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
@@ -329,8 +354,7 @@ export default function PlanDashboardPage() {
     try {
       setAccessLoadingType("VIEW");
       await requestAccess("VIEW");
-      showSuccess("Đã gửi yêu cầu quyền xem");
-      setShowAccessModal(false);
+      
     } finally {
       setAccessLoadingType(null);
     }
@@ -340,8 +364,7 @@ export default function PlanDashboardPage() {
     try {
       setAccessLoadingType("EDIT");
       await requestAccess("EDIT");
-      showSuccess("Đã gửi yêu cầu quyền chỉnh sửa");
-      setShowAccessModal(false);
+      
     } finally {
       setAccessLoadingType(null);
     }
@@ -355,6 +378,60 @@ export default function PlanDashboardPage() {
     );
   }
 
+  const handleDeletePlanFromSidebar = async (plan) => {
+    try {
+      await deletePlan(plan.id);
+      showSuccess("Đã xoá lịch trình");
+
+      // reload lists
+      await reloadMyPlans?.();
+      await reloadRecent?.();
+
+      // nếu đang ở đúng plan vừa xóa -> đá về My Plans
+      if (String(planId) === String(plan.id)) {
+        navigate("/plans/my-plans");
+      }
+    } catch (e) {
+      console.error(e);
+      showError("Không thể xoá lịch trình");
+    }
+  };
+
+  const handleRemoveRecentFromSidebar = async (plan) => {
+    await removeRecent(plan.id);
+  };
+  
+  const permissionDenied =
+    !loading &&
+    !board &&
+    (errorStatus === 403);
+
+  if (permissionDenied) {
+    return (
+      <PlanLayout
+        activePlanId={planId}
+        myPlans={myPlans}
+        recentPlans={recentPlans}
+        onOpenPlanList={() => navigate("/plans/my-plans")}
+        onOpenCalendar={() => navigate("/plans/timeline")}
+        onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
+        onCopyPlan={handleCopyFromSidebar}
+        onRemoveRecentPlan={handleRemoveRecentFromSidebar}
+        onDeletePlan={handleDeletePlanFromSidebar}
+      >
+        <AccessRequestModal
+          isOpen={true}
+          onClose={() => navigate("/plans/my-plans")}
+          visibility={board?.visibility || "PRIVATE"}
+          onRequestView={handleRequestView}
+          onRequestEdit={handleRequestEdit}
+          loadingType={accessLoadingType}
+          lockBackdropClose={true}
+        />
+      </PlanLayout>
+    );
+  }
+
   // helper: tìm list DAY theo dayDate (yyyy-MM-dd)
   const findDayListByDate = (dateStr) => {
     return (
@@ -364,13 +441,18 @@ export default function PlanDashboardPage() {
     );
   };
 
+
   return (
     <PlanLayout
       activePlanId={planId}
-      plans={sidebarPlans}
+      myPlans={myPlans}
+      recentPlans={recentPlans}
       onOpenPlanList={() => navigate("/plans/my-plans")}
-      onOpenCalendar={() => navigate("/plans/calendar")}
+      onOpenCalendar={() => navigate("/plans/timeline")}
       onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
+      onCopyPlan={handleCopyFromSidebar}
+      onRemoveRecentPlan={handleRemoveRecentFromSidebar}
+      onDeletePlan={handleDeletePlanFromSidebar}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4 gap-3">
@@ -434,7 +516,7 @@ export default function PlanDashboardPage() {
         {[
           { key: "summary", label: "Tổng quan" },
           { key: "board", label: "Bảng lịch trình" },
-          { key: "calendar", label: "Lịch tuần" },
+          { key: "calendar", label: "Thời gian biểu" },
           { key: "members", label: "Thành viên" },
         ].map((t) => {
           const ac = activeTab === t.key;
@@ -476,6 +558,7 @@ export default function PlanDashboardPage() {
           <PlanBoard
             board={board}
             isViewer={isViewer}
+            canEditBoard={canEditGeneral}
             planMembers={planMembers}
             handleAddList={handleAddList}
             renameList={renameList}

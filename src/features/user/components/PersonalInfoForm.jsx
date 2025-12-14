@@ -115,13 +115,9 @@ export default function PersonalInfoForm() {
       }
 
       const payload = {
-        fullname: fullname || null,
-        gender: gender || null, // BE dùng enum MALE/FEMALE/OTHER/UNKNOWN
+        gender: gender || null,
         dateOfBirth,
-        city: city || null,
-        country: country || null,
         addressLine: addressLine || null,
-        // email phụ / phone sẽ làm sau nếu cần
       };
 
       const action = await dispatch(updateUserProfile(payload));
@@ -173,22 +169,6 @@ export default function PersonalInfoForm() {
       <h3 className="font-semibold text-base md:text-lg text-slate-900 dark:text-slate-50">
         Dữ liệu cá nhân
       </h3>
-
-      {/* Tên đầy đủ */}
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-          Tên đầy đủ
-        </label>
-        <input
-          type="text"
-          value={fullname}
-          onChange={(e) => {
-            setFullname(e.target.value);
-            markChanged();
-          }}
-          className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-        />
-      </div>
 
       {/* Giới tính + Ngày sinh */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -20,6 +20,7 @@ import {
   fetchRequests,
   handleRequest,
   clearTrash,
+  copyPlan
 } from "../services/planBoardService";
 import {
   normalizeBoardPayload,
@@ -32,12 +33,27 @@ const initialState = {
   loading: false,
   actionLoading: false,
   error: null,
+  errorStatus: null,
   requests: [],
 };
 
-export const loadBoard = createAsyncThunk("planBoard/loadBoard", async (planId) => {
-  return await fetchBoard(planId);
-});
+export const loadBoard = createAsyncThunk(
+  "planBoard/loadBoard",
+  async (planId, { rejectWithValue }) => {
+    try {
+      return await fetchBoard(planId);
+    } catch (err) {
+      const status = err?.response?.status;
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Không thể tải kế hoạch";
+
+      return rejectWithValue({ status, message });
+    }
+  }
+);
 
 export const addList = createAsyncThunk(
   "planBoard/addList",
@@ -186,6 +202,12 @@ export const decideRequest = createAsyncThunk(
   }
 );
 
+export const copyPlanThunk = createAsyncThunk(
+  "planBoard/copyPlan",
+  async (planId) => {
+    return await copyPlan(planId);
+  }
+);
 const planBoardSlice = createSlice({
   name: "planBoard",
   initialState,
@@ -263,9 +285,7 @@ const planBoardSlice = createSlice({
       const rawBoard = incoming.board ?? incoming;
 
       const normalized = normalizeBoardPayload(rawBoard);
-      if (prevMyRole) {
-        normalized.myRole = prevMyRole;
-      }
+      normalized.myRole = prevMyRole;
 
       state.board = normalized;
     },
@@ -276,14 +296,21 @@ const planBoardSlice = createSlice({
       .addCase(loadBoard.pending, (s) => {
         s.loading = true;
         s.error = null;
+        s.errorStatus = null;
       })
       .addCase(loadBoard.fulfilled, (s, a) => {
         s.loading = false;
-        s.board = normalizeBoardPayload(a.payload);
+        s.error = null;
+        s.errorStatus = null;
+        const prevMyRole = s.board?.myRole || null; 
+        const normalized = normalizeBoardPayload(a.payload);
+        normalized.myRole = prevMyRole ?? normalized.myRole ?? null;
+        s.board = normalized;
       })
       .addCase(loadBoard.rejected, (s, a) => {
         s.loading = false;
-        s.error = a.error.message;
+        s.error = a.payload?.message || a.error?.message || "Không thể tải kế hoạch";
+        s.errorStatus = a.payload?.status || null; 
       })
 
       // Add list
