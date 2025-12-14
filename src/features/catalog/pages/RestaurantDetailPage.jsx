@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { useCatalogRestaurants } from "../hooks/useCatalogRestaurants";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -19,6 +20,7 @@ import RestaurantDirectionsSection from "../components/restaurant/RestaurantDire
 import RestaurantOpeningHoursSection from "../components/restaurant/RestaurantOpeningHoursSection";
 
 export default function RestaurantDetailPage() {
+  const { handleBookingSubmit } = useCatalogRestaurants();
   const { slug } = useParams();
   const dispatch = useDispatch();
 
@@ -96,7 +98,8 @@ export default function RestaurantDetailPage() {
                 <aside className="hidden lg:block">
                   <div className="lg:sticky lg:top-[88px]">
                     <div className="bg-white rounded-3xl border border-gray-200 shadow-sm relative">
-                      <RestaurantBookingBox restaurant={restaurant} />
+                      <RestaurantBookingBox restaurant={restaurant}
+                      onSubmit={handleBookingSubmit} />
                     </div>
                   </div>
                 </aside>

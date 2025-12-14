@@ -1,43 +1,57 @@
+// src/features/catalog/components/restaurant/RestaurantBookingBox.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaMinus, FaPlus, FaClock, FaCalendarAlt } from "react-icons/fa";
 import MravelDatePicker from "../../../../components/MravelDatePicker";
 import Button from "../../../../components/Button";
 
-/** build time list every 30 mins */
-const buildTimeOptions = () => {
-  const arr = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const hh = String(h).padStart(2, "0");
-      const mm = String(m).padStart(2, "0");
-      arr.push(`${hh}:${mm}`);
-    }
-  }
-  return arr;
-};
+import {
+  buildTimeOptionsFromOpeningHours,
+  getOpeningLabelForDate,
+} from "../../../booking/services/openingHoursUtils";
 
 export default function RestaurantBookingBox({
   restaurant,
-  onSubmit, // (payload) => void
+  onSubmit,
   className = "",
 }) {
-  /* ===== state ===== */
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
 
-  const [date, setDate] = useState(() => new Date());
-  const timeOptions = useMemo(buildTimeOptions, []);
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
   const [time, setTime] = useState(""); // "HH:mm"
+
+  const openingHours = restaurant?.openingHours || restaurant?.opening_hours || [];
+
+  // ✅ build timeOptions theo openingHours + date (mỗi 30 phút)
+  const timeOptions = useMemo(
+    () => buildTimeOptionsFromOpeningHours(openingHours, date, 30),
+    [openingHours, date]
+  );
+
+  const openingLabel = useMemo(
+    () => getOpeningLabelForDate(openingHours, date),
+    [openingHours, date]
+  );
+
+  // ✅ nếu user đổi ngày mà time hiện tại không còn hợp lệ -> auto chọn slot đầu
+  useEffect(() => {
+    if (!timeOptions.length) {
+      setTime("");
+      return;
+    }
+    if (!time || !timeOptions.includes(time)) setTime(timeOptions[0]);
+  }, [timeOptions]); // eslint-disable-line
 
   /* ===== popover: guests ===== */
   const [openGuests, setOpenGuests] = useState(false);
   const guestsRef = useRef(null);
-
   useEffect(() => {
     const onDoc = (e) => {
-      if (guestsRef.current && !guestsRef.current.contains(e.target)) {
-        setOpenGuests(false);
-      }
+      if (guestsRef.current && !guestsRef.current.contains(e.target)) setOpenGuests(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -48,16 +62,18 @@ export default function RestaurantBookingBox({
   const timeRef = useRef(null);
   useEffect(() => {
     const onDoc = (e) => {
-      if (timeRef.current && !timeRef.current.contains(e.target)) {
-        setOpenTime(false);
-      }
+      if (timeRef.current && !timeRef.current.contains(e.target)) setOpenTime(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
+  const canSubmit = !!restaurant?.slug && !!date && !!time && timeOptions.length > 0;
+
   const commit = (e) => {
     e?.preventDefault?.();
+    if (!canSubmit) return;
+
     onSubmit?.({
       restaurantSlug: restaurant?.slug,
       adults,
@@ -68,38 +84,27 @@ export default function RestaurantBookingBox({
   };
 
   return (
-    <div
-      className={[
-        "rounded-2xl border border-gray-200 bg-white shadow-sm",
-        "p-4 md:p-5",
-        className,
-      ].join(" ")}
-    >
+    <div className={["rounded-2xl border border-gray-200 bg-white shadow-sm", "p-4 md:p-5", className].join(" ")}>
       {/* Header */}
       <div className="text-center">
         <h3 className="text-lg font-bold text-gray-900">
           Đặt chỗ{" "}
           <span className="font-normal text-gray-600">(Để có chỗ trước khi đến)</span>
         </h3>
-        <div className="mt-1 text-sm font-semibold text-rose-600">
-          Giảm 10%
-        </div>
+        <div className="mt-1 text-sm font-semibold text-rose-600">Giảm 10%</div>
       </div>
 
       {/* Guests Row */}
       <div className="mt-4">
         <div className="text-sm font-semibold text-gray-700 mb-1">Số khách</div>
-        <div
-          ref={guestsRef}
-          className="relative"
-        >
+        <div ref={guestsRef} className="relative">
           <button
             type="button"
             onClick={() => setOpenGuests((v) => !v)}
             className="w-full h-11 px-3 rounded-lg border border-gray-300 text-left flex items-center gap-2"
           >
             <span className="text-gray-800">
-              {adults} người lớn{", "}{children} trẻ em
+              {adults} người lớn, {children} trẻ em
             </span>
             <span className="ml-auto text-gray-400">▾</span>
           </button>
@@ -185,33 +190,48 @@ export default function RestaurantBookingBox({
       {/* Date & Time */}
       <div className="mt-4">
         <div className="text-sm font-semibold text-gray-700 mb-1">Thời gian đến</div>
+
+        <div className="text-[11px] text-gray-500 mb-2">
+          {openingLabel}
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           {/* Date */}
           <div className="h-11 rounded-lg border border-gray-300 px-3 bg-white flex items-center relative">
             <FaCalendarAlt className="text-gray-400 mr-2" />
             <MravelDatePicker
-                selected={date}
-                onChange={setDate}
-
-                /* canh dưới-trái + đẩy sang TRÁI 12px, xuống 8px */
-                popperPlacement="bottom-start"
-                popperModifiers={[
-                { name: "offset", options: { offset: [0, 8] } }, // [-x, y]
+              selected={date}
+              onChange={(d) => {
+                if (!d) return;
+                const x = new Date(d);
+                x.setHours(0, 0, 0, 0);
+                setDate(x);
+              }}
+              popperPlacement="bottom-start"
+              popperModifiers={[
+                { name: "offset", options: { offset: [0, 8] } },
                 { name: "preventOverflow", options: { padding: 8 } },
-                ]}
-
-                /* render popper trong cùng container để canh chuẩn */
-                popperContainer={(props) => <div {...props} className="z-[9999]" />}
-
-                className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer"
+              ]}
+              popperContainer={(props) => <div {...props} className="z-[9999]" />}
+              className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer"
             />
-            </div>
-          {/* Time (dropdown like RestaurantSearchCard) */}
-          <div ref={timeRef} className="relative h-11 rounded-lg border border-gray-300 px-3 bg-white flex items-center cursor-pointer"
-               onClick={() => setOpenTime((v) => !v)}>
+          </div>
+
+          {/* Time */}
+          <div
+            ref={timeRef}
+            className={[
+              "relative h-11 rounded-lg border px-3 bg-white flex items-center",
+              timeOptions.length ? "border-gray-300 cursor-pointer" : "border-gray-200 cursor-not-allowed opacity-70",
+            ].join(" ")}
+            onClick={() => {
+              if (!timeOptions.length) return;
+              setOpenTime((v) => !v);
+            }}
+          >
             <FaClock className="text-gray-400 mr-2" />
             <span className={`text-sm ${time ? "text-gray-800" : "text-gray-400"}`}>
-              {time || "Chọn giờ"}
+              {timeOptions.length ? (time || "Chọn giờ") : "Nhà hàng đóng cửa"}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
@@ -221,16 +241,15 @@ export default function RestaurantBookingBox({
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 <div className="px-3 pb-1 text-xs font-semibold text-gray-500">
-                  Giờ (theo giờ địa phương)
+                  Giờ (cách nhau 30 phút)
                 </div>
+
                 {timeOptions.map((t) => (
                   <button
                     key={t}
                     type="button"
                     className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition ${
-                      t === time
-                        ? "bg-sky-50 text-sky-700 font-semibold"
-                        : "text-gray-800 hover:bg-gray-50"
+                      t === time ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-800 hover:bg-gray-50"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -250,8 +269,12 @@ export default function RestaurantBookingBox({
       {/* Submit */}
       <div className="mt-5">
         <Button
-          className="w-full h-11 rounded-lg bg-[#ff3b30] hover:bg-[#e2332a] text-white font-semibold text-base"
+          className={[
+            "w-full h-11 rounded-lg text-white font-semibold text-base",
+            canSubmit ? "bg-[#ff3b30] hover:bg-[#e2332a]" : "bg-gray-400 cursor-not-allowed",
+          ].join(" ")}
           onClick={commit}
+          disabled={!canSubmit}
         >
           Đặt chỗ ngay
         </Button>

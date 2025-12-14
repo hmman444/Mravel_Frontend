@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import BookingCard from "./BookingCard";
 import { Search, Mail, Phone, Hash } from "lucide-react";
 
 export default function BookingLookupForm({
@@ -18,7 +17,12 @@ export default function BookingLookupForm({
   error,
   result,
 
+  ResultCard,
   onOpenHotel,
+  onOpenRestaurant,
+
+  detailScope = "PUBLIC",
+  lookupCreds
 }) {
   const canSubmit = useMemo(() => {
     const codeOk = bookingCode?.trim()?.length >= 6;
@@ -45,9 +49,17 @@ export default function BookingLookupForm({
 
         <form
           className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            onSubmit?.();
+
+            console.log("SUBMIT fired", { bookingCode, phoneLast4, email });
+
+            try {
+              await onSubmit?.(); // ✅ await
+              console.log("SUBMIT done");
+            } catch (err) {
+              console.error("SUBMIT error:", err); // ✅ thấy lỗi rõ ràng
+            }
           }}
         >
           {/* bookingCode */}
@@ -137,7 +149,15 @@ export default function BookingLookupForm({
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 md:text-sm">
             Đã tìm thấy đơn. Bạn nên <b>copy/chụp lại mã booking</b> để tra cứu lần sau nếu lỡ xoá dữ liệu trình duyệt.
           </div>
-          <BookingCard booking={result} onOpenHotel={onOpenHotel} />
+          {ResultCard ? (
+            <ResultCard
+              booking={result}
+              onOpenHotel={onOpenHotel}
+              onOpenRestaurant={onOpenRestaurant}
+              detailScope={detailScope}
+              lookupCreds={lookupCreds}
+            />
+          ) : null}
         </div>
       ) : null}
     </section>

@@ -64,6 +64,7 @@ export default function BookingCard({
   booking,
   onOpenHotel,
   detailScope = "PUBLIC",
+  lookupCreds,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -71,6 +72,9 @@ export default function BookingCard({
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
+
+  const lookupPhoneLast4 = lookupCreds?.phoneLast4 || "";
+  const lookupEmail = lookupCreds?.email || null;
 
   // ✅ Hook luôn gọi trước mọi return
   const stayRange = useMemo(() => {
@@ -100,14 +104,26 @@ export default function BookingCard({
         setDetailError(null);
         setDetailLoading(true);
 
-        const url =
-          detailScope === "PRIVATE"
-            ? `/booking/bookings/${encodeURIComponent(code)}`
-            : `/booking/public/my/${encodeURIComponent(code)}`;
+        let res;
 
-        const res = await api.get(url);
+        if (detailScope === "LOOKUP") {
+          // ✅ HOTEL lookup detail
+          res = await api.post(`/booking/public/lookup/detail`, {
+            bookingCode: code,
+            phoneLast4: lookupPhoneLast4,
+            email: lookupEmail,
+          });
+        } else {
+          // ✅ HOTEL public/private detail
+          const url =
+            detailScope === "PRIVATE"
+              ? `/booking/bookings/${encodeURIComponent(code)}`
+              : `/booking/public/my/${encodeURIComponent(code)}`;
+
+          res = await api.get(url);
+        }
+
         const data = res.data?.data ?? null;
-
         if (!cancelled) setDetail(data);
       } catch (e) {
         const msg =
@@ -121,7 +137,13 @@ export default function BookingCard({
     return () => {
       cancelled = true;
     };
-  }, [open, booking?.code, detailScope]);
+  }, [
+    open,
+    booking?.code,
+    detailScope,
+    lookupPhoneLast4,
+    lookupEmail,
+  ]);
 
   // ✅ return sau hooks
   if (!booking) return null;

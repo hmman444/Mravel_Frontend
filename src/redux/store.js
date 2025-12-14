@@ -9,6 +9,9 @@ import planGeneralReducer from "../features/planBoard/slices/planGeneralSlice";
 import bookingReducer from "../features/booking/slices/bookingSlice";
 import bookingPublicReducer from "../features/booking/slices/bookingPublicSlice";
 import bookingPrivateReducer from "../features/booking/slices/bookingPrivateSlice";
+import bookingRestaurantReducer from "../features/booking/slices/bookingRestaurantSlice";
+import bookingRestaurantPrivateReducer from "../features/booking/slices/bookingRestaurantPrivateSlice";
+import bookingRestaurantPublicReducer from "../features/booking/slices/bookingRestaurantPublicSlice";
 import { injectStore } from "./storeInjector";
 
 export const store = configureStore({
@@ -22,6 +25,9 @@ export const store = configureStore({
     planGeneral: planGeneralReducer,
     bookingPublic: bookingPublicReducer,
     bookingPrivate: bookingPrivateReducer,
+    bookingRestaurant: bookingRestaurantReducer,
+    bookingRestaurantPrivate: bookingRestaurantPrivateReducer,
+    bookingRestaurantPublic: bookingRestaurantPublicReducer,
     booking: bookingReducer,
   },
   middleware: (getDefaultMiddleware) =>
