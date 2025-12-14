@@ -1,3 +1,6 @@
+// src/features/planBoard/components/summary/PlanDateInputs.jsx
+"use client";
+
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
@@ -8,12 +11,10 @@ export default function PlanDateInputs({
   endDate,
   setStartDate,
   setEndDate,
+  disabled = false, // NEW
 }) {
   const handleStartChange = (date) => {
-    if (endDate && date > endDate) {
-      showError("Ngày bắt đầu không thể sau ngày kết thúc!");
-      return;
-    }
+    // StartDate bây giờ không bắt lỗi > endDate nữa
     setStartDate(date);
   };
 
@@ -34,14 +35,15 @@ export default function PlanDateInputs({
         </label>
 
         <div
-          className="
+          className={`
             flex items-center gap-2
             bg-white/90 dark:bg-gray-800/80
             border border-gray-300 dark:border-gray-700
             rounded-xl px-3 py-2 shadow-sm
-            transition cursor-pointer
+            transition
             w-52
-          "
+            ${disabled ? "opacity-70 cursor-default" : "cursor-pointer"}
+          `}
         >
           <div
             className="
@@ -59,6 +61,7 @@ export default function PlanDateInputs({
             dateFormat="dd/MM/yyyy"
             placeholderText="Chọn ngày..."
             locale="vi"
+            disabled={disabled}
             className="
               bg-transparent outline-none flex-1 text-sm
               text-gray-700 dark:text-gray-200
@@ -92,14 +95,15 @@ export default function PlanDateInputs({
         </label>
 
         <div
-          className="
+          className={`
             flex items-center gap-2
             bg-white/90 dark:bg-gray-800/80
             border border-gray-300 dark:border-gray-700
             rounded-xl px-3 py-2 shadow-sm
-            transition cursor-pointer
+            transition
             w-52
-          "
+            ${disabled ? "opacity-70 cursor-default" : "cursor-pointer"}
+          `}
         >
           <div
             className="
@@ -118,6 +122,7 @@ export default function PlanDateInputs({
             dateFormat="dd/MM/yyyy"
             placeholderText="Chọn ngày..."
             locale="vi"
+            disabled={disabled}
             className="
               bg-transparent outline-none flex-1 text-sm
               text-gray-700 dark:text-gray-200

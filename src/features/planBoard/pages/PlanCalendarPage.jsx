@@ -15,7 +15,6 @@
   export default function PlanCalendarPage() {
     const navigate = useNavigate();
 
-    // Demo plan list (bạn sẽ thay bằng API thật)
     const plans = [
       {
         id: 1,
@@ -98,7 +97,7 @@
         activePlanId={null}
         plans={plans}
         onOpenPlanList={() => navigate("/plans/my-plans")}
-        onOpenCalendar={() => navigate("/plans/calendar")}
+        onOpenCalendar={() => navigate("/plans/timeline")}
         onOpenPlanDashboard={(plan) => navigate(`/plans/${plan.id}/dashboard`)}
       >
         {/* PAGE HEADER */}

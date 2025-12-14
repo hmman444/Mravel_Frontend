@@ -84,7 +84,7 @@ export default function Navbar() {
         </Link>
 
         {/* NAV LINKS */}
-        <nav className="hidden md:flex gap-6 font-medium text-sm">
+        <nav className="hidden md:flex gap-6 font-medium text-base">
           <Link className="hover:text-sky-500 transition" to="/hotels">
             Khách sạn
           </Link>
@@ -176,6 +176,7 @@ export default function Navbar() {
                       absolute right-0 mt-2 w-72 rounded-2xl overflow-hidden
                       shadow-2xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 animate-dropdown
+                      text-gray-900 dark:text-gray-100
                     "
                   >
                     {/* Header */}

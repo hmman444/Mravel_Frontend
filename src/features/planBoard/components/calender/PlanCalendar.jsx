@@ -13,7 +13,6 @@ export default function PlanCalendar({
   planMembers,
   createActivityCard,
   updateActivityCard,
-  onMoveCard,
 }) {
   const {
     selectedDate,
@@ -37,12 +36,12 @@ export default function PlanCalendar({
     handleSubmitActivity,
     getEventStyle,
     closeModal,
-    } = usePlanCalendarLogic({
+  } = usePlanCalendarLogic({
     board,
     canEdit,
     createActivityCard,
     updateActivityCard,
-    });
+  });
 
   return (
     <div className="h-full flex gap-4">
@@ -64,7 +63,7 @@ export default function PlanCalendar({
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Lịch tuần
+              Thời gian biểu
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Hiển thị & chỉnh sửa hoạt động theo ngày/giờ từ PlanBoard.
@@ -73,22 +72,24 @@ export default function PlanCalendar({
         </div>
 
         <PlanCalendarWeekGrid
-            weekDays={weekDays}
-            selectedDate={selectedDate}
-            planStart={planStart}
-            planEnd={planEnd}
-            dayListMap={dayListMap}
-            canEdit={canEdit}
-            eventsByDate={eventsByDate}
-            getEventStyle={getEventStyle}
-            onDoubleClickSlot={(dateStr, hour) =>
-                setCreatingSlot({ dateStr, hour })
-            }
-            onClickCreateSlot={(dateStr, hour) =>
-                setCreatingSlot({ dateStr, hour })
-            }
-            onOpenEvent={handleOpenEvent}
-            />
+          weekDays={weekDays}
+          selectedDate={selectedDate}
+          planStart={planStart}
+          planEnd={planEnd}
+          dayListMap={dayListMap}
+          canEdit={canEdit}
+          eventsByDate={eventsByDate}
+          getEventStyle={getEventStyle}
+          onDoubleClickSlot={(dateStr, hour) => {
+            if (!canEdit) return;
+            setCreatingSlot({ dateStr, hour });
+          }}
+          onClickCreateSlot={(dateStr, hour) => {
+            if (!canEdit) return;
+            setCreatingSlot({ dateStr, hour });
+          }}
+          onOpenEvent={handleOpenEvent}
+        />
 
         {canEdit && (
           <ActivityTypePicker
@@ -104,6 +105,7 @@ export default function PlanCalendar({
           handleSubmitActivity={handleSubmitActivity}
           editingCard={editingCard}
           planMembers={planMembers}
+          canEdit={canEdit} 
         />
       </div>
     </div>

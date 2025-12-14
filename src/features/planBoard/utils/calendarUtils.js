@@ -38,7 +38,6 @@ export function buildCalendarEventsFromBoard(board) {
     const dayDate = list.dayDate; // "2025-12-12"
 
     (list.cards || []).forEach((card) => {
-      // không có giờ thì bỏ qua, hoặc bạn có thể làm all-day event riêng
       if (!card.startTime && !card.endTime) return;
 
       const { hh: sh, mm: sm } = parseTimeString(card.startTime);

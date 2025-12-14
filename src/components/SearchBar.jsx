@@ -565,6 +565,15 @@ export default function SearchBar() {
   const navigate = useNavigate();
   const locationSubmitRef = useRef(null);
 
+  const [planQuery, setPlanQuery] = useState("");
+
+  const submitPlanSearch = () => {
+    const q = (planQuery || "").trim();
+    if (!q) return;
+
+    // Điều hướng sang trang feed lịch trình và đưa query lên URL
+    navigate(`/plans?query=${encodeURIComponent(q)}&mode=search`);
+  };
   const tabs = [
     {
       key: "hotel",
@@ -701,46 +710,38 @@ export default function SearchBar() {
 
         {activeTab === "plans" && (
           <form
-            className="grid grid-cols-12 gap-3 md:gap-4"
-            onSubmit={(e) => e.preventDefault()}
+            className="grid grid-cols-12 gap-3 md:gap-4 items-end"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitPlanSearch();
+            }}
           >
-            <TextInput
-              label="Điểm đến chính"
-              icon={<FaMapMarkerAlt />}
-              placeholder="Ví dụ: Đà Lạt"
-              value={""}
-              onChange={() => {}}
-              className="col-span-12 md:col-span-8"
-            />
-
-            <div className="col-span-6 md:col-span-2">
-              <div className="mb-1.5 text-xs md:text-sm font-semibold text-white/90">
-                Ngày bắt đầu
-              </div>
-              <div
-                className="
-                  flex items-center
-                  rounded-xl border border-white/40 md:border-slate-200
-                  px-3 md:px-3.5 py-2.5
-                  bg-white/95 dark:bg-gray-900/85 dark:border-white/10
-                  shadow-sm md:shadow
-                "
-              >
-                <FaCalendarAlt className="text-gray-400 mr-2" />
-                <input
-                  type="date"
-                  className="w-full outline-none bg-transparent text-sm text-gray-800 dark:text-gray-200"
-                />
-              </div>
+            <div className="col-span-12 md:col-span-10">
+              <TextInput
+                label="Tìm lịch trình hoặc người dùng"
+                icon={<FaSearch />}
+                placeholder='Ví dụ: "Đà Nẵng", "Hội An", "@luan", "Luân Đỗ"...'
+                value={planQuery}
+                onChange={setPlanQuery}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    submitPlanSearch();
+                  }
+                }}
+                className=""
+              />
             </div>
 
-            <div className="col-span-6 md:col-span-2 flex items-end">
+            <div className="col-span-12 md:col-span-2">
               <Button type="submit" className="w-full h-12 rounded-xl text-sm">
-                Tạo lịch trình
+                <FaSearch />
+                Tìm kiếm
               </Button>
             </div>
           </form>
         )}
+
       </div>
     </div>
   );

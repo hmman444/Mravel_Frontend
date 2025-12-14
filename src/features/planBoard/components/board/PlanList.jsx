@@ -241,7 +241,8 @@ export default function PlanList({
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      {...provided.dragHandleProps}
+                      {...(canEdit ? provided.dragHandleProps : {})}
+                      className={!canEdit ? "cursor-pointer" : ""}
                     >
                       <PlanCard
                         card={card}
@@ -389,8 +390,8 @@ export default function PlanList({
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-2 drag-card-wrapper"
+                          {...(canEdit ? provided.dragHandleProps : {})}
+                          className={`mb-2 drag-card-wrapper ${!canEdit ? "cursor-pointer" : ""}`}
                         >
                           <div className="no-transform no-blur no-shadow">
                             <PlanCard

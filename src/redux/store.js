@@ -12,6 +12,7 @@ import bookingPrivateReducer from "../features/booking/slices/bookingPrivateSlic
 import bookingRestaurantReducer from "../features/booking/slices/bookingRestaurantSlice";
 import bookingRestaurantPrivateReducer from "../features/booking/slices/bookingRestaurantPrivateSlice";
 import bookingRestaurantPublicReducer from "../features/booking/slices/bookingRestaurantPublicSlice";
+import profileReducer from "../features/user/slices/profileSlice";
 import { injectStore } from "./storeInjector";
 
 export const store = configureStore({
@@ -23,6 +24,7 @@ export const store = configureStore({
     userProfile: userProfileReducer,
     planList: planListReducer,
     planGeneral: planGeneralReducer,
+    profile: profileReducer,
     bookingPublic: bookingPublicReducer,
     bookingPrivate: bookingPrivateReducer,
     bookingRestaurant: bookingRestaurantReducer,

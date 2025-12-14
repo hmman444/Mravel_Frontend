@@ -20,9 +20,10 @@ import {
   loadRequests as loadRequestsThunk,
   decideRequest as decideRequestThunk,
   clearTrashThunk,
-  duplicateCardThunk
+  duplicateCardThunk,
+  copyPlanThunk
 } from "../slices/planBoardSlice";
-import { updateVisibility } from "../services/planBoardService";
+import { updateVisibility, deletePlan  } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
 // api error handling with toast
@@ -40,7 +41,7 @@ async function tryCall(promise, fallbackMessage) {
 // hook
 export function usePlanBoard(planId) {
   const dispatch = useDispatch();
-  const { board, loading, actionLoading, error, share, requests } = useSelector(
+  const { board, loading, actionLoading, error, errorStatus, share, requests } = useSelector(
     (state) => state.planBoard
   );
 
@@ -64,6 +65,7 @@ export function usePlanBoard(planId) {
     loading,
     actionLoading,
     error,
+    errorStatus,
     requests,
     memberCostSummary,
     planMembers,
@@ -84,6 +86,12 @@ export function usePlanBoard(planId) {
     canSeeRequests,
     canManageMembers,
 
+    copyPlan: (targetPlanId) =>
+      tryCall(
+        dispatch(copyPlanThunk(targetPlanId)).unwrap(),
+        "Không thể sao chép lịch trình"
+      ),
+      
     // lists
     createList: (payload) =>
       tryCall(
@@ -196,6 +204,7 @@ export function usePlanBoard(planId) {
         const result = await dispatch(
           sendAccessRequest({ planId, type })
         ).unwrap();
+        showSuccess("Gửi yêu cầu thành công");
         return result;
       } catch (err) {
         console.log(err);
@@ -221,6 +230,12 @@ export function usePlanBoard(planId) {
           }
         })(),
         "Không thể xử lý yêu cầu"
+      ),
+
+    deletePlan: (targetPlanId) =>
+      tryCall(
+        deletePlan(targetPlanId),
+        "Không thể xoá lịch trình"
       ),
   };
 }

@@ -154,9 +154,7 @@ export default function PlanCard({
   const showSubtitle = hasCustomTitle && subtitle;
 
   const handleCardClick = () => {
-    if (canEdit && onOpenActivityModal) {
-      onOpenActivityModal(listId, card);
-    }
+    onOpenActivityModal?.(listId, card, { readOnly: !canEdit });
   };
 
   return (

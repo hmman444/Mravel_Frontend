@@ -16,7 +16,7 @@ export const updateUserProfile = createAsyncThunk(
       return rejectWithValue("Không có token, vui lòng đăng nhập lại.");
     }
 
-    const result = await updateMyProfile(payload, accessToken);
+    const result = await updateMyProfile(payload);
 
     if (result.success) {
       // Cập nhật lại auth.user để toàn app dùng chung data mới

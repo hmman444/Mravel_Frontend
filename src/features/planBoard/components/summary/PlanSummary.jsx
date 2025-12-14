@@ -177,103 +177,6 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
 
   const totalCardsCount = allCards.length;
 
-  // chi phí theo loại hoạt động
-  const typeBreakdown = useMemo(() => {
-    const map = {};
-    allCards.forEach((card) => {
-      const key = card.activityType || "OTHER";
-      const cost = card.cost || {};
-      const est = cost.estimatedCost ?? 0;
-      const act = cost.actualCost ?? 0;
-
-      if (!map[key]) {
-        map[key] = {
-          activityType: key,
-          count: 0,
-          estimated: 0,
-          actual: 0,
-        };
-      }
-      map[key].count += 1;
-      map[key].estimated += est;
-      map[key].actual += act;
-    });
-
-    const totalForPercent = Object.values(map).reduce(
-      (sum, item) => sum + (item.actual || item.estimated),
-      0
-    );
-
-    return Object.values(map)
-      .map((item) => {
-        const usedValue = item.actual || item.estimated;
-        return {
-          ...item,
-          label: TYPE_CONFIG[item.activityType]?.label || "Khác",
-          icon: TYPE_CONFIG[item.activityType]?.icon || "📝",
-          usedValue,
-          percent:
-            totalForPercent > 0
-              ? Math.round((usedValue * 100) / totalForPercent)
-              : 0,
-        };
-      })
-      .sort((a, b) => (b.usedValue || 0) - (a.usedValue || 0));
-  }, [allCards]);
-
-  const typeChartData = useMemo(
-    () =>
-      typeBreakdown.map((t) => ({
-        name: t.label,
-        value: t.usedValue || 0,
-      })),
-    [typeBreakdown]
-  );
-
-  // chi phí theo ngày
-  const dayCostBreakdown = useMemo(
-    () =>
-      dayLists.map((list, idx) => {
-        const cards = list.cards || [];
-        let est = 0;
-        let act = 0;
-
-        cards.forEach((card) => {
-          const cost = card.cost || {};
-          est += cost.estimatedCost ?? 0;
-          act += cost.actualCost ?? 0;
-        });
-
-        return {
-          id: list.id,
-          index: idx + 1,
-          title: list.title || `Ngày ${idx + 1}`,
-          estimated: est,
-          actual: act,
-          usedValue: act || est || 0,
-          count: cards.length,
-        };
-      }),
-    [dayLists]
-  );
-
-  const dayChartData = useMemo(
-    () =>
-      dayCostBreakdown.map((d) => ({
-        name: `D${d.index}`,
-        label: d.title,
-        value: d.usedValue,
-      })),
-    [dayCostBreakdown]
-  );
-
-  const maxDayCost =
-    dayCostBreakdown.length > 0
-      ? dayCostBreakdown.reduce((best, cur) =>
-          cur.usedValue > best.usedValue ? cur : best
-        )
-      : null;
-
   // thống kê nhịp độ
   const totalDays =
     startDate && endDate
@@ -285,108 +188,89 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
 
   const avgPerDay =
     totalDays && used > 0 ? Math.round(used / totalDays) : null;
-  const avgPerPerson =
-    participantsCount > 0 && used > 0
-      ? Math.round(used / participantsCount)
-      : null;
-  const avgPerPersonPerDay =
-    totalDays && participantsCount > 0 && used > 0
-      ? Math.round(used / (participantsCount * totalDays))
-      : null;
-
-  // phân bổ chi phí theo người
-  const splitOverview = useMemo(() => {
-    const map = new Map();
-    let total = 0;
-
-    allCards.forEach((card) => {
-      (card.splitDetails || []).forEach((sd) => {
-        const name = sd.person?.displayName || "Khác";
-        const amt = sd.amount ?? 0;
-        if (amt <= 0) return;
-
-        total += amt;
-        map.set(name, (map.get(name) || 0) + amt);
-      });
-    });
-
-    const rows = Array.from(map.entries())
-      .map(([name, amount]) => ({
-        name,
-        amount,
-        percent: total ? Math.round((amount * 100) / total) : 0,
-      }))
-      .sort((a, b) => b.amount - a.amount);
-
-    return { total, rows };
-  }, [allCards]);
-
-  const splitChartData = useMemo(
-    () =>
-      splitOverview.rows.map((r) => ({
-        name: r.name,
-        value: r.amount,
-      })),
-    [splitOverview]
-  );
-
-  // thống kê hoạt động
-  const activityStats = useMemo(() => {
-    const totalActivities = allCards.length;
-    const totalDaysLocal = totalDays;
-
-    let busiestDay = null;
-    dayLists.forEach((list, idx) => {
-      const count = (list.cards || []).length;
-      if (!busiestDay || count > busiestDay.count) {
-        busiestDay = {
-          index: idx + 1,
-          title: list.title || `Ngày ${idx + 1}`,
-          count,
-        };
-      }
-    });
-
-    const typeCountMap = {};
-    allCards.forEach((card) => {
-      const type = card.activityType || "OTHER";
-      typeCountMap[type] = (typeCountMap[type] || 0) + 1;
-    });
-    const typeCountArr = Object.entries(typeCountMap).map(
-      ([activityType, count]) => ({
-        activityType,
-        count,
-        label: TYPE_CONFIG[activityType]?.label || "Khác",
-        icon: TYPE_CONFIG[activityType]?.icon || "📝",
-      })
+        
+  const computeDays = (s, e) => {
+    if (!s || !e) return null;
+    return Math.max(
+      1,
+      Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1
     );
-    typeCountArr.sort((a, b) => b.count - a.count);
-    const topType = typeCountArr[0] || null;
+  };
 
-    const avgActivitiesPerDay =
-      totalDaysLocal && totalActivities
-        ? totalActivities / totalDaysLocal
-        : null;
+  const handlePickDates = (s, e, changedField /* "start" | "end" */) => {
+    setStartDate(s);
+    setEndDate(e);
 
-    let paceLabel = null;
-    if (avgActivitiesPerDay != null) {
-      if (avgActivitiesPerDay >= 5) {
-        paceLabel = "Dày đặc, nhiều hoạt động";
-      } else if (avgActivitiesPerDay >= 3) {
-        paceLabel = "Vừa phải, cân bằng";
-      } else {
-        paceLabel = "Thoải mái, ít hoạt động";
+    if (!canEdit || !planId || !s || !e) return;
+
+    const oldS = originalStartRef.current;
+    const oldE = originalEndRef.current;
+
+    if (!oldS || !oldE) {
+      applyDatesChange(s, e);
+      return;
+    }
+
+    const oldDays = computeDays(oldS, oldE);
+    const newDays = computeDays(s, e);
+
+    let shrink = false;
+
+    if (changedField === "end") {
+      if (newDays !== null && oldDays !== null && newDays < oldDays) {
+        shrink = true;
       }
     }
 
-    return {
-      totalActivities,
-      avgActivitiesPerDay,
-      busiestDay,
-      topType,
-      paceLabel,
-    };
-  }, [allCards, dayLists, totalDays]);
+    if (shrink) {
+      setPendingDates({ start: s, end: e });
+      setShowConfirmDates(true);
+    } else {
+      applyDatesChange(s, e);
+    }
+  };
+
+  const handleStartDateChange = (newStart) => {
+    if (!newStart) {
+      setStartDate(null);
+      return;
+    }
+
+    const oldS = originalStartRef.current;
+    const oldE = originalEndRef.current;
+
+    let baseStart = oldS ?? startDate;
+    let baseEnd = oldE ?? endDate;
+
+    if (!baseStart || !baseEnd) {
+      handlePickDates(newStart, baseEnd || newStart, "start");
+      return;
+    }
+
+    const oldDays = computeDays(baseStart, baseEnd);
+    if (!oldDays || oldDays <= 0) {
+      handlePickDates(newStart, baseEnd, "start");
+      return;
+    }
+
+    // dời endDate theo duration cũ
+    const newEnd = new Date(newStart.getTime());
+    newEnd.setDate(newEnd.getDate() + (oldDays - 1));
+
+    handlePickDates(newStart, newEnd, "start");
+  };
+
+  const handleEndDateChange = (newEnd) => {
+    if (!newEnd) {
+      setEndDate(null);
+      return;
+    }
+    if (startDate && newEnd < startDate) {
+      showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+      return;
+    }
+    handlePickDates(startDate, newEnd, "end");
+  };
 
   // effect khi plan thay đổi
   useEffect(() => {
@@ -487,41 +371,6 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       showError("Không thể cập nhật ngày");
     } finally {
       setDatesSaving(false);
-    }
-  };
-
-  const computeDays = (s, e) => {
-    if (!s || !e) return null;
-    return Math.max(1, Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1);
-  };
-
-  const handlePickDates = (s, e) => {
-    setStartDate(s);
-    setEndDate(e);
-
-    if (!canEdit || !planId || !s || !e) return;
-
-    const oldS = originalStartRef.current;
-    const oldE = originalEndRef.current;
-
-    if (!oldS || !oldE) {
-      applyDatesChange(s, e);
-      return;
-    }
-
-    const oldDays = computeDays(oldS, oldE);
-    const newDays = computeDays(s, e);
-
-    const shrink =
-      (newDays !== null && oldDays !== null && newDays < oldDays) ||
-      s > oldS ||
-      e < oldE;
-
-    if (shrink) {
-      setPendingDates({ start: s, end: e });
-      setShowConfirmDates(true);
-    } else {
-      applyDatesChange(s, e);
     }
   };
 
@@ -859,8 +708,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 <PlanDateInputs
                   startDate={startDate}
                   endDate={endDate}
-                  setStartDate={(d) => handlePickDates(d, endDate)}
-                  setEndDate={(d) => handlePickDates(startDate, d)}
+                  setStartDate={handleStartDateChange}
+                  setEndDate={handleEndDateChange}
+                  disabled={!canEdit}
                 />
 
                 <div className="flex flex-wrap items-start justify-between gap-3 mt-1">
@@ -920,55 +770,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                   </div>
                 </div>
 
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/70 px-3 py-2">
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Nhịp độ
-                    </p>
-                    <p className="mt-0.5 font-semibold text-slate-900 dark:text-slate-50">
-                      {activityStats.paceLabel || "—"}
-                    </p>
-                    {activityStats.avgActivitiesPerDay && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        ~
-                        {activityStats.avgActivitiesPerDay
-                          .toFixed(1)
-                          .replace(".0", "")}{" "}
-                        hoạt động/ngày
-                      </p>
-                    )}
-                  </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/70 px-3 py-2">
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Ngày bận nhất
-                    </p>
-                    <p className="mt-0.5 font-semibold text-slate-900 dark:text-slate-50">
-                      {activityStats.busiestDay
-                        ? `Ngày ${activityStats.busiestDay.index}`
-                        : "—"}
-                    </p>
-                    {activityStats.busiestDay && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {activityStats.busiestDay.count} hoạt động
-                      </p>
-                    )}
-                  </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/70 px-3 py-2">
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Nhóm hoạt động chính
-                    </p>
-                    <p className="mt-0.5 font-semibold text-slate-900 dark:text-slate-50">
-                      {activityStats.topType
-                        ? `${activityStats.topType.icon} ${activityStats.topType.label}`
-                        : "—"}
-                    </p>
-                    {activityStats.topType && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {activityStats.topType.count} hoạt động
-                      </p>
-                    )}
-                  </div>
-                </div>
+
               </div>
             </div>
           </div>
@@ -1088,26 +890,6 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               </div>
               <div className="rounded-xl bg-slate-50 dark:bg-slate-900/80 px-3 py-2.5 flex flex-col">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  TB / người
-                </span>
-                <span className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  {avgPerPerson != null
-                    ? `${fmtMoney(avgPerPerson)}${currencySuffix}`
-                    : "—"}
-                </span>
-              </div>
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-900/80 px-3 py-2.5 flex flex-col">
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  TB / người / ngày
-                </span>
-                <span className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  {avgPerPersonPerDay != null
-                    ? `${fmtMoney(avgPerPersonPerDay)}${currencySuffix}`
-                    : "—"}
-                </span>
-              </div>
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-900/80 px-3 py-2.5 flex flex-col">
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   Ngân sách / người
                 </span>
                 <span className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
@@ -1186,319 +968,6 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         </div>
       </div>
 
-      {/* thống kê */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
-        {/* theo loại hoạt động */}
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-900/40 flex items-center justify-center">
-                <FaRoute className="text-sky-600 dark:text-sky-300 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Cơ cấu chi phí theo loại hoạt động
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Xem nhóm hoạt động nào “ngốn tiền” nhiều để tối ưu cho
-                  các plan sau.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {typeChartData.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">
-              Chưa có thẻ hoạt động nào.
-            </p>
-          ) : (
-            <>
-              <div className="h-56">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <defs>
-                      {typeChartData.map((_, index) => (
-                        <linearGradient
-                          key={index}
-                          id={`typeGrad-${index}`}
-                          x1="0"
-                          y1="0"
-                          x2="1"
-                          y2="1"
-                        >
-                          <stop
-                            offset="0%"
-                            stopColor={
-                              CHART_COLORS[index % CHART_COLORS.length]
-                            }
-                            stopOpacity={0.95}
-                          />
-                          <stop
-                            offset="100%"
-                            stopColor={
-                              CHART_COLORS[index % CHART_COLORS.length]
-                            }
-                            stopOpacity={0.6}
-                          />
-                        </linearGradient>
-                      ))}
-                    </defs>
-                    <Pie
-                      data={typeChartData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={55}
-                      outerRadius={85}
-                      paddingAngle={2}
-                      isAnimationActive={true}
-                      animationDuration={600}
-                      animationEasing="ease-out"
-                    >
-                      {typeChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={`url(#typeGrad-${index})`}
-                          stroke="white"
-                          strokeWidth={1}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => [
-                        `${fmtMoney(value)}${currencySuffix}`,
-                        "Chi phí",
-                      ]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                {typeBreakdown.map((t, idx) => (
-                  <div
-                    key={t.activityType}
-                    className="flex items-center justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="inline-flex w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{
-                          backgroundColor:
-                            CHART_COLORS[idx % CHART_COLORS.length],
-                        }}
-                      />
-                      <span className="truncate">
-                        {t.icon} {t.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-slate-500 dark:text-slate-400">
-                        {t.percent}%
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        ({t.count} hoạt động)
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* theo ngày */}
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-900/40 flex items-center justify-center">
-                <FaBed className="text-amber-600 dark:text-amber-300 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Tổng chi theo ngày
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Ngày nào “nặng tiền” nhất để cân bằng lịch trình khi lặp
-                  lại.
-                </p>
-              </div>
-            </div>
-
-            {maxDayCost && (
-              <div className="px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/40 text-[11px] text-amber-700 dark:text-amber-200">
-                Cao nhất: {maxDayCost.title} –{" "}
-                {fmtMoney(maxDayCost.usedValue)}
-                {currencySuffix}
-              </div>
-            )}
-          </div>
-
-          {dayChartData.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">
-              Chưa có ngày nào trong kế hoạch.
-            </p>
-          ) : (
-            <>
-              <div className="h-56">
-                <ResponsiveContainer>
-                  <BarChart data={dayChartData}>
-                    <XAxis
-                      dataKey="name"
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={{ stroke: "#E2E8F0" }}
-                    />
-                    <YAxis
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={{ stroke: "#E2E8F0" }}
-                    />
-                    <Tooltip
-                      formatter={(value) => [
-                        `${fmtMoney(value)}${currencySuffix}`,
-                        "Tổng chi",
-                      ]}
-                      labelFormatter={(label, payload) => {
-                        const item = payload?.[0]?.payload;
-                        return item?.label || label;
-                      }}
-                    />
-                    <Bar
-                      dataKey="value"
-                      radius={[8, 8, 0, 0]}
-                      isAnimationActive={true}
-                      animationDuration={600}
-                      animationEasing="ease-out"
-                    >
-                      {dayChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-day-${index}`}
-                          fill={CHART_COLORS[index % CHART_COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-                Gợi ý: nếu một ngày quá cao so với những ngày khác, có thể
-                dời bớt hoạt động sang ngày lân cận khi lặp lại plan.
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* theo người */}
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-900/40 flex items-center justify-center">
-                <FaTicketAlt className="text-sky-600 dark:text-sky-300 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Chi phí theo người
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Dựa trên kết quả chia tiền (splitDetails), hữu ích khi lặp
-                  lại kế hoạch cho đúng nhóm người.
-                </p>
-              </div>
-            </div>
-
-            {splitOverview.total > 0 && (
-              <div className="px-2 py-1 rounded-full bg-sky-50 dark:bg-sky-900/40 text-[11px] text-sky-700 dark:text-sky-200">
-                Tổng chia: {fmtMoney(splitOverview.total)}
-                {currencySuffix}
-              </div>
-            )}
-          </div>
-
-          {splitChartData.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">
-              Chưa có dữ liệu chia tiền. Hãy bật chia tiền ở từng hoạt động
-              để xem tổng chi / người tại đây.
-            </p>
-          ) : (
-            <>
-              <div className="h-56">
-                <ResponsiveContainer>
-                  <BarChart
-                    data={splitChartData}
-                    layout="vertical"
-                    margin={{ left: 40, right: 16, top: 8, bottom: 8 }}
-                  >
-                    <XAxis
-                      type="number"
-                      tickFormatter={(v) => fmtMoney(v)}
-                      fontSize={11}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={80}
-                      fontSize={11}
-                    />
-                    <Tooltip
-                      formatter={(value) => [
-                        `${fmtMoney(value)}${currencySuffix}`,
-                        "Tổng chi",
-                      ]}
-                    />
-                    <Bar
-                      dataKey="value"
-                      radius={[0, 8, 8, 0]}
-                      isAnimationActive={true}
-                      animationDuration={600}
-                      animationEasing="ease-out"
-                    >
-                      {splitChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-split-${index}`}
-                          fill={CHART_COLORS[index % CHART_COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-3 space-y-1 text-[11px]">
-                {splitOverview.rows.map((p, idx) => (
-                  <div
-                    key={p.name}
-                    className="flex items-center justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-flex w-2.5 h-2.5 rounded-full"
-                        style={{
-                          backgroundColor:
-                            CHART_COLORS[idx % CHART_COLORS.length],
-                        }}
-                      />
-                      <span className="truncate max-w-[140px] sm:max-w-[200px]">
-                        {p.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                        {p.percent}% tổng chia
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-900 dark:text-slate-50 whitespace-nowrap">
-                        {fmtMoney(p.amount)}
-                        {currencySuffix}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
       {/* media */}
       <div className="grid grid-cols-1">
         <div className="rounded-2xl bg-white/95 dark:bg-slate-950/80 backdrop-blur p-5 shadow-lg shadow-slate-900/10 border border-slate-200/70 dark:border-slate-800">
@@ -1553,7 +1022,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
           {canEdit && (
             <label className="inline-flex items-center gap-2 px-4 py-2 mt-4 rounded-full border text-xs font-medium cursor-pointer bg-white/80 dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:text-sky-600 dark:hover:border-sky-500 dark:hover:text-sky-300 shadow-sm transition-all duration-200">
               <FaCloudUploadAlt className="text-sm" />
-              <span>Thêm ảnh tham khảo cho lần sau</span>
+              <span>Thêm hình ảnh kỷ niệm</span>
               <input
                 hidden
                 type="file"

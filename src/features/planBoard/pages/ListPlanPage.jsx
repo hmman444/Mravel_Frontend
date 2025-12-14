@@ -1,5 +1,7 @@
+// src/features/planBoard/pages/ListPlanPage.jsx
 "use client";
 
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaPlus,
@@ -7,17 +9,25 @@ import {
   FaCalendarAlt,
   FaSearch,
   FaChevronDown,
+  FaTrash,
+  FaCopy,
 } from "react-icons/fa";
+
 import PlanLayout from "../components/PlanLayout";
-import { useState, useMemo } from "react";
 import NewPlanModal from "../../planFeed/components/NewPlanModal";
+import ConfirmModal from "../../../components/ConfirmModal";
+
 import { useMyPlans } from "../hooks/useMyPlans";
+import { useRecentPlans } from "../hooks/useRecentPlans";
+import { showSuccess, showError } from "../../../utils/toastUtils";
+import { deletePlan as deletePlanApi, copyPlan as copyPlanApi } from "../services/planBoardService";
 
 export default function ListPlanPage() {
   const navigate = useNavigate();
   const [openNewPlan, setOpenNewPlan] = useState(false);
 
-  const { plans, loading, reload } = useMyPlans(true);
+  const { plans: myPlans, loading, reload: reloadMyPlans } = useMyPlans(true);
+  const { recentPlans, reloadRecent, removeRecent } = useRecentPlans();
 
   const [search, setSearch] = useState("");
   const [month, setMonth] = useState("");
@@ -27,14 +37,13 @@ export default function ListPlanPage() {
   const [roleFilter, setRoleFilter] = useState("");
   const [hasBudgetOnly, setHasBudgetOnly] = useState(false);
 
+  const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
+
   const formatMoney = (amount, currency) => {
     if (amount === null || amount === undefined) return "—";
     const cur = currency || "VND";
     try {
-      return amount.toLocaleString("vi-VN", {
-        style: "currency",
-        currency: cur,
-      });
+      return amount.toLocaleString("vi-VN", { style: "currency", currency: cur });
     } catch {
       return `${amount.toLocaleString("vi-VN")} ${cur}`;
     }
@@ -43,14 +52,6 @@ export default function ListPlanPage() {
   const formatDate = (d) => {
     if (!d) return "";
     return new Date(d).toLocaleDateString("vi-VN");
-  };
-
-  const statusClasses = {
-    DRAFT: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-    ACTIVE: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    COMPLETED:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    CANCELLED: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
   };
 
   const statusLabels = {
@@ -69,54 +70,80 @@ export default function ListPlanPage() {
   const filtered = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    return (plans || [])
+    return (myPlans || [])
       .filter((p) => {
         if (!keyword) return true;
         const text = `${p.title || ""} ${p.description || ""}`.toLowerCase();
         return text.includes(keyword);
       })
       .filter((p) =>
-        month
-          ? new Date(p.startDate).getMonth() + 1 === Number(month)
-          : true
+        month ? new Date(p.startDate).getMonth() + 1 === Number(month) : true
       )
       .filter((p) =>
         year ? new Date(p.startDate).getFullYear() === Number(year) : true
       )
-      .filter((p) =>
-        statusFilter ? p.status === statusFilter : true
-      )
-      .filter((p) =>
-        roleFilter ? p.myRole === roleFilter : true
-      )
-      .filter((p) =>
-        hasBudgetOnly ? p.budgetTotal && p.budgetTotal > 0 : true
-      )
+      .filter((p) => (statusFilter ? p.status === statusFilter : true))
+      .filter((p) => (roleFilter ? p.myRole === roleFilter : true))
+      .filter((p) => (hasBudgetOnly ? p.budgetTotal && p.budgetTotal > 0 : true))
       .sort((a, b) => {
         const da = a.startDate ? new Date(a.startDate) : new Date(0);
         const db = b.startDate ? new Date(b.startDate) : new Date(0);
         return sort === "asc" ? da - db : db - da;
       });
-  }, [
-    plans,
-    search,
-    month,
-    year,
-    sort,
-    statusFilter,
-    roleFilter,
-    hasBudgetOnly,
-  ]);
+  }, [myPlans, search, month, year, sort, statusFilter, roleFilter, hasBudgetOnly]);
 
   const skeletons = Array.from({ length: 6 });
+
+  const handleCopyFromSidebar = async (plan) => {
+    try {
+      const copied = await copyPlanApi(plan.id);
+      if (copied?.id) {
+        showSuccess("Đã tạo bản sao lịch trình");
+        await reloadMyPlans?.();
+        await reloadRecent?.();
+        navigate(`/plans/${copied.id}`);
+      } else {
+        showError("Không thể tạo bản sao lịch trình");
+      }
+    } catch (e) {
+      console.error(e);
+      showError("Không thể tạo bản sao lịch trình");
+    }
+  };
+
+  const handleDeletePlan = async (plan) => {
+    try {
+      await deletePlanApi(plan.id);
+      showSuccess("Đã xoá lịch trình");
+      await reloadMyPlans?.();
+      await reloadRecent?.();
+
+      // nếu đang ở /my-plans thì vẫn ở lại, chỉ refresh danh sách
+    } catch (e) {
+      console.error(e);
+      showError("Không thể xoá lịch trình");
+    }
+  };
+
+  const handleRemoveRecentFromSidebar = async (plan) => {
+    try {
+      await removeRecent(plan.id);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <PlanLayout
       activePlanId={null}
-      plans={plans}
+      myPlans={myPlans}
+      recentPlans={recentPlans}
       onOpenPlanList={() => navigate("/plans/my-plans")}
-      onOpenCalendar={() => navigate("/plans/calendar")}
+      onOpenCalendar={() => navigate("/plans/timeline")}
       onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
+      onCopyPlan={handleCopyFromSidebar}
+      onRemoveRecentPlan={handleRemoveRecentFromSidebar}
+      onDeletePlan={(p) => setConfirmDeletePlan(p)} // ✅ sidebar bấm xoá -> confirm
     >
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -186,9 +213,7 @@ export default function ListPlanPage() {
 
         <Dropdown
           label={
-            statusFilter
-              ? statusLabels[statusFilter] || "Trạng thái"
-              : "Trạng thái"
+            statusFilter ? statusLabels[statusFilter] || "Trạng thái" : "Trạng thái"
           }
           value={statusFilter}
           onChange={setStatusFilter}
@@ -246,35 +271,28 @@ export default function ListPlanPage() {
           skeletons.map((_, i) => (
             <div
               key={i}
-              className="
-                h-[230px] rounded-2xl bg-gray-200/60 dark:bg-gray-700/60
-                animate-pulse
-              "
+              className="h-[230px] rounded-2xl bg-gray-200/60 dark:bg-gray-700/60 animate-pulse"
             />
           ))}
 
         {!loading &&
           filtered.map((p) => {
-            const status = p.status;
             const currency = p.budgetCurrency || "VND";
             const budget = p.budgetTotal;
             const estimated = p.totalEstimatedCost;
             const actual = p.totalActualCost;
 
             const budgetUsage =
-              budget && actual
-                ? Math.min(100, Math.round((actual / budget) * 100))
-                : null;
+              budget && actual ? Math.min(100, Math.round((actual / budget) * 100)) : null;
 
             const myRoleLabel = p.myRole ? roleLabels[p.myRole] || p.myRole : "";
 
             const days =
               p.startDate && p.endDate
-                ? Math.round(
-                    (new Date(p.endDate) - new Date(p.startDate)) /
-                      (1000 * 60 * 60 * 24)
-                  ) + 1
+                ? Math.round((new Date(p.endDate) - new Date(p.startDate)) / (1000 * 60 * 60 * 24)) + 1
                 : null;
+
+            const canDelete = p.myRole === "OWNER"; // nếu muốn cho EDITOR xoá thì sửa điều kiện
 
             return (
               <div
@@ -294,7 +312,7 @@ export default function ListPlanPage() {
                       <img
                         src={p.thumbnail}
                         alt={p.title}
-                        className="h-full w-full object-cover transform  transition-transform duration-300"
+                        className="h-full w-full object-cover transform transition-transform duration-300"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                     </>
@@ -303,13 +321,8 @@ export default function ListPlanPage() {
                   )}
 
                   <div className="absolute top-2 left-3 flex flex-col gap-1">
-                    <span
-                      className={`
-                        inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium
-                        bg-black/40 text-white backdrop-blur
-                      `}
-                    >
-                      {statusLabels[status] || "Không xác định"}
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/40 text-white backdrop-blur">
+                      {statusLabels[p.status] || "Không xác định"}
                     </span>
 
                     {myRoleLabel && (
@@ -324,6 +337,55 @@ export default function ListPlanPage() {
                       {days} ngày
                     </span>
                   )}
+
+                  {/* ✅ Icon actions (xoá + copy) */}
+                  <div className="absolute top-2 right-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      title="Sao chép"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleCopyFromSidebar(p);
+                      }}
+                      className="
+                        opacity-0 group-hover:opacity-100
+                        transition-all
+                        h-8 w-8 rounded-full
+                        bg-white/90 dark:bg-gray-900/80 backdrop-blur
+                        border border-gray-200 dark:border-gray-700
+                        text-gray-700 dark:text-gray-200
+                        hover:scale-105
+                      "
+                    >
+                      <FaCopy className="mx-auto text-[13px]" />
+                    </button>
+
+                    <button
+                      type="button"
+                      title={canDelete ? "Xoá lịch trình" : "Chỉ chủ sở hữu được xoá"}
+                      disabled={!canDelete}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setConfirmDeletePlan(p);
+                      }}
+                      className={`
+                        opacity-0 group-hover:opacity-100
+                        transition-all
+                        h-8 w-8 rounded-full
+                        backdrop-blur border
+                        hover:scale-105
+                        ${
+                          canDelete
+                            ? "bg-white/90 dark:bg-gray-900/80 border-gray-200 dark:border-gray-700 text-red-600 dark:text-red-400"
+                            : "bg-white/60 dark:bg-gray-900/40 border-gray-200/60 dark:border-gray-700/60 text-gray-400 cursor-not-allowed"
+                        }
+                      `}
+                    >
+                      <FaTrash className="mx-auto text-[13px]" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="p-4">
@@ -380,10 +442,7 @@ export default function ListPlanPage() {
                       </div>
                       <div className="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                         <div
-                          className="
-                            h-full rounded-full bg-gradient-to-r
-                            from-emerald-400 via-amber-400 to-red-500
-                          "
+                          className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500"
                           style={{ width: `${budgetUsage}%` }}
                         />
                       </div>
@@ -430,16 +489,13 @@ export default function ListPlanPage() {
           from { opacity: 0; transform: translateY(6px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-opacityFade {
-          animation: opacityFade .25s ease-out;
-        }
+        .animate-opacityFade { animation: opacityFade .25s ease-out; }
+
         @keyframes dropdown {
           from { opacity: 0; transform: translateY(-4px) scale(.97); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .animate-dropdown {
-          animation: dropdown .18s ease-out;
-        }
+        .animate-dropdown { animation: dropdown .18s ease-out; }
       `}</style>
 
       <NewPlanModal
@@ -447,14 +503,30 @@ export default function ListPlanPage() {
         onClose={() => setOpenNewPlan(false)}
         onCreated={() => {
           setOpenNewPlan(false);
-          reload();
+          reloadMyPlans?.();
+          reloadRecent?.();
         }}
       />
+
+      {confirmDeletePlan && (
+        <ConfirmModal
+          open={true}
+          title="Xoá lịch trình"
+          message={`Xác nhận xoá "${confirmDeletePlan.title}"? Hành động này không thể hoàn tác.`}
+          confirmText="Xoá"
+          onClose={() => setConfirmDeletePlan(null)}
+          onConfirm={async () => {
+            const plan = confirmDeletePlan;
+            setConfirmDeletePlan(null);
+            await handleDeletePlan(plan);
+          }}
+        />
+      )}
     </PlanLayout>
   );
 }
 
-function Dropdown({ label, value, onChange, options }) {
+function Dropdown({ label, onChange, options }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -472,12 +544,9 @@ function Dropdown({ label, value, onChange, options }) {
         "
       >
         <span className="whitespace-nowrap">{label}</span>
-
         <FaChevronDown
           size={12}
-          className={`transition-transform duration-300 ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
