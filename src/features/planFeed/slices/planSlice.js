@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchPlans, sendReaction, sendComment, sharePlan, fetchMyPlans } from "../services/planService";
+import { fetchPlans, sendReaction, sendComment, sharePlan, fetchMyPlans, searchPlansAndUsers } from "../services/planService";
 
 const initialState = {
   items: [],
@@ -12,6 +12,12 @@ const initialState = {
   myLoading: false,
   myHasMore: true,
   myPage: 1,
+
+  searchQuery: "",
+  searchLoading: false,
+  searchPlans: [],
+  searchUsers: [],
+  searchMeta: { page: 1, size: 10, total: 0, hasMore: false },
 
   error: null,
 };
@@ -44,6 +50,11 @@ export const loadMyPlans = createAsyncThunk(
   }
 );
 
+export const searchAll = createAsyncThunk("plan/searchAll", async ({ q, page = 1, size = 10 }) => {
+  const res = await searchPlansAndUsers(q, page, size);
+  return { q, res };
+});
+
 const planSlice = createSlice({
   name: "plan",
   initialState,
@@ -52,6 +63,13 @@ const planSlice = createSlice({
       state.items = [];
       state.page = 1;
       state.hasMore = true;
+    },
+    clearSearch(state) {
+      state.searchQuery = "";
+      state.searchLoading = false;
+      state.searchPlans = [];
+      state.searchUsers = [];
+      state.searchMeta = { page: 1, size: 10, total: 0, hasMore: false };
     },
   },
   extraReducers: (builder) => {
@@ -81,6 +99,7 @@ const planSlice = createSlice({
 
           update(state.items.find(p => p.id === planId));
           update(state.myItems.find(p => p.id === planId));
+          update(state.searchPlans.find((p) => p.id === planId));
       })
       .addCase(commentPlan.fulfilled, (state, action) => {
         const { planId, data } = action.payload;
@@ -117,6 +136,7 @@ const planSlice = createSlice({
 
         // Cập nhật cho My Plans
         updateComments(state.myItems.find((p) => p.id === planId));
+        updateComments(state.searchPlans.find((p) => p.id === planId));
       })
 
       .addCase(loadMyPlans.pending, (state) => {
@@ -135,9 +155,31 @@ const planSlice = createSlice({
       .addCase(loadMyPlans.rejected, (state, action) => {
         state.myLoading = false;
         state.error = action.error.message;
+      })
+      .addCase(searchAll.pending, (state) => {
+        state.searchLoading = true;
+      })
+      .addCase(searchAll.fulfilled, (state, action) => {
+        const { q, res } = action.payload;
+
+        state.searchLoading = false;
+        state.searchQuery = q;
+
+        state.searchPlans = res?.plans?.items || [];
+        state.searchUsers = res?.users || [];
+        state.searchMeta = {
+          page: res?.plans?.page || 1,
+          size: res?.plans?.size || 10,
+          total: res?.plans?.total || 0,
+          hasMore: !!res?.plans?.hasMore,
+        };
+      })
+      .addCase(searchAll.rejected, (state, action) => {
+        state.searchLoading = false;
+        state.error = action.error.message;
       });
   },
 });
 
-export const { resetPlans } = planSlice.actions;
+export const { resetPlans, clearSearch } = planSlice.actions;
 export default planSlice.reducer;

@@ -30,6 +30,13 @@ export default function AboutBlock({ userView, profile, loading }) {
   const p = profile || {};
   const isDefaultBio = !p.bio;
 
+  const genderLabelMap = {
+    MALE: "Nam",
+    FEMALE: "Nữ",
+    OTHER: "Khác",
+    UNKNOWN: "Khác",
+  };
+
   return (
     <div className="space-y-3">
       {/* BIO */}
@@ -82,7 +89,9 @@ export default function AboutBlock({ userView, profile, loading }) {
         {p.gender && (
           <div className="flex items-center gap-2">
             <UserIcon className="w-4 h-4 text-violet-500" />
-            <span>Giới tính: {p.gender}</span>
+            <span>
+              Giới tính: {genderLabelMap[p.gender] || p.gender}
+            </span>
           </div>
         )}
 

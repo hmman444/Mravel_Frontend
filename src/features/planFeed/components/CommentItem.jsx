@@ -90,11 +90,21 @@ export default function CommentItem({ comment, me, onReply }) {
       {/* ===== ROOT COMMENT ===== */}
       <div className="flex items-start gap-2">
         {/* Avatar gốc (không còn đường nối) */}
-        <img
-          src={rootAvatar}
-          alt={rootName}
-          className="w-9 h-9 rounded-full object-cover"
-        />
+        <Link
+          to={rootUser?.id ? `/profile/${rootUser.id}` : "#"}
+          onClick={(e) => {
+            if (!rootUser?.id) e.preventDefault();
+            e.stopPropagation();
+          }}
+          className="shrink-0"
+          title={rootUser?.id ? `Xem trang cá nhân ${rootName}` : ""}
+        >
+          <img
+            src={rootAvatar}
+            alt={rootName}
+            className="w-9 h-9 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
+          />
+        </Link>
 
         <div className="flex-1">
           <div
@@ -106,7 +116,18 @@ export default function CommentItem({ comment, me, onReply }) {
             "
           >
             <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-              {rootName}
+              {rootUser?.id ? (
+                <Link
+                  to={`/profile/${rootUser.id}`}
+                  className="hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                  title="Xem trang cá nhân"
+                >
+                  {rootName}
+                </Link>
+              ) : (
+                rootName
+              )}
             </div>
             <div className="text-sm text-gray-800 dark:text-gray-100">
               {comment.text}
@@ -221,11 +242,26 @@ function ReplyItem({ reply, parentUser, onClickReply }) {
 
   return (
     <div className="flex items-start gap-2">
-      <img
-        src={avatar}
-        alt={name}
-        className="w-7 h-7 rounded-full object-cover"
-      />
+      {user?.id ? (
+        <Link
+          to={`/profile/${user.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0"
+          title={`Xem trang cá nhân ${name}`}
+        >
+          <img
+            src={avatar}
+            alt={name}
+            className="w-7 h-7 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
+          />
+        </Link>
+      ) : (
+        <img
+          src={avatar}
+          alt={name}
+          className="w-7 h-7 rounded-full object-cover"
+        />
+      )}
 
       <div className="flex-1">
         <div
@@ -237,7 +273,18 @@ function ReplyItem({ reply, parentUser, onClickReply }) {
           "
         >
           <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-            {name}
+            {user?.id ? (
+              <Link
+                to={`/profile/${user.id}`}
+                className="hover:underline"
+                onClick={(e) => e.stopPropagation()}
+                title="Xem trang cá nhân"
+              >
+                {name}
+              </Link>
+            ) : (
+              name
+            )}
           </div>
           <div className="text-sm text-gray-800 dark:text-gray-100">
             {parentUser?.id ? (

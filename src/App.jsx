@@ -87,7 +87,7 @@ function App() {
 
         {/* User routes */}
         <Route path="/account/profile" element={<AccountProfilePage />} />
-        <Route path="/u/:userId" element={<UserPublicProfilePage />} />
+        <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
 
         {/* General routes */}
         <Route path="/search" element={<SearchPage />} />
