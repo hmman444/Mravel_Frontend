@@ -11,12 +11,8 @@ export const getGuestRestaurantBookingDetail = async (code) => {
 };
 
 export const lookupGuestRestaurantBooking = async ({ bookingCode, phoneLast4, email }) => {
-  const res = await api.post("/booking/public/restaurants/lookup", {
-    bookingCode,
-    phoneLast4,
-    email,
-  });
-  return res.data?.data;
+  const res = await api.post("/booking/public/restaurants/lookup", { bookingCode, phoneLast4, email });
+  return res.data?.data ?? res.data?.result ?? res.data;
 };
 
 export const clearGuestRestaurantBookings = async () => {

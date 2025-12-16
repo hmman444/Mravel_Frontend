@@ -309,6 +309,7 @@ export default function MyBookingsPage() {
               onClearResult={onClearLookupResult}
               loading={lookupLoading}
               error={lookupError}
+              result={lookupResult}
               ResultCard={smartResultCard}
               onOpenHotel={!isRestaurantCode ? onOpenHotel : undefined}
               onOpenRestaurant={isRestaurantCode ? onOpenRestaurant : undefined}

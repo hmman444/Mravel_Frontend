@@ -66,12 +66,82 @@ export default function BookingCard({
   detailScope = "PUBLIC",
   lookupCreds,
 }) {
-  const [open, setOpen] = useState(false);
-
   // detail state
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
+
+  const [open, setOpen] = useState(false);
+  const PENDING_EXPIRE_MINUTES = 30;
+
+  const [nowTick, setNowTick] = useState(Date.now());
+  const [resuming, setResuming] = useState(false);
+  const [resumeError, setResumeError] = useState(null);
+
+  const isPendingPay = useMemo(() => {
+    const s = String((detail || booking)?.status || "").toUpperCase();
+    const p = String((detail || booking)?.paymentStatus || "").toUpperCase();
+    return s === "PENDING_PAYMENT" && p === "PENDING";
+  }, [detail, booking]);
+
+  const deadlineMs = useMemo(() => {
+    const created = (detail || booking)?.createdAt;
+    const t = Date.parse(created);
+    if (!created || Number.isNaN(t)) return null;
+    return t + PENDING_EXPIRE_MINUTES * 60 * 1000;
+  }, [detail, booking]);
+
+  const expiresInMs = deadlineMs ? (deadlineMs - nowTick) : 0;
+  const canResume = isPendingPay && !!deadlineMs && expiresInMs > 0;
+
+  useEffect(() => {
+    if (!canResume) return;
+    const id = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [canResume]);
+
+  const fmtCountdown = (ms) => {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  };
+
+  const onResumePayment = async () => {
+    if (!code) return;
+    try {
+      setResumeError(null);
+      setResuming(true);
+
+      let res;
+
+      if (detailScope === "PRIVATE") {
+        res = await api.post(`/booking/bookings/${encodeURIComponent(code)}/resume-payment`);
+      } else if (detailScope === "LOOKUP") {
+        res = await api.post(`/booking/public/lookup/resume`, {
+          bookingCode: code,
+          phoneLast4: lookupPhoneLast4,
+          email: lookupEmail,
+        });
+      } else {
+        // PUBLIC (device cookie)
+        res = await api.post(`/booking/public/my/${encodeURIComponent(code)}/resume-payment`);
+      }
+
+      const dto = res.data?.data;
+      const payUrl = dto?.payUrl;
+      if (!payUrl) throw new Error("Không nhận được payUrl");
+
+      window.location.assign(payUrl);
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Không thể tiếp tục thanh toán";
+      setResumeError(msg);
+      // nếu bạn có toast thì thay alert bằng toast
+      // alert(msg);
+    } finally {
+      setResuming(false);
+    }
+  };
 
   const lookupPhoneLast4 = lookupCreds?.phoneLast4 || "";
   const lookupEmail = lookupCreds?.email || null;
@@ -267,6 +337,36 @@ export default function BookingCard({
             >
               Copy mã
             </button>
+
+            {canResume ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onResumePayment}
+                  disabled={resuming}
+                  className={[
+                    "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
+                    resuming ? "bg-gray-400 cursor-not-allowed text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white",
+                  ].join(" ")}
+                  title={`Còn ${fmtCountdown(expiresInMs)} để thanh toán`}
+                >
+                  {resuming ? (
+                    "Đang mở MoMo..."
+                  ) : (
+                    <>
+                      Tiếp tục thanh toán{" "}
+                      <span className="inline-block w-[52px] text-center font-mono tabular-nums">
+                        ({fmtCountdown(expiresInMs)})
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {resumeError ? (
+                  <p className="text-[11px] text-red-600">{resumeError}</p>
+                ) : null}
+              </>
+            ) : null}
           </div>
         </div>
 

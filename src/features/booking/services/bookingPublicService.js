@@ -11,12 +11,8 @@ export const getGuestBookingDetail = async (code) => {
 };
 
 export const lookupGuestBooking = async ({ bookingCode, phoneLast4, email }) => {
-  const res = await api.post("/booking/public/lookup", {
-    bookingCode,
-    phoneLast4,
-    email,
-  });
-  return res.data?.data;
+  const res = await api.post("/booking/public/lookup", { bookingCode, phoneLast4, email });
+  return res.data?.data ?? res.data?.result ?? res.data;
 };
 
 export const clearGuestBookings = async () => {

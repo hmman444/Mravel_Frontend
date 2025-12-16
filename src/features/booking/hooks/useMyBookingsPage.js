@@ -32,8 +32,8 @@ export function useMyBookingsPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [type, setType] = useState("HOTEL");
-  const [tab, setTab] = useState("DEVICE");
+  const [type, setType] = useState("HOTEL");  // HOTEL | RESTAURANT
+  const [tab, setTab] = useState("DEVICE");   // ACCOUNT | DEVICE | LOOKUP
 
   // AUTH
   const { user, accessToken } = useSelector((s) => s.auth || {});
@@ -51,24 +51,48 @@ export function useMyBookingsPage() {
   const restAcc = useSelector((s) => s.bookingRestaurantPrivate?.my);
   const restClaim = useSelector((s) => s.bookingRestaurantPrivate?.claim);
 
-  const lookupScope =
-    type === "RESTAURANT" ? (restLookup?.scope || "PUBLIC") : "PUBLIC";
+  // ✅ LOOKUP FORM STATE tách theo type (HOTEL/RESTAURANT)
+  const [lookupForm, setLookupForm] = useState({
+    HOTEL: { bookingCode: "", phoneLast4: "", email: "" },
+    RESTAURANT: { bookingCode: "", phoneLast4: "", email: "" },
+  });
 
-  // ===== lookup form state (dùng chung) =====
-  const [bookingCode, setBookingCode] = useState("");
-  const [phoneLast4, setPhoneLast4] = useState("");
-  const [email, setEmail] = useState("");
+  const form = lookupForm[type];
 
-  const codeUpper = bookingCode.trim().toUpperCase();
-  const lookupType = codeUpper.startsWith("RB-") ? "RESTAURANT" : "HOTEL";
+  const setBookingCode = useCallback(
+    (v) =>
+      setLookupForm((s) => ({
+        ...s,
+        [type]: { ...s[type], bookingCode: v },
+      })),
+    [type]
+  );
 
-  // ✅ luôn load DEVICE list cho CẢ 2 loại (để chuyển tab nhỏ không cần call lại)
+  const setPhoneLast4 = useCallback(
+    (v) =>
+      setLookupForm((s) => ({
+        ...s,
+        [type]: { ...s[type], phoneLast4: v },
+      })),
+    [type]
+  );
+
+  const setEmail = useCallback(
+    (v) =>
+      setLookupForm((s) => ({
+        ...s,
+        [type]: { ...s[type], email: v },
+      })),
+    [type]
+  );
+
+  // ✅ luôn load DEVICE list cho CẢ 2 loại
   useEffect(() => {
     dispatch(fetchGuestMyBookings());
     dispatch(fetchGuestMyRestaurantBookings());
   }, [dispatch]);
 
-  // ✅ khi vào ACCOUNT và đã login => load CẢ 2 loại để lấy count + render nhanh
+  // ✅ khi vào ACCOUNT và đã login => load CẢ 2 loại
   useEffect(() => {
     if (tab !== "ACCOUNT") return;
     if (!isLoggedIn) return;
@@ -119,30 +143,29 @@ export function useMyBookingsPage() {
     }
   }, [dispatch, type, isLoggedIn, user?.id, navigate]);
 
-  // ===== Lookup submit =====
+  // ===== Lookup submit (✅ theo type, không dựa prefix nữa) =====
   const onSubmitLookup = useCallback(async () => {
     const payload = {
-      bookingCode: bookingCode.trim(),
-      phoneLast4: phoneLast4.trim(),
-      email: email?.trim() || null,
+      bookingCode: (form.bookingCode || "").trim().toUpperCase(),
+      phoneLast4: (form.phoneLast4 || "").trim(),
+      email: form.email?.trim() || null,
     };
 
-    const codeUpper = payload.bookingCode.toUpperCase();
-    const t = codeUpper.startsWith("RB-") ? "RESTAURANT" : "HOTEL";
-
-    if (t === "RESTAURANT") {
-      await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
+    if (type === "RESTAURANT") {
+      const data = await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
+      console.log("LOOKUP REST unwrap:", data);
     } else {
-      await dispatch(lookupBookingPublic(payload)).unwrap();
+      const data = await dispatch(lookupBookingPublic(payload)).unwrap();
+      console.log("LOOKUP HOTEL unwrap:", data);
     }
-  }, [dispatch, bookingCode, phoneLast4, email]);
+  }, [dispatch, type, form]);
 
   const onClearLookupResult = useCallback(() => {
-    if (lookupType === "HOTEL") dispatch(clearLookup());
+    if (type === "HOTEL") dispatch(clearLookup());
     else dispatch(clearRestaurantLookup());
-  }, [dispatch, lookupType]);
+  }, [dispatch, type]);
 
-  // ===== Counts (để show nhỏ phía dưới) =====
+  // ===== Counts =====
   const deviceHotelCount = useMemo(() => hotelMy?.items?.length || 0, [hotelMy?.items]);
   const deviceRestCount = useMemo(() => restMy?.items?.length || 0, [restMy?.items]);
   const accountHotelCount = useMemo(() => hotelAcc?.items?.length || 0, [hotelAcc?.items]);
@@ -160,9 +183,14 @@ export function useMyBookingsPage() {
   const claimLoading = type === "HOTEL" ? !!hotelClaim?.loading : !!restClaim?.loading;
   const claimError = type === "HOTEL" ? hotelClaim?.error : restClaim?.error;
 
+  // ✅ LOOKUP state theo type (đúng UI: hotel/res độc lập)
   const lookupLoading = type === "HOTEL" ? !!hotelLookup?.loading : !!restLookup?.loading;
   const lookupError = type === "HOTEL" ? hotelLookup?.error : restLookup?.error;
   const lookupResult = type === "HOTEL" ? hotelLookup?.result : restLookup?.result;
+  const lookupScope =
+    type === "HOTEL"
+      ? (hotelLookup?.scope || "PUBLIC")
+      : (restLookup?.scope || "PUBLIC");
 
   return {
     // main tabs
@@ -201,10 +229,10 @@ export function useMyBookingsPage() {
     claimError,
     onClaimToAccount,
 
-    // LOOKUP
-    bookingCode,
-    phoneLast4,
-    email,
+    // LOOKUP (tách theo type)
+    bookingCode: form.bookingCode,
+    phoneLast4: form.phoneLast4,
+    email: form.email,
     setBookingCode,
     setPhoneLast4,
     setEmail,
