@@ -12,6 +12,7 @@ import bookingPrivateReducer from "../features/booking/slices/bookingPrivateSlic
 import bookingRestaurantReducer from "../features/booking/slices/bookingRestaurantSlice";
 import bookingRestaurantPrivateReducer from "../features/booking/slices/bookingRestaurantPrivateSlice";
 import bookingRestaurantPublicReducer from "../features/booking/slices/bookingRestaurantPublicSlice";
+import adminAmenityReducer from "../features/admin/slices/adminAmenitySlice";
 import profileReducer from "../features/user/slices/profileSlice";
 import { injectStore } from "./storeInjector";
 
@@ -31,6 +32,7 @@ export const store = configureStore({
     bookingRestaurantPrivate: bookingRestaurantPrivateReducer,
     bookingRestaurantPublic: bookingRestaurantPublicReducer,
     booking: bookingReducer,
+    adminAmenity: adminAmenityReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

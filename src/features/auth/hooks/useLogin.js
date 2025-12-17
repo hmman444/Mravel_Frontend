@@ -12,11 +12,11 @@ export const useLogin = () => {
 
     if (loginUser.fulfilled.match(action)) {
       setMessage("Đăng nhập thành công!");
-      return true;
+      return { ok: true, role: action.payload.role };
     }
 
     setMessage(action.payload || "Sai email hoặc mật khẩu!");
-    return false;
+    return { ok: false };
   };
 
   return { loading, error, message, handleLogin };

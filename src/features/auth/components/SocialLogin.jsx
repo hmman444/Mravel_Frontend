@@ -5,19 +5,31 @@ import { useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import { useDispatch } from "react-redux";
 import { socialLoginUser } from "../slices/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function SocialLogin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ fix
   const [loading, setLoading] = useState(false);
+
   const redirectParam = new URLSearchParams(location.search).get("redirect");
+
+  const goAfterLogin = (role) => {
+    if (redirectParam) {
+      navigate(decodeURIComponent(redirectParam));
+      return;
+    }
+    navigate(role === "ADMIN" ? "/admin" : "/"); // ✅ theo role
+  };
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         setLoading(true);
+
         const idToken = tokenResponse.access_token || tokenResponse.credential;
+
         const action = await dispatch(
           socialLoginUser({
             provider: "google",
@@ -25,12 +37,11 @@ export default function SocialLogin() {
             rememberMe: true,
           })
         );
-        if (socialLoginUser.fulfilled.match(action)){
-          if (redirectParam) {
-            navigate(decodeURIComponent(redirectParam));
-          } else {
-            navigate("/");
-          }
+
+        if (socialLoginUser.fulfilled.match(action)) {
+          goAfterLogin(action.payload.role); // ✅ lấy role từ payload
+        } else {
+          console.error("Google socialLoginUser rejected:", action.payload);
         }
       } catch (err) {
         console.error("Google login error:", err);
@@ -45,7 +56,8 @@ export default function SocialLogin() {
   const handleFacebookSuccess = async (response) => {
     try {
       setLoading(true);
-      const fbToken = response.accessToken;
+
+      const fbToken = response?.accessToken;
       if (!fbToken) {
         console.error("Facebook login failed: missing accessToken");
         return;
@@ -58,7 +70,12 @@ export default function SocialLogin() {
           rememberMe: true,
         })
       );
-      if (socialLoginUser.fulfilled.match(action)) navigate("/");
+
+      if (socialLoginUser.fulfilled.match(action)) {
+        goAfterLogin(action.payload.role); // ✅ theo role
+      } else {
+        console.error("Facebook socialLoginUser rejected:", action.payload);
+      }
     } catch (err) {
       console.error("Facebook login error:", err);
     } finally {
@@ -83,9 +100,7 @@ export default function SocialLogin() {
         >
           <FcGoogle className="text-xl" />
           <span className="w-px h-5 bg-gray-200"></span>
-          <span className="text-sm font-medium text-gray-700">
-            Google
-          </span>
+          <span className="text-sm font-medium text-gray-700">Google</span>
         </button>
 
         <FacebookLogin
@@ -103,9 +118,7 @@ export default function SocialLogin() {
             >
               <FaFacebook className="text-blue-600 text-xl" />
               <span className="w-px h-5 bg-gray-200"></span>
-              <span className="text-sm font-medium text-gray-700">
-                Facebook
-              </span>
+              <span className="text-sm font-medium text-gray-700">Facebook</span>
             </button>
           )}
         />

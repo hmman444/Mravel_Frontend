@@ -228,6 +228,13 @@ export default function PlanBoard({
   };
 
   const handleTrashPointerDown = (e) => {
+    if (!canEditBoard) {
+      e.preventDefault();
+      e.stopPropagation();
+      setShowTrash((prev) => !prev);
+      return;
+    }
+
     setIsDraggingTrash(true);
     e.preventDefault();
     e.stopPropagation();
@@ -359,7 +366,7 @@ export default function PlanBoard({
 
   const handleConfirmClearTrash = async () => {
     setConfirmClearTrash(false);
-    if (!clearTrash || isViewer) return;
+    if (!clearTrash || !canEditBoard) return;
     await clearTrash();
   };
 
@@ -460,7 +467,7 @@ export default function PlanBoard({
                 position: "absolute",
                 left: trashPos.x,
                 top: trashPos.y,
-                zIndex: 40,
+                zIndex: 38,
                 width: 280,
               }}
             >
@@ -469,7 +476,7 @@ export default function PlanBoard({
                 onPointerDown={handleTrashPointerDown}
                 className={`
                   mb-2 inline-flex items-center gap-2
-                  rounded-full px-3 py-1
+                  rounded-full px-3 py-1 z-0
                   text-xs font-semibold text-white shadow-md
                   cursor-move transition-all
                   ${isDocked ? "bg-rose-500" : "bg-rose-500/90"}
@@ -477,7 +484,7 @@ export default function PlanBoard({
               >
                 <FaTrashAlt className="text-[11px]" />
                 <span>
-                  Thùng rác (Kéo lên để gắn)
+                  {canEditBoard ? "Thùng rác (Kéo lên để gắn)" : "Thùng rác"}
                 </span>
               </div>
 
@@ -497,22 +504,20 @@ export default function PlanBoard({
                         Thùng rác
                       </span>
 
-                      {!isViewer &&
-                        trashList?.cards?.length > 0 &&
-                        clearTrash && (
-                          <button
-                            type="button"
-                            onClick={() => setConfirmClearTrash(true)}
-                            className="
-                              text-[10px] px-3 py-1 rounded-full
-                              bg-red-500/10 text-red-600
-                              hover:bg-red-500/20 hover:text-red-700
-                              transition-all font-medium
-                            "
-                          >
-                            Xóa tất cả
-                          </button>
-                        )}
+                      {canEditBoard && trashList?.cards?.length > 0 && clearTrash && (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmClearTrash(true)}
+                          className="
+                            text-[10px] px-3 py-1 rounded-full
+                            bg-red-500/10 text-red-600
+                            hover:bg-red-500/20 hover:text-red-700
+                            transition-all font-medium
+                          "
+                        >
+                          Xóa tất cả
+                        </button>
+                      )}
                     </div>
 
                     <div className="px-2 pb-2">
@@ -535,7 +540,7 @@ export default function PlanBoard({
                         duplicateCard={duplicateCard}
                         onActivityTypeSelected={handleActivityPicked}
                         onOpenActivityModal={openEditModal}
-                        canEdit={!isViewer}
+                        canEdit={canEditBoard}
                       />
                     </div>
                   </motion.div>

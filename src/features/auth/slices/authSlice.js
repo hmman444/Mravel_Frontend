@@ -118,6 +118,7 @@ const authSlice = createSlice({
     user: null,
     accessToken,
     refreshToken,
+    role: null,
     loading: false,
     error: null,
     message: null,
@@ -129,6 +130,9 @@ const authSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
+    },
+    setRole: (state, action) => {
+      state.role = action.payload; // "ADMIN" | "USER"
     },
     clearMessage: (state) => {
       state.message = null;
@@ -145,6 +149,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.role = action.payload.role;
         state.message = "Đăng nhập thành công!";
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -160,6 +165,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.role = action.payload.role;
         state.message = "Đăng nhập mạng xã hội thành công!";
       })
       .addCase(socialLoginUser.rejected, (state, action) => {
@@ -171,6 +177,7 @@ const authSlice = createSlice({
         state.accessToken = null;
         state.refreshToken = null;
         state.user = null;
+        state.role = null;
         state.message = action.payload;
       })
       .addCase(logoutUser.rejected, (state, action) => {
@@ -248,5 +255,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setTokensRedux, setUser, clearMessage } = authSlice.actions;
+export const { setTokensRedux, setUser, setRole, clearMessage } = authSlice.actions;
 export default authSlice.reducer;
