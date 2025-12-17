@@ -41,16 +41,19 @@ import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 
 import { useMainSocket } from "./realtime/useMainSocket";
+import { useHydrateRole } from "./features/auth/hooks/useHydrateRole";
 //Booking
 import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 import MyBookingsPage from "./features/booking/pages/MyBookingsPage";
 import RestaurantBookingPage from "./features/booking/pages/RestaurantBookingPage";
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
+import RequireRole from "./routes/RequireRole";
 function App() {
   useLoadUser();
   useAuthSync();
   useMainSocket();
+  useHydrateRole();
   return (
     <>
     <Router>
@@ -63,23 +66,31 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
         {/* Admin routes */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<ManageUsersPage />} />
-        <Route path="/admin/partners" element={<ManagePartnersPage />} />
-        <Route path="/admin/reports" element={<ManageReportsPage />} />
-        <Route path="/admin/services" element={<ManageServicesPage />} />
-        <Route path="/admin/locations" element={<ManageLocationsPage />} />
-        <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
-        <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
-        <Route path="/admin/locations/:id" element={<LocationDetailPage />} />
-        <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
+        <Route element={<RequireRole allow={["ADMIN"]} />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<ManageUsersPage />} />
+          <Route path="/admin/partners" element={<ManagePartnersPage />} />
+          <Route path="/admin/reports" element={<ManageReportsPage />} />
+          <Route path="/admin/services" element={<ManageServicesPage />} />
+          <Route path="/admin/locations" element={<ManageLocationsPage />} />
+          <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
+          <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
+          <Route path="/admin/locations/:id" element={<LocationDetailPage />} />
+          <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
+        </Route>
 
-        {/* Plans routes */}
-        <Route path="/plans" element={<PlanListPage />} />
-        <Route path="/plans/:planId" element={<PlanDashboardPage />} />
-        <Route path="/plans/join" element={<JoinPlanPage />} />
-        <Route path="/plans/my-plans" element={<ListPlanPage />} />
-        <Route path="/plans/timeline" element={<PlanTimeLinePage  />} />
+        <Route element={<RequireRole allow={["USER"]} />}>
+          {/* Plans routes */}
+          <Route path="/plans" element={<PlanListPage />} />
+          <Route path="/plans/:planId" element={<PlanDashboardPage />} />
+          <Route path="/plans/join" element={<JoinPlanPage />} />
+          <Route path="/plans/my-plans" element={<ListPlanPage />} />
+          <Route path="/plans/timeline" element={<PlanTimeLinePage  />} />
+
+          {/* User routes */}
+          <Route path="/account/profile" element={<AccountProfilePage />} />
+          <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
+        </Route>
 
         {/* Catalog routes */}       
         <Route path="/place/:slug" element={<PlaceDetailPage />} />
@@ -88,10 +99,6 @@ function App() {
         <Route path="/hotels/:slug" element={<HotelDetailPage />} />
         <Route path="/restaurants" element={<RestaurantsHomePage />} />
         <Route path="/restaurants/:slug" element={<RestaurantDetailPage />} />
-
-        {/* User routes */}
-        <Route path="/account/profile" element={<AccountProfilePage />} />
-        <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
 
         {/* General routes */}
         <Route path="/search" element={<SearchPage />} />

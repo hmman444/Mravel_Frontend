@@ -33,15 +33,16 @@ export default function LoginPage() {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    const success = await handleLogin(email, password, rememberMe);
+    const {ok, role} = await handleLogin(email, password, rememberMe);
 
-    if (success) {
+    if (ok) {
       if (redirectParam) {
         const redirectPath = decodeURIComponent(redirectParam);
         navigate(redirectPath);
         return;
       }
-      navigate("/");
+
+      navigate(role === "ADMIN" ? "/admin" : "/");
     }
   };
 

@@ -91,52 +91,6 @@ api.interceptors.response.use(
       }
     }
 
-    if (message.includes("Plan not found")) {
-      window.location.href = "/plans/not-found";
-      return Promise.reject(error);
-    }
-
-    if (message.includes("You don't have permission to view this board")) {
-      window.location.href = "/plans/no-access";
-      return Promise.reject(error);
-    }
-
-    if (message.includes("You are not invited to this plan")) {
-      showError("Bạn chưa được mời vào lịch trình này.");
-      return Promise.reject(error);
-    }
-
-    if (message.includes("You don't have permission to edit")) {
-      showError("Bạn không có quyền chỉnh sửa lịch trình này.");
-      return Promise.reject(error);
-    }
-
-    if (message.includes("Cannot remove the owner")) {
-      showError("Không thể xoá chủ sở hữu.");
-      return Promise.reject(error);
-    }
-
-    if (message.includes("Owner cannot remove themselves")) {
-      showError("Bạn không thể xoá chính mình.");
-      return Promise.reject(error);
-    }
-
-    if (message.includes("Cannot change role of the owner")) {
-      showError("Không thể đổi quyền của chủ sở hữu.");
-      return Promise.reject(error);
-    }
-
-    // invite
-    if (message.includes("Invalid token")) {
-      window.location.href = "/plans/join-invalid";
-      return Promise.reject(error);
-    }
-
-    if (message.includes("Invite expired")) {
-      window.location.href = "/plans/join-expired";
-      return Promise.reject(error);
-    }
-
     // access requests
     if (message.includes("Bạn đã gửi yêu cầu trước đó")) {
       showError("Bạn đã gửi yêu cầu trước đó.");
@@ -147,8 +101,6 @@ api.interceptors.response.use(
       showError("Bạn đã có quyền truy cập.");
       return Promise.reject(error);
     }
-
-
 
     return Promise.reject(error);
   }
