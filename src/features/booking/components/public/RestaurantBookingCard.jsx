@@ -48,12 +48,81 @@ function DetailRow({ label, value, mono = false }) {
 export default function RestaurantBookingCard({
   booking,
   onOpenRestaurant,
-  detailScope = "PUBLIC", // PUBLIC | PRIVATE
+  detailScope = "PUBLIC", // PUBLIC | PRIVATE | LOOKUP
+  lookupCreds,            // { phoneLast4, email } - dùng khi detailScope="LOOKUP"
 }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
+
+  const PENDING_EXPIRE_MINUTES = 30;
+
+  const [nowTick, setNowTick] = useState(Date.now());
+  const [resuming, setResuming] = useState(false);
+  const [resumeError, setResumeError] = useState(null);
+
+  const isPendingPay = useMemo(() => {
+    const s = String((detail || booking)?.status || "").toUpperCase();
+    const p = String((detail || booking)?.paymentStatus || "").toUpperCase();
+    return s === "PENDING_PAYMENT" && p === "PENDING";
+  }, [detail, booking]);
+
+  const deadlineMs = useMemo(() => {
+    const created = (detail || booking)?.createdAt;
+    const t = Date.parse(created);
+    if (!created || Number.isNaN(t)) return null;
+    return t + PENDING_EXPIRE_MINUTES * 60 * 1000;
+  }, [detail, booking]);
+
+  const expiresInMs = deadlineMs ? (deadlineMs - nowTick) : 0;
+  const canResume = isPendingPay && !!deadlineMs && expiresInMs > 0;
+
+  useEffect(() => {
+    if (!canResume) return;
+    const id = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [canResume]);
+
+  const fmtCountdown = (ms) => {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  };
+
+  const onResumePayment = async () => {
+    if (!code) return;
+    try {
+      setResumeError(null);
+      setResuming(true);
+
+      let res;
+
+      if (detailScope === "PRIVATE") {
+        res = await api.post(`/booking/restaurants/${encodeURIComponent(code)}/resume-payment`);
+      } else if (detailScope === "LOOKUP") {
+        res = await api.post(`/booking/public/restaurants/lookup/resume`, {
+          bookingCode: code,
+          phoneLast4: lookupCreds?.phoneLast4,
+          email: lookupCreds?.email?.trim() || null,
+        });
+      } else {
+        res = await api.post(`/booking/public/restaurants/my/${encodeURIComponent(code)}/resume-payment`);
+      }
+
+      const dto = res.data?.data;
+      const payUrl = dto?.payUrl;
+      if (!payUrl) throw new Error("Không nhận được payUrl");
+
+      window.location.assign(payUrl);
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Không thể tiếp tục thanh toán";
+      setResumeError(msg);
+    } finally {
+      setResuming(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -61,6 +130,27 @@ export default function RestaurantBookingCard({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
+
+  // ✅ tách riêng hàm fetchDetail để xử lý LOOKUP/PUBLIC/PRIVATE rõ ràng
+  const fetchDetail = async (code) => {
+    if (detailScope === "PRIVATE") {
+      const res = await api.get(`/booking/restaurants/${encodeURIComponent(code)}`);
+      return res.data?.data ?? res.data;
+    }
+
+    if (detailScope === "LOOKUP") {
+      const res = await api.post(`/booking/public/restaurants/lookup/detail`, {
+        bookingCode: code,
+        phoneLast4: lookupCreds?.phoneLast4,
+        email: lookupCreds?.email?.trim() || null,
+      });
+      return res.data?.data ?? res.data;
+    }
+
+    // PUBLIC (device cookie)
+    const res = await api.get(`/booking/public/restaurants/my/${encodeURIComponent(code)}`);
+    return res.data?.data ?? res.data;
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -74,15 +164,9 @@ export default function RestaurantBookingCard({
         setDetailError(null);
         setDetailLoading(true);
 
-        // ✅ bạn tạo API theo các url này (mục BE bên dưới)
-        const url =
-          detailScope === "PRIVATE"
-            ? `/booking/restaurants/${encodeURIComponent(code)}`
-            : `/booking/public/restaurants/my/${encodeURIComponent(code)}`;
+        const data = await fetchDetail(code);
 
-        const res = await api.get(url);
-        const data = res.data?.data ?? null;
-        if (!cancelled) setDetail(data);
+        if (!cancelled) setDetail(data ?? null);
       } catch (e) {
         const msg =
           e?.response?.data?.message || e?.message || "Không tải được chi tiết đơn";
@@ -95,7 +179,8 @@ export default function RestaurantBookingCard({
     return () => {
       cancelled = true;
     };
-  }, [open, booking?.code, detailScope]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, booking?.code, detailScope, lookupCreds?.phoneLast4, lookupCreds?.email]);
 
   const b = detail || booking;
 
@@ -124,7 +209,7 @@ export default function RestaurantBookingCard({
 
     reservationDate,
     reservationTime,
-  } = b;
+  } = b || {};
 
   const reservationLabel = useMemo(() => {
     if (!reservationDate) return "--";
@@ -144,11 +229,21 @@ export default function RestaurantBookingCard({
                 {code}
               </span>
 
-              <span className={["inline-flex items-center rounded-lg border px-2 py-1 text-[11px] font-semibold", badgeClass(status)].join(" ")}>
+              <span
+                className={[
+                  "inline-flex items-center rounded-lg border px-2 py-1 text-[11px] font-semibold",
+                  badgeClass(status),
+                ].join(" ")}
+              >
                 {status}
               </span>
 
-              <span className={["inline-flex items-center rounded-lg border px-2 py-1 text-[11px] font-semibold", badgeClass(paymentStatus)].join(" ")}>
+              <span
+                className={[
+                  "inline-flex items-center rounded-lg border px-2 py-1 text-[11px] font-semibold",
+                  badgeClass(paymentStatus),
+                ].join(" ")}
+              >
                 {paymentStatus}
               </span>
             </div>
@@ -217,6 +312,36 @@ export default function RestaurantBookingCard({
             >
               Copy mã
             </button>
+
+            {canResume ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onResumePayment}
+                  disabled={resuming}
+                  className={[
+                    "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
+                    resuming ? "bg-gray-400 cursor-not-allowed text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white",
+                  ].join(" ")}
+                  title={`Còn ${fmtCountdown(expiresInMs)} để thanh toán`}
+                >
+                   {resuming ? (
+                    "Đang mở MoMo..."
+                  ) : (
+                    <>
+                      Tiếp tục thanh toán{" "}
+                      <span className="inline-block w-[52px] text-center font-mono tabular-nums">
+                        ({fmtCountdown(expiresInMs)})
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {resumeError ? (
+                  <p className="text-[11px] text-red-600">{resumeError}</p>
+                ) : null}
+              </>
+            ) : null}
           </div>
         </div>
       </article>

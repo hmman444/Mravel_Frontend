@@ -4,7 +4,6 @@ import {
   getMyGuestRestaurantBookings,
   lookupGuestRestaurantBooking,
   clearGuestRestaurantBookings,
-  getUserRestaurantBookingDetail,
 } from "../services/restaurantBookingPublicService";
 
 export const fetchGuestMyRestaurantBookings = createAsyncThunk(
@@ -20,32 +19,12 @@ export const fetchGuestMyRestaurantBookings = createAsyncThunk(
 
 export const lookupRestaurantBookingPublic = createAsyncThunk(
   "bookingRestaurantPublic/lookupRestaurantBookingPublic",
-  async (payload, { rejectWithValue, getState }) => {
+  async (payload, { rejectWithValue }) => {
     try {
       const result = await lookupGuestRestaurantBooking(payload);
-      return { result, scope: "PUBLIC" };
+      return { result, scope: "LOOKUP" }; // hoặc PUBLIC
     } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Tra cứu thất bại";
-      const status = e?.response?.status;
-
-      const { auth } = getState() || {};
-      const isLoggedIn = !!auth?.accessToken && !!auth?.user?.id;
-
-      // chỉ fallback khi login + đúng case “thuộc tài khoản”
-      const isBelongsToAccount =
-        status === 409 || /thuộc tài khoản/i.test(msg);
-
-      if (isLoggedIn && isBelongsToAccount) {
-        try {
-          const detail = await getUserRestaurantBookingDetail(payload.bookingCode);
-          return { result: detail, scope: "PRIVATE" };
-        } catch (e2) {
-          const msg2 = e2?.response?.data?.message || e2?.message || msg;
-          return rejectWithValue(msg2);
-        }
-      }
-
-      return rejectWithValue(msg);
+      return rejectWithValue(e?.response?.data?.message || "Tra cứu thất bại");
     }
   }
 );
