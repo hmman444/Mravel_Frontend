@@ -18,45 +18,71 @@ const initialState = {
   error: null,
 };
 
-/* ===================== THUNKS ===================== */
-
 export const loadAmenities = createAsyncThunk(
   "adminAmenity/loadAmenities",
-  async (params) => {
-    return await fetchAmenities(params);
+  async (params, { rejectWithValue }) => {
+    try {
+      return await fetchAmenities(params);
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
   }
 );
 
 export const loadGroupedAmenities = createAsyncThunk(
   "adminAmenity/loadGroupedAmenities",
-  async (scope) => {
-    return await fetchGroupedAmenities(scope);
+  async (scope, { rejectWithValue }) => {
+    try {
+      return await fetchGroupedAmenities(scope);
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
   }
 );
 
 export const createAmenityThunk = createAsyncThunk(
   "adminAmenity/createAmenity",
-  async (payload) => {
-    return await createAmenity(payload);
+  async (payload, { rejectWithValue }) => {
+    try {
+      return await createAmenity(payload);
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
   }
 );
 
 export const updateAmenityThunk = createAsyncThunk(
   "adminAmenity/updateAmenity",
-  async ({ id, payload }) => {
-    return await updateAmenity(id, payload);
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      return await updateAmenity(id, payload);
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
   }
 );
 
 export const deleteAmenityThunk = createAsyncThunk(
   "adminAmenity/deleteAmenity",
-  async (id) => {
-    await deleteAmenity(id);
-    return id;
+  async (id, { rejectWithValue }) => {
+    try {
+      await deleteAmenity(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
   }
 );
 
-/* ===================== SLICE ===================== */
+const apiMessage = (err) => {
+  const msg =
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    err?.message;
+
+  if (err?.response?.status === 401) return "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
+  return msg || "Có lỗi xảy ra";
+};
 
 const adminAmenitySlice = createSlice({
   name: "adminAmenity",
@@ -104,7 +130,7 @@ const adminAmenitySlice = createSlice({
       })
       .addCase(createAmenityThunk.rejected, (state, action) => {
         state.saving = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
 
       /* -------- UPDATE -------- */
@@ -118,7 +144,7 @@ const adminAmenitySlice = createSlice({
       })
       .addCase(updateAmenityThunk.rejected, (state, action) => {
         state.saving = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
 
       /* -------- DELETE -------- */
@@ -131,7 +157,7 @@ const adminAmenitySlice = createSlice({
       })
       .addCase(deleteAmenityThunk.rejected, (state, action) => {
         state.deleting = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       });
   },
 });
