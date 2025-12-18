@@ -16,11 +16,15 @@ import ActivityFooterButtons from "./ActivityFooterButtons";
 
 import { inputBase, sectionCard } from "../../utils/activityStyles";
 import { useSplitMoney } from "../../hooks/useSplitMoney";
+import { buildInitialExtraCosts, normalizeExtraCosts, calcExtraTotal } from "../../utils/costUtils";
+
 import {
-  buildInitialExtraCosts,
-  normalizeExtraCosts,
-  calcExtraTotal,
-} from "../../utils/costUtils";
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+  getLocDisplayLabel,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
 const EXTRA_TYPES = [
   { value: "RENTAL", label: "Thuê đồ" },
@@ -29,13 +33,21 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+function safeJsonParse(str) {
+  try {
+    return str ? JSON.parse(str) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function EntertainActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
   planMembers = [],
-  readOnly 
+  readOnly,
 }) {
   const [title, setTitle] = useState("");
   const [placeName, setPlaceName] = useState("");
@@ -53,74 +65,53 @@ export default function EntertainActivityModal({
   const [note, setNote] = useState("");
 
   const [extraCosts, setExtraCosts] = useState([]);
-
   const [errors, setErrors] = useState({});
 
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalEntertainLocation, setInternalEntertainLocation] = useState(null);
   const effectiveEntertainLocation = internalEntertainLocation || null;
 
-  // ===== LOAD DỮ LIỆU =====
+  // ===== LOAD =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
 
       setTitle(editingCard.text || "");
       setPlaceName(data.placeName || "");
       setAddress(data.address || "");
 
-      const loadedStart =
-        editingCard.startTime || data.startTime || data.time || "";
-      const loadedEnd =
-        editingCard.endTime ||
-        data.endTime ||
-        editingCard.startTime ||
-        data.time ||
-        "";
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setStartTime(start);
+      setEndTime(end);
+      setDurationMinutes(null);
 
-      setStartTime(loadedStart);
-      setEndTime(loadedEnd);
-      setDurationMinutes(null); // ActivityTimeRangeSection sẽ tính lại
+      setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : "");
+      setTicketCount(data.ticketCount != null ? String(data.ticketCount) : "1");
 
-      setTicketPrice(
-        data.ticketPrice != null ? String(data.ticketPrice) : ""
-      );
-      setTicketCount(
-        data.ticketCount != null ? String(data.ticketCount) : "1"
-      );
-
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
-      }
+      setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
+      setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
 
       setExtraCosts(buildInitialExtraCosts(data, cost));
-
-      setBudgetAmount(
-        cost.budgetAmount !== undefined && cost.budgetAmount !== null
-          ? String(cost.budgetAmount)
-          : ""
-      );
-
       setNote(editingCard.description || "");
 
-      if (data.entertainLocation) {
-        setInternalEntertainLocation(data.entertainLocation);
-      } else {
-        setInternalEntertainLocation(null);
+      const normalizedLoc = normalizeLocationFromStored(data.entertainLocation);
+      setInternalEntertainLocation(normalizedLoc || null);
+
+      // sync UI name/address nếu có location
+      if (normalizedLoc) {
+        const label = getLocDisplayLabel(normalizedLoc, "");
+        if (label) setPlaceName(label);
+
+        const full = normalizedLoc.fullAddress || normalizedLoc.address || "";
+        if (full) setAddress(full);
       }
     } else {
-      // reset khi tạo mới
+      // reset new
       setTitle("");
       setPlaceName("");
       setAddress("");
@@ -131,63 +122,65 @@ export default function EntertainActivityModal({
 
       setTicketPrice("");
       setTicketCount("1");
+
       setActualCost("");
       setBudgetAmount("");
       setNote("");
-      setExtraCosts([]);
 
+      setExtraCosts([]);
       setInternalEntertainLocation(null);
+      setPlacePickerOpen(false);
     }
   }, [open, editingCard]);
 
-  // SYNC location -> placeName + address
+  // ===== SYNC LOCATION -> NAME + ADDRESS =====
   useEffect(() => {
     if (!effectiveEntertainLocation) return;
 
-    if (effectiveEntertainLocation.label || effectiveEntertainLocation.name) {
-      setPlaceName(
-        effectiveEntertainLocation.label ||
-          effectiveEntertainLocation.name ||
-          ""
-      );
-    }
+    const label = getLocDisplayLabel(effectiveEntertainLocation, "");
+    const full = effectiveEntertainLocation.fullAddress || effectiveEntertainLocation.address || "";
 
-    if (
-      effectiveEntertainLocation.address ||
-      effectiveEntertainLocation.fullAddress
-    ) {
-      setAddress(
-        effectiveEntertainLocation.address ||
-          effectiveEntertainLocation.fullAddress ||
-          ""
-      );
-    }
+    if (label) setPlaceName(label);
+    if (full) setAddress(full);
   }, [effectiveEntertainLocation]);
 
-  // ===== TÍNH CHI PHÍ =====
+  // ===== EXTRA COSTS CRUD =====
+  const addExtraCost = () =>
+    setExtraCosts((prev) => [
+      ...prev,
+      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
+    ]);
+
+  const updateExtraCost = (idx, key, value) => {
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
+  };
+
+  const removeExtraCost = (idx) =>
+    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
+
+  // ===== COST CALC =====
+  // baseEstimated = vé (không gồm extra) -> để lưu vào cost.estimatedCost (tránh double)
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(ticketCount || 0);
     return p * c;
   }, [ticketPrice, ticketCount]);
 
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
-  );
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
 
-  const estimatedCost = useMemo(
-    () => baseEstimated + extraTotal,
-    [baseEstimated, extraTotal]
-  );
+  // estimatedTotal (hiển thị / chia) = base + extra
+  const estimatedTotal = useMemo(() => baseEstimated + extraTotal, [baseEstimated, extraTotal]);
 
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedCost;
-  }, [actualCost, estimatedCost]);
+    return a > 0 ? a : estimatedTotal;
+  }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN DÙNG CHUNG =====
+  // ===== SPLIT HOOK =====
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -219,26 +212,9 @@ export default function EntertainActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COSTS CRUD =====
-  const addExtraCost = () =>
-    setExtraCosts((prev) => [
-      ...prev,
-      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
-    ]);
-
-  const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
-  };
-
-  const removeExtraCost = (idx) =>
-    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
-
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
     const normalizedParticipants = participants.map((p) =>
       typeof p === "number" ? p : p?.memberId
@@ -246,7 +222,8 @@ export default function EntertainActivityModal({
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedCost || null,
+      // ✅ FIX: estimatedCost = base only (vé) — extra nằm trong extraCosts
+      estimatedCost: baseEstimated > 0 ? baseEstimated : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
@@ -259,7 +236,6 @@ export default function EntertainActivityModal({
       split: splitPayload,
       participants: normalizedParticipants,
       normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
     };
   };
 
@@ -282,8 +258,7 @@ export default function EntertainActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const { cost, split, participants } = buildPayload();
 
     onSubmit?.({
       type: "ENTERTAIN",
@@ -293,23 +268,18 @@ export default function EntertainActivityModal({
       startTime: startTime || null,
       endTime: endTime || null,
       durationMinutes: durationMinutes ?? null,
-      participantCount:
-        splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
+      participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
+
+      // ✅ activityData GỌN: chỉ đặc thù ENTERTAIN
       activityData: {
-        placeName,
-        address,
-        entertainLocation: effectiveEntertainLocation || null,
-        time: startTime || "",
-        startTime,
-        endTime,
+        placeName: placeName.trim(),
+        address: address?.trim() || null,
+        entertainLocation: slimLocationForStorage(effectiveEntertainLocation),
         ticketPrice: ticketPrice ? Number(ticketPrice) : null,
         ticketCount: ticketCount ? Number(ticketCount) : null,
-        actualCost: actualCost ? Number(actualCost) : null,
-        extraSpend: extraTotal || null,
-        extraItems: normalizedExtraCosts,
-        estimatedCost: estimatedCost || null,
       },
+
       cost,
       split,
     });
@@ -331,20 +301,9 @@ export default function EntertainActivityModal({
       labelPrefix="Vui chơi"
       name={placeName}
       emptyLabelText="Điền/chọn địa điểm vui chơi để lưu hoạt động."
-      locationText={
-        (effectiveEntertainLocation || address)
-          ? `Địa điểm: ${
-              effectiveEntertainLocation?.address ||
-              effectiveEntertainLocation?.fullAddress ||
-              address
-            }`
-          : ""
-      }
+      locationText={effectiveEntertainLocation?.fullAddress || address || ""}
       timeText={
-        startTime &&
-        endTime &&
-        durationMinutes != null &&
-        !errors.time
+        startTime && endTime && durationMinutes != null && !errors.time
           ? `${startTime} - ${endTime} (${durationMinutes} phút)`
           : ""
       }
@@ -440,8 +399,8 @@ export default function EntertainActivityModal({
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-emerald-50 text-emerald-500 border border-emerald-100
-                                dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
+                    bg-emerald-50 text-emerald-500 border border-emerald-100
+                    dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
                 >
                   <FaMapMarkerAlt />
                 </div>
@@ -450,18 +409,12 @@ export default function EntertainActivityModal({
                   {effectiveEntertainLocation || address ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {effectiveEntertainLocation?.label ||
-                          effectiveEntertainLocation?.name ||
-                          placeName ||
-                          "Địa điểm đã chọn"}
+                        {getLocDisplayLabel(effectiveEntertainLocation, placeName || "Địa điểm đã chọn")}
                       </p>
-                      {(effectiveEntertainLocation?.address ||
-                        effectiveEntertainLocation?.fullAddress ||
-                        address) && (
+
+                      {(effectiveEntertainLocation?.fullAddress || address) && (
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                          {effectiveEntertainLocation?.address ||
-                            effectiveEntertainLocation?.fullAddress ||
-                            address}
+                          {effectiveEntertainLocation?.fullAddress || address}
                         </p>
                       )}
 
@@ -472,8 +425,7 @@ export default function EntertainActivityModal({
                         {effectiveEntertainLocation?.lat != null &&
                           effectiveEntertainLocation?.lng != null && (
                             <span className="px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-                              {effectiveEntertainLocation.lat.toFixed(4)},{" "}
-                              {effectiveEntertainLocation.lng.toFixed(4)}
+                              {effectiveEntertainLocation.lat.toFixed(4)}, {effectiveEntertainLocation.lng.toFixed(4)}
                             </span>
                           )}
                       </div>
@@ -490,20 +442,21 @@ export default function EntertainActivityModal({
                   )}
                 </div>
 
-                <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-emerald-500 group-hover:text-emerald-600 dark:text-emerald-300
-                                dark:group-hover:text-emerald-200">
+                <span
+                  className="hidden md:inline-flex items-center text-[11px] font-medium
+                    text-emerald-500 group-hover:text-emerald-600 dark:text-emerald-300
+                    dark:group-hover:text-emerald-200"
+                >
                   Mở bản đồ
                 </span>
               </button>
+
               {errors.placeName && (
-                <p className="mt-1 text-[11px] text-rose-500">
-                  {errors.placeName}
-                </p>
+                <p className="mt-1 text-[11px] text-rose-500">{errors.placeName}</p>
               )}
             </div>
 
-            {/* Thời gian: dùng ActivityTimeRangeSection */}
+            {/* Thời gian */}
             <div className="mt-3">
               <ActivityTimeRangeSection
                 sectionLabel="Thời gian vui chơi"
@@ -516,9 +469,7 @@ export default function EntertainActivityModal({
                 onStartTimeChange={(val) => setStartTime(val)}
                 onEndTimeChange={(val) => setEndTime(val)}
                 error={errors.time}
-                onErrorChange={(msg) =>
-                  setErrors((prev) => ({ ...prev, time: msg }))
-                }
+                onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
                 durationHintPrefix="Thời lượng ước tính"
               />
@@ -533,7 +484,7 @@ export default function EntertainActivityModal({
               Chi phí vui chơi
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Giá vé / lượt + chi phí phát sinh + ngân sách + chi phí thực tế
+              Giá vé / lượt + phát sinh + ngân sách + chi phí thực tế
             </span>
           </div>
 
@@ -600,8 +551,7 @@ export default function EntertainActivityModal({
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng{" "}
-                  <b>chi phí vé + phát sinh</b> để chia tiền.
+                  Nếu để trống, hệ thống sẽ dùng <b>chi phí vé</b> + <b>phát sinh</b> để chia tiền.
                 </p>
               </div>
 
@@ -628,23 +578,18 @@ export default function EntertainActivityModal({
             {/* Tóm tắt chi phí */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Chi phí vé:{" "}
-                <span className="font-semibold">
-                  {baseEstimated.toLocaleString("vi-VN")}đ
-                </span>
+                Chi phí vé: <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh:{" "}
-                <span className="font-semibold">
-                  {extraTotal.toLocaleString("vi-VN")}đ
-                </span>
+                Phát sinh: <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
                 Tổng dự kiến (vé + phát sinh):{" "}
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  {estimatedCost.toLocaleString("vi-VN")}đ
+                  {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
+
               {actualCost && Number(actualCost) > 0 && (
                 <div>
                   Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
@@ -653,12 +598,11 @@ export default function EntertainActivityModal({
                   </span>
                 </div>
               )}
+
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
                   Ngân sách:{" "}
-                  <span className="font-semibold">
-                    {Number(budgetAmount).toLocaleString("vi-VN")}đ
-                  </span>
+                  <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
             </div>
@@ -718,14 +662,24 @@ export default function EntertainActivityModal({
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
         onSelect={(loc) => {
-          setInternalEntertainLocation(loc || null);
-          if (loc?.label || loc?.name) {
-            setPlaceName(loc.label || loc.name);
+          if (!loc) {
+            setPlacePickerOpen(false);
+            return;
+          }
+
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          setInternalEntertainLocation(slim || null);
+
+          const label = getLocDisplayLabel(slim, "");
+          const full = slim?.fullAddress || slim?.address || "";
+
+          if (label) {
+            setPlaceName(label);
             setErrors((prev) => ({ ...prev, placeName: "" }));
           }
-          if (loc?.address || loc?.fullAddress) {
-            setAddress(loc.address || loc.fullAddress);
-          }
+          if (full) setAddress(full);
+
+          setPlacePickerOpen(false);
         }}
         initialTab="ENTERTAIN"
         activityType="ENTERTAIN"

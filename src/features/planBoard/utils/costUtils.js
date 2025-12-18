@@ -7,11 +7,23 @@
  * Dùng chung cho các modal: FOOD / TRANSPORT / STAY / ...
  */
 export function buildInitialExtraCosts(activityData = {}, cost = {}) {
-  // 1) Ưu tiên extraItems trong activityData (format mới)
-  if (
-    Array.isArray(activityData.extraItems) &&
-    activityData.extraItems.length > 0
-  ) {
+  // 1) Ưu tiên cost.extraCosts (nguồn chuẩn)
+  if (Array.isArray(cost.extraCosts) && cost.extraCosts.length > 0) {
+    return cost.extraCosts.map((e) => ({
+      reason: e.reason || "Chi phí phụ",
+      type: e.type || "OTHER",
+      estimatedAmount: null,
+      actualAmount:
+        e.actualAmount !== undefined &&
+        e.actualAmount !== null &&
+        e.actualAmount !== ""
+          ? Number(e.actualAmount)
+          : 0,
+    }));
+  }
+
+  // 2) Fallback: activityData.extraItems (legacy / format cũ)
+  if (Array.isArray(activityData.extraItems) && activityData.extraItems.length > 0) {
     return activityData.extraItems.map((it) => ({
       reason: it.reason || it.note || "Chi phí phụ",
       type: it.type || "OTHER",
@@ -25,20 +37,7 @@ export function buildInitialExtraCosts(activityData = {}, cost = {}) {
     }));
   }
 
-  // 2) Nếu không có, dùng cost.extraCosts (format chuẩn cost)
-  if (Array.isArray(cost.extraCosts) && cost.extraCosts.length > 0) {
-    return cost.extraCosts.map((e) => ({
-      reason: e.reason || "Chi phí phụ",
-      type: e.type || "OTHER",
-      estimatedAmount: null,
-      actualAmount:
-        e.actualAmount != null && e.actualAmount !== ""
-          ? Number(e.actualAmount)
-          : 0,
-    }));
-  }
-
-  // 3) Legacy: activityData.extraSpend (tổng lẻ)
+  // 3) Legacy: activityData.extraSpend
   if (activityData.extraSpend != null) {
     return [
       {

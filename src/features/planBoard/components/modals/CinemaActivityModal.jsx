@@ -6,7 +6,6 @@ import {
   FaTimes,
   FaFilm,
   FaMapMarkerAlt,
-  FaClock,
   FaChair,
   FaMoneyBillWave,
 } from "react-icons/fa";
@@ -29,6 +28,14 @@ import {
   calcExtraTotal,
 } from "../../utils/costUtils";
 
+import {
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+  getLocDisplayLabel,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
+
 const FORMATS = [
   { value: "2D", label: "2D" },
   { value: "3D", label: "3D" },
@@ -42,13 +49,21 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+const safeJsonParse = (str) => {
+  try {
+    return str ? JSON.parse(str) : {};
+  } catch {
+    return {};
+  }
+};
+
 export default function CinemaActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
   planMembers = [],
-  readOnly 
+  readOnly = false,
 }) {
   const [title, setTitle] = useState("");
   const [cinemaName, setCinemaName] = useState("");
@@ -64,152 +79,148 @@ export default function CinemaActivityModal({
 
   const [ticketPrice, setTicketPrice] = useState("");
   const [comboPrice, setComboPrice] = useState("");
+
   const [budgetAmount, setBudgetAmount] = useState("");
   const [actualCost, setActualCost] = useState("");
   const [note, setNote] = useState("");
 
-  // dùng cấu trúc extraCosts chung
   const [extraCosts, setExtraCosts] = useState([]);
+  const [errors, setErrors] = useState({});
 
-  // place picker
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalCinemaLocation, setInternalCinemaLocation] = useState(null);
   const effectiveCinemaLocation = internalCinemaLocation || null;
 
-  // errors
-  const [errors, setErrors] = useState({});
-
-  // ===== LOAD DỮ LIỆU =====
+  // ===== LOAD WHEN OPEN =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
 
       setTitle(editingCard.text || "");
       setCinemaName(data.cinemaName || "");
       setAddress(data.address || "");
       setMovieName(data.movieName || "");
+
       setFormat(data.format || "2D");
       setSeats(data.seats || "");
 
-      const loadedStart =
-        editingCard.startTime || data.startTime || data.showtime || "";
-      const loadedEnd =
-        editingCard.endTime ||
-        data.endTime ||
-        editingCard.startTime ||
-        data.showtime ||
-        "";
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setStartTime(start);
+      setEndTime(end);
+      setDurationMinutes(null);
 
-      setStartTime(loadedStart);
-      setEndTime(loadedEnd);
-      setDurationMinutes(null); // để ActivityTimeRangeSection tính lại
+      setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : "");
+      setComboPrice(data.comboPrice != null ? String(data.comboPrice) : "");
 
-      setTicketPrice(
-        data.ticketPrice != null ? String(data.ticketPrice) : ""
-      );
-      setComboPrice(
-        data.comboPrice != null ? String(data.comboPrice) : ""
-      );
+      setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
+      setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
 
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
-      }
-
-      if (cost.budgetAmount != null) {
-        setBudgetAmount(String(cost.budgetAmount));
-      } else {
-        setBudgetAmount("");
-      }
-
+      setExtraCosts(buildInitialExtraCosts(data, cost));
       setNote(editingCard.description || "");
 
-      // extraCosts: dùng helper chung
-      setExtraCosts(buildInitialExtraCosts(data, cost));
+      const nLoc = normalizeLocationFromStored(data.cinemaLocation) || null;
+      setInternalCinemaLocation(nLoc);
 
-      if (data.cinemaLocation) {
-        setInternalCinemaLocation(data.cinemaLocation);
-      } else {
-        setInternalCinemaLocation(null);
+      // sync text from loc (nếu có)
+      if (nLoc) {
+        const label = getLocDisplayLabel(nLoc, data.cinemaName || "");
+        if (label) setCinemaName(label);
+        if (nLoc.fullAddress || nLoc.address) {
+          setAddress(nLoc.fullAddress || nLoc.address || data.address || "");
+        }
       }
     } else {
-      // reset khi tạo mới
+      // RESET new
       setTitle("");
       setCinemaName("");
       setAddress("");
       setMovieName("");
-      setFormat("2D");
-      setSeats("");
 
       setStartTime("");
       setEndTime("");
       setDurationMinutes(null);
 
+      setFormat("2D");
+      setSeats("");
+
       setTicketPrice("");
       setComboPrice("");
+
       setBudgetAmount("");
       setActualCost("");
       setNote("");
-      setExtraCosts([]);
 
+      setExtraCosts([]);
       setInternalCinemaLocation(null);
+      setPlacePickerOpen(false);
     }
   }, [open, editingCard]);
 
-  // sync location từ PlacePicker vào rạp + địa chỉ
+  // ===== SYNC MAP -> CINEMA NAME + ADDRESS =====
   useEffect(() => {
     if (!effectiveCinemaLocation) return;
 
-    if (effectiveCinemaLocation.label || effectiveCinemaLocation.name) {
-      setCinemaName(
-        effectiveCinemaLocation.label || effectiveCinemaLocation.name || ""
-      );
+    const label = getLocDisplayLabel(effectiveCinemaLocation, "");
+    if (label) {
+      setCinemaName(label);
       setErrors((prev) => ({ ...prev, cinemaName: "" }));
     }
 
-    if (
-      effectiveCinemaLocation.address ||
-      effectiveCinemaLocation.fullAddress
-    ) {
+    if (effectiveCinemaLocation.fullAddress || effectiveCinemaLocation.address) {
       setAddress(
-        effectiveCinemaLocation.address ||
-          effectiveCinemaLocation.fullAddress ||
+        effectiveCinemaLocation.fullAddress ||
+          effectiveCinemaLocation.address ||
           ""
       );
     }
   }, [effectiveCinemaLocation]);
 
-  // ===== COST LOGIC =====
-  const baseCost = useMemo(() => {
+  // ===== EXTRA COST CRUD =====
+  const addExtraCost = () =>
+    setExtraCosts((prev) => [
+      ...prev,
+      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
+    ]);
+
+  const updateExtraCost = (idx, key, value) => {
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
+  };
+
+  const removeExtraCost = (idx) =>
+    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
+
+  // ===== COST LOGIC (MATCH NEW STANDARD) =====
+  // baseEstimated = vé + combo (không bao gồm extra)
+  const baseEstimated = useMemo(() => {
     const t = Number(ticketPrice || 0);
     const c = Number(comboPrice || 0);
     return t + c;
   }, [ticketPrice, comboPrice]);
 
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
+
+  // tổng dự kiến để hiển thị & fallback chia tiền
+  const estimatedTotal = useMemo(
+    () => baseEstimated + extraTotal,
+    [baseEstimated, extraTotal]
   );
 
-  const estimatedCost = baseCost + extraTotal;
-
+  // chi phí để chia tiền: actual nếu có, không thì estimatedTotal
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedCost;
-  }, [actualCost, estimatedCost]);
+    return a > 0 ? a : estimatedTotal;
+  }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN CHUNG =====
+  // ===== SPLIT HOOK =====
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -241,34 +252,17 @@ export default function CinemaActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COST CRUD =====
-  const addExtraCost = () =>
-    setExtraCosts((prev) => [
-      ...prev,
-      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
-    ]);
-
-  const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
-  };
-
-  const removeExtraCost = (idx) =>
-    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
-
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
-
     const normalizedParticipants = participants.map((p) =>
       typeof p === "number" ? p : p?.memberId
     );
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedCost > 0 ? estimatedCost : null,
+      // ✅ estimatedCost chỉ là base (vé + combo)
+      estimatedCost: baseEstimated > 0 ? baseEstimated : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
@@ -281,7 +275,6 @@ export default function CinemaActivityModal({
       split: splitPayload,
       participants: normalizedParticipants,
       normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
     };
   };
 
@@ -289,7 +282,7 @@ export default function CinemaActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!cinemaName.trim()) {
+    if (!cinemaName.trim() && !effectiveCinemaLocation) {
       newErrors.cinemaName = "Vui lòng nhập hoặc chọn rạp xem phim.";
     }
 
@@ -308,8 +301,7 @@ export default function CinemaActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const { cost, split, participants, normalizedExtraCosts } = buildPayload();
 
     onSubmit?.({
       type: "CINEMA",
@@ -322,23 +314,19 @@ export default function CinemaActivityModal({
       participantCount:
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
+
+      // ✅ activityData gọn: chỉ field đặc thù CINEMA
       activityData: {
-        cinemaName,
-        cinemaLocation: effectiveCinemaLocation || null,
-        address,
-        movieName,
+        cinemaName: cinemaName.trim(),
+        cinemaLocation: slimLocationForStorage(effectiveCinemaLocation),
+        address: (address || "").trim(),
+        movieName: movieName.trim(),
         format,
-        seats,
-        showtime: startTime || "",
-        startTime,
-        endTime,
+        seats: (seats || "").trim(),
         ticketPrice: ticketPrice ? Number(ticketPrice) : null,
         comboPrice: comboPrice ? Number(comboPrice) : null,
-        extraSpend: extraTotal || null,
-        extraItems: normalizedExtraCosts,
-        actualCost: actualCost ? Number(actualCost) : null,
-        estimatedCost: estimatedCost || null,
       },
+
       cost,
       split,
     });
@@ -361,9 +349,7 @@ export default function CinemaActivityModal({
       name={movieName}
       emptyLabelText="Điền tên phim và rạp để lưu hoạt động xem phim."
       locationText={
-        effectiveCinemaLocation ||
-        cinemaName ||
-        address
+        effectiveCinemaLocation || cinemaName || address
           ? `Rạp: ${
               effectiveCinemaLocation?.label ||
               effectiveCinemaLocation?.name ||
@@ -383,10 +369,7 @@ export default function CinemaActivityModal({
           : ""
       }
       timeText={
-        startTime &&
-        endTime &&
-        durationMinutes != null &&
-        !errors.time
+        startTime && endTime && durationMinutes != null && !errors.time
           ? `Suất: ${startTime} - ${endTime} (${durationMinutes} phút)`
           : ""
       }
@@ -507,8 +490,8 @@ export default function CinemaActivityModal({
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-rose-50 text-rose-500 border border-rose-100
-                                dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800"
+                    bg-rose-50 text-rose-500 border border-rose-100
+                    dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800"
                 >
                   <FaMapMarkerAlt />
                 </div>
@@ -522,6 +505,7 @@ export default function CinemaActivityModal({
                           cinemaName ||
                           "Địa điểm đã chọn"}
                       </p>
+
                       {(effectiveCinemaLocation?.address ||
                         effectiveCinemaLocation?.fullAddress ||
                         address) && (
@@ -551,19 +535,21 @@ export default function CinemaActivityModal({
                         Chọn rạp trên bản đồ
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn rạp / trung tâm thương mại bạn
-                        sẽ xem.
+                        Nhấn để mở bản đồ, chọn rạp / trung tâm thương mại bạn sẽ xem.
                       </p>
                     </>
                   )}
                 </div>
 
-                <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-rose-500 group-hover:text-rose-600 dark:text-rose-300
-                                dark:group-hover:text-rose-200">
+                <span
+                  className="hidden md:inline-flex items-center text-[11px] font-medium
+                    text-rose-500 group-hover:text-rose-600 dark:text-rose-300
+                    dark:group-hover:text-rose-200"
+                >
                   Mở bản đồ
                 </span>
               </button>
+
               {errors.cinemaName && (
                 <p className="mt-1 text-[11px] text-rose-500">
                   {errors.cinemaName}
@@ -571,7 +557,7 @@ export default function CinemaActivityModal({
               )}
             </div>
 
-            {/* Thời gian chiếu: dùng ActivityTimeRangeSection */}
+            {/* Thời gian chiếu */}
             <div className="mt-3">
               <ActivityTimeRangeSection
                 sectionLabel="Thời gian chiếu"
@@ -648,14 +634,14 @@ export default function CinemaActivityModal({
           </div>
         </section>
 
-        {/* CHI PHÍ XEM PHIM */}
+        {/* CHI PHÍ */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Chi phí xem phim
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Vé + combo bắp nước + phát sinh + ngân sách
+              Vé + combo + phát sinh + ngân sách
             </span>
           </div>
 
@@ -698,7 +684,6 @@ export default function CinemaActivityModal({
               </div>
             </div>
 
-            {/* Chi phí phát sinh – dùng ExtraCostsSection */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -708,7 +693,6 @@ export default function CinemaActivityModal({
               label="Chi phí phát sinh (gửi xe, đồ ăn thêm...)"
             />
 
-            {/* NGÂN SÁCH + THỰC TẾ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
@@ -746,41 +730,29 @@ export default function CinemaActivityModal({
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                   Nếu để trống <b>chi phí thực tế</b>, hệ thống sẽ dùng{" "}
-                  <b>giá vé + combo + phát sinh</b> để chia tiền.
+                  <b>vé + combo + phát sinh</b> để chia tiền.
                 </p>
               </div>
             </div>
 
-            {/* TÓM TẮT DẠNG CARD DỌC */}
+            {/* TÓM TẮT */}
             <div className="mt-1 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 px-4 py-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Giá vé:{" "}
+                Vé + combo (dự kiến):{" "}
                 <span className="font-semibold">
-                  {Number(ticketPrice || 0).toLocaleString("vi-VN")}đ
+                  {baseEstimated.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               <div>
-                Combo bắp nước:{" "}
-                <span className="font-semibold">
-                  {Number(comboPrice || 0).toLocaleString("vi-VN")}đ
-                </span>
-              </div>
-              <div>
-                Dự kiến vé + combo:{" "}
-                <span className="font-semibold">
-                  {baseCost.toLocaleString("vi-VN")}đ
-                </span>
-              </div>
-              <div>
-                Chi phí phát sinh:{" "}
+                Phát sinh:{" "}
                 <span className="font-semibold">
                   {extraTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               <div>
-                Tổng dự kiến (sau phát sinh):{" "}
+                Tổng dự kiến (vé + combo + phát sinh):{" "}
                 <span className="font-semibold text-rose-600 dark:text-rose-400">
-                  {estimatedCost.toLocaleString("vi-VN")}đ
+                  {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               {actualCost && Number(actualCost) > 0 && (
@@ -851,21 +823,29 @@ export default function CinemaActivityModal({
         </section>
       </ActivityModalShell>
 
-      {/* PLACE PICKER CHO CINEMA */}
+      {/* PLACE PICKER */}
       <PlacePickerModal
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
         onSelect={(loc) => {
-          const next = loc || null;
-          setInternalCinemaLocation(next);
+          if (!loc) {
+            setInternalCinemaLocation(null);
+            setPlacePickerOpen(false);
+            return;
+          }
 
-          if (next?.label || next?.name) {
-            setCinemaName(next.label || next.name);
-            setErrors((prev) => ({ ...prev, cinemaName: "" }));
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          const label = getLocDisplayLabel(slim, "");
+
+          setInternalCinemaLocation(slim || null);
+          setErrors((prev) => ({ ...prev, cinemaName: "" }));
+
+          if (label) setCinemaName(label);
+          if (slim?.fullAddress || slim?.address) {
+            setAddress(slim.fullAddress || slim.address || "");
           }
-          if (next?.address || next?.fullAddress) {
-            setAddress(next.address || next.fullAddress);
-          }
+
+          setPlacePickerOpen(false);
         }}
         initialTab="CINEMA"
         activityType="CINEMA"

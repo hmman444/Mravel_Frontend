@@ -23,11 +23,15 @@ import ActivityFooterButtons from "./ActivityFooterButtons";
 
 import { inputBase, sectionCard } from "../../utils/activityStyles";
 import { useSplitMoney } from "../../hooks/useSplitMoney";
+import { buildInitialExtraCosts, normalizeExtraCosts, calcExtraTotal } from "../../utils/costUtils";
+
 import {
-  buildInitialExtraCosts,
-  normalizeExtraCosts,
-  calcExtraTotal,
-} from "../../utils/costUtils";
+  getLocDisplayLabel,
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
 const EXTRA_TYPES = [
   { value: "SHIPPING", label: "Phí ship" },
@@ -36,13 +40,22 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+function safeJsonParse(str) {
+  try {
+    if (!str) return {};
+    return JSON.parse(str);
+  } catch {
+    return {};
+  }
+}
+
 export default function ShoppingActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
   planMembers = [],
-  readOnly 
+  readOnly,
 }) {
   const [title, setTitle] = useState("");
   const [storeName, setStoreName] = useState("");
@@ -58,12 +71,10 @@ export default function ShoppingActivityModal({
   const [actualCost, setActualCost] = useState("");
 
   const [extraCosts, setExtraCosts] = useState([]);
-
   const [errors, setErrors] = useState({});
 
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
-  const [internalShoppingLocation, setInternalShoppingLocation] =
-    useState(null);
+  const [internalShoppingLocation, setInternalShoppingLocation] = useState(null);
   const effectiveShoppingLocation = internalShoppingLocation || null;
 
   // ===== LOAD DỮ LIỆU =====
@@ -73,65 +84,61 @@ export default function ShoppingActivityModal({
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
 
-      const split = editingCard.split || {};
-
       setTitle(editingCard.text || "");
+
       setStoreName(data.storeName || "");
       setAddress(data.address || "");
 
-      setItems(
-        Array.isArray(data.items)
-          ? data.items.map((it) => ({
-              name: it.name || "",
-              price:
-                it.price !== undefined && it.price !== null
-                  ? String(it.price)
-                  : "",
-            }))
-          : []
-      );
-      setNote(editingCard.description || "");
+      // time: ưu tiên root start/end (chuẩn mới), fallback data cũ
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setStartTime(start);
+      setEndTime(end);
+      setDurationMinutes(null);
 
-      const loadedStart =
-        editingCard.startTime || data.startTime || data.time || "";
-      const loadedEnd =
-        editingCard.endTime ||
-        data.endTime ||
-        editingCard.startTime ||
-        data.time ||
-        "";
-
-      setStartTime(loadedStart);
-      setEndTime(loadedEnd);
-      setDurationMinutes(null); // để ActivityTimeRangeSection tính lại
-
-      if (cost.budgetAmount != null) {
-        setBudgetAmount(String(cost.budgetAmount));
-      } else {
-        setBudgetAmount("");
-      }
-
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
-      }
+      // items: chuẩn hoá về {name, price string}
+      const loadedItems = Array.isArray(data.items)
+        ? data.items.map((it) => ({
+            name: it?.name || "",
+            price:
+              it?.price !== undefined && it?.price !== null ? String(it.price) : "",
+          }))
+        : [];
 
       // extraCosts: dùng helper chung
-      setExtraCosts(buildInitialExtraCosts(data, cost));
+      const loadedExtra = buildInitialExtraCosts(data, cost);
+      setExtraCosts(loadedExtra);
 
-      if (data.shoppingLocation) {
-        setInternalShoppingLocation(data.shoppingLocation);
+      // Legacy rescue:
+      // Nếu items rỗng nhưng có cost.estimatedCost (cũ) thì tạo 1 item để không mất dữ liệu
+      if (loadedItems.length === 0 && cost?.estimatedCost != null && Number(cost.estimatedCost) > 0) {
+        const extraTotalLoaded = calcExtraTotal(loadedExtra);
+        const baseMaybe = Math.max(0, Number(cost.estimatedCost) - Number(extraTotalLoaded || 0));
+        setItems([
+          {
+            name: "Mua sắm",
+            price: String(baseMaybe > 0 ? baseMaybe : Number(cost.estimatedCost)),
+          },
+        ]);
       } else {
-        setInternalShoppingLocation(null);
+        setItems(loadedItems);
       }
+
+      setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
+      setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
+
+      setNote(editingCard.description || "");
+
+      // location: normalize slim/bloat
+      const normalizedLoc = normalizeLocationFromStored(data.shoppingLocation);
+      setInternalShoppingLocation(normalizedLoc || null);
+
+      // sync address fallback từ loc
+      if (normalizedLoc?.fullAddress) setAddress(normalizedLoc.fullAddress);
+      const label = getLocDisplayLabel(normalizedLoc, "");
+      if (label) setStoreName(label);
     } else {
       // reset new
       setTitle("");
@@ -149,49 +156,33 @@ export default function ShoppingActivityModal({
       setExtraCosts([]);
 
       setInternalShoppingLocation(null);
+      setPlacePickerOpen(false);
     }
   }, [open, editingCard]);
 
-  // SYNC location từ PlacePicker vào tên + địa chỉ
+  // ===== SYNC location -> name + address =====
   useEffect(() => {
     if (!effectiveShoppingLocation) return;
 
-    if (effectiveShoppingLocation.label || effectiveShoppingLocation.name) {
-      setStoreName(
-        effectiveShoppingLocation.label ||
-          effectiveShoppingLocation.name ||
-          ""
-      );
-    }
+    const label = getLocDisplayLabel(effectiveShoppingLocation, "");
+    if (label) setStoreName(label);
 
-    if (
-      effectiveShoppingLocation.address ||
-      effectiveShoppingLocation.fullAddress
-    ) {
-      setAddress(
-        effectiveShoppingLocation.address ||
-          effectiveShoppingLocation.fullAddress ||
-          ""
-      );
-    }
+    const full = effectiveShoppingLocation.fullAddress || effectiveShoppingLocation.address || "";
+    if (full) setAddress(full);
   }, [effectiveShoppingLocation]);
 
-  // ===== DANH SÁCH MÓN HÀNG =====
-  const handleAddItem = () => {
-    setItems((prev) => [...prev, { name: "", price: "" }]);
-  };
+  // ===== ITEMS CRUD =====
+  const handleAddItem = () => setItems((prev) => [...prev, { name: "", price: "" }]);
 
   const handleChangeItem = (idx, key, value) => {
     setItems((prev) => {
       const clone = [...prev];
-      clone[idx][key] = value;
+      clone[idx] = { ...clone[idx], [key]: value };
       return clone;
     });
   };
 
-  const handleRemoveItem = (idx) => {
-    setItems((prev) => prev.filter((_, i) => i !== idx));
-  };
+  const handleRemoveItem = (idx) => setItems((prev) => prev.filter((_, i) => i !== idx));
 
   // ===== EXTRA COSTS CRUD =====
   const addExtraCost = () =>
@@ -201,15 +192,17 @@ export default function ShoppingActivityModal({
     ]);
 
   const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
   };
 
-  const removeExtraCost = (idx) =>
-    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
+  const removeExtraCost = (idx) => setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== TÍNH CHI PHÍ =====
+  // ===== COST CALC =====
+  // BASE (không gồm extra)
   const totalItemCost = useMemo(
     () =>
       items.reduce((sum, it) => {
@@ -219,23 +212,17 @@ export default function ShoppingActivityModal({
     [items]
   );
 
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
-  );
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
 
-  const estimatedCost = useMemo(
-    () => totalItemCost + extraTotal,
-    [totalItemCost, extraTotal]
-  );
+  // Tổng dự kiến để hiển thị + fallback chia tiền
+  const estimatedTotal = useMemo(() => totalItemCost + extraTotal, [totalItemCost, extraTotal]);
 
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedCost;
-  }, [actualCost, estimatedCost]);
+    return a > 0 ? a : estimatedTotal;
+  }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN CHUNG =====
+  // ===== SPLIT HOOK =====
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -270,22 +257,22 @@ export default function ShoppingActivityModal({
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
 
     const filteredItems = items
-      .filter((it) => it.name.trim() || it.price)
       .map((it) => ({
-        name: it.name.trim(),
-        price: it.price ? Number(it.price) : 0,
-      }));
+        name: (it?.name || "").trim(),
+        price: it?.price ? Number(it.price) : 0,
+      }))
+      .filter((it) => it.name || (it.price && it.price > 0));
 
-    const normalizedParticipants = participants.map((p) =>
-      typeof p === "number" ? p : p?.memberId
-    );
+    const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p?.memberId));
+
+    // ✅ estimatedCost = BASE (tổng giá món) - KHÔNG cộng extra
+    const estimatedBase = totalItemCost > 0 ? totalItemCost : null;
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedCost > 0 ? estimatedCost : null,
+      estimatedCost: estimatedBase,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
@@ -293,24 +280,14 @@ export default function ShoppingActivityModal({
       extraCosts: normalizedExtraCosts,
     };
 
-    return {
-      cost,
-      split: splitPayload,
-      participants: normalizedParticipants,
-      normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
-      filteredItems,
-    };
+    return { cost, split: splitPayload, participants: normalizedParticipants, filteredItems };
   };
 
   // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!storeName.trim()) {
-      newErrors.storeName =
-        "Vui lòng nhập hoặc chọn cửa hàng / địa điểm mua sắm.";
-    }
+    if (!storeName.trim()) newErrors.storeName = "Vui lòng nhập hoặc chọn cửa hàng / địa điểm mua sắm.";
 
     if (startTime && endTime && durationMinutes == null) {
       newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
@@ -323,40 +300,27 @@ export default function ShoppingActivityModal({
 
     setErrors({});
 
-    const {
-      cost,
-      split,
-      participants,
-      normalizedExtraCosts,
-      extraTotal,
-      filteredItems,
-    } = buildPayload();
+    const { cost, split, participants, filteredItems } = buildPayload();
 
     onSubmit?.({
       type: "SHOPPING",
-      title: title || `Mua sắm tại ${storeName}`,
-      text: title || `Mua sắm tại ${storeName}`,
+      title: title || `Mua sắm: ${storeName}`,
+      text: title || `Mua sắm: ${storeName}`,
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
       durationMinutes: durationMinutes ?? null,
-      participantCount:
-        splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
+      participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
+
+      // ✅ activityData GỌN: chỉ đặc thù SHOPPING (không nhét time/cost/extra vào đây)
       activityData: {
-        storeName,
-        address,
-        shoppingLocation: effectiveShoppingLocation || null,
-        time: startTime || "",
-        startTime,
-        endTime,
+        storeName: storeName.trim(),
+        address: address?.trim() || null, // fallback UI (optional)
+        shoppingLocation: slimLocationForStorage(effectiveShoppingLocation),
         items: filteredItems,
-        totalItemCost,
-        actualCost: actualCost ? Number(actualCost) : null,
-        extraSpend: extraTotal || null,
-        extraItems: normalizedExtraCosts,
-        estimatedCost: estimatedCost || null,
       },
+
       cost,
       split,
     });
@@ -375,29 +339,18 @@ export default function ShoppingActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Mua sắm tại"
+      labelPrefix="Mua sắm"
       name={storeName}
-      emptyLabelText="Điền/chọn tên cửa hàng / khu mua sắm để lưu hoạt động."
-      locationText={
-        (effectiveShoppingLocation || address)
-          ? `Địa điểm: ${
-              effectiveShoppingLocation?.address ||
-              effectiveShoppingLocation?.fullAddress ||
-              address
-            }`
-          : ""
-      }
+      emptyLabelText="Điền/chọn cửa hàng để lưu hoạt động mua sắm."
+      locationText={effectiveShoppingLocation?.fullAddress || address || ""}
       timeText={
-        startTime &&
-        endTime &&
-        durationMinutes != null &&
-        !errors.time
+        startTime && endTime && durationMinutes != null && !errors.time
           ? `${startTime} - ${endTime} (${durationMinutes} phút)`
           : ""
       }
     />
   );
-  
+
   const footerRight = readOnly ? (
     <div className="flex items-center justify-end">
       <button
@@ -426,14 +379,10 @@ export default function ShoppingActivityModal({
       <ActivityModalShell
         open={open}
         onClose={onClose}
-        icon={{
-          main: <FaShoppingBag />,
-          close: <FaTimes size={14} />,
-          bg: "from-pink-500 to-rose-500",
-        }}
+        icon={{ main: <FaShoppingBag />, close: <FaTimes size={14} />, bg: "from-pink-500 to-rose-500" }}
         title="Hoạt động mua sắm"
         typeLabel="Shopping"
-        subtitle="Ghi lại những gì bạn mua và chi phí."
+        subtitle="Ghi lại món đồ đã mua và chi phí để chia tiền cho nhóm."
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -441,9 +390,7 @@ export default function ShoppingActivityModal({
         {/* THÔNG TIN CHUNG */}
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
-            </label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Thông tin chung</label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
               Cửa hàng + địa chỉ + thời gian
             </span>
@@ -451,28 +398,23 @@ export default function ShoppingActivityModal({
 
           <div className={sectionCard}>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
-              </label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Tên hoạt động (tuỳ chọn)</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Mua đặc sản Đà Nẵng..."
+                placeholder="Ví dụ: Mua quà lưu niệm..."
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
 
-            {/* ĐỊA CHỈ + MAP PICKER */}
+            {/* MAP PICKER */}
             <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Cửa hàng / địa chỉ trên bản đồ
-              </label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Cửa hàng / địa chỉ trên bản đồ</label>
 
               <button
                 type="button"
                 onClick={() => setPlacePickerOpen(true)}
-                className={`
-                  group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
+                className={`group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
                   border-slate-200/80 dark:border-slate-700 px-3 py-2.5
                   flex items-start gap-3 text-left
                   hover:border-pink-400 hover:shadow-md hover:bg-pink-50/70
@@ -482,13 +424,12 @@ export default function ShoppingActivityModal({
                     errors.storeName
                       ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
                       : ""
-                  }
-                `}
+                  }`}
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-pink-50 text-pink-500 border border-pink-100
-                                dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800"
+                    bg-pink-50 text-pink-500 border border-pink-100
+                    dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800"
                 >
                   <FaMapMarkerAlt />
                 </div>
@@ -497,18 +438,12 @@ export default function ShoppingActivityModal({
                   {effectiveShoppingLocation || address || storeName ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {effectiveShoppingLocation?.label ||
-                          effectiveShoppingLocation?.name ||
-                          storeName ||
-                          "Địa điểm đã chọn"}
+                        {getLocDisplayLabel(effectiveShoppingLocation, storeName || "Địa điểm đã chọn")}
                       </p>
-                      {(effectiveShoppingLocation?.address ||
-                        effectiveShoppingLocation?.fullAddress ||
-                        address) && (
+
+                      {(effectiveShoppingLocation?.fullAddress || address) && (
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                          {effectiveShoppingLocation?.address ||
-                            effectiveShoppingLocation?.fullAddress ||
-                            address}
+                          {effectiveShoppingLocation?.fullAddress || address}
                         </p>
                       )}
 
@@ -516,13 +451,11 @@ export default function ShoppingActivityModal({
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
                           Đã chọn trên bản đồ
                         </span>
-                        {effectiveShoppingLocation?.lat != null &&
-                          effectiveShoppingLocation?.lng != null && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
-                              {effectiveShoppingLocation.lat.toFixed(4)},{" "}
-                              {effectiveShoppingLocation.lng.toFixed(4)}
-                            </span>
-                          )}
+                        {effectiveShoppingLocation?.lat != null && effectiveShoppingLocation?.lng != null && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
+                            {effectiveShoppingLocation.lat.toFixed(4)}, {effectiveShoppingLocation.lng.toFixed(4)}
+                          </span>
+                        )}
                       </div>
                     </>
                   ) : (
@@ -537,20 +470,18 @@ export default function ShoppingActivityModal({
                   )}
                 </div>
 
-                <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-pink-500 group-hover:text-pink-600 dark:text-pink-300
-                                dark:group-hover:text-pink-200">
+                <span
+                  className="hidden md:inline-flex items-center text-[11px] font-medium
+                    text-pink-500 group-hover:text-pink-600 dark:text-pink-300 dark:group-hover:text-pink-200"
+                >
                   Mở bản đồ
                 </span>
               </button>
-              {errors.storeName && (
-                <p className="mt-1 text-[11px] text-rose-500">
-                  {errors.storeName}
-                </p>
-              )}
+
+              {errors.storeName && <p className="mt-1 text-[11px] text-rose-500">{errors.storeName}</p>}
             </div>
 
-            {/* Thời gian mua sắm: dùng ActivityTimeRangeSection */}
+            {/* TIME */}
             <div className="mt-3">
               <ActivityTimeRangeSection
                 sectionLabel="Thời gian mua sắm"
@@ -563,9 +494,7 @@ export default function ShoppingActivityModal({
                 onStartTimeChange={(val) => setStartTime(val)}
                 onEndTimeChange={(val) => setEndTime(val)}
                 error={errors.time}
-                onErrorChange={(msg) =>
-                  setErrors((prev) => ({ ...prev, time: msg }))
-                }
+                onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
                 durationHintPrefix="Thời lượng ước tính"
               />
@@ -573,12 +502,10 @@ export default function ShoppingActivityModal({
           </div>
         </section>
 
-        {/* DANH SÁCH MÓN HÀNG + CHI PHÍ */}
+        {/* ITEMS & COST */}
         <section className="space-y-3">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Danh sách món hàng & chi phí
-            </label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Danh sách món hàng & chi phí</label>
             <button
               type="button"
               onClick={handleAddItem}
@@ -589,12 +516,10 @@ export default function ShoppingActivityModal({
           </div>
 
           <div className={sectionCard + " space-y-4"}>
-            {/* Danh sách món hàng */}
+            {/* Items */}
             <div>
               {items.length === 0 && (
-                <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Nhập từng món đã mua và giá tiền.
-                </p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">Nhập từng món đã mua và giá tiền.</p>
               )}
 
               <div className="space-y-2 mt-1">
@@ -602,9 +527,7 @@ export default function ShoppingActivityModal({
                   <div key={idx} className="flex items-center gap-2 group">
                     <input
                       value={it.name}
-                      onChange={(e) =>
-                        handleChangeItem(idx, "name", e.target.value)
-                      }
+                      onChange={(e) => handleChangeItem(idx, "name", e.target.value)}
                       placeholder={`Món hàng ${idx + 1}`}
                       className={`${inputBase} flex-1`}
                     />
@@ -615,9 +538,7 @@ export default function ShoppingActivityModal({
                         type="number"
                         min="0"
                         value={it.price}
-                        onChange={(e) =>
-                          handleChangeItem(idx, "price", e.target.value)
-                        }
+                        onChange={(e) => handleChangeItem(idx, "price", e.target.value)}
                         placeholder="Giá"
                         className={`${inputBase} w-28`}
                       />
@@ -627,8 +548,8 @@ export default function ShoppingActivityModal({
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(idx)}
-                      className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 
-                    dark:hover:bg-rose-950/40 transition"
+                      className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50
+                        dark:hover:bg-rose-950/40 transition"
                     >
                       <FaTrashAlt size={12} />
                     </button>
@@ -637,7 +558,7 @@ export default function ShoppingActivityModal({
               </div>
             </div>
 
-            {/* Chi phí phụ – dùng ExtraCostsSection */}
+            {/* Extra */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -647,7 +568,7 @@ export default function ShoppingActivityModal({
               label="Chi phí phụ (ship, túi, phụ thu...)"
             />
 
-            {/* Thực tế + Ngân sách */}
+            {/* Actual + Budget */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
@@ -660,11 +581,14 @@ export default function ShoppingActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền sau khi thanh toán hóa đơn"
+                    placeholder="Điền lại sau khi thanh toán"
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  Nếu để trống, hệ thống sẽ dùng <b>tổng giá món</b> + <b>phát sinh</b> để chia tiền.
+                </p>
               </div>
 
               <div>
@@ -678,7 +602,7 @@ export default function ShoppingActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 2.000.000"
+                    placeholder="VD: 2000000"
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -686,52 +610,43 @@ export default function ShoppingActivityModal({
               </div>
             </div>
 
-            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              Nếu để trống <b>chi phí thực tế</b>, hệ thống sẽ dùng{" "}
-              <b>tổng giá món + chi phí phụ</b> để chia tiền.
-            </p>
-
-            {/* CARD TÓM TẮT */}
-            <div className="mt-2 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 px-4 py-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 space-y-0.5">
+            {/* Summary */}
+            <div className="rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 px-4 py-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
                 Tổng giá món:{" "}
-                <span className="font-semibold">
-                  {totalItemCost.toLocaleString("vi-VN")}đ
-                </span>
+                <span className="font-semibold">{totalItemCost.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Chi phí phụ:{" "}
-                <span className="font-semibold">
-                  {extraTotal.toLocaleString("vi-VN")}đ
-                </span>
+                Phát sinh:{" "}
+                <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến (món + phụ):{" "}
+                Tổng dự kiến (món + phát sinh):{" "}
                 <span className="font-semibold text-pink-600 dark:text-pink-400">
-                  {estimatedCost.toLocaleString("vi-VN")}đ
+                  {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
+
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                  Đang dùng <b>chi phí thực tế</b>:{" "}
                   <span className="font-semibold text-pink-600 dark:text-pink-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
                 </div>
               )}
+
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
                   Ngân sách:{" "}
-                  <span className="font-semibold">
-                    {Number(budgetAmount).toLocaleString("vi-VN")}đ
-                  </span>
+                  <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
             </div>
           </div>
         </section>
 
-        {/* CHIA TIỀN */}
+        {/* SPLIT */}
         <section className="space-y-4">
           <SplitMoneySection
             planMembers={planMembers}
@@ -759,15 +674,11 @@ export default function ShoppingActivityModal({
           />
         </section>
 
-        {/* GHI CHÚ */}
+        {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
-            </label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm thông tin nhỏ cho cả nhóm
-            </span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm thông tin nhỏ cho cả nhóm</span>
           </div>
           <textarea
             rows={3}
@@ -779,21 +690,29 @@ export default function ShoppingActivityModal({
         </section>
       </ActivityModalShell>
 
-      {/* PLACE PICKER CHO SHOPPING */}
+      {/* PLACE PICKER */}
       <PlacePickerModal
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
         onSelect={(loc) => {
-          const next = loc || null;
-          setInternalShoppingLocation(next);
+          if (!loc) {
+            setPlacePickerOpen(false);
+            return;
+          }
 
-          if (next?.label || next?.name) {
-            setStoreName(next.label || next.name);
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          setInternalShoppingLocation(slim || null);
+
+          const label = getLocDisplayLabel(slim, "");
+          const full = slim?.fullAddress || slim?.address || "";
+
+          if (label) {
+            setStoreName(label);
             setErrors((prev) => ({ ...prev, storeName: "" }));
           }
-          if (next?.address || next?.fullAddress) {
-            setAddress(next.address || next.fullAddress);
-          }
+          if (full) setAddress(full);
+
+          setPlacePickerOpen(false);
         }}
         initialTab="SHOPPING"
         activityType="SHOPPING"
