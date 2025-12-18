@@ -26,7 +26,7 @@ export default function AdminSidebar() {
       { to: "/admin/users", label: t("manage_users"), icon: UsersIcon },
       { to: "/admin/partners", label: t("manage_partners"), icon: BuildingOfficeIcon },
       { to: "/admin/services", label: t("manage_services"), icon: Cog6ToothIcon },
-      { to: "/admin/locations", label: t("manage_locations"), icon: MapIcon },
+      { to: "/admin/places", label: t("manage_locations"), icon: MapIcon },
       { to: "/admin/amenities", label: t("manage_amenities"), icon: SparklesIcon },
       { to: "/admin/reports", label: t("reports"), icon: FlagIcon },
     ],

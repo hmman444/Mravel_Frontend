@@ -8,9 +8,9 @@ import {
   apiUpdateThumbnail,
   apiAddImage,
   apiRemoveImage,
-  uploadToCloudinary,
   apiUpdateBudget,
 } from "../services/planGeneralService";
+import { uploadToCloudinary } from "../../../utils/cloudinaryUpload";
 
 const asyncAction = (type, fn) =>
   createAsyncThunk(`planGeneral/${type}`, async (payload) => await fn(payload));

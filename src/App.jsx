@@ -33,10 +33,10 @@ import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
 import ManagePartnersPage from "./features/admin/pages/ManagePartnersPage";
 import ManageReportsPage from "./features/admin/pages/ManageReportsPage";
 import ManageServicesPage from "./features/admin/pages/ManageServicesPage";
-import ManageLocationsPage from "./features/admin/pages/ManageLocationsPage";
+import ManagePlacesPage from "./features/admin/pages/ManagePlacesPage";
 import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
-import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
+import AdminPlaceDetailPage from "./features/admin/pages/AdminPlaceDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 
@@ -72,10 +72,11 @@ function App() {
           <Route path="/admin/partners" element={<ManagePartnersPage />} />
           <Route path="/admin/reports" element={<ManageReportsPage />} />
           <Route path="/admin/services" element={<ManageServicesPage />} />
-          <Route path="/admin/locations" element={<ManageLocationsPage />} />
+          <Route path="/admin/places" element={<ManagePlacesPage />} />
           <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
           <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
-          <Route path="/admin/locations/:id" element={<LocationDetailPage />} />
+          <Route path="/admin/places/:slug" element={<AdminPlaceDetailPage />} />
+          <Route path="/admin/places/new" element={<AdminPlaceDetailPage />} />
           <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
         </Route>
 
