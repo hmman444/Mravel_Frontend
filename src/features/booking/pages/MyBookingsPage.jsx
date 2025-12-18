@@ -1,5 +1,5 @@
 // src/features/booking/pages/MyBookingsPage.jsx
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../../../components/Navbar";
@@ -75,17 +75,6 @@ export default function MyBookingsPage() {
 
   const goLogin = () =>
     navigate(`/login?redirect=${encodeURIComponent("/my-bookings")}`);
-
-  // ✅ Tổng count hiển thị trên 3 tab lớn (ACCOUNT/DEVICE/LOOKUP)
-  const accountCount = useMemo(
-    () => (accountHotelCount || 0) + (accountRestCount || 0),
-    [accountHotelCount, accountRestCount]
-  );
-
-  const deviceCount = useMemo(
-    () => (deviceHotelCount || 0) + (deviceRestCount || 0),
-    [deviceHotelCount, deviceRestCount]
-  );
 
   const claimButton = (
     <>
@@ -249,7 +238,7 @@ export default function MyBookingsPage() {
                     : "text-gray-700 hover:bg-gray-50",
                 ].join(" ")}
               >
-                Đơn trong tài khoản ({accountCount})
+                Đơn trong tài khoản
               </button>
 
               <button
@@ -262,7 +251,7 @@ export default function MyBookingsPage() {
                     : "text-gray-700 hover:bg-gray-50",
                 ].join(" ")}
               >
-                Đơn trên thiết bị này ({deviceCount})
+                Đơn trên thiết bị này
               </button>
 
               <button

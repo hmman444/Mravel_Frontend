@@ -12,6 +12,7 @@ import bookingPrivateReducer from "../features/booking/slices/bookingPrivateSlic
 import bookingRestaurantReducer from "../features/booking/slices/bookingRestaurantSlice";
 import bookingRestaurantPrivateReducer from "../features/booking/slices/bookingRestaurantPrivateSlice";
 import bookingRestaurantPublicReducer from "../features/booking/slices/bookingRestaurantPublicSlice";
+import partnerAuthReducer from "../features/partnerAuth/slices/partnerAuthSlice";
 import adminAmenityReducer from "../features/admin/slices/adminAmenitySlice";
 import profileReducer from "../features/user/slices/profileSlice";
 import adminPlaceReducer from "../features/admin/slices/adminPlaceSlice";
@@ -33,6 +34,7 @@ export const store = configureStore({
     bookingRestaurantPrivate: bookingRestaurantPrivateReducer,
     bookingRestaurantPublic: bookingRestaurantPublicReducer,
     booking: bookingReducer,
+    partnerAuth: partnerAuthReducer,
     adminAmenity: adminAmenityReducer,
     adminPlace: adminPlaceReducer,
   },

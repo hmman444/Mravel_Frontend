@@ -46,6 +46,18 @@ import { useHydrateRole } from "./features/auth/hooks/useHydrateRole";
 import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 import MyBookingsPage from "./features/booking/pages/MyBookingsPage";
 import RestaurantBookingPage from "./features/booking/pages/RestaurantBookingPage";
+import PaymentMethodPage from "./features/booking/pages/PaymentMethodPage";
+//Partner
+import PartnerLoginPage from "./features/partnerAuth/pages/LoginPage";
+import PartnerRegisterPage from "./features/partnerAuth/pages/RegisterPage";
+import PartnerForgotPasswordPage from "./features/partnerAuth/pages/ForgotPasswordPage";
+import PartnerResetPasswordPage from "./features/partnerAuth/pages/ResetPasswordPage";
+import PartnerVerifyOtpPage from "./features/partnerAuth/pages/VerifyOtpPage";
+import PartnerLandingPage from "./features/partner/pages/PartnerLandingPage";
+import PartnerDashboardPage from "./features/partner/pages/PartnerDashboardPage";
+import PartnerServicesPage from "./features/partner/pages/PartnerServicesPage";
+import PartnerBookingsPage from "./features/partner/pages/PartnerBookingsPage";
+import PartnerUnlockRequestsPage from "./features/partner/pages/PartnerUnlockRequestsPage";
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 import RequireRole from "./routes/RequireRole";
@@ -110,6 +122,23 @@ function App() {
         <Route path="/booking/hotel" element={<HotelBookingPage />} />
         <Route path="/my-bookings" element={<MyBookingsPage />} />
         <Route path="/booking/restaurant" element={<RestaurantBookingPage />} />
+        <Route path="/booking/payment-method" element={<PaymentMethodPage />} />
+
+        {/* Partner Auth routes */}
+        <Route path="/partner/login" element={<PartnerLoginPage />} />
+        <Route path="/partner/register" element={<PartnerRegisterPage />} />
+        <Route path="/partner/forgot-password" element={<PartnerForgotPasswordPage />} />
+        <Route path="/partner/reset-password" element={<PartnerResetPasswordPage />} />
+        <Route path="/partner/verify-otp" element={<PartnerVerifyOtpPage />} />
+
+        {/* Partner routes */}
+        <Route path="/partner/dashboard" element={<PartnerDashboardPage />} />
+        <Route path="/partner/services" element={<PartnerServicesPage />} />
+        <Route path="/partner/bookings" element={<PartnerBookingsPage />} />
+        <Route path="/partner/unlock-requests" element={<PartnerUnlockRequestsPage />} />
+
+        {/* Auth routes */}
+        <Route path="/partner" element={<PartnerLandingPage />} />
 
         {/* Coming soon routes */}
         <Route path="/maybe" element={<FeatureComingSoonPage />} />
