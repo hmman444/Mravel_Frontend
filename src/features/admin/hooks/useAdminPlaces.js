@@ -8,6 +8,8 @@ import {
   clearChildren,
   clearPlaceDetail,
   createPlaceThunk,
+  lockPlaceThunk,
+  unlockPlaceThunk,
 } from "../slices/adminPlaceSlice";
 
 export function useAdminPlaces() {
@@ -26,6 +28,9 @@ export function useAdminPlaces() {
 
     loadDetail: (slug) => dispatch(loadPlaceDetailAdmin(slug)).unwrap(),
     update: (id, payload) => dispatch(updatePlaceThunk({ id, payload })).unwrap(),
+    lock: (id) => dispatch(lockPlaceThunk(id)).unwrap(),
+    unlock: (id) => dispatch(unlockPlaceThunk(id)).unwrap(),
+
     remove: (id) => dispatch(deletePlaceThunk(id)).unwrap(),
 
     clearChildren: () => dispatch(clearChildren()),
