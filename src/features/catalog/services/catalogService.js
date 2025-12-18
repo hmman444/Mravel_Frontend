@@ -183,8 +183,10 @@ export async function searchRestaurants({
 export const getPlaces = async (params = {}) => {
   try {
     const res = await api.get(`${PLACES_PREFIX}/poi`, { params });
-    // BE trả trực tiếp Page<PlaceSummaryDTO>
-    return { success: true, data: normalizePage(res.data) };
+
+    // NEW: ApiResponse.data = Page<PlaceSummaryDTO>
+    const pageData = res.data?.data;
+    return { success: true, data: normalizePage(pageData) };
   } catch (error) {
     return toError(error, "Lỗi tải danh sách địa điểm");
   }
@@ -196,7 +198,10 @@ export const suggestPlaces = async (q, limit = 6) => {
     const res = await api.get(`${PLACES_PREFIX}/poi`, {
       params: { q, page: 0, size: limit },
     });
-    return { success: true, data: res.data?.content ?? [] };
+
+    // NEW: ApiResponse.data = Page => lấy content
+    const pageData = res.data?.data;
+    return { success: true, data: pageData?.content ?? [] };
   } catch (error) {
     return toError(error, "Lỗi gợi ý địa điểm");
   }
@@ -205,10 +210,10 @@ export const suggestPlaces = async (q, limit = 6) => {
 /** GET /catalog/places/{slug} */
 export const getPlaceDetail = async (slug) => {
   try {
-    const res = await api.get(
-      `${PLACES_PREFIX}/${encodeURIComponent(slug)}`
-    );
-    return { success: true, data: res.data };
+    const res = await api.get(`${PLACES_PREFIX}/${encodeURIComponent(slug)}`);
+
+    // NEW: ApiResponse.data = PlaceDetailDTO
+    return { success: true, data: res.data?.data };
   } catch (error) {
     return toError(error, "Không tìm thấy địa điểm");
   }
@@ -231,12 +236,12 @@ export const getChildren = async (slug, params = {}, options = {}) => {
   try {
     const res = await api.get(
       `${PLACES_PREFIX}/${encodeURIComponent(slug)}/children`,
-      {
-        params,
-        signal: options.signal,
-      }
+      { params, signal: options.signal }
     );
-    return { success: true, data: normalizePage(res.data) };
+
+    // NEW: ApiResponse.data = Page<PlaceSummaryDTO>
+    const pageData = res.data?.data;
+    return { success: true, data: normalizePage(pageData) };
   } catch (error) {
     return toError(error, "Lỗi tải danh sách con");
   }

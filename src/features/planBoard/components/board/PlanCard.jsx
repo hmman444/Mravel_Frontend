@@ -13,7 +13,6 @@ export default function PlanCard({
   card,
   listId,
   toggleDone,
-  setEditCard,
   duplicateCard,
   activeMenu,
   setActiveMenu,

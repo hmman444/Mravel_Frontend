@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { updateUserProfile } from "../slices/userProfileSlice";
 import { toast } from "react-toastify";
+import { showError } from "../../../utils/toastUtils";
 
 // Đơn giản: vài nước phổ biến, bạn muốn thì thêm
 const COUNTRIES = [
@@ -127,11 +128,11 @@ export default function PersonalInfoForm() {
         setHasChanges(false);
         // Redux.user đã được update, useEffect phía trên sẽ sync lại form
       } else {
-        toast.error(action.payload || "Cập nhật hồ sơ thất bại!");
+        showError(action.payload || "Cập nhật hồ sơ thất bại!");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Đã xảy ra lỗi khi cập nhật hồ sơ!");
+      showError("Đã xảy ra lỗi khi cập nhật hồ sơ!");
     } finally {
       setSaving(false);
     }

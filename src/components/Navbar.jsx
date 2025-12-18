@@ -53,7 +53,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-[200] transition-all duration-300
+      className={`fixed top-0 w-full z-[39] transition-all duration-300
         ${solid
           ? "bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-white/10 shadow-md"
           : "bg-transparent"

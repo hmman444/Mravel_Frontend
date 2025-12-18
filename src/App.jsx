@@ -33,14 +33,15 @@ import ManageUsersPage from "./features/admin/pages/ManageUsersPage";
 import ManagePartnersPage from "./features/admin/pages/ManagePartnersPage";
 import ManageReportsPage from "./features/admin/pages/ManageReportsPage";
 import ManageServicesPage from "./features/admin/pages/ManageServicesPage";
-import ManageLocationsPage from "./features/admin/pages/ManageLocationsPage";
+import ManagePlacesPage from "./features/admin/pages/ManagePlacesPage";
 import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
-import LocationDetailPage from "./features/admin/pages/LocationDetailPage";
+import AdminPlaceDetailPage from "./features/admin/pages/AdminPlaceDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import JoinPlanPage from "./features/planBoard/pages/JoinPlanPage";
 
 import { useMainSocket } from "./realtime/useMainSocket";
+import { useHydrateRole } from "./features/auth/hooks/useHydrateRole";
 //Booking
 import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 import MyBookingsPage from "./features/booking/pages/MyBookingsPage";
@@ -59,10 +60,12 @@ import PartnerBookingsPage from "./features/partner/pages/PartnerBookingsPage";
 import PartnerUnlockRequestsPage from "./features/partner/pages/PartnerUnlockRequestsPage";
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
+import RequireRole from "./routes/RequireRole";
 function App() {
   useLoadUser();
   useAuthSync();
   useMainSocket();
+  useHydrateRole();
   return (
     <>
     <Router>
@@ -75,23 +78,32 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
         {/* Admin routes */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<ManageUsersPage />} />
-        <Route path="/admin/partners" element={<ManagePartnersPage />} />
-        <Route path="/admin/reports" element={<ManageReportsPage />} />
-        <Route path="/admin/services" element={<ManageServicesPage />} />
-        <Route path="/admin/locations" element={<ManageLocationsPage />} />
-        <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
-        <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
-        <Route path="/admin/locations/:id" element={<LocationDetailPage />} />
-        <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
+        <Route element={<RequireRole allow={["ADMIN"]} />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<ManageUsersPage />} />
+          <Route path="/admin/partners" element={<ManagePartnersPage />} />
+          <Route path="/admin/reports" element={<ManageReportsPage />} />
+          <Route path="/admin/services" element={<ManageServicesPage />} />
+          <Route path="/admin/places" element={<ManagePlacesPage />} />
+          <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
+          <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
+          <Route path="/admin/places/:slug" element={<AdminPlaceDetailPage />} />
+          <Route path="/admin/places/new" element={<AdminPlaceDetailPage />} />
+          <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
+        </Route>
 
-        {/* Plans routes */}
-        <Route path="/plans" element={<PlanListPage />} />
-        <Route path="/plans/:planId" element={<PlanDashboardPage />} />
-        <Route path="/plans/join" element={<JoinPlanPage />} />
-        <Route path="/plans/my-plans" element={<ListPlanPage />} />
-        <Route path="/plans/timeline" element={<PlanTimeLinePage  />} />
+        <Route element={<RequireRole allow={["USER"]} />}>
+          {/* Plans routes */}
+          <Route path="/plans" element={<PlanListPage />} />
+          <Route path="/plans/:planId" element={<PlanDashboardPage />} />
+          <Route path="/plans/join" element={<JoinPlanPage />} />
+          <Route path="/plans/my-plans" element={<ListPlanPage />} />
+          <Route path="/plans/timeline" element={<PlanTimeLinePage  />} />
+
+          {/* User routes */}
+          <Route path="/account/profile" element={<AccountProfilePage />} />
+          <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
+        </Route>
 
         {/* Catalog routes */}       
         <Route path="/place/:slug" element={<PlaceDetailPage />} />
@@ -100,10 +112,6 @@ function App() {
         <Route path="/hotels/:slug" element={<HotelDetailPage />} />
         <Route path="/restaurants" element={<RestaurantsHomePage />} />
         <Route path="/restaurants/:slug" element={<RestaurantDetailPage />} />
-
-        {/* User routes */}
-        <Route path="/account/profile" element={<AccountProfilePage />} />
-        <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
 
         {/* General routes */}
         <Route path="/search" element={<SearchPage />} />
