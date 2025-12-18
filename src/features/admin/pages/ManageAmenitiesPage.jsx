@@ -2,39 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
-import Toast from "../../../components/Toast";
 import { useAdminAmenities } from "../hooks/useAdminAmenities";
 
-/* =========================
-   ENUM OPTIONS (FE mapping)
-========================= */
-const SCOPE_OPTIONS = ["HOTEL", "ROOM", "RESTAURANT"];
-const GROUP_OPTIONS = [
-  "ROOM",
-  "HOTEL_SERVICE",
-  "PUBLIC_AREA",
-  "NEARBY",
-  "INTERNET",
-  "OTHER",
-];
-const SECTION_OPTIONS = [
-  "HIGHLIGHT_FEATURES",
-  "BASIC_FACILITIES",
-  "ROOM_FACILITIES",
-  "BATHROOM",
-  "FOOD_AND_DRINK",
-  "TRANSPORT",
-  "INTERNET",
-  "ENTERTAINMENT",
-  "OTHER",
-];
+import AmenityStats from "../components/amenity/AmenityStats";
+import AmenityFilters from "../components/amenity/AmenityFilters";
+import AmenityTable from "../components/amenity/AmenityTable";
+import AmenityFormModal from "../components/amenity/AmenityFormModal";
+
+import ConfirmModal from "../../../components/ConfirmModal";
+import { showError, showSuccess } from "../../../utils/toastUtils";
+
+const soft = {
+  btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98]",
+  btnPrimary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
+  btnGhost:
+    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+};
 
 export default function ManageAmenitiesPage() {
   const { t } = useTranslation();
@@ -50,33 +35,120 @@ export default function ManageAmenitiesPage() {
     remove,
   } = useAdminAmenities();
 
+  // filters
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [search, setSearch] = useState("");
+  const [scope, setScope] = useState("ALL");
+  const [group, setGroup] = useState("ALL");
+  const [section, setSection] = useState("ALL");
+  const [activeFilter, setActiveFilter] = useState("ACTIVE"); // ACTIVE | INACTIVE | ALL (nếu bạn có thêm ở Filters)
+  const [sortBy, setSortBy] = useState("NAME_ASC");
+
+  // modal add/edit
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  /* =========================
-     Load data
-  ========================= */
+  // confirm delete modal
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null); // { id, name }
+
+  // toggle active loading per-row (tách khỏi deleting)
+  const [toggleLoadingIds, setToggleLoadingIds] = useState(() => new Set());
+
+  const [formError, setFormError] = useState("");
+
+  const extractApiMessage = (err) => {
+    if (typeof err === "string") return err;
+
+    if (typeof err?.response?.data === "string") return err.response.data;
+
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message;
+
+    return msg || "Có lỗi xảy ra, vui lòng thử lại.";
+  };
+
+  const setRowToggling = (id, on) => {
+    setToggleLoadingIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
   useEffect(() => {
-    load({ active: true });
+    load({ active: true }); // hook hiện tại của bạn đang load active=true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =========================
-     Search filter
-  ========================= */
-  const filteredAmenities = useMemo(() => {
-    if (!search) return amenities;
-    const q = search.toLowerCase();
-    return amenities.filter(
-      (a) =>
-        a.name?.toLowerCase().includes(q) ||
-        a.code?.toLowerCase().includes(q)
-    );
-  }, [amenities, search]);
+  const totalCount = amenities?.length || 0;
+  const activeCount = useMemo(
+    () => (amenities || []).filter((x) => x.active).length,
+    [amenities]
+  );
 
-  /* =========================
-     Handlers
-  ========================= */
+  const filteredAmenities = useMemo(() => {
+    let list = [...(amenities || [])];
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (a) =>
+          a.name?.toLowerCase().includes(q) ||
+          a.code?.toLowerCase().includes(q) ||
+          a.description?.toLowerCase().includes(q)
+      );
+    }
+
+    // activeFilter
+    if (activeFilter === "ACTIVE") list = list.filter((a) => a.active === true);
+    if (activeFilter === "INACTIVE") list = list.filter((a) => a.active === false);
+    // nếu bạn có "ALL" thì không lọc
+
+    if (scope !== "ALL") list = list.filter((a) => a.scope === scope);
+    if (group !== "ALL") list = list.filter((a) => a.group === group);
+    if (section !== "ALL") list = list.filter((a) => a.section === section);
+
+    const byStr = (v) => (v || "").toString().toLowerCase();
+    switch (sortBy) {
+      case "NAME_DESC":
+        list.sort((a, b) => byStr(b.name).localeCompare(byStr(a.name)));
+        break;
+      case "CODE_ASC":
+        list.sort((a, b) => byStr(a.code).localeCompare(byStr(b.code)));
+        break;
+      case "CODE_DESC":
+        list.sort((a, b) => byStr(b.code).localeCompare(byStr(a.code)));
+        break;
+      case "NAME_ASC":
+      default:
+        list.sort((a, b) => byStr(a.name).localeCompare(byStr(b.name)));
+        break;
+    }
+
+    return list;
+  }, [amenities, search, scope, group, section, activeFilter, sortBy]);
+
+  const hasAnyFilter =
+    search.trim() ||
+    scope !== "ALL" ||
+    group !== "ALL" ||
+    section !== "ALL" ||
+    activeFilter !== "ACTIVE" ||
+    sortBy !== "NAME_ASC";
+
+  const resetFilters = () => {
+    setSearch("");
+    setScope("ALL");
+    setGroup("ALL");
+    setSection("ALL");
+    setActiveFilter("ACTIVE");
+    setSortBy("NAME_ASC");
+  };
+
   const openCreate = () => {
     setEditing(null);
     setShowModal(true);
@@ -87,14 +159,66 @@ export default function ManageAmenitiesPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm(t("confirm_delete"))) return;
-    await remove(id);
-    Toast.success(t("delete_success"));
+  // ===== Delete flow (ConfirmModal) =====
+  const requestDelete = (id) => {
+    const found = (amenities || []).find((x) => x.id === id);
+    setPendingDelete({ id, name: found?.name || id });
+    setConfirmOpen(true);
   };
 
+  const closeConfirm = () => {
+    setConfirmOpen(false);
+    setPendingDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete?.id) return;
+    try {
+      await remove(pendingDelete.id);
+      showSuccess("");
+      await load({ active: true });
+    } finally {
+      closeConfirm();
+    }
+  };
+
+  // ===== Toggle active =====
+  const deactivateAmenity = async (id) => {
+    if (!id) return;
+    setRowToggling(id, true);
+    try {
+      // nếu API của bạn yêu cầu payload đầy đủ thì đổi thành update(id, { active:false, ... })
+      await update(id, { active: false });
+
+      showSuccess("Đã tắt tiện ích");
+      await load({ active: true });
+    } catch (e) {
+      showError("Tắt tiện ích thất bại");
+    } finally {
+      setRowToggling(id, false);
+    }
+  };
+
+  const activateAmenity = async (id) => {
+    if (!id) return;
+    setRowToggling(id, true);
+    try {
+      await update(id, { active: true });
+
+      showSuccess("Đã bật tiện ích");
+      await load({ active: true });
+    } catch (e) {
+      showError("Bật tiện ích thất bại");
+    } finally {
+      setRowToggling(id, false);
+    }
+  };
+
+  // ===== Create / Edit submit =====
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
+
     const form = e.target;
 
     const payload = {
@@ -105,202 +229,169 @@ export default function ManageAmenitiesPage() {
       scope: form.scope.value,
       group: form.group.value,
       section: form.section.value,
-      active: form.active.checked,
     };
 
     if (!payload.code || !payload.name) {
-      Toast.error(t("empty_name_error"));
+      showError(t("Tên không thể trống"));
       return;
     }
 
-    if (editing) {
-      await update(editing.id, payload);
-      Toast.success(t("update_success"));
-    } else {
-      await create(payload);
-      Toast.success(t("add_success"));
-    }
+    try {
+      if (editing) {
+        await update(editing.id, payload);
+        showSuccess(t("Cập nhật tiện ích thành công"));
+      } else {
+        await create(payload);
+        showSuccess(t("Thêm tiện ích thành công"));
+      }
 
-    setShowModal(false);
+      setShowModal(false);
+    } catch (err) {
+      const msg = extractApiMessage(err);
+
+      // show cả Toast + show ngay trong modal
+      showError(msg);
+      setFormError(msg);
+    }
   };
 
-  /* =========================
-     Render
-  ========================= */
+  // merge deleting + toggleLoadingIds -> disable actions đúng hơn
+  const rowBusy = (id) => deleting || toggleLoadingIds.has(id);
+
   return (
     <AdminLayout>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{t("manage_amenities")}</h1>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          <PlusIcon className="w-5 h-5" />
-          {t("add_amenity")}
-        </button>
-      </div>
+      <div className="mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              {t("manage_amenities")}
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Quản lý danh sách tiện nghi theo scope / group / section.
+            </p>
+          </div>
 
-      {/* Search */}
-      <div className="relative w-80 mb-6">
-        <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t("search_amenity")}
-          className="w-full pl-10 pr-3 py-2 border rounded-md focus:ring focus:border-blue-500"
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`${soft.btn} ${soft.btnGhost} gap-2`}
+              type="button"
+            >
+              <FunnelIcon className="h-5 w-5" />
+              Bộ lọc
+            </button>
+
+            <button
+              onClick={openCreate}
+              className={`${soft.btn} ${soft.btnPrimary} gap-2`}
+              type="button"
+            >
+              <PlusIcon className="h-5 w-5" />
+              {t("add_amenity")}
+            </button>
+          </div>
+        </div>
+
+        <AmenityStats
+          totalCount={totalCount}
+          activeCount={activeCount}
+          visibleCount={filteredAmenities.length}
         />
       </div>
 
-      {/* List */}
-      {loading ? (
-        <p className="text-gray-500">{t("loading")}...</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredAmenities.map((a) => (
-            <div
-              key={a.id}
-              className="bg-white rounded-lg shadow p-5 flex flex-col justify-between"
-            >
-              <div className="flex gap-3 mb-3">
-                <div className="text-3xl">{a.icon || "✨"}</div>
-                <div>
-                  <h3 className="font-semibold">
-                    {a.name}{" "}
-                    {!a.active && (
-                      <span className="text-xs text-red-500">(inactive)</span>
-                    )}
-                  </h3>
-                  <p className="text-sm text-gray-500">{a.code}</p>
-                  <p className="text-xs text-gray-400">
-                    {a.scope} · {a.group} · {a.section}
-                  </p>
-                </div>
-              </div>
+      {/* Filters */}
+      <AmenityFilters
+        t={t}
+        open={filtersOpen}
+        search={search}
+        setSearch={setSearch}
+        scope={scope}
+        setScope={setScope}
+        group={group}
+        setGroup={setGroup}
+        section={section}
+        setSection={setSection}
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        hasAnyFilter={hasAnyFilter}
+        onReset={resetFilters}
+      />
 
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => openEdit(a)}
-                  className="p-2 hover:bg-gray-100 rounded"
-                >
-                  <PencilIcon className="w-5 h-5 text-blue-600" />
-                </button>
-                <button
-                  onClick={() => handleDelete(a.id)}
-                  className="p-2 hover:bg-gray-100 rounded"
-                  disabled={deleting}
-                >
-                  <TrashIcon className="w-5 h-5 text-red-600" />
-                </button>
-              </div>
-            </div>
+      {/* Table */}
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800"
+            />
           ))}
         </div>
-      )}
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white rounded-lg p-6 w-full max-w-lg space-y-4"
-          >
-            <h2 className="text-xl font-bold">
-              {editing ? t("edit_amenity") : t("add_new_amenity")}
-            </h2>
-
-            <input
-              name="code"
-              defaultValue={editing?.code || ""}
-              placeholder="CODE (WIFI_FREE)"
-              className="w-full border px-3 py-2 rounded"
-            />
-
-            <input
-              name="name"
-              defaultValue={editing?.name || ""}
-              placeholder={t("amenity_name")}
-              className="w-full border px-3 py-2 rounded"
-            />
-
-            <input
-              name="description"
-              defaultValue={editing?.description || ""}
-              placeholder={t("short_desc")}
-              className="w-full border px-3 py-2 rounded"
-            />
-
-            <input
-              name="icon"
-              defaultValue={editing?.icon || ""}
-              placeholder={t("icon_placeholder")}
-              className="w-full border px-3 py-2 rounded"
-            />
-
-            <select
-              name="scope"
-              defaultValue={editing?.scope || "HOTEL"}
-              className="w-full border px-3 py-2 rounded"
+      ) : filteredAmenities.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Không có tiện nghi phù hợp với bộ lọc hiện tại
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              type="button"
+              className={`${soft.btn} ${soft.btnGhost}`}
+              onClick={resetFilters}
             >
-              {SCOPE_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-
-            <select
-              name="group"
-              defaultValue={editing?.group || "OTHER"}
-              className="w-full border px-3 py-2 rounded"
+              Reset bộ lọc
+            </button>
+            <button
+              type="button"
+              className={`${soft.btn} ${soft.btnPrimary}`}
+              onClick={openCreate}
             >
-              {GROUP_OPTIONS.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-
-            <select
-              name="section"
-              defaultValue={editing?.section || "OTHER"}
-              className="w-full border px-3 py-2 rounded"
-            >
-              {SECTION_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="active"
-                defaultChecked={editing?.active ?? true}
-              />
-              {t("active")}
-            </label>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border rounded"
-              >
-                {t("cancel")}
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                {t("save")}
-              </button>
-            </div>
-          </form>
+              Thêm tiện nghi
+            </button>
+          </div>
         </div>
+      ) : (
+        <AmenityTable
+          t={t}
+          items={filteredAmenities}
+          deleting={false /* không dùng deleting chung cho toggle nữa */}
+          onEdit={openEdit}
+          onDeactivate={(id) => {
+            if (rowBusy(id)) return;
+            deactivateAmenity(id);
+          }}
+          onActivate={(id) => {
+            if (rowBusy(id)) return;
+            activateAmenity(id);
+          }}
+          // nếu vẫn muốn xóa thì bạn giữ button delete ở table (hiện table bạn đã bỏ delete),
+          // còn nếu bạn thêm lại delete thì gọi requestDelete tại đây.
+          onDelete={requestDelete}
+        />
       )}
+
+      {/* Modal add/edit */}
+      <AmenityFormModal
+        t={t}
+        open={showModal}
+        saving={saving}
+        editing={editing}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleSubmit}
+      />
+
+      {/* Confirm delete modal */}
+      <ConfirmModal
+        open={confirmOpen}
+        title="Xóa tiện nghi"
+        message={`Bạn có chắc muốn xóa "${pendingDelete?.name || ""}" không?`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        onClose={closeConfirm}
+        onConfirm={confirmDelete}
+      />
     </AdminLayout>
   );
 }

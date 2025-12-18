@@ -89,7 +89,7 @@ export default function ManageLocationsPage() {
             {filteredLocations.map((loc) => (
             <div
                 key={loc.id}
-                onClick={() => navigate(`/admin/locations/${loc.id}`)}
+                onClick={() => navigate(`/admin/places/${loc.id}`)}
                 className="relative overflow-hidden rounded-2xl cursor-pointer shadow-md group"
             >
                 {/* Ảnh nền */}
