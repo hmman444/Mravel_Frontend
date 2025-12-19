@@ -67,7 +67,7 @@ partnerApi.interceptors.response.use(
       if (!refreshToken) throw new Error("No partner refresh token found");
 
       // Partner refresh endpoint
-      const refreshRes = await axios.post(`${BASE_URL}/partner/auth/refresh`, {
+      const refreshRes = await axios.post(`${BASE_URL}/auth/partner/refresh`, {
         refreshToken,
       });
 
@@ -80,7 +80,7 @@ partnerApi.interceptors.response.use(
       store.dispatch(setPartnerTokensRedux({ accessToken, refreshToken: newRefresh }));
 
       // Partner me endpoint
-      const meRes = await partnerApi.get("/partner/auth/me");
+      const meRes = await partnerApi.get("/auth/partner/me");
       store.dispatch(setPartnerUser(meRes.data.data || meRes.data));
 
       onRefreshed(accessToken);
