@@ -49,11 +49,13 @@ import RestaurantBookingPage from "./features/booking/pages/RestaurantBookingPag
 //Others
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 import RequireRole from "./routes/RequireRole";
+import { useNotificationRealtime } from "./realtime/useNotificationRealtime";
 function App() {
   useLoadUser();
   useAuthSync();
   useMainSocket();
   useHydrateRole();
+  useNotificationRealtime();
   return (
     <>
     <Router>
