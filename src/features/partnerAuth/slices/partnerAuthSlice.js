@@ -97,12 +97,11 @@ export const partnerSocialLoginUser = createAsyncThunk(
 
 export const fetchCurrentPartner = createAsyncThunk(
   "partnerAuth/me",
-  async (_, { getState, rejectWithValue }) => {
-    const token = getState().partnerAuth.accessToken;
-    if (!token) return rejectWithValue("Không có token");
+  async (_, { rejectWithValue }) => {
     const result = await getCurrentPartner();
-    if (result.success) return result.data;
-    return rejectWithValue(result.message);
+    if (!result?.success) return rejectWithValue(result?.message || "Không lấy được thông tin đối tác");
+
+    return result.data;
   }
 );
 
