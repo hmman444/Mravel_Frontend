@@ -154,7 +154,7 @@ export default function Navbar() {
           <Link className="hover:text-sky-500 transition" to="/my-bookings">
             Đặt dịch vụ
           </Link>
-          <Link className="hover:text-sky-500 transition" to="/maybe">
+          <Link className="hover:text-sky-500 transition" to="/partner">
             Hợp tác
           </Link>
         </nav>

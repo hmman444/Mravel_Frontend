@@ -1,15 +1,17 @@
-// src/features/booking/hooks/useHotelBookingPage.js
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchHotelDetail } from "../../catalog/slices/catalogSlice";
 import { useHotelPricing } from "./useHotelPricing";
-import { fetchHotelAvailability, createHotelPayment } from "../slices/bookingSlice";
+import { fetchHotelAvailability } from "../slices/bookingSlice";
 import { fmt } from "../services/bookingService";
 import { fetchCurrentUser } from "../../auth/slices/authSlice";
 
+import { setDraftPayment } from "../slices/bookingSlice";
+
 export function useHotelBookingPage() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const hotelSlug = params.get("hotelSlug") || "";
@@ -19,33 +21,25 @@ export function useHotelBookingPage() {
   const { hotelAvailability, payment } = useSelector((s) => s.booking);
   const { data: hotel, loading } = useSelector((s) => s.catalog.hotelDetail);
 
-  // ✅ auth state
   const { accessToken, user } = useSelector((s) => s.auth);
   const isLoggedIn = !!accessToken;
   const userId = isLoggedIn ? (user?.id ?? null) : null;
 
-  // ✅ nếu có token mà chưa load user => gọi /auth/me
   useEffect(() => {
-    if (isLoggedIn && !user) {
-      dispatch(fetchCurrentUser());
-    }
+    if (isLoggedIn && !user) dispatch(fetchCurrentUser());
   }, [dispatch, isLoggedIn, user]);
 
-  // ✅ form state
   const [contactName, setContactName] = useState("Mẫn Huỳnh Minh");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("nsndman0404@gmail.com");
   const [note, setNote] = useState("");
 
-  // ✅ optional: nếu logged-in và có user, autofill contact
   useEffect(() => {
     if (!user) return;
-    // tùy field backend trả về. Bạn chỉnh lại cho đúng tên field user của bạn.
     if (!contactName) setContactName(user.fullname || user.name || "");
     if (!contactEmail) setContactEmail(user.email || "");
   }, [user]); // eslint-disable-line
 
-  // dates
   const [checkIn, setCheckIn] = useState(() => {
     const d = new Date(); d.setHours(0,0,0,0); return d;
   });
@@ -100,15 +94,14 @@ export function useHotelBookingPage() {
 
   const isEnoughRooms = hotelAvailability?.data?.isEnough ?? true;
 
+  // ✅ THAY ĐỔI: onPay giờ chỉ tạo draft + navigate sang PaymentMethodPage
   const onPay = useCallback(async ({ paymentOption }) => {
     if (!hotel || !roomType || !ratePlan) return;
 
     const payOption = paymentOption === "DEPOSIT" ? "DEPOSIT" : "FULL";
 
     const payload = {
-      // ✅ đây là điểm bạn cần:
-      userId, // logged-in => number, guest => null
-
+      userId,
       contactName,
       contactPhone,
       contactEmail,
@@ -123,6 +116,9 @@ export function useHotelBookingPage() {
 
       payOption,
 
+      // ✅ gateway sẽ được chọn ở trang PaymentMethodPage
+      // gateway: "MOMO" | "VNPAY" | "ZALOPAY",
+
       rooms: [
         {
           roomTypeId: roomType.id,
@@ -135,16 +131,28 @@ export function useHotelBookingPage() {
       ],
     };
 
-    const result = await dispatch(createHotelPayment(payload)).unwrap();
-    const url = result?.payUrl || result?.paymentUrl;
-    if (url) window.location.href = url;
+    dispatch(setDraftPayment({
+      type: "HOTEL",
+      payload,
+      meta: {
+        title: "Thanh toán đặt phòng",
+        subTitle: hotel.name,
+        amount: pricingAllRooms?.finalTotal ?? null,
+        nights,
+        roomsCount,
+      },
+    }));
+
+    navigate("/booking/payment-method?type=hotel");
   }, [
-    dispatch,
+    dispatch, navigate,
     hotel, roomType, ratePlan,
     userId,
     contactName, contactPhone, contactEmail, note,
     checkIn, checkOut,
     roomsCount,
+    nights,
+    pricingAllRooms?.finalTotal,
   ]);
 
   const hotelName = hotel?.name || hotelSlug || "Khách sạn của bạn";
@@ -164,7 +172,6 @@ export function useHotelBookingPage() {
     remainingRoomsText,
     isEnoughRooms,
 
-    // ✅ expose thêm nếu bạn muốn show UI
     isLoggedIn,
     user,
 

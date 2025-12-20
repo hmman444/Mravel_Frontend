@@ -22,6 +22,13 @@ export const createHotelPayment = createAsyncThunk(
 const initialState = {
   hotelAvailability: { loading: false, error: null, data: null, lastQuery: null },
   payment: { loading: false, error: null, data: null },
+
+  // ✅ NEW: draft để trang PaymentMethodPage dùng
+  draftPayment: {
+    type: null,     // "HOTEL" | "RESTAURANT" (chuẩn bị cho phần res)
+    payload: null,  // payload gửi BE để tạo payment
+    meta: null,     // data hiển thị UI (tên, số tiền...)
+  },
 };
 
 const bookingSlice = createSlice({
@@ -31,6 +38,18 @@ const bookingSlice = createSlice({
     clearBookingErrors(state) {
       state.hotelAvailability.error = null;
       state.payment.error = null;
+    },
+
+    // ✅ NEW
+    setDraftPayment(state, action) {
+      state.draftPayment.type = action.payload?.type ?? null;
+      state.draftPayment.payload = action.payload?.payload ?? null;
+      state.draftPayment.meta = action.payload?.meta ?? null;
+    },
+    clearDraftPayment(state) {
+      state.draftPayment.type = null;
+      state.draftPayment.payload = null;
+      state.draftPayment.meta = null;
     },
   },
   extraReducers: (builder) => {
@@ -60,9 +79,9 @@ const bookingSlice = createSlice({
       .addCase(createHotelPayment.rejected, (state, action) => {
         state.payment.loading = false;
         state.payment.error = action.payload || "Lỗi tạo thanh toán";
-      })
+      });
   },
 });
 
-export const { clearBookingErrors } = bookingSlice.actions;
+export const { clearBookingErrors, setDraftPayment, clearDraftPayment } = bookingSlice.actions;
 export default bookingSlice.reducer;
