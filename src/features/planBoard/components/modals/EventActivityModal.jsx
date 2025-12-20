@@ -2,12 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  FaTimes,
-  FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaMoneyBillWave,
-} from "react-icons/fa";
+import { FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
 import SplitMoneySection from "./SplitMoneySection";
@@ -21,11 +16,15 @@ import ActivityFooterButtons from "./ActivityFooterButtons";
 
 import { inputBase, sectionCard } from "../../utils/activityStyles";
 import { useSplitMoney } from "../../hooks/useSplitMoney";
+import { buildInitialExtraCosts, normalizeExtraCosts, calcExtraTotal } from "../../utils/costUtils";
+
 import {
-  buildInitialExtraCosts,
-  normalizeExtraCosts,
-  calcExtraTotal,
-} from "../../utils/costUtils";
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+  getLocDisplayLabel,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
 const EXTRA_TYPES = [
   { value: "SERVICE_FEE", label: "Phí dịch vụ" },
@@ -34,12 +33,21 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+const safeJsonParse = (str) => {
+  try {
+    return str ? JSON.parse(str) : {};
+  } catch {
+    return {};
+  }
+};
+
 export default function EventActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
   planMembers = [],
+  readOnly = false,
 }) {
   const [title, setTitle] = useState("");
   const [eventName, setEventName] = useState("");
@@ -52,28 +60,26 @@ export default function EventActivityModal({
 
   const [ticketPrice, setTicketPrice] = useState("");
   const [ticketCount, setTicketCount] = useState("1");
+
   const [budgetAmount, setBudgetAmount] = useState("");
   const [actualCost, setActualCost] = useState("");
   const [note, setNote] = useState("");
 
   const [extraCosts, setExtraCosts] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalEventLocation, setInternalEventLocation] = useState(null);
   const effectiveEventLocation = internalEventLocation || null;
 
-  const [errors, setErrors] = useState({});
-
-  // ===== LOAD KHI MỞ MODAL =====
+  // ===== LOAD WHEN OPEN =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
 
       setTitle(editingCard.text || "");
@@ -81,52 +87,31 @@ export default function EventActivityModal({
       setVenue(data.venue || "");
       setAddress(data.address || "");
 
-      const loadedStart =
-        editingCard.startTime || data.startTime || data.time || "";
-      const loadedEnd =
-        editingCard.endTime ||
-        data.endTime ||
-        editingCard.startTime ||
-        data.time ||
-        "";
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setStartTime(start);
+      setEndTime(end);
+      setDurationMinutes(null);
 
-      setStartTime(loadedStart);
-      setEndTime(loadedEnd);
-      setDurationMinutes(null); // để ActivityTimeRangeSection tự tính lại
+      setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : "");
+      setTicketCount(data.ticketCount != null ? String(data.ticketCount) : "1");
 
-      setTicketPrice(
-        data.ticketPrice != null ? String(data.ticketPrice) : ""
-      );
-      setTicketCount(
-        data.ticketCount != null ? String(data.ticketCount) : "1"
-      );
+      setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
+      setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
 
-      if (cost.budgetAmount != null) {
-        setBudgetAmount(String(cost.budgetAmount));
-      } else {
-        setBudgetAmount("");
-      }
-
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
-      }
-
+      setExtraCosts(buildInitialExtraCosts(data, cost));
       setNote(editingCard.description || "");
 
-      // extraCosts: dùng helper chung
-      setExtraCosts(buildInitialExtraCosts(data, cost));
+      const nLoc = normalizeLocationFromStored(data.eventLocation) || null;
+      setInternalEventLocation(nLoc);
 
-      if (data.eventLocation) {
-        setInternalEventLocation(data.eventLocation);
-      } else {
-        setInternalEventLocation(null);
+      // nếu có fullAddress từ loc mới -> sync text cho UI
+      if (nLoc?.fullAddress) {
+        const label = getLocDisplayLabel(nLoc, data.venue || "");
+        if (label) setVenue(label);
+        setAddress(nLoc.fullAddress || nLoc.address || data.address || "");
       }
     } else {
-      // RESET khi tạo mới
+      // reset new
       setTitle("");
       setEventName("");
       setVenue("");
@@ -140,61 +125,65 @@ export default function EventActivityModal({
       setTicketCount("1");
       setBudgetAmount("");
       setActualCost("");
-      setNote("");
       setExtraCosts([]);
+      setNote("");
 
       setInternalEventLocation(null);
+      setPlacePickerOpen(false);
     }
   }, [open, editingCard]);
 
-  // SYNC từ map → venue + address
+  // ===== SYNC label from location -> venue/address =====
   useEffect(() => {
     if (!effectiveEventLocation) return;
 
-    if (effectiveEventLocation.label || effectiveEventLocation.name) {
-      setVenue(
-        effectiveEventLocation.label || effectiveEventLocation.name || ""
-      );
-      setErrors((prev) => ({ ...prev, venue: "" }));
-    }
-    if (
-      effectiveEventLocation.address ||
-      effectiveEventLocation.fullAddress
-    ) {
-      setAddress(
-        effectiveEventLocation.address ||
-          effectiveEventLocation.fullAddress ||
-          ""
-      );
+    const label = getLocDisplayLabel(effectiveEventLocation, "");
+    if (label) setVenue(label);
+
+    if (effectiveEventLocation.fullAddress || effectiveEventLocation.address) {
+      setAddress(effectiveEventLocation.fullAddress || effectiveEventLocation.address || "");
     }
   }, [effectiveEventLocation]);
 
-  // ===== COST LOGIC =====
-  const ticketTotal = useMemo(() => {
+  // ===== EXTRA COSTS CRUD =====
+  const addExtraCost = () =>
+    setExtraCosts((prev) => [
+      ...prev,
+      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
+    ]);
+
+  const updateExtraCost = (idx, key, value) => {
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
+  };
+
+  const removeExtraCost = (idx) =>
+    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
+
+  // ===== COST (FIX ESTIMATED COST LIKE OTHER MODALS) =====
+  // baseEstimated = vé (không bao gồm extra). Extra tách riêng trong extraCosts.
+  const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(ticketCount || 0);
     return p * c;
   }, [ticketPrice, ticketCount]);
 
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
-  );
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
 
-  const estimatedTotal = ticketTotal + extraTotal;
+  // tổng dự kiến để hiển thị & fallback chia tiền (base + extra)
+  const estimatedTotal = useMemo(() => baseEstimated + extraTotal, [baseEstimated, extraTotal]);
 
+  // dùng để chia tiền: nếu có actual thì dùng actual, không thì dùng estimatedTotal
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedTotal;
+    return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN CHUNG =====
-  const splitHook = useSplitMoney({
-    editingCard,
-    planMembers,
-    parsedActual,
-  });
+  // ===== SPLIT HOOK =====
+  const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
     splitEnabled,
@@ -221,34 +210,15 @@ export default function EventActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COST CRUD =====
-  const addExtraCost = () =>
-    setExtraCosts((prev) => [
-      ...prev,
-      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
-    ]);
-
-  const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
-  };
-
-  const removeExtraCost = (idx) =>
-    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
-
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
-
-    const normalizedParticipants = participants.map((p) =>
-      typeof p === "number" ? p : p?.memberId
-    );
+    const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p?.memberId));
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedTotal > 0 ? estimatedTotal : null,
+      // ✅ estimatedCost chỉ là base (vé) giống các modal khác
+      estimatedCost: baseEstimated > 0 ? baseEstimated : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
@@ -256,27 +226,18 @@ export default function EventActivityModal({
       extraCosts: normalizedExtraCosts,
     };
 
-    return {
-      cost,
-      split: splitPayload,
-      participants: normalizedParticipants,
-      normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
-    };
+    return { cost, split: splitPayload, participants: normalizedParticipants, normalizedExtraCosts };
   };
 
   // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!eventName.trim()) {
-      newErrors.eventName = "Vui lòng nhập tên sự kiện.";
-    }
+    if (!eventName.trim()) newErrors.eventName = "Vui lòng nhập tên sự kiện.";
 
-    // BẮT BUỘC CÓ ĐỊA ĐIỂM: venue / address / chọn trên bản đồ
+    // bắt buộc có địa điểm: chọn map hoặc nhập venue/address
     if (!effectiveEventLocation && !venue.trim() && !address.trim()) {
-      newErrors.venue =
-        "Vui lòng chọn địa điểm sự kiện trên bản đồ hoặc nhập venue / địa chỉ.";
+      newErrors.venue = "Vui lòng chọn địa điểm sự kiện trên bản đồ hoặc nhập venue / địa chỉ.";
     }
 
     if (startTime && endTime && durationMinutes == null) {
@@ -290,8 +251,7 @@ export default function EventActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const { cost, split, participants } = buildPayload();
 
     onSubmit?.({
       type: "EVENT",
@@ -301,24 +261,19 @@ export default function EventActivityModal({
       startTime: startTime || null,
       endTime: endTime || null,
       durationMinutes: durationMinutes ?? null,
-      participantCount:
-        splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
+      participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
+
+      // ✅ activityData GỌN: chỉ đặc thù EVENT (KHÔNG nhét tiền/extra/time vào)
       activityData: {
-        eventName,
-        venue,
-        address,
-        eventLocation: effectiveEventLocation || null,
-        time: startTime || "",
-        startTime,
-        endTime,
+        eventName: eventName.trim(),
+        venue: venue.trim(),
+        address: address?.trim() || "",
+        eventLocation: slimLocationForStorage(effectiveEventLocation),
         ticketPrice: ticketPrice ? Number(ticketPrice) : null,
         ticketCount: ticketCount ? Number(ticketCount) : null,
-        extraSpend: extraTotal || null,
-        extraItems: normalizedExtraCosts,
-        estimatedCost: estimatedTotal || null,
-        actualCost: actualCost ? Number(actualCost) : null,
       },
+
       cost,
       split,
     });
@@ -326,7 +281,7 @@ export default function EventActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER + FOOTER =====
+  // ===== HEADER / FOOTER =====
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}
@@ -341,37 +296,38 @@ export default function EventActivityModal({
       name={eventName}
       emptyLabelText="Điền tên sự kiện để lưu hoạt động."
       locationText={
-        effectiveEventLocation || venue || address
-          ? `Địa điểm: ${
-              effectiveEventLocation?.label ||
-              effectiveEventLocation?.name ||
-              venue ||
-              "Đã chọn"
-            }${
-              effectiveEventLocation?.address ||
+        effectiveEventLocation?.fullAddress || effectiveEventLocation?.address || address || venue
+          ? `${
               effectiveEventLocation?.fullAddress ||
-              address
-                ? ` – ${
-                    effectiveEventLocation?.address ||
-                    effectiveEventLocation?.fullAddress ||
-                    address
-                  }`
-                : ""
+              effectiveEventLocation?.address ||
+              address ||
+              venue
             }`
           : ""
       }
       timeText={
-        startTime &&
-        endTime &&
-        durationMinutes != null &&
-        !errors.time
-          ? `Thời gian: ${startTime} - ${endTime} (${durationMinutes} phút)`
+        startTime && endTime && durationMinutes != null && !errors.time
+          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
           : ""
       }
     />
   );
 
-  const footerRight = (
+  const footerRight = readOnly ? (
+    <div className="flex items-center justify-end">
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold
+          border border-slate-200 dark:border-slate-700
+          bg-white/80 dark:bg-slate-900/70
+          text-slate-700 dark:text-slate-100
+          hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+      >
+        Đóng
+      </button>
+    </div>
+  ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
@@ -442,9 +398,7 @@ export default function EventActivityModal({
                 />
               </div>
               {errors.eventName && (
-                <p className="mt-1 text-[11px] text-rose-500">
-                  {errors.eventName}
-                </p>
+                <p className="mt-1 text-[11px] text-rose-500">{errors.eventName}</p>
               )}
             </div>
 
@@ -462,21 +416,21 @@ export default function EventActivityModal({
                   setErrors((prev) => ({ ...prev, venue: "" }));
                 }}
                 className={`group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
-                          border-slate-200/80_dark:border-slate-700 px-3 py-2.5
-                          flex items-start gap-3 text-left
-                          hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50/70
-                          dark:hover:border-indigo-500 dark:hover:bg-slate-900
-                          transition
-                          ${
-                            errors.venue
-                              ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                              : ""
-                          }`}
+                  border-slate-200/80 dark:border-slate-700 px-3 py-2.5
+                  flex items-start gap-3 text-left
+                  hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50/70
+                  dark:hover:border-indigo-500 dark:hover:bg-slate-900
+                  transition
+                  ${
+                    errors.venue
+                      ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
+                      : ""
+                  }`}
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-indigo-50 text-indigo-500 border border-indigo-100
-                                dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800"
+                    bg-indigo-50 text-indigo-500 border border-indigo-100
+                    dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800"
                 >
                   <FaMapMarkerAlt />
                 </div>
@@ -490,6 +444,7 @@ export default function EventActivityModal({
                           venue ||
                           "Địa điểm đã chọn"}
                       </p>
+
                       {(effectiveEventLocation?.address ||
                         effectiveEventLocation?.fullAddress ||
                         address) && (
@@ -500,18 +455,18 @@ export default function EventActivityModal({
                         </p>
                       )}
 
-                      <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
-                        <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
-                        </span>
-                        {effectiveEventLocation?.lat != null &&
-                          effectiveEventLocation?.lng != null && (
+                      {effectiveEventLocation?.lat != null &&
+                        effectiveEventLocation?.lng != null && (
+                          <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                            <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
+                              Đã chọn trên bản đồ
+                            </span>
                             <span className="px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
                               {effectiveEventLocation.lat.toFixed(4)},{" "}
                               {effectiveEventLocation.lng.toFixed(4)}
                             </span>
-                          )}
-                      </div>
+                          </div>
+                        )}
                     </>
                   ) : (
                     <>
@@ -519,27 +474,27 @@ export default function EventActivityModal({
                         Chọn địa điểm sự kiện trên bản đồ
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, tìm sân vận động, hội trường, venue
-                        tổ chức...
+                        Nhấn để mở bản đồ, tìm sân vận động, hội trường, venue tổ chức...
                       </p>
                     </>
                   )}
                 </div>
 
-                <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-indigo-500 group-hover:text-indigo-600 dark:text-indigo-300
-                                dark:group-hover:text-indigo-200">
+                <span
+                  className="hidden md:inline-flex items-center text-[11px] font-medium
+                    text-indigo-500 group-hover:text-indigo-600 dark:text-indigo-300
+                    dark:group-hover:text-indigo-200"
+                >
                   Mở bản đồ
                 </span>
               </button>
+
               {errors.venue && (
-                <p className="mt-1 text-[11px] text-rose-500">
-                  {errors.venue}
-                </p>
+                <p className="mt-1 text-[11px] text-rose-500">{errors.venue}</p>
               )}
             </div>
 
-            {/* Thời gian sự kiện – dùng ActivityTimeRangeSection */}
+            {/* Thời gian sự kiện */}
             <div className="mt-3">
               <ActivityTimeRangeSection
                 sectionLabel="Thời gian sự kiện"
@@ -552,9 +507,7 @@ export default function EventActivityModal({
                 onStartTimeChange={(val) => setStartTime(val)}
                 onEndTimeChange={(val) => setEndTime(val)}
                 error={errors.time}
-                onErrorChange={(msg) =>
-                  setErrors((prev) => ({ ...prev, time: msg }))
-                }
+                onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
                 durationHintPrefix="Thời lượng ước tính"
               />
@@ -608,7 +561,7 @@ export default function EventActivityModal({
               </div>
             </div>
 
-            {/* CHI PHÍ PHÁT SINH */}
+            {/* Chi phí phát sinh */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -619,7 +572,7 @@ export default function EventActivityModal({
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Chi phí thực tế */}
+              {/* Thực tế */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
                   Tổng chi phí thực tế cho sự kiện (nếu có)
@@ -637,8 +590,7 @@ export default function EventActivityModal({
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng{" "}
-                  <b>tổng giá vé + chi phí phát sinh</b> để chia tiền.
+                  Nếu để trống, hệ thống sẽ dùng <b>vé + phát sinh</b> để chia tiền.
                 </p>
               </div>
 
@@ -662,22 +614,16 @@ export default function EventActivityModal({
               </div>
             </div>
 
-            {/* TÓM TẮT CHI PHÍ */}
+            {/* Tóm tắt */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Tổng giá vé (ước tính):{" "}
-                <span className="font-semibold">
-                  {ticketTotal.toLocaleString("vi-VN")}đ
-                </span>
+                Vé (ước tính): <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh:{" "}
-                <span className="font-semibold">
-                  {extraTotal.toLocaleString("vi-VN")}đ
-                </span>
+                Phát sinh: <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến:{" "}
+                Tổng dự kiến (vé + phát sinh):{" "}
                 <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
@@ -693,9 +639,7 @@ export default function EventActivityModal({
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
                   Ngân sách:{" "}
-                  <span className="font-semibold">
-                    {Number(budgetAmount).toLocaleString("vi-VN")}đ
-                  </span>
+                  <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
             </div>
@@ -730,15 +674,11 @@ export default function EventActivityModal({
           />
         </section>
 
-        {/* GHI CHÚ */}
+        {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
-            </label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm lưu ý nhỏ cho cả nhóm
-            </span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm lưu ý nhỏ cho cả nhóm</span>
           </div>
           <textarea
             rows={3}
@@ -750,20 +690,27 @@ export default function EventActivityModal({
         </section>
       </ActivityModalShell>
 
-      {/* PLACE PICKER CHO EVENT */}
+      {/* PLACE PICKER */}
       <PlacePickerModal
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
         onSelect={(loc) => {
-          const next = loc || null;
-          setInternalEventLocation(next);
+          if (!loc) {
+            setInternalEventLocation(null);
+            setPlacePickerOpen(false);
+            return;
+          }
+
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          const label = getLocDisplayLabel(slim, "");
+
+          setInternalEventLocation(slim || null);
           setErrors((prev) => ({ ...prev, venue: "" }));
-          if (next?.label || next?.name) {
-            setVenue(next.label || next.name);
-          }
-          if (next?.address || next?.fullAddress) {
-            setAddress(next.address || next.fullAddress);
-          }
+
+          if (label) setVenue(label);
+          if (slim?.fullAddress || slim?.address) setAddress(slim.fullAddress || slim.address || "");
+
+          setPlacePickerOpen(false);
         }}
         initialTab="PLACE"
         activityType="EVENT"

@@ -63,7 +63,7 @@ export default function AdminSidebar() {
     return location.pathname === to || location.pathname.startsWith(to + "/");
   };
 
-  // ✅ Dark-mode synced: border + glass background + blur
+  // Dark-mode synced: border + glass background + blur
   const asideBase = [
     "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)]",
     "border-r border-slate-200/70 dark:border-slate-800",
@@ -79,8 +79,8 @@ export default function AdminSidebar() {
     "dark:text-slate-200 dark:hover:bg-slate-800/60";
 
   const itemActive =
-    "bg-gradient-to-r from-sky-500 to-blue-600 text-white " +
-    "shadow-[0_10px_28px_rgba(37,99,235,0.28)]";
+    "bg-gradient-to-r from-blue-500 to-blue-500 text-white " +
+    "";
 
   const iconWrapIdle =
     "bg-slate-100 group-hover:bg-slate-200 " +

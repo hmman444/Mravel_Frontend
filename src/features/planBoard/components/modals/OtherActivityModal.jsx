@@ -2,12 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  FaTimes,
-  FaPenFancy,
-  FaMapMarkerAlt,
-  FaMoneyBillWave,
-} from "react-icons/fa";
+import { FaTimes, FaPenFancy, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
 import SplitMoneySection from "./SplitMoneySection";
@@ -27,6 +22,14 @@ import {
   calcExtraTotal,
 } from "../../utils/costUtils";
 
+import {
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+  getLocDisplayLabel,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
+
 const EXTRA_TYPES = [
   { value: "SERVICE_FEE", label: "Phí dịch vụ" },
   { value: "SURCHARGE", label: "Phụ thu" },
@@ -34,29 +37,38 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+const safeJsonParse = (str) => {
+  try {
+    return str ? JSON.parse(str) : {};
+  } catch {
+    return {};
+  }
+};
+
 export default function OtherActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
   planMembers = [],
-  readOnly 
+  readOnly = false,
 }) {
   const [title, setTitle] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationText, setLocationText] = useState("");
 
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(null);
 
+  // Chi phí chính (không cộng extra)
   const [estimatedCost, setEstimatedCost] = useState("");
   const [actualCost, setActualCost] = useState("");
-  const [note, setNote] = useState("");
+  const [budgetAmount, setBudgetAmount] = useState("");
 
+  const [note, setNote] = useState("");
   const [customFields, setCustomFields] = useState([{ key: "", value: "" }]);
 
   const [extraCosts, setExtraCosts] = useState([]);
-  const [budgetAmount, setBudgetAmount] = useState("");
 
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalOtherLocation, setInternalOtherLocation] = useState(null);
@@ -64,51 +76,35 @@ export default function OtherActivityModal({
 
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD KHI MỞ MODAL =====
+  // ===== LOAD WHEN OPEN =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
 
-      setTitle(editingCard.text || data.title || "Hoạt động khác");
-      setLocation(data.location || "");
+      setTitle(editingCard.text || data?.title || "Hoạt động khác");
+      setLocationText(data.locationText || data.location || "");
 
-      const loadedStart = editingCard.startTime || data.startTime || "";
-      const loadedEnd =
-        editingCard.endTime || data.endTime || editingCard.startTime || "";
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setStartTime(start);
+      setEndTime(end);
+      setDurationMinutes(null);
 
-      setStartTime(loadedStart);
-      setEndTime(loadedEnd);
-      setDurationMinutes(null); // để ActivityTimeRangeSection tự tính lại
-
-      // estimatedCost chính (không cộng extra)
-      if (data.estimatedCost != null) {
-        setEstimatedCost(String(data.estimatedCost));
-      } else if (cost.estimatedCost != null) {
+      // estimatedCost = chi phí chính (không cộng extra)
+      if (cost.estimatedCost != null) {
         setEstimatedCost(String(cost.estimatedCost));
+      } else if (data.estimatedCost != null) {
+        setEstimatedCost(String(data.estimatedCost));
       } else {
         setEstimatedCost("");
       }
 
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
-      }
-
-      if (cost.budgetAmount != null) {
-        setBudgetAmount(String(cost.budgetAmount));
-      } else {
-        setBudgetAmount("");
-      }
+      setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
+      setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
 
       setNote(editingCard.description || "");
 
@@ -118,19 +114,25 @@ export default function OtherActivityModal({
           : [{ key: "", value: "" }]
       );
 
-      // location object mới
-      if (data.otherLocation) {
-        setInternalOtherLocation(data.otherLocation);
-      } else {
-        setInternalOtherLocation(null);
-      }
-
-      // extraCosts: dùng helper chung
       setExtraCosts(buildInitialExtraCosts(data, cost));
+
+      const nLoc = normalizeLocationFromStored(data.otherLocation) || null;
+      setInternalOtherLocation(nLoc);
+
+      // sync text from loc (nếu có)
+      if (nLoc) {
+        const label = getLocDisplayLabel(nLoc, "");
+        if (label && !locationText) setLocationText(label);
+
+        if (nLoc.fullAddress || nLoc.address) {
+          // ưu tiên address dạng đầy đủ
+          setLocationText((prev) => prev || (nLoc.fullAddress || nLoc.address || ""));
+        }
+      }
     } else {
-      // RESET NEW
+      // RESET new
       setTitle("");
-      setLocation("");
+      setLocationText("");
 
       setStartTime("");
       setEndTime("");
@@ -138,59 +140,49 @@ export default function OtherActivityModal({
 
       setEstimatedCost("");
       setActualCost("");
-      setNote("");
-      setCustomFields([{ key: "", value: "" }]);
-      setExtraCosts([]);
       setBudgetAmount("");
 
+      setNote("");
+      setCustomFields([{ key: "", value: "" }]);
+
+      setExtraCosts([]);
       setInternalOtherLocation(null);
+      setPlacePickerOpen(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editingCard]);
 
-  // SYNC từ effectiveOtherLocation vào location text
+  // ===== SYNC MAP -> locationText =====
   useEffect(() => {
     if (!effectiveOtherLocation) return;
 
-    if (
-      effectiveOtherLocation.address ||
-      effectiveOtherLocation.fullAddress ||
-      effectiveOtherLocation.label ||
-      effectiveOtherLocation.name
-    ) {
-      setLocation(
-        effectiveOtherLocation.address ||
-          effectiveOtherLocation.fullAddress ||
-          effectiveOtherLocation.label ||
-          effectiveOtherLocation.name ||
-          ""
-      );
+    const label = getLocDisplayLabel(effectiveOtherLocation, "");
+    const addr = effectiveOtherLocation.fullAddress || effectiveOtherLocation.address;
+
+    if (addr || label) {
+      setLocationText(addr || label || "");
       setErrors((prev) => ({ ...prev, location: "" }));
     }
   }, [effectiveOtherLocation]);
 
   // ===== COST LOGIC =====
-  const estimatedValue = useMemo(
-    () => Number(estimatedCost || 0),
-    [estimatedCost]
-  );
+  const estimatedValue = useMemo(() => Number(estimatedCost || 0), [estimatedCost]);
 
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
-  );
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
 
+  // tổng để hiển thị & fallback chia tiền
   const estimatedTotal = useMemo(
     () => estimatedValue + extraTotal,
     [estimatedValue, extraTotal]
   );
 
+  // chia tiền dùng actual nếu có, không thì estimatedTotal
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedTotal;
+    return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN CHUNG =====
+  // ===== SPLIT HOOK =====
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -230,41 +222,41 @@ export default function OtherActivityModal({
     ]);
 
   const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
   };
 
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
   // ===== CUSTOM FIELDS CRUD =====
-  const handleAddField = () => {
-    setCustomFields((prev) => [...prev, { key: "", value: "" }]);
-  };
+  const handleAddField = () => setCustomFields((prev) => [...prev, { key: "", value: "" }]);
 
   const handleChangeField = (index, field, value) => {
-    const next = [...customFields];
-    next[index][field] = value;
-    setCustomFields(next);
+    setCustomFields((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
   };
 
-  const handleRemoveField = (index) => {
+  const handleRemoveField = (index) =>
     setCustomFields((prev) => prev.filter((_, i) => i !== index));
-  };
 
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
-
     const normalizedParticipants = participants.map((p) =>
       typeof p === "number" ? p : p?.memberId
     );
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedTotal > 0 ? estimatedTotal : null,
+      // ✅ estimatedCost chỉ là chi phí chính
+      estimatedCost: estimatedValue > 0 ? estimatedValue : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
@@ -277,7 +269,6 @@ export default function OtherActivityModal({
       split: splitPayload,
       participants: normalizedParticipants,
       normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
     };
   };
 
@@ -285,7 +276,7 @@ export default function OtherActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!location.trim()) {
+    if (!locationText.trim() && !effectiveOtherLocation) {
       newErrors.location = "Vui lòng nhập hoặc chọn địa điểm.";
     }
 
@@ -300,8 +291,7 @@ export default function OtherActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const { cost, split, participants } = buildPayload();
 
     onSubmit?.({
       type: "OTHER",
@@ -314,19 +304,16 @@ export default function OtherActivityModal({
       participantCount:
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
+
+      // ✅ activityData gọn
       activityData: {
-        location,
-        otherLocation: effectiveOtherLocation || null,
-        startTime,
-        endTime,
-        estimatedCost: estimatedTotal || null,
-        actualCost: actualCost ? Number(actualCost) : null,
-        extraSpend: extraTotal || null,
-        extraItems: normalizedExtraCosts,
+        locationText: (locationText || "").trim(),
+        otherLocation: slimLocationForStorage(effectiveOtherLocation),
         customFields: customFields.filter(
-          (f) => f.key.trim() !== "" || f.value.trim() !== ""
+          (f) => (f.key || "").trim() !== "" || (f.value || "").trim() !== ""
         ),
       },
+
       cost,
       split,
     });
@@ -349,21 +336,18 @@ export default function OtherActivityModal({
       name={title || "Hoạt động khác"}
       emptyLabelText="Đặt tên hoạt động để dễ phân biệt."
       locationText={
-        effectiveOtherLocation || location
+        effectiveOtherLocation || locationText
           ? `Địa điểm: ${
               effectiveOtherLocation?.label ||
               effectiveOtherLocation?.name ||
               effectiveOtherLocation?.address ||
               effectiveOtherLocation?.fullAddress ||
-              location
+              locationText
             }`
           : ""
       }
       timeText={
-        startTime &&
-        endTime &&
-        durationMinutes != null &&
-        !errors.time
+        startTime && endTime && durationMinutes != null && !errors.time
           ? `Thời gian: ${startTime} - ${endTime} (${durationMinutes} phút)`
           : ""
       }
@@ -434,7 +418,7 @@ export default function OtherActivityModal({
               />
             </div>
 
-            {/* ĐỊA ĐIỂM - chọn trên bản đồ (bắt buộc) */}
+            {/* ĐỊA ĐIỂM */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 Địa điểm
@@ -444,27 +428,27 @@ export default function OtherActivityModal({
                 type="button"
                 onClick={() => setPlacePickerOpen(true)}
                 className={`group mt-1 w-full rounded-2xl border bg-white/90 dark:bg-slate-900/80
-                          border-slate-200/80 dark:border-slate-700 px-3 py-2.5
-                          flex items-start gap-3 text-left
-                          hover:border-slate-500 hover:shadow-md hover:bg-slate-50/80
-                          dark:hover:border-slate-400 dark:hover:bg-slate-900
-                          transition
-                          ${
-                            errors.location
-                              ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
-                              : ""
-                          }`}
+                  border-slate-200/80 dark:border-slate-700 px-3 py-2.5
+                  flex items-start gap-3 text-left
+                  hover:border-slate-500 hover:shadow-md hover:bg-slate-50/80
+                  dark:hover:border-slate-400 dark:hover:bg-slate-900
+                  transition
+                  ${
+                    errors.location
+                      ? "border-rose-400 bg-rose-50/80 dark:border-rose-500/80 dark:bg-rose-950/40"
+                      : ""
+                  }`}
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-slate-50 text-slate-600 border border-slate-100
-                                dark:bg-slate-900/40 dark:text-slate-200 dark:border-slate-700"
+                    bg-slate-50 text-slate-600 border border-slate-100
+                    dark:bg-slate-900/40 dark:text-slate-200 dark:border-slate-700"
                 >
                   <FaMapMarkerAlt />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  {effectiveOtherLocation || location ? (
+                  {effectiveOtherLocation || locationText ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
                         {effectiveOtherLocation?.label ||
@@ -473,11 +457,11 @@ export default function OtherActivityModal({
                       </p>
                       {(effectiveOtherLocation?.address ||
                         effectiveOtherLocation?.fullAddress ||
-                        location) && (
+                        locationText) && (
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
                           {effectiveOtherLocation?.address ||
                             effectiveOtherLocation?.fullAddress ||
-                            location}
+                            locationText}
                         </p>
                       )}
 
@@ -500,27 +484,27 @@ export default function OtherActivityModal({
                         Chọn địa điểm trên bản đồ
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn địa điểm cho hoạt động này (quán,
-                        công viên,...).
+                        Nhấn để mở bản đồ, chọn địa điểm cho hoạt động này (quán, công viên,...).
                       </p>
                     </>
                   )}
                 </div>
 
-                <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-slate-500 group-hover:text-slate-700 dark:text-slate-300
-                                dark:group-hover:text-slate-100">
+                <span
+                  className="hidden md:inline-flex items-center text-[11px] font-medium
+                    text-slate-500 group-hover:text-slate-700 dark:text-slate-300
+                    dark:group-hover:text-slate-100"
+                >
                   Mở bản đồ
                 </span>
               </button>
+
               {errors.location && (
-                <p className="mt-1 text-[11px] text-rose-500">
-                  {errors.location}
-                </p>
+                <p className="mt-1 text-[11px] text-rose-500">{errors.location}</p>
               )}
             </div>
 
-            {/* Thời gian – dùng ActivityTimeRangeSection */}
+            {/* TIME */}
             <div className="mt-3">
               <ActivityTimeRangeSection
                 sectionLabel="Thời gian hoạt động"
@@ -533,9 +517,7 @@ export default function OtherActivityModal({
                 onStartTimeChange={(val) => setStartTime(val)}
                 onEndTimeChange={(val) => setEndTime(val)}
                 error={errors.time}
-                onErrorChange={(msg) =>
-                  setErrors((prev) => ({ ...prev, time: msg }))
-                }
+                onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
                 durationHintPrefix="Thời lượng ước tính"
               />
@@ -555,7 +537,6 @@ export default function OtherActivityModal({
           </div>
 
           <div className={sectionCard + " space-y-4"}>
-            {/* ƯỚC LƯỢNG + THỰC TẾ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
@@ -591,22 +572,21 @@ export default function OtherActivityModal({
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  Nếu để trống, hệ thống sẽ dùng <b>chi phí ước lượng</b> + <b>phát sinh</b> để chia tiền.
+                </p>
               </div>
             </div>
 
-            {/* PHÁT SINH – dùng ExtraCostsSection */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
               updateExtraCost={updateExtraCost}
               removeExtraCost={removeExtraCost}
               extraTypes={EXTRA_TYPES}
-              title="Chi phí phát sinh (tuỳ chọn)"
-              addLabel="+ Thêm khoản phát sinh"
-              hint="Ví dụ: gửi xe, phụ phí, đồ uống, đạo cụ, quà tặng..."
+              label="Chi phí phát sinh (tuỳ chọn)"
             />
 
-            {/* NGÂN SÁCH + TÓM TẮT */}
             <div className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
@@ -629,18 +609,14 @@ export default function OtherActivityModal({
               <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
                 <div>
                   Ước lượng ban đầu:{" "}
-                  <span className="font-semibold">
-                    {estimatedValue.toLocaleString("vi-VN")}đ
-                  </span>
+                  <span className="font-semibold">{estimatedValue.toLocaleString("vi-VN")}đ</span>
                 </div>
                 <div>
                   Phát sinh:{" "}
-                  <span className="font-semibold">
-                    {extraTotal.toLocaleString("vi-VN")}đ
-                  </span>
+                  <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
                 </div>
                 <div>
-                  Tổng dự kiến:{" "}
+                  Tổng dự kiến (để chia nếu chưa có thực tế):{" "}
                   <span className="font-semibold text-slate-800 dark:text-slate-100">
                     {estimatedTotal.toLocaleString("vi-VN")}đ
                   </span>
@@ -656,9 +632,7 @@ export default function OtherActivityModal({
                 {budgetAmount && Number(budgetAmount) > 0 && (
                   <div>
                     Ngân sách:{" "}
-                    <span className="font-semibold">
-                      {Number(budgetAmount).toLocaleString("vi-VN")}đ
-                    </span>
+                    <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                   </div>
                 )}
               </div>
@@ -694,7 +668,7 @@ export default function OtherActivityModal({
           />
         </section>
 
-        {/* THÔNG TIN THÊM */}
+        {/* CUSTOM FIELDS */}
         <section className="space-y-2">
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
@@ -715,9 +689,7 @@ export default function OtherActivityModal({
                 <input
                   placeholder="Tên trường (vd: Dresscode, mua quà, ...)"
                   value={f.key}
-                  onChange={(e) =>
-                    handleChangeField(idx, "key", e.target.value)
-                  }
+                  onChange={(e) => handleChangeField(idx, "key", e.target.value)}
                   className={inputBase}
                 />
 
@@ -725,9 +697,7 @@ export default function OtherActivityModal({
                   <input
                     placeholder="Giá trị (vd: Trang phục màu đỏ, 500.000đ, ...)"
                     value={f.value}
-                    onChange={(e) =>
-                      handleChangeField(idx, "value", e.target.value)
-                    }
+                    onChange={(e) => handleChangeField(idx, "value", e.target.value)}
                     className={`${inputBase} flex-1`}
                   />
                   <button
@@ -743,7 +713,7 @@ export default function OtherActivityModal({
           </div>
         </section>
 
-        {/* GHI CHÚ */}
+        {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
@@ -763,24 +733,30 @@ export default function OtherActivityModal({
         </section>
       </ActivityModalShell>
 
-      {/* PLACE PICKER CHO OTHER */}
+      {/* PLACE PICKER */}
       <PlacePickerModal
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
         onSelect={(loc) => {
-          const next = loc || null;
-          setInternalOtherLocation(next);
-          if (
-            next?.address ||
-            next?.fullAddress ||
-            next?.label ||
-            next?.name
-          ) {
-            setLocation(
-              next.address || next.fullAddress || next.label || next.name
-            );
-            setErrors((prev) => ({ ...prev, location: "" }));
+          if (!loc) {
+            setInternalOtherLocation(null);
+            setPlacePickerOpen(false);
+            return;
           }
+
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          const label = getLocDisplayLabel(slim, "");
+
+          setInternalOtherLocation(slim || null);
+          setErrors((prev) => ({ ...prev, location: "" }));
+
+          if (slim?.fullAddress || slim?.address) {
+            setLocationText(slim.fullAddress || slim.address || "");
+          } else if (label) {
+            setLocationText(label);
+          }
+
+          setPlacePickerOpen(false);
         }}
         initialTab="PLACE"
         activityType="OTHER"

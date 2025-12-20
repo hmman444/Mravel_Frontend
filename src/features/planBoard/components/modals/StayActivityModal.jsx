@@ -2,12 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  FaTimes,
-  FaBed,
-  FaMapMarkerAlt,
-  FaMoneyBillWave,
-} from "react-icons/fa";
+import { FaTimes, FaBed, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
 import SplitMoneySection from "./SplitMoneySection";
@@ -27,7 +22,14 @@ import {
   calcExtraTotal,
 } from "../../utils/costUtils";
 
-// Có thể tái sử dụng chung cho các modal khác nếu muốn
+import {
+  getLocDisplayLabel,
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
+
 const EXTRA_TYPES = [
   { value: "SERVICE_FEE", label: "Phí dịch vụ" },
   { value: "SURCHARGE", label: "Phụ thu" },
@@ -35,6 +37,27 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+function safeJsonParse(str) {
+  try {
+    if (!str) return {};
+    return JSON.parse(str);
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * FE policy (match BE logic):
+ * - cost.estimatedCost: base (KHÔNG gồm extra)
+ * - extraCosts: gửi riêng qua cost.extraCosts
+ * - cost.actualCost:
+ *    + user nhập -> gửi number (manual)
+ *    + user xoá -> gửi null (auto)
+ *
+ * Display policy:
+ * - estimatedTotal (tổng dự kiến để xem): base + extraTotal
+ * - parsedActual (tổng để chia trên FE): userActual nếu có, else estimatedTotal
+ */
 export default function StayActivityModal({
   open,
   onClose,
@@ -42,7 +65,7 @@ export default function StayActivityModal({
   editingCard,
   planMembers = [],
   stayLocation: stayLocationProp,
-  readOnly 
+  readOnly,
 }) {
   const [title, setTitle] = useState("");
   const [hotelName, setHotelName] = useState("");
@@ -52,79 +75,108 @@ export default function StayActivityModal({
   const [checkOut, setCheckOut] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(null);
 
-  const [pricePerTime, setPricePerTime] = useState("");
+  // đây là "base" (chi phí cơ bản), KHÔNG gồm extra
+  const [pricePerNight, setPricePerNight] = useState("");
+
   const [nights, setNights] = useState("1");
 
+  // actualCost manual input
   const [actualCost, setActualCost] = useState("");
   const [budgetAmount, setBudgetAmount] = useState("");
   const [note, setNote] = useState("");
 
-  // dùng chung format với Transport: { reason, type, estimatedAmount, actualAmount }
   const [extraCosts, setExtraCosts] = useState([]);
-
   const [errors, setErrors] = useState({});
 
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [internalStayLocation, setInternalStayLocation] = useState(null);
-  const effectiveStayLocation = internalStayLocation || stayLocationProp || null;
 
-  // ===== LOAD DỮ LIỆU KHI MỞ MODAL =====
+  const normalizedPropLocation = useMemo(
+    () => normalizeLocationFromStored(stayLocationProp) || null,
+    [stayLocationProp]
+  );
+
+  const effectiveStayLocation =
+    internalStayLocation || normalizedPropLocation || null;
+
+  // ===== LOAD WHEN OPEN =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {}; // useSplitMoney sẽ xử lý phần này
 
       setTitle(editingCard.text || "");
+
       setHotelName(data.hotelName || "");
       setAddress(data.address || "");
 
-      setCheckIn(editingCard.startTime || data.checkIn || "");
-      setCheckOut(editingCard.endTime || data.checkOut || "");
-      setDurationMinutes(null); // sẽ được tính lại bởi ActivityTimeRangeSection
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setCheckIn(start);
+      setCheckOut(end);
+      setDurationMinutes(null);
 
-      setPricePerTime(
-        data.pricePerNight != null
-          ? String(data.pricePerNight)
-          : data.pricePerTime != null
-          ? String(data.pricePerTime)
-          : ""
+      // 1) Load extra from cost (nguồn chuẩn), fallback activityData
+      const loadedExtra = buildInitialExtraCosts(data, cost);
+      setExtraCosts(loadedExtra);
+
+      const extraTotalFromLoaded = calcExtraTotal(loadedExtra);
+
+      // 2) Load base estimated (pricePerNight) - QUAN TRỌNG:
+      // BE expects estimatedCost = BASE, extraCosts separate.
+      // Nhưng dữ liệu cũ có thể đã lưu estimatedCost = (base + extra).
+      // => nếu có cost.estimatedCost thì tách base = estimatedCost - extraTotalLoaded.
+      let base = null;
+
+      if (cost.estimatedCost != null) {
+        const est = Number(cost.estimatedCost);
+        const maybe = est - Number(extraTotalFromLoaded || 0);
+
+        // Nếu dữ liệu cũ đúng chuẩn (estimatedCost là base),
+        // maybe = base - extra (<= 0) -> fallback về est.
+        base = maybe > 0 ? maybe : est;
+      } else {
+        // fallback legacy from activityData
+        const ppn =
+          data.pricePerNight != null
+            ? data.pricePerNight
+            : data.pricePerTime != null
+            ? data.pricePerTime
+            : null;
+
+        base = ppn != null ? Number(ppn) : null;
+      }
+
+      setPricePerNight(
+        base != null && !Number.isNaN(base) ? String(base) : ""
       );
 
       setNights(data.nights != null ? String(data.nights) : "1");
 
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
-      }
+      // 3) actualCost manual
+      setActualCost(
+        cost.actualCost != null && cost.actualCost !== undefined
+          ? String(cost.actualCost)
+          : ""
+      );
 
-      setExtraCosts(buildInitialExtraCosts(data, cost));
-
-      if (cost.budgetAmount != null) {
-        setBudgetAmount(String(cost.budgetAmount));
-      } else {
-        setBudgetAmount("");
-      }
+      setBudgetAmount(
+        cost.budgetAmount != null && cost.budgetAmount !== undefined
+          ? String(cost.budgetAmount)
+          : ""
+      );
 
       setNote(editingCard.description || "");
 
-      // stay location từ activityData cũ (nếu có)
-      if (data.hotelLocation) {
-        setInternalStayLocation(data.hotelLocation);
-      } else {
-        setInternalStayLocation(null);
-      }
+      // 4) location normalize
+      setInternalStayLocation(
+        normalizeLocationFromStored(data.hotelLocation) || null
+      );
     } else {
-      // reset new
+      // NEW
       setTitle("");
       setHotelName("");
       setAddress("");
@@ -133,71 +185,59 @@ export default function StayActivityModal({
       setCheckOut("");
       setDurationMinutes(null);
 
-      setPricePerTime("");
+      setPricePerNight("");
       setNights("1");
+
       setActualCost("");
       setBudgetAmount("");
       setNote("");
       setExtraCosts([]);
 
-      setInternalStayLocation(stayLocationProp || null);
+      setInternalStayLocation(normalizedPropLocation || null);
     }
-  }, [open, editingCard, stayLocationProp]);
+  }, [open, editingCard, normalizedPropLocation]);
 
-  // Nếu parent thay đổi stayLocationProp bên ngoài (rare) thì sync
+  // nếu parent đổi prop lúc đang tạo mới
   useEffect(() => {
-    if (!editingCard && stayLocationProp) {
-      setInternalStayLocation(stayLocationProp);
+    if (!editingCard) {
+      setInternalStayLocation(normalizedPropLocation || null);
     }
-  }, [stayLocationProp, editingCard]);
+  }, [normalizedPropLocation, editingCard]);
 
-  // SYNC từ effectiveStayLocation vào tên + địa chỉ
+  // sync location -> name/address
   useEffect(() => {
     if (!effectiveStayLocation) return;
 
-    if (effectiveStayLocation.label || effectiveStayLocation.name) {
-      setHotelName(
-        effectiveStayLocation.label || effectiveStayLocation.name || ""
-      );
-    }
+    const name = getLocDisplayLabel(effectiveStayLocation, "");
+    const full =
+      effectiveStayLocation.fullAddress || effectiveStayLocation.address || "";
 
-    if (effectiveStayLocation.address || effectiveStayLocation.fullAddress) {
-      setAddress(
-        effectiveStayLocation.address ||
-          effectiveStayLocation.fullAddress ||
-          ""
-      );
-    }
+    if (name) setHotelName(name);
+    if (full) setAddress(full);
   }, [effectiveStayLocation]);
 
-  // ===== TÍNH TOÁN CHI PHÍ =====
+  // ===== COST CALC (UI) =====
   const baseEstimated = useMemo(
-    () => Number(pricePerTime || 0),
-    [pricePerTime]
+    () => Number(pricePerNight || 0),
+    [pricePerNight]
   );
 
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
-  );
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
 
+  // tổng dự kiến hiển thị (base + extra)
   const estimatedTotal = useMemo(
     () => baseEstimated + extraTotal,
     [baseEstimated, extraTotal]
   );
 
+  // tổng để chia (manual actual nếu có, không thì dùng estimatedTotal)
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedTotal;
+    return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN DÙNG CHUNG =====
-  const splitHook = useSplitMoney({
-    editingCard,
-    planMembers,
-    parsedActual,
-  });
+  // ===== SPLIT HOOK =====
+  const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
     splitEnabled,
@@ -224,7 +264,7 @@ export default function StayActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COSTS HANDLERS =====
+  // ===== EXTRA COSTS =====
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -232,47 +272,46 @@ export default function StayActivityModal({
     ]);
 
   const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
   };
 
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD ĐỂ GỬI LÊN BE =====
+  // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
+    const normalizedParticipants = participants.map((p) =>
+      typeof p === "number" ? p : p?.memberId
+    );
+
+    // ✅ QUAN TRỌNG: estimatedCost = base (KHÔNG gồm extra)
+    const estimatedBase = baseEstimated > 0 ? baseEstimated : null;
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedTotal || null,
+      estimatedCost: estimatedBase,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
+      // ✅ user xoá => "" => null -> BE auto mode
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
-      participants: participants.map((p) =>
-        typeof p === "number" ? p : p.memberId
-      ),
+      participants: normalizedParticipants,
       extraCosts: normalizedExtraCosts,
     };
 
-    return {
-      cost,
-      split: splitPayload,
-      participants,
-      normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
-    };
+    return { cost, split: splitPayload, participants: normalizedParticipants };
   };
 
   // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!hotelName.trim()) {
+    if (!hotelName.trim())
       newErrors.hotelName = "Vui lòng nhập hoặc chọn chỗ nghỉ.";
-    }
 
     if (checkIn && checkOut && durationMinutes == null) {
       newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
@@ -285,8 +324,7 @@ export default function StayActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const { cost, split, participants } = buildPayload();
 
     onSubmit?.({
       type: "STAY",
@@ -298,23 +336,17 @@ export default function StayActivityModal({
       durationMinutes: durationMinutes ?? null,
       participantCount:
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
-      participants: participants.map((p) =>
-        typeof p === "number" ? p : p.memberId
-      ),
+      participants,
+
       activityData: {
-        hotelName,
-        address,
-        hotelLocation: effectiveStayLocation || null,
-        checkIn,
-        checkOut,
-        pricePerTime: pricePerTime ? Number(pricePerTime) : null,
-        pricePerNight: pricePerTime ? Number(pricePerTime) : null,
+        hotelName: hotelName.trim(),
+        address: address?.trim() || null,
+        hotelLocation: slimLocationForStorage(effectiveStayLocation),
         nights: nights ? Number(nights) : null,
-        actualCost: actualCost ? Number(actualCost) : null,
-        extraSpend: extraTotal || null,
-        extraItems: normalizedExtraCosts,
-        estimatedCost: estimatedTotal || null,
+        // giữ base cho UI (không phải “tổng để chia”)
+        pricePerNight: pricePerNight ? Number(pricePerNight) : null,
       },
+
       cost,
       split,
     });
@@ -322,7 +354,7 @@ export default function StayActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER (DÙNG COMPONENT CHUNG) =====
+  // ===== HEADER / FOOTER =====
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}
@@ -336,24 +368,16 @@ export default function StayActivityModal({
       labelPrefix="Nghỉ tại"
       name={hotelName}
       emptyLabelText="Điền/chọn tên chỗ nghỉ để lưu hoạt động nghỉ ngơi."
-      locationText={
-        effectiveStayLocation?.address ||
-        effectiveStayLocation?.fullAddress ||
-        address ||
-        ""
-      }
+      locationText={effectiveStayLocation?.fullAddress || address || ""}
       timeText={
-        checkIn &&
-        checkOut &&
-        durationMinutes != null &&
-        !errors.time
+        checkIn && checkOut && durationMinutes != null && !errors.time
           ? `${checkIn} - ${checkOut} (${durationMinutes} phút)`
           : ""
       }
     />
   );
-  
-   const footerRight = readOnly ? (
+
+  const footerRight = readOnly ? (
     <div className="flex items-center justify-end">
       <button
         type="button"
@@ -417,7 +441,7 @@ export default function StayActivityModal({
               />
             </div>
 
-            {/* ĐỊA CHỈ - chọn trên bản đồ */}
+            {/* PICK STAY LOCATION */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 Địa chỉ / vị trí trên bản đồ
@@ -440,8 +464,8 @@ export default function StayActivityModal({
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-violet-50 text-violet-500 border border-violet-100
-                                dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-800"
+                    bg-violet-50 text-violet-500 border border-violet-100
+                    dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-800"
                 >
                   <FaMapMarkerAlt />
                 </div>
@@ -450,18 +474,15 @@ export default function StayActivityModal({
                   {effectiveStayLocation || address ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {effectiveStayLocation?.label ||
-                          effectiveStayLocation?.name ||
-                          hotelName ||
-                          "Chỗ nghỉ đã chọn"}
+                        {getLocDisplayLabel(
+                          effectiveStayLocation,
+                          hotelName || "Chỗ nghỉ đã chọn"
+                        )}
                       </p>
-                      {(effectiveStayLocation?.address ||
-                        effectiveStayLocation?.fullAddress ||
-                        address) && (
+
+                      {(effectiveStayLocation?.fullAddress || address) && (
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                          {effectiveStayLocation?.address ||
-                            effectiveStayLocation?.fullAddress ||
-                            address}
+                          {effectiveStayLocation?.fullAddress || address}
                         </p>
                       )}
 
@@ -490,12 +511,15 @@ export default function StayActivityModal({
                   )}
                 </div>
 
-                <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-violet-500 group-hover:text-violet-600 dark:text-violet-300
-                                dark:group-hover:text-violet-200">
+                <span
+                  className="hidden md:inline-flex items-center text-[11px] font-medium
+                    text-violet-500 group-hover:text-violet-600 dark:text-violet-300
+                    dark:group-hover:text-violet-200"
+                >
                   Mở bản đồ
                 </span>
               </button>
+
               {errors.hotelName && (
                 <p className="mt-1 text-[11px] text-rose-500">
                   {errors.hotelName}
@@ -503,7 +527,6 @@ export default function StayActivityModal({
               )}
             </div>
 
-            {/* Thời gian nghỉ: dùng ActivityTimeRangeSection */}
             <ActivityTimeRangeSection
               sectionLabel="Thời gian nghỉ"
               startLabel="Bắt đầu nghỉ"
@@ -524,23 +547,22 @@ export default function StayActivityModal({
           </div>
         </section>
 
-        {/* CHI PHÍ NGHỈ NGƠI */}
+        {/* CHI PHÍ */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               Chi phí nghỉ ngơi
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Chi phí cho một lần nghỉ trong ngày + phát sinh + ngân sách + thực tế
+              Base + phát sinh + ngân sách + thực tế
             </span>
           </div>
-          
+
           <div className={sectionCard + " space-y-4"}>
             <div className="flex gap-4">
-              {/* Cột 1 */}
               <div className="flex-1">
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Chi phí dự kiến cho lần nghỉ này
+                  Chi phí cơ bản (không gồm phát sinh)
                 </label>
 
                 <div className="flex items-center gap-2">
@@ -548,16 +570,15 @@ export default function StayActivityModal({
                   <input
                     type="number"
                     min="0"
-                    value={pricePerTime}
-                    onChange={(e) => setPricePerTime(e.target.value)}
-                    placeholder="VD: 450.000"
+                    value={pricePerNight}
+                    onChange={(e) => setPricePerNight(e.target.value)}
+                    placeholder="VD: 450000"
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
               </div>
 
-              {/* Cột 2 */}
               <div className="flex-1">
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
                   Số đêm của cả booking (thông tin thêm)
@@ -570,16 +591,9 @@ export default function StayActivityModal({
                   onChange={(e) => setNights(e.target.value)}
                   className={`${inputBase} w-full`}
                 />
-
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                  Dùng để ghi chú tổng thời gian lưu trú, nhưng chi phí chia cho ngày này chỉ
-                  lấy <b>một phần tương ứng với lần nghỉ này</b>.
-                </p>
               </div>
             </div>
-            
 
-            {/* CHI PHÍ PHÁT SINH – dùng chung ExtraCostsSection */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -588,11 +602,10 @@ export default function StayActivityModal({
               extraTypes={EXTRA_TYPES}
             />
 
-            {/* CHI PHÍ THỰC TẾ & NGÂN SÁCH */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho lần nghỉ này (nếu có)
+                  Tổng chi phí thực tế (nếu có)
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -601,20 +614,19 @@ export default function StayActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền sau khi thanh toán"
+                    placeholder="Điền lại sau khi thanh toán"
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng{" "}
-                  <b>chi phí dự kiến + phát sinh</b> để chia tiền.
+                  Nếu để trống, hệ thống sẽ dùng <b>chi phí vé</b> + <b>phát sinh</b> để chia tiền.
                 </p>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho lần nghỉ này (tuỳ chọn)
+                  Ngân sách (tuỳ chọn)
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -623,7 +635,7 @@ export default function StayActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 1.000.000"
+                    placeholder="VD: 1000000"
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -631,7 +643,6 @@ export default function StayActivityModal({
               </div>
             </div>
 
-            {/* TÓM TẮT CHI PHÍ */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
                 Chi phí cơ bản:{" "}
@@ -646,24 +657,16 @@ export default function StayActivityModal({
                 </span>
               </div>
               <div>
-                Tổng dự kiến (cơ bản + phát sinh):{" "}
+                Tổng dự kiến (để chia khi auto):{" "}
                 <span className="font-semibold text-violet-600 dark:text-violet-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                  Đang dùng <b>chi phí thực tế</b>:{" "}
                   <span className="font-semibold text-violet-600 dark:text-violet-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
-                  </span>
-                </div>
-              )}
-              {budgetAmount && Number(budgetAmount) > 0 && (
-                <div>
-                  Ngân sách:{" "}
-                  <span className="font-semibold">
-                    {Number(budgetAmount).toLocaleString("vi-VN")}đ
                   </span>
                 </div>
               )}
@@ -719,19 +722,29 @@ export default function StayActivityModal({
         </section>
       </ActivityModalShell>
 
-      {/* PLACE PICKER CHO STAY */}
+      {/* PLACE PICKER */}
       <PlacePickerModal
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
         onSelect={(loc) => {
-          setInternalStayLocation(loc || null);
-          if (loc?.label || loc?.name) {
-            setHotelName(loc.label || loc.name);
+          if (!loc) {
+            setPlacePickerOpen(false);
+            return;
+          }
+
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          setInternalStayLocation(slim || null);
+
+          const name = getLocDisplayLabel(slim, "");
+          const full = slim?.fullAddress || slim?.address || "";
+
+          if (name) {
+            setHotelName(name);
             setErrors((prev) => ({ ...prev, hotelName: "" }));
           }
-          if (loc?.address || loc?.fullAddress) {
-            setAddress(loc.address || loc.fullAddress);
-          }
+          if (full) setAddress(full);
+
+          setPlacePickerOpen(false);
         }}
         initialTab="HOTEL"
         activityType="STAY"

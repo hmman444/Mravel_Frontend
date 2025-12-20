@@ -6,6 +6,8 @@ import {
   updateAdminPlace,
   deleteAdminPlace,
   createAdminPlace,
+  lockAdminPlace,
+  unlockAdminPlace
 } from "../services/adminPlaceService";
 
 const apiMessage = (err) => {
@@ -65,8 +67,32 @@ export const updatePlaceThunk = createAsyncThunk(
   }
 );
 
+export const lockPlaceThunk = createAsyncThunk(
+  "adminPlace/lockPlace",
+  async (id, { rejectWithValue }) => {
+    try {
+      await lockAdminPlace(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
+  }
+);
+
+export const unlockPlaceThunk = createAsyncThunk(
+  "adminPlace/unlockPlace",
+  async (id, { rejectWithValue }) => {
+    try {
+      await unlockAdminPlace(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
+  }
+);
+
 export const deletePlaceThunk = createAsyncThunk(
-  "adminPlace/deletePlace",
+  "adminPlace/hardDeletePlace",
   async (id, { rejectWithValue }) => {
     try {
       await deleteAdminPlace(id);
@@ -132,7 +158,7 @@ const adminPlaceSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    /* --- destinations --- */
+    // destinations
     builder
       .addCase(createPlaceThunk.pending, (state) => {
         state.detail.saving = true;
@@ -159,7 +185,7 @@ const adminPlaceSlice = createSlice({
         state.destinations.error = action.payload || "Lỗi tải destinations";
       });
 
-    /* --- children --- */
+    // children
     builder
       .addCase(loadChildren.pending, (state) => {
         state.children.loading = true;
@@ -175,7 +201,60 @@ const adminPlaceSlice = createSlice({
         state.children.error = action.payload || "Lỗi tải children";
       });
 
-    /* --- detail --- */
+      //lock
+    builder
+      .addCase(lockPlaceThunk.pending, (state) => {
+        state.detail.deleting = true; // tái dụng flag
+        state.detail.error = null;
+      })
+      .addCase(lockPlaceThunk.fulfilled, (state, action) => {
+        state.detail.deleting = false;
+        const id = action.payload;
+
+        // detail
+        if (state.detail?.data?.id === id) state.detail.data.active = false;
+
+        // destinations list
+        state.destinations.items = (state.destinations.items || []).map((x) =>
+          x.id === id ? { ...x, active: false } : x
+        );
+
+        // children list
+        state.children.items = (state.children.items || []).map((x) =>
+          x.id === id ? { ...x, active: false } : x
+        );
+      })
+      .addCase(lockPlaceThunk.rejected, (state, action) => {
+        state.detail.deleting = false;
+        state.detail.error = action.payload || "Khóa thất bại";
+      });
+
+    // unlock 
+    builder
+      .addCase(unlockPlaceThunk.pending, (state) => {
+        state.detail.deleting = true;
+        state.detail.error = null;
+      })
+      .addCase(unlockPlaceThunk.fulfilled, (state, action) => {
+        state.detail.deleting = false;
+        const id = action.payload;
+
+        if (state.detail?.data?.id === id) state.detail.data.active = true;
+
+        state.destinations.items = (state.destinations.items || []).map((x) =>
+          x.id === id ? { ...x, active: true } : x
+        );
+
+        state.children.items = (state.children.items || []).map((x) =>
+          x.id === id ? { ...x, active: true } : x
+        );
+      })
+      .addCase(unlockPlaceThunk.rejected, (state, action) => {
+        state.detail.deleting = false;
+        state.detail.error = action.payload || "Mở khóa thất bại";
+      });
+
+    // detail
     builder
       .addCase(loadPlaceDetailAdmin.pending, (state) => {
         state.detail.loading = true;
@@ -191,7 +270,7 @@ const adminPlaceSlice = createSlice({
         state.detail.error = action.payload || "Không tải được chi tiết";
       });
 
-    /* --- update --- */
+    // update
     builder
       .addCase(updatePlaceThunk.pending, (state) => {
         state.detail.saving = true;
@@ -206,7 +285,7 @@ const adminPlaceSlice = createSlice({
         state.detail.error = action.payload || "Cập nhật thất bại";
       });
 
-    /* --- delete --- */
+    // delete
     builder
       .addCase(deletePlaceThunk.pending, (state) => {
         state.detail.deleting = true;

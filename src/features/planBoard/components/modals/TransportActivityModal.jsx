@@ -2,12 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  FaTimes,
-  FaRoute,
-  FaMapMarkerAlt,
-  FaMoneyBillWave,
-} from "react-icons/fa";
+import { FaTimes, FaRoute, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import { haversineDistanceKm } from "../../../planBoard/utils/distance";
 
@@ -23,11 +18,15 @@ import ActivityFooterButtons from "./ActivityFooterButtons";
 
 import { inputBase, sectionCard, pillBtn } from "../../utils/activityStyles";
 import { useSplitMoney } from "../../hooks/useSplitMoney";
+import { buildInitialExtraCosts, normalizeExtraCosts, calcExtraTotal } from "../../utils/costUtils";
+
 import {
-  buildInitialExtraCosts,
-  normalizeExtraCosts,
-  calcExtraTotal,
-} from "../../utils/costUtils";
+  slimLocationForStorage,
+  normalizeLocationFromStored,
+  getLocDisplayLabel,
+} from "../../utils/locationUtils";
+
+import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
 const TRANSPORT_METHODS = [
   { value: "taxi", label: "Taxi / Grab" },
@@ -45,17 +44,29 @@ const EXTRA_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+function safeJsonParse(str) {
+  try {
+    if (!str) return {};
+    return JSON.parse(str);
+  } catch {
+    return {};
+  }
+}
+
 export default function TransportActivityModal({
   open,
   onClose,
   onSubmit,
   editingCard,
   planMembers = [],
-  readOnly = false
+  readOnly = false,
 }) {
   const [title, setTitle] = useState("");
-  const [fromPlace, setFromPlace] = useState("");
-  const [toPlace, setToPlace] = useState("");
+
+  // Fallback text (data cũ / user gõ tay)
+  const [fromPlaceText, setFromPlaceText] = useState("");
+  const [toPlaceText, setToPlaceText] = useState("");
+
   const [stops, setStops] = useState([]);
   const [method, setMethod] = useState("taxi");
 
@@ -63,6 +74,7 @@ export default function TransportActivityModal({
   const [endTime, setEndTime] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(null);
 
+  // BASE = cước chính (không gồm phát sinh)
   const [estimatedCostInput, setEstimatedCostInput] = useState("");
   const [budgetAmount, setBudgetAmount] = useState("");
   const [actualCost, setActualCost] = useState("");
@@ -74,90 +86,90 @@ export default function TransportActivityModal({
 
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [placePickerField, setPlacePickerField] = useState(null); // "from" | "to"
+
   const [internalFromLocation, setInternalFromLocation] = useState(null);
   const [internalToLocation, setInternalToLocation] = useState(null);
 
   const effectiveFromLocation = internalFromLocation || null;
   const effectiveToLocation = internalToLocation || null;
 
-  // ===== LOAD DỮ LIỆU KHI MỞ MODAL =====
+  // ===== LOAD WHEN OPEN =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
 
     if (editingCard) {
-      const data = editingCard.activityDataJson
-        ? JSON.parse(editingCard.activityDataJson)
-        : {};
+      const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
-      const split = editingCard.split || {}; // useSplitMoney sẽ xử lý
 
       setTitle(editingCard.text || "");
 
-      setFromPlace(data.fromPlace || "");
-      setToPlace(data.toPlace || "");
-      setStops(data.stops || []);
+      // Fallback text (data cũ)
+      setFromPlaceText(data.fromPlace || "");
+      setToPlaceText(data.toPlace || "");
+
+      setStops(Array.isArray(data.stops) ? data.stops : []);
       setMethod(data.method || "taxi");
 
-      const loadedStart =
-        editingCard.startTime || data.startTime || data.time || "";
-      const loadedEnd =
-        editingCard.endTime ||
-        data.endTime ||
-        editingCard.startTime ||
-        data.time ||
-        "";
+      const { start, end } = pickStartEndFromCard(editingCard, data);
+      setStartTime(start);
+      setEndTime(end);
+      setDurationMinutes(null);
 
-      setStartTime(loadedStart);
-      setEndTime(loadedEnd);
-      setDurationMinutes(null); // tính lại bằng ActivityTimeRangeSection
+      // 1) load extra trước để có extraTotal (phục vụ tách base nếu data cũ)
+      const loadedExtra = buildInitialExtraCosts(data, cost);
+      setExtraCosts(loadedExtra);
+      const extraTotalFromLoaded = calcExtraTotal(loadedExtra);
 
-      // Chi phí ước lượng (cước chính) — giữ logic cũ: lấy từ cost.estimatedCost hoặc activityData.estimatedCost
+      // 2) base estimated:
+      // - ưu tiên data.estimatedBase / data.estimatedCost
+      // - fallback cost.estimatedCost
+      // - nếu cost.estimatedCost trước đây là (base+extra) -> tách base = est - extra
       const baseFromData =
         data.estimatedBase != null
-          ? data.estimatedBase
+          ? Number(data.estimatedBase)
           : data.estimatedCost != null
-          ? data.estimatedCost
+          ? Number(data.estimatedCost)
           : null;
 
-      const base =
+      let base =
         baseFromData != null
           ? baseFromData
           : cost.estimatedCost != null
-          ? cost.estimatedCost
+          ? Number(cost.estimatedCost)
           : null;
 
-      setEstimatedCostInput(
-        base !== null && base !== undefined ? String(base) : ""
-      );
-
-      setBudgetAmount(
-        cost.budgetAmount !== undefined && cost.budgetAmount !== null
-          ? String(cost.budgetAmount)
-          : ""
-      );
-
-      if (data.actualCost != null) {
-        setActualCost(String(data.actualCost));
-      } else if (cost.actualCost != null) {
-        setActualCost(String(cost.actualCost));
-      } else {
-        setActualCost("");
+      if (base != null && cost.estimatedCost != null && baseFromData == null) {
+        const est = Number(cost.estimatedCost);
+        const maybe = est - Number(extraTotalFromLoaded || 0);
+        // nếu data cũ từng lưu estimatedCost = base+extra, thì maybe sẽ là base hợp lý
+        if (maybe > 0 && maybe < est) base = maybe;
       }
 
-      setExtraCosts(buildInitialExtraCosts(data, cost));
+      setEstimatedCostInput(base != null && !Number.isNaN(base) ? String(base) : "");
+
+      setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
+      setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
 
       setNote(editingCard.description || "");
 
-      // load from/to location đã lưu trong activityData
-      setInternalFromLocation(data.fromLocation || null);
-      setInternalToLocation(data.toLocation || null);
+      setInternalFromLocation(normalizeLocationFromStored(data.fromLocation) || null);
+      setInternalToLocation(normalizeLocationFromStored(data.toLocation) || null);
+
+      // nếu loc mới có label -> sync text
+      if (data.fromLocation) {
+        const n = normalizeLocationFromStored(data.fromLocation);
+        if (n) setFromPlaceText(getLocDisplayLabel(n, data.fromPlace || ""));
+      }
+      if (data.toLocation) {
+        const n = normalizeLocationFromStored(data.toLocation);
+        if (n) setToPlaceText(getLocDisplayLabel(n, data.toPlace || ""));
+      }
     } else {
-      // reset khi tạo mới
       setTitle("");
-      setFromPlace("");
-      setToPlace("");
+      setFromPlaceText("");
+      setToPlaceText("");
       setStops([]);
       setMethod("taxi");
 
@@ -178,43 +190,31 @@ export default function TransportActivityModal({
     }
   }, [open, editingCard]);
 
-  // Đồng bộ text nếu có location (giống Stay)
+  // ===== SYNC label from locations -> text =====
   useEffect(() => {
-    if (effectiveFromLocation) {
-      const label =
-        effectiveFromLocation.label ||
-        effectiveFromLocation.name ||
-        effectiveFromLocation.address ||
-        effectiveFromLocation.fullAddress ||
-        "";
-      if (label) setFromPlace(label);
-    }
+    if (!effectiveFromLocation) return;
+    const label = getLocDisplayLabel(effectiveFromLocation, "");
+    if (label) setFromPlaceText(label);
   }, [effectiveFromLocation]);
 
   useEffect(() => {
-    if (effectiveToLocation) {
-      const label =
-        effectiveToLocation.label ||
-        effectiveToLocation.name ||
-        effectiveToLocation.address ||
-        effectiveToLocation.fullAddress ||
-        "";
-      if (label) setToPlace(label);
-    }
+    if (!effectiveToLocation) return;
+    const label = getLocDisplayLabel(effectiveToLocation, "");
+    if (label) setToPlaceText(label);
   }, [effectiveToLocation]);
 
-  // ===== GHÉ NGANG =====
+  // ===== STOPS =====
   const addStop = () => setStops((prev) => [...prev, ""]);
 
   const changeStop = (v, idx) => {
-    const arr = [...stops];
-    arr[idx] = v;
-    setStops(arr);
+    setStops((prev) => {
+      const arr = [...prev];
+      arr[idx] = v;
+      return arr;
+    });
   };
 
-  const removeStop = (idx) => {
-    setStops((prev) => prev.filter((_, i) => i !== idx));
-  };
+  const removeStop = (idx) => setStops((prev) => prev.filter((_, i) => i !== idx));
 
   // ===== EXTRA COSTS =====
   const addExtraCost = () =>
@@ -224,42 +224,27 @@ export default function TransportActivityModal({
     ]);
 
   const updateExtraCost = (idx, key, value) => {
-    const arr = [...extraCosts];
-    arr[idx] = { ...arr[idx], [key]: value };
-    setExtraCosts(arr);
+    setExtraCosts((prev) => {
+      const arr = [...prev];
+      arr[idx] = { ...arr[idx], [key]: value };
+      return arr;
+    });
   };
 
-  const removeExtraCost = (idx) =>
-    setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
+  const removeExtraCost = (idx) => setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== TÍNH CHI PHÍ =====
-  const baseEstimated = useMemo(
-    () => Number(estimatedCostInput || 0),
-    [estimatedCostInput]
-  );
-
-  const extraTotal = useMemo(
-    () => calcExtraTotal(extraCosts),
-    [extraCosts]
-  );
-
-  const estimatedTotal = useMemo(
-    () => baseEstimated + extraTotal,
-    [baseEstimated, extraTotal]
-  );
+  // ===== COST CALC =====
+  const baseEstimated = useMemo(() => Number(estimatedCostInput || 0), [estimatedCostInput]);
+  const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
+  const estimatedTotal = useMemo(() => baseEstimated + extraTotal, [baseEstimated, extraTotal]);
 
   const parsedActual = useMemo(() => {
     const a = Number(actualCost || 0);
-    if (a > 0) return a;
-    return estimatedTotal;
+    return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== HOOK CHIA TIỀN DÙNG CHUNG =====
-  const splitHook = useSplitMoney({
-    editingCard,
-    planMembers,
-    parsedActual,
-  });
+  // ===== SPLIT HOOK =====
+  const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
     splitEnabled,
@@ -286,9 +271,11 @@ export default function TransportActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== DISTANCE / GOOGLE MAPS =====
+  // ===== DISTANCE / MAPS =====
   const distanceKm = useMemo(() => {
-    if (!effectiveFromLocation || !effectiveToLocation) return null;
+    if (effectiveFromLocation?.lat == null || effectiveFromLocation?.lng == null) return null;
+    if (effectiveToLocation?.lat == null || effectiveToLocation?.lng == null) return null;
+
     return haversineDistanceKm(
       { lat: effectiveFromLocation.lat, lng: effectiveFromLocation.lng },
       { lat: effectiveToLocation.lat, lng: effectiveToLocation.lng }
@@ -296,7 +283,10 @@ export default function TransportActivityModal({
   }, [effectiveFromLocation, effectiveToLocation]);
 
   const mapsDirectionUrl =
-    effectiveFromLocation && effectiveToLocation
+    effectiveFromLocation?.lat != null &&
+    effectiveFromLocation?.lng != null &&
+    effectiveToLocation?.lat != null &&
+    effectiveToLocation?.lng != null
       ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
           `${effectiveFromLocation.lat},${effectiveFromLocation.lng}`
         )}&destination=${encodeURIComponent(
@@ -307,15 +297,14 @@ export default function TransportActivityModal({
   // ===== BUILD PAYLOAD =====
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
-    const extraTotalNormalized = calcExtraTotal(normalizedExtraCosts);
+    const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p.memberId));
 
-    const normalizedParticipants = participants.map((p) =>
-      typeof p === "number" ? p : p.memberId
-    );
+    // ✅ estimatedCost = BASE (không gồm extra)
+    const estimatedBase = baseEstimated > 0 ? baseEstimated : null;
 
     const cost = {
       currencyCode: "VND",
-      estimatedCost: estimatedTotal || null,
+      estimatedCost: estimatedBase,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
@@ -323,26 +312,15 @@ export default function TransportActivityModal({
       extraCosts: normalizedExtraCosts,
     };
 
-    return {
-      cost,
-      split: splitPayload,
-      participants: normalizedParticipants,
-      normalizedExtraCosts,
-      extraTotal: extraTotalNormalized,
-    };
+    return { cost, split: splitPayload, participants: normalizedParticipants };
   };
 
   // ===== SUBMIT =====
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!fromPlace.trim()) {
-      newErrors.from = "Vui lòng chọn điểm đi.";
-    }
-
-    if (!toPlace.trim()) {
-      newErrors.to = "Vui lòng chọn điểm đến.";
-    }
+    if (!fromPlaceText.trim()) newErrors.from = "Vui lòng chọn điểm đi.";
+    if (!toPlaceText.trim()) newErrors.to = "Vui lòng chọn điểm đến.";
 
     if (startTime && endTime && durationMinutes == null) {
       newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
@@ -355,35 +333,29 @@ export default function TransportActivityModal({
 
     setErrors({});
 
-    const { cost, split, participants, normalizedExtraCosts, extraTotal } =
-      buildPayload();
+    const { cost, split, participants } = buildPayload();
 
     onSubmit?.({
       type: "TRANSPORT",
-      title: title || `Di chuyển: ${fromPlace} → ${toPlace}`,
-      text: title || `Di chuyển: ${fromPlace} → ${toPlace}`,
+      title: title || `Di chuyển: ${fromPlaceText} → ${toPlaceText}`,
+      text: title || `Di chuyển: ${fromPlaceText} → ${toPlaceText}`,
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
       durationMinutes: durationMinutes ?? null,
-      participantCount:
-        splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
+      participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
+
+      // ✅ activityData gọn: chỉ đặc thù TRANSPORT
       activityData: {
-        fromPlace,
-        toPlace,
-        fromLocation: effectiveFromLocation || null,
-        toLocation: effectiveToLocation || null,
-        stops: stops.filter((s) => s.trim()),
+        fromPlace: fromPlaceText.trim(),
+        toPlace: toPlaceText.trim(),
+        fromLocation: slimLocationForStorage(effectiveFromLocation),
+        toLocation: slimLocationForStorage(effectiveToLocation),
+        stops: (stops || []).map((s) => s.trim()).filter(Boolean),
         method,
-        estimatedCost: estimatedTotal || null,
-        actualCost: actualCost ? Number(actualCost) : null,
-        extraTotal: extraTotal || null,
-        extraItems: normalizedExtraCosts,
-        time: startTime || "",
-        startTime,
-        endTime,
       },
+
       cost,
       split,
     });
@@ -400,30 +372,32 @@ export default function TransportActivityModal({
     />
   );
 
+  const footerName =
+    fromPlaceText && toPlaceText
+      ? `${fromPlaceText} → ${toPlaceText}${
+          distanceKm != null ? ` (Khoảng cách ước tính: ${distanceKm.toFixed(1)} km)` : ""
+        }`
+      : "";
+
   const footerLeft = (
     <ActivityFooterSummary
       labelPrefix="Di chuyển"
-      name={
-        fromPlace && toPlace ? `${fromPlace} → ${toPlace} (Khoảng cách ước tính: ${distanceKm.toFixed(1)} km)` : ""
-      }
+      name={footerName}
       emptyLabelText="Điền đầy đủ điểm đi và điểm đến để lưu hoạt động."
       locationText={
-        distanceKm != null
-          ? ` ${effectiveFromLocation.address} → ${effectiveToLocation.address}`
+        effectiveFromLocation?.fullAddress || effectiveToLocation?.fullAddress
+          ? `${effectiveFromLocation?.fullAddress || ""} → ${effectiveToLocation?.fullAddress || ""}`
           : ""
       }
       timeText={
-        startTime &&
-        endTime &&
-        durationMinutes != null &&
-        !errors.time
+        startTime && endTime && durationMinutes != null && !errors.time
           ? `${startTime} - ${endTime} (${durationMinutes} phút)`
           : ""
       }
     />
   );
 
-   const footerRight = readOnly ? (
+  const footerRight = readOnly ? (
     <div className="flex items-center justify-end">
       <button
         type="button"
@@ -446,28 +420,20 @@ export default function TransportActivityModal({
     />
   );
 
-  // Anchor cho PlacePicker (focus vào đầu/cuối route)
+  // Anchor cho PlacePicker (gợi ý map focus)
   let anchorPoint = null;
-  if (placePickerField === "from" && effectiveToLocation?.lat != null) {
+  if (placePickerField === "from" && effectiveToLocation?.lat != null && effectiveToLocation?.lng != null) {
     anchorPoint = {
       lat: effectiveToLocation.lat,
       lng: effectiveToLocation.lng,
-      label:
-        effectiveToLocation.label ||
-        effectiveToLocation.name ||
-        effectiveToLocation.address ||
-        "",
+      label: getLocDisplayLabel(effectiveToLocation, ""),
     };
   }
-  if (placePickerField === "to" && effectiveFromLocation?.lat != null) {
+  if (placePickerField === "to" && effectiveFromLocation?.lat != null && effectiveFromLocation?.lng != null) {
     anchorPoint = {
       lat: effectiveFromLocation.lat,
       lng: effectiveFromLocation.lng,
-      label:
-        effectiveFromLocation.label ||
-        effectiveFromLocation.name ||
-        effectiveFromLocation.address ||
-        "",
+      label: getLocDisplayLabel(effectiveFromLocation, ""),
     };
   }
 
@@ -476,11 +442,7 @@ export default function TransportActivityModal({
       <ActivityModalShell
         open={open}
         onClose={onClose}
-        icon={{
-          main: <FaRoute />,
-          close: <FaTimes size={14} />,
-          bg: "from-sky-500 to-indigo-500",
-        }}
+        icon={{ main: <FaRoute />, close: <FaTimes size={14} />, bg: "from-sky-500 to-indigo-500" }}
         title="Hoạt động di chuyển"
         typeLabel="Transport"
         subtitle="Ghi lại quãng đường, thời gian, chi phí và chia tiền cho nhóm."
@@ -491,9 +453,7 @@ export default function TransportActivityModal({
         {/* THÔNG TIN CHUNG */}
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
-            </label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Thông tin chung</label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
               Tên + điểm đi/đến + điểm ghé
             </span>
@@ -501,9 +461,7 @@ export default function TransportActivityModal({
 
           <div className={sectionCard}>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
-              </label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Tên hoạt động (tuỳ chọn)</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -513,7 +471,7 @@ export default function TransportActivityModal({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-              {/* ĐI TỪ */}
+              {/* FROM */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                   Đi từ <span className="text-red-500 align-middle">*</span>
@@ -540,48 +498,39 @@ export default function TransportActivityModal({
                 >
                   <div
                     className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-sky-50 text-sky-500 border border-sky-100
-                                dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800"
+                      bg-sky-50 text-sky-500 border border-sky-100
+                      dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800"
                   >
                     <FaMapMarkerAlt />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    {effectiveFromLocation || fromPlace ? (
+                    {effectiveFromLocation || fromPlaceText ? (
                       <>
                         <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                          {effectiveFromLocation?.label ||
-                            effectiveFromLocation?.name ||
-                            fromPlace ||
-                            "Điểm xuất phát đã chọn"}
+                          {getLocDisplayLabel(effectiveFromLocation, fromPlaceText || "Điểm xuất phát")}
                         </p>
 
-                        {(effectiveFromLocation?.address ||
-                          effectiveFromLocation?.fullAddress) && (
+                        {effectiveFromLocation?.fullAddress && (
                           <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                            {effectiveFromLocation.address ||
-                              effectiveFromLocation.fullAddress}
+                            {effectiveFromLocation.fullAddress}
                           </p>
                         )}
 
-                        {!effectiveFromLocation && fromPlace && (
+                        {!effectiveFromLocation && fromPlaceText && (
                           <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                            {fromPlace}
+                            {fromPlaceText}
                           </p>
                         )}
 
-                        {effectiveFromLocation && (
+                        {effectiveFromLocation?.lat != null && effectiveFromLocation?.lng != null && (
                           <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                             <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
                               Đã chọn trên bản đồ
                             </span>
-                            {effectiveFromLocation.lat != null &&
-                              effectiveFromLocation.lng != null && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
-                                  {effectiveFromLocation.lat.toFixed(4)},{" "}
-                                  {effectiveFromLocation.lng.toFixed(4)}
-                                </span>
-                              )}
+                            <span className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
+                              {effectiveFromLocation.lat.toFixed(4)}, {effectiveFromLocation.lng.toFixed(4)}
+                            </span>
                           </div>
                         )}
                       </>
@@ -591,27 +540,24 @@ export default function TransportActivityModal({
                           Chọn điểm xuất phát trên bản đồ
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                          Nhấn để mở Map, chọn khách sạn, địa điểm hoặc quán ăn
-                          làm điểm đi.
+                          Nhấn để mở Map, chọn địa điểm làm điểm đi.
                         </p>
                       </>
                     )}
                   </div>
 
-                  <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-sky-500 group-hover:text-sky-600 dark:text-sky-300
-                                dark:group-hover:text-sky-200">
+                  <span
+                    className="hidden md:inline-flex items-center text-[11px] font-medium
+                      text-sky-500 group-hover:text-sky-600 dark:text-sky-300 dark:group-hover:text-sky-200"
+                  >
                     Mở bản đồ
                   </span>
                 </button>
-                {errors.from && (
-                  <p className="mt-1 text-[11px] text-rose-500">
-                    {errors.from}
-                  </p>
-                )}
+
+                {errors.from && <p className="mt-1 text-[11px] text-rose-500">{errors.from}</p>}
               </div>
 
-              {/* ĐẾN */}
+              {/* TO */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                   Đến <span className="text-red-500 align-middle">*</span>
@@ -638,48 +584,39 @@ export default function TransportActivityModal({
                 >
                   <div
                     className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                                bg-emerald-50 text-emerald-500 border border-emerald-100
-                                dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
+                      bg-emerald-50 text-emerald-500 border border-emerald-100
+                      dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
                   >
                     <FaMapMarkerAlt />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    {effectiveToLocation || toPlace ? (
+                    {effectiveToLocation || toPlaceText ? (
                       <>
                         <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                          {effectiveToLocation?.label ||
-                            effectiveToLocation?.name ||
-                            toPlace ||
-                            "Điểm đến đã chọn"}
+                          {getLocDisplayLabel(effectiveToLocation, toPlaceText || "Điểm đến")}
                         </p>
 
-                        {(effectiveToLocation?.address ||
-                          effectiveToLocation?.fullAddress) && (
+                        {effectiveToLocation?.fullAddress && (
                           <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                            {effectiveToLocation.address ||
-                              effectiveToLocation.fullAddress}
+                            {effectiveToLocation.fullAddress}
                           </p>
                         )}
 
-                        {!effectiveToLocation && toPlace && (
+                        {!effectiveToLocation && toPlaceText && (
                           <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                            {toPlace}
+                            {toPlaceText}
                           </p>
                         )}
 
-                        {effectiveToLocation && (
+                        {effectiveToLocation?.lat != null && effectiveToLocation?.lng != null && (
                           <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                             <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
                               Đã chọn trên bản đồ
                             </span>
-                            {effectiveToLocation.lat != null &&
-                              effectiveToLocation.lng != null && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
-                                  {effectiveToLocation.lat.toFixed(4)},{" "}
-                                  {effectiveToLocation.lng.toFixed(4)}
-                                </span>
-                              )}
+                            <span className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
+                              {effectiveToLocation.lat.toFixed(4)}, {effectiveToLocation.lng.toFixed(4)}
+                            </span>
                           </div>
                         )}
                       </>
@@ -689,22 +626,21 @@ export default function TransportActivityModal({
                           Chọn điểm đến trên bản đồ
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                          Nhấn để mở Map, chọn địa điểm kế tiếp hoặc khách sạn,
-                          quán ăn làm điểm đến.
+                          Nhấn để mở Map, chọn địa điểm làm điểm đến.
                         </p>
                       </>
                     )}
                   </div>
 
-                  <span className="hidden md:inline-flex items-center text-[11px] font-medium
-                                text-emerald-500 group-hover:text-emerald-600 dark:text-emerald-300
-                                dark:group-hover:text-emerald-200">
+                  <span
+                    className="hidden md:inline-flex items-center text-[11px] font-medium
+                      text-emerald-500 group-hover:text-emerald-600 dark:text-emerald-300 dark:group-hover:text-emerald-200"
+                  >
                     Mở bản đồ
                   </span>
                 </button>
-                {errors.to && (
-                  <p className="mt-1 text-[11px] text-rose-500">{errors.to}</p>
-                )}
+
+                {errors.to && <p className="mt-1 text-[11px] text-rose-500">{errors.to}</p>}
               </div>
 
               {mapsDirectionUrl && (
@@ -713,10 +649,10 @@ export default function TransportActivityModal({
                     type="button"
                     onClick={() => window.open(mapsDirectionUrl, "_blank")}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl
-                    bg-sky-50 text-sky-700 border border-sky-200 text-[11px] font-medium
-                    hover:bg-sky-100 hover:border-sky-300
-                    dark:bg-sky-900/30 dark:text-sky-200 dark:border-sky-800
-                    dark:hover:bg-sky-900/60"
+                      bg-sky-50 text-sky-700 border border-sky-200 text-[11px] font-medium
+                      hover:bg-sky-100 hover:border-sky-300
+                      dark:bg-sky-900/30 dark:text-sky-200 dark:border-sky-800
+                      dark:hover:bg-sky-900/60"
                   >
                     <FaRoute size={11} />
                     <span>Mở chỉ đường trên Google Maps</span>
@@ -725,17 +661,14 @@ export default function TransportActivityModal({
               )}
             </div>
 
-            {/* GHÉ NGANG */}
+            {/* STOPS */}
             <div className="pt-1 mt-2">
               <div className="flex items-center justify-between gap-2">
-                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Ghé ngang
-                </label>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Ghé ngang</label>
                 <button
                   onClick={addStop}
                   type="button"
-                  className="flex items-center gap-1 text-[11px] font-medium text-sky-600
-                 dark:text-sky-300 hover:text-sky-500"
+                  className="flex items-center gap-1 text-[11px] font-medium text-sky-600 dark:text-sky-300 hover:text-sky-500"
                 >
                   + Thêm điểm dừng
                 </button>
@@ -755,7 +688,7 @@ export default function TransportActivityModal({
                         onClick={() => removeStop(i)}
                         type="button"
                         className="p-2 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50
-                       dark:hover:bg-rose-950/40 transition"
+                          dark:hover:bg-rose-950/40 transition"
                       >
                         <FaTimes size={12} />
                       </button>
@@ -767,23 +700,16 @@ export default function TransportActivityModal({
           </div>
         </section>
 
-        {/* PHƯƠNG TIỆN & THỜI GIAN */}
+        {/* METHOD & TIME */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Phương tiện & Thời gian
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Chọn cách đi + giờ đi/đến
-            </span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Phương tiện & Thời gian</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Chọn cách đi + giờ đi/đến</span>
           </div>
 
           <div className={sectionCard + " space-y-3"}>
-            {/* Phương tiện */}
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Phương tiện
-              </label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Phương tiện</label>
               <div className="flex flex-wrap gap-2 mt-1.5">
                 {TRANSPORT_METHODS.map((m) => (
                   <button
@@ -802,7 +728,6 @@ export default function TransportActivityModal({
               </div>
             </div>
 
-            {/* Thời gian: dùng ActivityTimeRangeSection */}
             <ActivityTimeRangeSection
               sectionLabel="Thời gian di chuyển"
               startLabel="Bắt đầu"
@@ -814,28 +739,21 @@ export default function TransportActivityModal({
               onStartTimeChange={(val) => setStartTime(val)}
               onEndTimeChange={(val) => setEndTime(val)}
               error={errors.time}
-              onErrorChange={(msg) =>
-                setErrors((prev) => ({ ...prev, time: msg }))
-              }
+              onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
               onDurationChange={(mins) => setDurationMinutes(mins)}
               durationHintPrefix="Thời lượng dự kiến"
             />
           </div>
         </section>
 
-        {/* NGÂN SÁCH & CHI PHÍ */}
+        {/* COST */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ngân sách & chi phí
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Ước lượng + phát sinh + thực tế
-            </span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ngân sách & chi phí</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Ước lượng + phát sinh + thực tế</span>
           </div>
 
           <div className={sectionCard + " space-y-4"}>
-            {/* Ước lượng + ngân sách */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
@@ -849,7 +767,7 @@ export default function TransportActivityModal({
                     value={estimatedCostInput}
                     onChange={(e) => setEstimatedCostInput(e.target.value)}
                     className={`${inputBase} flex-1`}
-                    placeholder="VD: 50.000"
+                    placeholder="VD: 50000"
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
@@ -874,7 +792,6 @@ export default function TransportActivityModal({
               </div>
             </div>
 
-            {/* Extra costs */}
             <ExtraCostsSection
               extraCosts={extraCosts}
               addExtraCost={addExtraCost}
@@ -883,7 +800,6 @@ export default function TransportActivityModal({
               extraTypes={EXTRA_TYPES}
             />
 
-            {/* Chi phí thực tế */}
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 Tổng chi phí thực tế cho chuyến này (nếu có)
@@ -895,30 +811,24 @@ export default function TransportActivityModal({
                   min="0"
                   value={actualCost}
                   onChange={(e) => setActualCost(e.target.value)}
-                  placeholder="Điền sau khi trả tiền xong"
+                  placeholder="Điền lại sau khi thanh toán"
                   className={`${inputBase} flex-1`}
                 />
                 <span className="text-xs text-slate-500">đ</span>
               </div>
               <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                Nếu để trống, hệ thống sẽ dùng{" "}
-                <b>chi phí ước lượng + phát sinh</b> để chia tiền.
+                Nếu để trống, hệ thống sẽ dùng <b>chi phí ước lượng</b> + <b>phát sinh</b> để chia tiền.
               </p>
             </div>
 
-            {/* Tóm tắt chi phí */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
                 Cước chính ước lượng:{" "}
-                <span className="font-semibold">
-                  {baseEstimated.toLocaleString("vi-VN")}đ
-                </span>
+                <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh (phí dịch vụ, thuế...):{" "}
-                <span className="font-semibold">
-                  {extraTotal.toLocaleString("vi-VN")}đ
-                </span>
+                Phát sinh:{" "}
+                <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
                 Tổng dự kiến:{" "}
@@ -926,27 +836,27 @@ export default function TransportActivityModal({
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
+
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                  Đang dùng <b>chi phí thực tế</b>:{" "}
                   <span className="font-semibold text-sky-600 dark:text-sky-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
                 </div>
               )}
+
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
                   Ngân sách:{" "}
-                  <span className="font-semibold">
-                    {Number(budgetAmount).toLocaleString("vi-VN")}đ
-                  </span>
+                  <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
             </div>
           </div>
         </section>
 
-        {/* CHIA TIỀN */}
+        {/* SPLIT */}
         <section className="space-y-4">
           <SplitMoneySection
             planMembers={planMembers}
@@ -974,15 +884,11 @@ export default function TransportActivityModal({
           />
         </section>
 
-        {/* GHI CHÚ */}
+        {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
-            </label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm thông tin nhỏ cho cả nhóm
-            </span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm thông tin nhỏ cho cả nhóm</span>
           </div>
           <textarea
             rows={3}
@@ -994,7 +900,7 @@ export default function TransportActivityModal({
         </section>
       </ActivityModalShell>
 
-      {/* PLACE PICKER CHO TRANSPORT */}
+      {/* PLACE PICKER */}
       <PlacePickerModal
         open={placePickerOpen}
         onClose={() => setPlacePickerOpen(false)}
@@ -1004,16 +910,16 @@ export default function TransportActivityModal({
             return;
           }
 
-          const label =
-            loc.label || loc.name || loc.address || loc.fullAddress || "";
+          const slim = normalizeLocationFromStored(slimLocationForStorage(loc));
+          const label = getLocDisplayLabel(slim, "");
 
           if (placePickerField === "from") {
-            setInternalFromLocation(loc);
-            if (label) setFromPlace(label);
+            setInternalFromLocation(slim);
+            if (label) setFromPlaceText(label);
             setErrors((prev) => ({ ...prev, from: "" }));
           } else if (placePickerField === "to") {
-            setInternalToLocation(loc);
-            if (label) setToPlace(label);
+            setInternalToLocation(slim);
+            if (label) setToPlaceText(label);
             setErrors((prev) => ({ ...prev, to: "" }));
           }
 

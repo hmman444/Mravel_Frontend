@@ -16,6 +16,7 @@ import partnerAuthReducer from "../features/partnerAuth/slices/partnerAuthSlice"
 import adminAmenityReducer from "../features/admin/slices/adminAmenitySlice";
 import profileReducer from "../features/user/slices/profileSlice";
 import adminPlaceReducer from "../features/admin/slices/adminPlaceSlice";
+import notificationsReducer from "../features/notifications/slices/notificationSlice";
 import partnerReducer from "../features/partner/slices/partnerSlice";
 import { injectStore } from "./storeInjector";
 
@@ -38,6 +39,7 @@ export const store = configureStore({
     partnerAuth: partnerAuthReducer,
     adminAmenity: adminAmenityReducer,
     adminPlace: adminPlaceReducer,
+    notifications:notificationsReducer,
     partner: partnerReducer,
   },
   middleware: (getDefaultMiddleware) =>

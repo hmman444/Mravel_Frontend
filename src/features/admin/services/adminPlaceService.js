@@ -5,7 +5,7 @@ const BASE = "/admin/places";
 const ensureOk = (res) => {
   const body = res?.data;
   if (body?.success === false) {
-    const msg = body?.message || "Có lỗi xảy ra";
+    const msg = body?.message || body?.error || "Có lỗi xảy ra";
     const err = new Error(msg);
     err.response = { data: body, status: res?.status };
     throw err;
@@ -13,7 +13,6 @@ const ensureOk = (res) => {
   return body?.data;
 };
 
-// normalize Page (Spring Page)
 const normalizePage = (page) => ({
   items: page?.content ?? [],
   page: page?.number ?? 0,
@@ -40,15 +39,23 @@ export async function fetchAdminPlaceDetail(slug) {
 }
 
 export async function fetchAdminChildren(slug, params = {}) {
-  const res = await api.get(`${BASE}/${encodeURIComponent(slug)}/children`, {
-    params,
-  });
+  const res = await api.get(`${BASE}/${encodeURIComponent(slug)}/children`, { params });
   const pageData = ensureOk(res);
   return normalizePage(pageData);
 }
 
 export async function updateAdminPlace(id, payload) {
   const res = await api.put(`${BASE}/${id}`, payload);
+  return ensureOk(res);
+}
+
+export async function lockAdminPlace(id) {
+  const res = await api.patch(`${BASE}/${id}/lock`);
+  return ensureOk(res);
+}
+
+export async function unlockAdminPlace(id) {
+  const res = await api.patch(`${BASE}/${id}/unlock`);
   return ensureOk(res);
 }
 

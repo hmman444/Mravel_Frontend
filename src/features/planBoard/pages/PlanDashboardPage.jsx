@@ -258,17 +258,7 @@ export default function PlanDashboardPage() {
         payments: [],
       };
 
-    const activityJson = {
-      ...(activityData || {}),
-      ...rest,
-      type: type || "OTHER",
-      title: finalText,
-      description: finalDescription,
-      startTime,
-      endTime,
-      estimatedCost: parsedEstimated,
-      actualCost: parsedActual,
-    };
+    const activityJson = activityData || {};
 
     return {
       text: finalText,
