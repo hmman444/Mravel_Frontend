@@ -19,7 +19,6 @@ export default function NotificationBell({ solid, onOpen }) {
 
   const wrapRef = useRef(null);
 
-  // ✅ dùng CLICK, KHÔNG dùng mousedown
   useEffect(() => {
     if (!dropdownOpen) return;
 
@@ -42,7 +41,7 @@ export default function NotificationBell({ solid, onOpen }) {
       <button
         type="button"
         onClick={(e) => {
-          e.stopPropagation();   // ⭐ FIX QUAN TRỌNG NHẤT
+          e.stopPropagation();   
           onOpen?.();
           toggle();
         }}

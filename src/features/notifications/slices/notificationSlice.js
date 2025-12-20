@@ -32,9 +32,6 @@ const apiMessage = (err) => {
   return msg || "Có lỗi xảy ra";
 };
 
-/** =========================
- * Helpers
- * ========================= */
 const normalizeNotiItem = (n) => {
   if (!n) return null;
 

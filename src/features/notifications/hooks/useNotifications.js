@@ -22,9 +22,6 @@ export function useNotifications() {
     [userId]
   );
 
-  /* =============================
-   * 🟢 LOAD NGAY KHI LOGIN
-   * ============================= */
   const loadedOnceRef = useRef(false);
 
   useEffect(() => {
@@ -46,7 +43,6 @@ export function useNotifications() {
     loadedOnceRef.current = true;
   }, [userId, dispatch, n.size]);
 
-  /* ============================= */
 
   const open = useCallback(() => dispatch(setDropdownOpen(true)), [dispatch]);
   const close = useCallback(() => dispatch(setDropdownOpen(false)), [dispatch]);

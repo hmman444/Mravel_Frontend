@@ -27,6 +27,7 @@ export async function fetchNotifications(params = {}) {
   const res = await api.get(`${BASE}${query ? `?${query}` : ""}`);
   return ensureOk(res);
 }
+
 export async function markNotificationRead(id, params = {}) {
   const query = new URLSearchParams(params).toString();
   const res = await api.patch(`${BASE}/${id}/read${query ? `?${query}` : ""}`);
