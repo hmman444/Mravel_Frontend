@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, CreditCard, Hash, UtensilsCrossed, X } from "lucide-react";
 import api from "../../../../utils/axiosInstance";
+import CancelBookingModal from "../public/BookingCancelModal";
 
 const fmtDateTime = (d) => {
   if (!d) return "--";
@@ -28,6 +29,35 @@ const badgeClass = (status) => {
   return "bg-gray-50 text-gray-700 border-gray-200";
 };
 
+const CANCELLED_SET = new Set([
+  "CANCELLED",
+  "CANCELLED_BY_GUEST",
+  "CANCELLED_BY_PARTNER",
+  "REFUNDED",
+  "PARTIAL_REFUNDED",
+]);
+
+const toReservationDateTime = (dateStr, timeStr) => {
+  if (!dateStr) return null;
+  const [y, m, d] = String(dateStr).split("-").map(Number);
+  if (!y || !m || !d) return null;
+
+  let hh = 0, mm = 0;
+  if (timeStr && /^\d{2}:\d{2}/.test(timeStr)) {
+    const parts = String(timeStr).split(":").map(Number);
+    hh = parts[0] || 0;
+    mm = parts[1] || 0;
+  }
+  const dt = new Date(y, m - 1, d, hh, mm, 0, 0);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+};
+
+const isUsedTimePassedRestaurant = (reservationDate, reservationTime) => {
+  const dt = toReservationDateTime(reservationDate, reservationTime);
+  if (!dt) return false;
+  return dt.getTime() < Date.now();
+};
+
 function DetailRow({ label, value, mono = false }) {
   if (value === undefined || value === null || value === "") return null;
   return (
@@ -50,11 +80,17 @@ export default function RestaurantBookingCard({
   onOpenRestaurant,
   detailScope = "PUBLIC", // PUBLIC | PRIVATE | LOOKUP
   lookupCreds,            // { phoneLast4, email } - dùng khi detailScope="LOOKUP"
+  onRefresh,
 }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
+
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReasonInput, setCancelReasonInput] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
 
   const PENDING_EXPIRE_MINUTES = 30;
 
@@ -67,6 +103,21 @@ export default function RestaurantBookingCard({
     const p = String((detail || booking)?.paymentStatus || "").toUpperCase();
     return s === "PENDING_PAYMENT" && p === "PENDING";
   }, [detail, booking]);
+
+  const canCancel = useMemo(() => {
+    const st = String((detail || booking)?.status || "").toUpperCase();
+    if (CANCELLED_SET.has(st)) return false;
+
+    const rd = (detail || booking)?.reservationDate;
+    const rt = (detail || booking)?.reservationTime;
+
+    if (isUsedTimePassedRestaurant(rd, rt)) return false;
+
+    const dt = toReservationDateTime(rd, rt);
+    return dt ? dt.getTime() > Date.now() : false;
+  }, [detail, booking]);
+
+  const showCancelButton = !isPendingPay && canCancel;
 
   const deadlineMs = useMemo(() => {
     const created = (detail || booking)?.createdAt;
@@ -121,6 +172,51 @@ export default function RestaurantBookingCard({
       setResumeError(msg);
     } finally {
       setResuming(false);
+    }
+  };
+
+  const callCancelApi = async ({ code, reason }) => {
+    if (detailScope === "PRIVATE") {
+      return api.post(`/booking/restaurants/${encodeURIComponent(code)}/cancel`, { reason });
+    }
+    if (detailScope === "LOOKUP") {
+      return api.post(`/booking/public/restaurants/lookup/cancel`, {
+        bookingCode: code,
+        phoneLast4: lookupCreds?.phoneLast4,
+        email: lookupCreds?.email?.trim() || null,
+        reason,
+      });
+    }
+    return api.post(`/booking/public/restaurants/my/${encodeURIComponent(code)}/cancel`, { reason });
+  };
+
+  const onCancelSubmit = async () => {
+    if (!code) return;
+    try {
+      setCancelError(null);
+      setCancelLoading(true);
+
+      await callCancelApi({ code, reason: (cancelReasonInput || "").trim() });
+
+      // ✅ refresh list ở page cha
+      onRefresh?.();
+
+      setCancelOpen(false);
+      setCancelReasonInput("");
+
+      // nếu modal detail đang mở => reload detail (giống hotel)
+      if (open) {
+        setDetail(null);
+        setDetailLoading(true);
+        const data = await fetchDetail(code);
+        setDetail(data ?? null);
+        setDetailLoading(false);
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Hủy đơn thất bại";
+      setCancelError(msg);
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -342,6 +438,20 @@ export default function RestaurantBookingCard({
                 ) : null}
               </>
             ) : null}
+
+            {showCancelButton ? (
+              <button
+                type="button"
+                onClick={() => setCancelOpen(true)}
+                className={[
+                  "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
+                  "border border-red-600 text-red-600 hover:bg-red-50",
+                ].join(" ")}
+                title="Hủy đơn"
+              >
+                Hủy đơn
+              </button>
+            ) : null}
           </div>
         </div>
       </article>
@@ -456,10 +566,39 @@ export default function RestaurantBookingCard({
               >
                 Đóng
               </button>
+
+              {showCancelButton ? (
+                <button
+                  type="button"
+                  onClick={() => setCancelOpen(true)}
+                  className={[
+                    "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
+                    "border border-red-600 text-red-600 hover:bg-red-50",
+                  ].join(" ")}
+                  title="Hủy đơn"
+                >
+                  Hủy đơn
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
       ) : null}
+
+      <CancelBookingModal
+        open={cancelOpen}
+        code={code}
+        serviceName={restaurantName || ""}
+        reason={cancelReasonInput}
+        setReason={setCancelReasonInput}
+        loading={cancelLoading}
+        error={cancelError}
+        onClose={() => {
+          setCancelOpen(false);
+          setCancelError(null);
+        }}
+        onSubmit={onCancelSubmit}
+      />
     </>
   );
 }
