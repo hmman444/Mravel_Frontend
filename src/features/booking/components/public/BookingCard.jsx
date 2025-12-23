@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, CreditCard, Hotel, Hash, X } from "lucide-react";
 import api from "../../../../utils/axiosInstance";
+import CancelBookingModal from "../public/BookingCancelModal";
 
 const fmtDate = (d) => {
   if (!d) return "--";
@@ -40,6 +41,37 @@ const badgeClass = (status) => {
   return "bg-gray-50 text-gray-700 border-gray-200";
 };
 
+const CANCELLED_SET = new Set([
+  "CANCELLED",
+  "CANCELLED_BY_GUEST",
+  "CANCELLED_BY_PARTNER",
+  "REFUNDED",
+  "PARTIAL_REFUNDED",
+]);
+
+const toDateSafe = (v) => {
+  if (!v) return null;
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    const [y, m, d] = v.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }
+  const dt = new Date(v);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+};
+
+const isUsedTimePassedHotel = (checkOutDate) => {
+  const d = toDateSafe(checkOutDate);
+  if (!d) return false;
+
+  if (typeof checkOutDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(checkOutDate)) {
+    const eod = new Date(d);
+    eod.setHours(23, 59, 59, 999);
+    return eod.getTime() < Date.now();
+  }
+  return d.getTime() < Date.now();
+};
+
 function DetailRow({ label, value, mono = false }) {
   if (value === undefined || value === null || value === "") return null;
   return (
@@ -65,6 +97,7 @@ export default function BookingCard({
   onOpenHotel,
   detailScope = "PUBLIC",
   lookupCreds,
+  onRefresh,
 }) {
   // detail state
   const [detail, setDetail] = useState(null);
@@ -78,10 +111,21 @@ export default function BookingCard({
   const [resuming, setResuming] = useState(false);
   const [resumeError, setResumeError] = useState(null);
 
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReasonInput, setCancelReasonInput] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
+
   const isPendingPay = useMemo(() => {
-    const s = String((detail || booking)?.status || "").toUpperCase();
-    const p = String((detail || booking)?.paymentStatus || "").toUpperCase();
+    const s = String((detail || booking)?.status || "").trim().toUpperCase();
+    const p = String((detail || booking)?.paymentStatus || "").trim().toUpperCase();
     return s === "PENDING_PAYMENT" && p === "PENDING";
+  }, [detail, booking]);
+
+  const isConfirmed = useMemo(() => {
+    const s = String((detail || booking)?.status || "").trim().toUpperCase();
+    // tuỳ bạn: nếu hệ thống chỉ dùng CONFIRMED thì để mỗi CONFIRMED
+    return s === "CONFIRMED" || s === "PAID";
   }, [detail, booking]);
 
   const deadlineMs = useMemo(() => {
@@ -93,7 +137,6 @@ export default function BookingCard({
 
   const expiresInMs = deadlineMs ? (deadlineMs - nowTick) : 0;
   const canResume = isPendingPay && !!deadlineMs && expiresInMs > 0;
-
   useEffect(() => {
     if (!canResume) return;
     const id = setInterval(() => setNowTick(Date.now()), 1000);
@@ -152,6 +195,28 @@ export default function BookingCard({
     const co = booking?.checkOutDate;
     return fmtRange(ci, co);
   }, [booking?.checkInDate, booking?.checkOutDate]);
+
+    const canCancel = useMemo(() => {
+      const st = String((detail || booking)?.status || "").trim().toUpperCase();
+
+      // ✅ chỉ cho hủy khi đã xác nhận (đúng yêu cầu của bạn)
+      if (!isConfirmed) return false;
+
+      // ✅ các trạng thái đã hủy thì thôi
+      if (CANCELLED_SET.has(st)) return false;
+
+      const ci = (detail || booking)?.checkInDate;
+      const co = (detail || booking)?.checkOutDate;
+
+      // ✅ đã qua thời gian sử dụng => không cho hủy
+      if (isUsedTimePassedHotel(co)) return false;
+
+      // ✅ chỉ cho hủy khi chưa tới check-in
+      const d = toDateSafe(ci);
+      return d ? d.getTime() > Date.now() : false;
+    }, [detail, booking, isConfirmed]);
+
+  const showCancelButton = !canResume && canCancel;
 
   useEffect(() => {
     if (!open) return;
@@ -220,6 +285,70 @@ export default function BookingCard({
 
   const b = detail || booking;
 
+  const callCancelApi = async ({ code, reason }) => {
+    if (detailScope === "PRIVATE") {
+      return api.post(`/booking/bookings/${encodeURIComponent(code)}/cancel`, { reason });
+    }
+    if (detailScope === "LOOKUP") {
+      return api.post(`/booking/public/lookup/cancel`, {
+        bookingCode: code,
+        phoneLast4: lookupPhoneLast4,
+        email: lookupEmail,
+        reason,
+      });
+    }
+    // PUBLIC (device cookie)
+    return api.post(`/booking/public/my/${encodeURIComponent(code)}/cancel`, { reason });
+  };
+
+  const onCancelSubmit = async () => {
+    if (!code) return;
+    try {
+      setCancelError(null);
+      setCancelLoading(true);
+
+      await callCancelApi({ code, reason: (cancelReasonInput || "").trim() });
+      onRefresh?.();
+
+      // refresh detail + UI
+      setCancelOpen(false);
+      setCancelReasonInput("");
+
+      // cách đơn giản nhất: reload modal detail nếu đang mở, còn không thì user bấm refresh list
+      if (open) {
+        // bạn đang có useEffect fetch detail phụ thuộc open, nên “đá” lại open
+        setDetail(null);
+        // trigger fetch lại bằng cách giữ open=true (effect đã chạy khi open=true rồi),
+        // nên ta gọi fetch thủ công bằng cách bật loading và gọi lại giống effect:
+        setDetailLoading(true);
+        const url =
+          detailScope === "PRIVATE"
+            ? `/booking/bookings/${encodeURIComponent(code)}`
+            : detailScope === "LOOKUP"
+            ? null
+            : `/booking/public/my/${encodeURIComponent(code)}`;
+
+        let res;
+        if (detailScope === "LOOKUP") {
+          res = await api.post(`/booking/public/lookup/detail`, {
+            bookingCode: code,
+            phoneLast4: lookupPhoneLast4,
+            email: lookupEmail,
+          });
+        } else {
+          res = await api.get(url);
+        }
+        setDetail(res.data?.data ?? null);
+        setDetailLoading(false);
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Hủy đơn thất bại";
+      setCancelError(msg);
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
   const {
     code,
     hotelName,
@@ -239,8 +368,8 @@ export default function BookingCard({
     totalAmount,
     amountPaid,
     currencyCode,
-    cancelReason,
-    cancelledAt,
+    cancelReason: cancelReasonDb,
+    cancelledAt: cancelledAtDb,
 
     checkInDate,
     checkOutDate,
@@ -366,6 +495,20 @@ export default function BookingCard({
                   <p className="text-[11px] text-red-600">{resumeError}</p>
                 ) : null}
               </>
+            ) : null}
+
+            {showCancelButton ? (
+              <button
+                type="button"
+                onClick={() => setCancelOpen(true)}
+                className={[
+                  "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
+                  "border border-red-600 text-red-600 hover:bg-red-50",
+                ].join(" ")}
+                title="Hủy đơn"
+              >
+                Hủy đơn
+              </button>
             ) : null}
           </div>
         </div>
@@ -533,17 +676,18 @@ export default function BookingCard({
                     <div className="h-px bg-gray-100" />
                     <DetailRow label="Currency" value={currencyCode} />
 
-                    {cancelReason ? (
-                        <>
+                    {cancelReasonDb ? (
+                      <>
                         <div className="h-px bg-gray-100" />
-                        <DetailRow label="Lý do huỷ" value={cancelReason} />
-                        </>
+                        <DetailRow label="Lý do huỷ" value={cancelReasonDb} />
+                      </>
                     ) : null}
-                    {cancelledAt ? (
-                        <>
+
+                    {cancelledAtDb ? (
+                      <>
                         <div className="h-px bg-gray-100" />
-                        <DetailRow label="Huỷ lúc" value={fmtDate(cancelledAt)} />
-                        </>
+                        <DetailRow label="Huỷ lúc" value={fmtDate(cancelledAtDb)} />
+                      </>
                     ) : null}
                     </div>
                 </div>
@@ -608,6 +752,21 @@ export default function BookingCard({
           </div>
         </div>
       ) : null}
+
+      <CancelBookingModal
+        open={cancelOpen}
+        code={code}
+        serviceName={hotelName || ""}
+        reason={cancelReasonInput}
+        setReason={setCancelReasonInput}
+        loading={cancelLoading}
+        error={cancelError}
+        onClose={() => {
+          setCancelOpen(false);
+          setCancelError(null);
+        }}
+        onSubmit={onCancelSubmit}
+      />
     </>
   );
 }

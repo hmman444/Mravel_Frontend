@@ -77,6 +77,7 @@ export default function GuestRestaurantBookingsList({
               booking={b}
               onOpenRestaurant={onOpenRestaurant}
               detailScope={detailScope}
+              onRefresh={onRefresh}
             />
           ))}
         </div>

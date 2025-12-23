@@ -11,6 +11,7 @@ import FadeInSection from "../../../components/FadeInSection";
 import HotelBrandPartners from "../components/hotel/HotelBrandPartners";
 import PaymentPartners from "../components/PaymentPartners";
 import WeekendNearbyHotels from "../components/hotel/WeekendNearbyHotels";
+import HotelSearchResultsSection from "../components/hotel/HotelSearchResultsSection";
 
 export default function HotelsHomePage() {
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ export default function HotelsHomePage() {
       <main className="flex-1 w-full">
         {/* Chơi cuối tuần gần nhà (thay cho Khách sạn phổ biến) */}
         <FadeInSection className="max-w-7xl mx-auto px-6 pt-10 pb-10">
+          <HotelSearchResultsSection />
           <WeekendNearbyHotels />
         </FadeInSection>
 
