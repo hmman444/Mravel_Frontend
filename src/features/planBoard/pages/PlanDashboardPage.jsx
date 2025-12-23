@@ -9,7 +9,8 @@ import PlanSummary from "../components/summary/PlanSummary";
 import PlanBoard from "../components/board/PlanBoard";
 import PlanMembers from "../components/member/PlanMembers";
 import PlanCalendar from "../components/calender/PlanCalendar";
-
+import PlanFeedTab from "../components/feed/PlanFeedTab";
+import PlanStatsTab from "../components/stats/PlanStatsTab";
 import ShareModal from "../components/modals/ShareModal";
 import ConfirmModal from "../../../components/ConfirmModal";
 import AccessRequestModal from "../components/modals/AccessRequestModal";
@@ -53,7 +54,6 @@ export default function PlanDashboardPage() {
 
   const { plans: myPlans, reload: reloadMyPlans } = useMyPlans();
   const { recentPlans, reloadRecent, removeRecent } = useRecentPlans();
-
   const { updateTitle } = usePlanGeneral();
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window === "undefined") return "summary";
@@ -183,13 +183,6 @@ export default function PlanDashboardPage() {
     }
   };
 
-  /**
-   * Chuẩn hoá payload gửi lên BE từ activityPayload của modal
-   * activity = {
-   *   type: "TRANSPORT" | "FOOD" | ...,
-   *   title, startTime, endTime, estimatedCost, actualCost, note, ...
-   * }
-   */
   const buildCardPayloadFromActivity = (activity) => {
     if (!activity) return {};
 
@@ -508,6 +501,8 @@ export default function PlanDashboardPage() {
           { key: "board", label: "Bảng lịch trình" },
           { key: "calendar", label: "Thời gian biểu" },
           { key: "members", label: "Thành viên" },
+          { key: "feed", label: "Bài viết" },
+          { key: "stats", label: "Thống kê" }
         ].map((t) => {
           const ac = activeTab === t.key;
           return (
@@ -642,6 +637,12 @@ export default function PlanDashboardPage() {
         )}
 
         {activeTab === "members" && <PlanMembers planId={planId} />}
+        {activeTab === "feed" && (
+          <PlanFeedTab planId={planId} active={activeTab === "feed"} />
+        )}
+        {activeTab === "stats" && (
+          <PlanStatsTab board={board} planMembers={planMembers} />
+        )}
       </div>
 
       {/* MODALS */}

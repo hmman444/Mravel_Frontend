@@ -241,7 +241,7 @@ export default function PlanCard({
             transition-all duration-200 flex-shrink-0
             ${
               card.done
-                ? "bg-emerald-500 text-white border-emerald-500 shadow-[0_4px_10px_rgba(16,185,129,0.45)] scale-105"
+                ? "bg-emerald-500 text-white border-emerald-500  scale-105"
                 : "bg-white/95 border-gray-300 hover:border-emerald-400 hover:bg-emerald-50"
             }
           `}

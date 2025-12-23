@@ -5,16 +5,7 @@ import { useLogout } from "../features/auth/hooks/useLogout";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  Bell,
-  ChevronDown,
-  LogOut,
-  User2,
-  Sun,
-  Moon,
-  Globe,
-  Check,
-} from "lucide-react";
+import { Bell, ChevronDown, LogOut, User2, Sun, Moon, Globe, Check } from "lucide-react";
 
 import { useNotifications } from "../features/notifications/hooks/useNotifications";
 import NotificationDropdown from "../features/notifications/components/NotificationDropdown";
@@ -39,16 +30,9 @@ export default function Navbar() {
 
   const solid = scrolled || !isTransparentPage;
 
-  /* ================= NOTIFICATIONS (1 nơi duy nhất) ================= */
-  const {
-    items,
-    loading,
-    saving,
-    unreadCount,
-    load,
-    markAllRead,
-    markRead,
-  } = useNotifications();
+  /* ================= NOTIFICATIONS ================= */
+  const { items, loading, saving, unreadCount, load, markAllRead, markRead } =
+    useNotifications();
 
   const [notiOpen, setNotiOpen] = useState(false);
   const notiWrapRef = useRef(null);
@@ -58,8 +42,7 @@ export default function Navbar() {
   const userMenuRef = useRef(null);
 
   const fullname = user?.fullname || "Người dùng";
-  const avatar =
-    user?.avatar || "https://ui-avatars.com/api/?name=User";
+  const avatar = user?.avatar || "https://ui-avatars.com/api/?name=User";
 
   /* ================= LANGUAGE ================= */
   const langs = useMemo(
@@ -72,10 +55,19 @@ export default function Navbar() {
   const currentLang =
     langs.find((l) => i18n.language?.startsWith(l.code)) || langs[0];
 
-  /* ================= LOAD NOTI ON LOGIN (để chuông có số ngay) ================= */
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef(null);
+
+  /* ================= THEME ================= */
+  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
+
+  /* ================= LOAD NOTI ON LOGIN ================= */
   useEffect(() => {
     if (!accessToken || !user?.id) return;
-    // load page 1 nhẹ (size lấy từ slice/hook), để badge hiện ngay
     load().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user?.id]);
@@ -84,22 +76,22 @@ export default function Navbar() {
   useEffect(() => {
     setNotiOpen(false);
     setUserMenuOpen(false);
+    setLangOpen(false);
   }, [location.pathname, location.search]);
 
-  /* ================= OUTSIDE CLICK (capture) =================
-   * Dùng pointerdown capture để tránh “mở xong đóng ngay”
-   */
+  /* ================= OUTSIDE CLICK (capture) ================= */
   useEffect(() => {
     const onPointerDown = (e) => {
       const t = e.target;
 
-      // đóng noti nếu click ngoài vùng noti
       if (notiWrapRef.current && !notiWrapRef.current.contains(t)) {
         setNotiOpen(false);
       }
-      // đóng user menu nếu click ngoài vùng user menu
       if (userMenuRef.current && !userMenuRef.current.contains(t)) {
         setUserMenuOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(t)) {
+        setLangOpen(false);
       }
     };
 
@@ -180,17 +172,90 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              {/* THEME (đưa ra ngoài) */}
+              <button
+                type="button"
+                onClick={() => setDark((v) => !v)}
+                className={`
+                  grid place-items-center w-10 h-10 rounded-full
+                  hover:bg-gray-200 dark:hover:bg-gray-800 transition
+                  ${solid ? "" : "bg-white/10 hover:bg-white/15"}
+                `}
+                aria-label="Đổi chế độ sáng tối"
+                title="Chế độ sáng/tối"
+              >
+                {dark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </button>
+
+              {/* LANGUAGE (đưa ra ngoài) */}
+              <div className="relative" ref={langRef}>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUserMenuOpen(false);
+                    setNotiOpen(false);
+                    setLangOpen((v) => !v);
+                  }}
+                  className={`
+                    flex items-center gap-2 px-3 h-10 rounded-full
+                    hover:bg-gray-100 dark:hover:bg-gray-800 transition
+                    ${solid ? "" : "bg-white/10 hover:bg-white/15"}
+                  `}
+                  aria-label="Ngôn ngữ"
+                  title="Ngôn ngữ"
+                >
+                  <Globe className="w-5 h-5" />
+                  <span className="hidden md:inline text-sm font-medium">
+                    {currentLang?.code?.toUpperCase()}
+                  </span>
+                </button>
+
+                {langOpen && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="
+                      absolute right-0 mt-2 w-48 z-[90]
+                      rounded-2xl border border-gray-200 dark:border-gray-800
+                      bg-white dark:bg-gray-900 shadow-xl overflow-hidden
+                      text-gray-900 dark:text-gray-100
+                    "
+                  >
+                    {langs.map((l) => {
+                      const active = currentLang?.code === l.code;
+                      return (
+                        <button
+                          key={l.code}
+                          onClick={() => {
+                            i18n.changeLanguage(l.code);
+                            localStorage.setItem("language", l.code);
+                            setLangOpen(false);
+                          }}
+                          className="
+                            w-full flex items-center justify-between px-3 py-2 text-sm
+                            hover:bg-slate-100 dark:hover:bg-slate-800 transition
+                          "
+                        >
+                          <span className={active ? "font-semibold" : "font-medium"}>
+                            {l.label}
+                          </span>
+                          {active && <Check className="w-4 h-4 text-sky-500" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* NOTIFICATION */}
               <div className="relative" ref={notiWrapRef}>
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // mở noti => đóng user menu
                     setUserMenuOpen(false);
+                    setLangOpen(false);
                     setNotiOpen((v) => !v);
-                    // mở thì load page1 (nếu chưa load hoặc muốn refresh)
-                    // tránh spam: chỉ load khi mở
                     if (!notiOpen) load().catch(() => {});
                   }}
                   className={`
@@ -201,7 +266,6 @@ export default function Navbar() {
                   aria-label="Thông báo"
                 >
                   <Bell className="w-6 h-6" />
-
                   {unreadCount > 0 && (
                     <span
                       className="
@@ -216,10 +280,7 @@ export default function Navbar() {
                 </button>
 
                 {notiOpen && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute right-0"
-                  >
+                  <div onClick={(e) => e.stopPropagation()} className="absolute right-0">
                     <NotificationDropdown
                       onClose={() => setNotiOpen(false)}
                       items={items}
@@ -239,14 +300,18 @@ export default function Navbar() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // mở avatar => đóng noti
                     setNotiOpen(false);
+                    setLangOpen(false);
                     setUserMenuOpen((v) => !v);
                   }}
-                  className="
-                    flex items-center gap-2 px-2 py-1 rounded-full
-                    hover:bg-gray-100 dark:hover:bg-gray-800 transition
-                  "
+                  className={`
+                    flex items-center gap-2 px-2 py-1 rounded-full transition
+                    ${
+                      solid
+                        ? "hover:bg-gray-100/70 dark:hover:bg-gray-800/60"
+                        : "hover:bg-white/10"
+                    }
+                  `}
                 >
                   <img
                     src={avatar}
@@ -276,7 +341,6 @@ export default function Navbar() {
                       shadow-2xl z-[70]
                     "
                   >
-                    {/* Header (ép màu chữ để không dính text-white của navbar) */}
                     <div className="px-4 py-3 border-b border-gray-200/70 dark:border-gray-800/70">
                       <p className="text-sm font-bold truncate">{fullname}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -291,19 +355,6 @@ export default function Navbar() {
                         onClick={() => {
                           setUserMenuOpen(false);
                           navigate(`/profile/${user?.id}`);
-                        }}
-                      />
-
-                      <div className="my-2 border-t border-gray-200/70 dark:border-gray-800/70" />
-
-                      <ThemeToggleInline />
-
-                      <LanguagePickerInline
-                        langs={langs}
-                        current={currentLang}
-                        onPick={(code) => {
-                          i18n.changeLanguage(code);
-                          localStorage.setItem("language", code);
                         }}
                       />
 
@@ -351,104 +402,5 @@ function MenuLink({ icon, label, onClick }) {
       <span className="text-sky-600 dark:text-sky-300">{icon}</span>
       <span className="font-medium">{label}</span>
     </button>
-  );
-}
-
-function ThemeToggleInline() {
-  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
-
-  return (
-    <button
-      type="button"
-      onClick={() => setDark((v) => !v)}
-      className="
-        w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm
-        hover:bg-sky-50 dark:hover:bg-slate-800 transition
-      "
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-sky-600 dark:text-sky-300">
-          {dark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-        </span>
-        <span className="font-medium">Chế độ</span>
-      </div>
-
-      <div className={`relative w-11 h-6 rounded-full transition ${dark ? "bg-sky-600/90" : "bg-gray-300"}`}>
-        <span
-          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-            dark ? "translate-x-5" : "translate-x-0"
-          }`}
-        />
-      </div>
-    </button>
-  );
-}
-
-function LanguagePickerInline({ langs, current, onPick }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="
-          w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm
-          hover:bg-sky-50 dark:hover:bg-slate-800 transition
-        "
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-sky-600 dark:text-sky-300">
-            <Globe className="w-4 h-4" />
-          </span>
-          <span className="font-medium">Ngôn ngữ</span>
-        </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400">{current?.label}</span>
-      </button>
-
-      {open && (
-        <div
-          className="
-            absolute right-4 top-full mt-1 w-48 z-[90]
-            rounded-2xl border border-gray-200 dark:border-gray-800
-            bg-white dark:bg-gray-900 shadow-xl overflow-hidden
-          "
-        >
-          {langs.map((l) => {
-            const active = current?.code === l.code;
-            return (
-              <button
-                key={l.code}
-                onClick={() => {
-                  onPick(l.code);
-                  setOpen(false);
-                }}
-                className="
-                  w-full flex items-center justify-between px-3 py-2 text-sm
-                  hover:bg-slate-100 dark:hover:bg-slate-800 transition
-                "
-              >
-                <span className={active ? "font-semibold" : "font-medium"}>{l.label}</span>
-                {active && <Check className="w-4 h-4 text-sky-500" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
   );
 }

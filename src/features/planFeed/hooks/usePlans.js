@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { loadPlans, reactPlan, commentPlan, searchAll, clearSearch } from "../slices/planSlice";
+import { loadPlans, reactPlan, commentPlan, searchAll, clearSearch, loadPlanFeedDetail } from "../slices/planSlice";
 
 export function usePlans() {
   const dispatch = useDispatch();
@@ -14,6 +14,8 @@ export function usePlans() {
     searchPlans,
     searchUsers,
     searchMeta,
+
+    current, currentLoading, currentError,
   } = useSelector((s) => s.plan);
 
   const fetchNext = () => dispatch(loadPlans({ page: page + 1 }));
@@ -25,6 +27,8 @@ export function usePlans() {
   const doSearch = (q) => dispatch(searchAll({ q, page: 1, size: 10 }));
   const resetSearch = () => dispatch(clearSearch());
   const isSearching = !!searchQuery;
+
+  const loadFeedDetail = (id) => dispatch(loadPlanFeedDetail({ id }));
 
   return {
     items,
@@ -44,5 +48,7 @@ export function usePlans() {
     searchMeta,
     doSearch,
     resetSearch,
+    loadFeedDetail, 
+    current, currentLoading, currentError,
   };
 }

@@ -29,12 +29,18 @@ import {
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
 const TRANSPORT_METHODS = [
-  { value: "taxi", label: "Taxi / Grab" },
+  { value: "taxi", label: "Taxi" },
+  { value: "motorbike taxi", label: "Xe ôm" },
   { value: "motorbike", label: "Xe máy" },
   { value: "car", label: "Ô tô riêng" },
+  { value: "coach", label: "Xe khách" },
+  { value: "plane", label: "Máy bay" },
   { value: "bus", label: "Xe buýt" },
   { value: "walk", label: "Đi bộ" },
+  { value: "shift", label: "Tàu thuyền" },
+  { value: "train", label: "Tàu điện" },
   { value: "other", label: "Khác" },
+
 ];
 
 const EXTRA_TYPES = [

@@ -1,5 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchPlans, sendReaction, sendComment, sharePlan, fetchMyPlans, searchPlansAndUsers } from "../services/planService";
+import {
+  fetchPlans,
+  sendReaction,
+  sendComment,
+  sharePlan,
+  fetchMyPlans,
+  searchPlansAndUsers,
+  fetchPlanFeedDetail, 
+} from "../services/planService";
 
 const initialState = {
   items: [],
@@ -7,6 +15,9 @@ const initialState = {
   loading: false,
   hasMore: true,
   page: 1,
+
+  currentLoading: false,
+  currentError: null,
 
   myItems: [],
   myLoading: false,
@@ -26,6 +37,23 @@ export const loadPlans = createAsyncThunk("plan/loadPlans", async ({ page = 1 })
   const res = await fetchPlans(page, 3);
   return { data: res, page };
 });
+
+export const loadPlanFeedDetail = createAsyncThunk(
+  "plan/loadPlanFeedDetail",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const res = await fetchPlanFeedDetail(id);
+      return res;
+    } catch (e) {
+      return rejectWithValue(
+        e?.response?.data?.message ||
+          e?.response?.data?.error ||
+          e?.message ||
+          "Không lấy được bài viết"
+      );
+    }
+  }
+);
 
 export const reactPlan = createAsyncThunk("plan/reactPlan", async ({ planId, type }) => {
   const res = await sendReaction(planId, type);
@@ -100,6 +128,7 @@ const planSlice = createSlice({
           update(state.items.find(p => p.id === planId));
           update(state.myItems.find(p => p.id === planId));
           update(state.searchPlans.find((p) => p.id === planId));
+          update(state.current && state.current.id === planId ? state.current : null);
       })
       .addCase(commentPlan.fulfilled, (state, action) => {
         const { planId, data } = action.payload;
@@ -137,6 +166,7 @@ const planSlice = createSlice({
         // Cập nhật cho My Plans
         updateComments(state.myItems.find((p) => p.id === planId));
         updateComments(state.searchPlans.find((p) => p.id === planId));
+        updateComments(state.current && state.current.id === planId ? state.current : null);
       })
 
       .addCase(loadMyPlans.pending, (state) => {
@@ -177,6 +207,18 @@ const planSlice = createSlice({
       .addCase(searchAll.rejected, (state, action) => {
         state.searchLoading = false;
         state.error = action.error.message;
+      })
+      .addCase(loadPlanFeedDetail.pending, (state) => {
+        state.currentLoading = true;
+        state.currentError = null;
+      })
+      .addCase(loadPlanFeedDetail.fulfilled, (state, action) => {
+        state.currentLoading = false;
+        state.current = action.payload;
+      })
+      .addCase(loadPlanFeedDetail.rejected, (state, action) => {
+        state.currentLoading = false;
+        state.currentError = action.payload || action.error.message;
       });
   },
 });
