@@ -1,235 +1,234 @@
-import { useState } from "react";
+"use client";
+
+// src/features/admin/pages/ManagePartnersPage.jsx
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
-import PartnerCard from "../components/PartnerCard";
-import { Link } from "react-router-dom";
-import {
-    ResponsiveContainer,
-    RadarChart,
-    PolarGrid,
-    PolarAngleAxis,
-    Radar,
-    Tooltip,
-    XAxis,
-    YAxis,
-    Legend,
-    LineChart,
-    Line,
-} from "recharts";
-import { useTranslation } from "react-i18next";
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import ConfirmModal from "../../../components/ConfirmModal";
+import { showError, showSuccess } from "../../../utils/toastUtils";
+
+import { useAdminPartners } from "../hooks/useAdminPartners";
+
+import UserStats from "../components/user/UserStats";
+import UserFilters from "../components/user/UserFilters";
+import UserTable from "../components/user/UserTable";
+
+const soft = {
+  btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98]",
+  btnGhost:
+    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+};
 
 export default function ManagePartnersPage() {
-    const { t } = useTranslation();
-    const [filter, setFilter] = useState("month");
-    const [showRequests, setShowRequests] = useState(false);
+  const title = "Quản lý đối tác";
+  const roleParam = "PARTNER";
 
-    // Dữ liệu radar: loại hình dịch vụ
-    const serviceStats = [
-        { type: t("tour"), count: 40 },
-        { type: t("hotel"), count: 55 },
-        { type: t("food"), count: 30 },
-        { type: t("transport"), count: 20 },
-        { type: t("guide"), count: 15 },
-    ];
+  const { items, loading, toggling, error, load, lock, unlock } = useAdminPartners();
 
-    // Dữ liệu tỉ lệ đối tác mới / cũ
-    const ratioDataSets = {
-        day: [
-        { label: t("morning"), new: 5, old: 10 },
-        { label: t("afternoon"), new: 8, old: 12 },
-        { label: t("evening"), new: 4, old: 9 },
-        ],
-        week: [
-        { label: t("monday"), new: 12, old: 20 },
-        { label: t("tuesday"), new: 15, old: 22 },
-        { label: t("wednesday"), new: 18, old: 25 },
-        { label: t("thursday"), new: 10, old: 18 },
-        { label: t("friday"), new: 20, old: 28 },
-        { label: t("saturday"), new: 22, old: 30 },
-        { label: t("sunday"), new: 19, old: 26 },
-        ],
-        month: [
-        { label: t("week1"), new: 35, old: 55 },
-        { label: t("week2"), new: 40, old: 60 },
-        { label: t("week3"), new: 50, old: 70 },
-        { label: t("week4"), new: 45, old: 65 },
-        ],
-        year: [
-        { label: t("jan"), new: 40, old: 70 },
-        { label: t("feb"), new: 45, old: 75 },
-        { label: t("mar"), new: 50, old: 80 },
-        { label: t("apr"), new: 42, old: 68 },
-        { label: t("may"), new: 55, old: 85 },
-        { label: t("jun"), new: 60, old: 90 },
-        { label: t("jul"), new: 65, old: 95 },
-        { label: t("aug"), new: 70, old: 100 },
-        { label: t("sep"), new: 75, old: 105 },
-        { label: t("oct"), new: 80, old: 110 },
-        { label: t("nov"), new: 85, old: 115 },
-        { label: t("dec"), new: 90, old: 120 },
-        ],
-    };
+  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL"); // ALL | ACTIVE | LOCKED
 
-    const ratioData = ratioDataSets[filter];
+  const [toggleLoadingIds, setToggleLoadingIds] = useState(() => new Set());
 
-    // Dữ liệu xu hướng phân bổ dịch vụ 12 tháng
-    const serviceTrendData = [
-        { month: t("jan"), tour: 35, hotel: 45, food: 25, transport: 20, guide: 10 },
-        { month: t("feb"), tour: 42, hotel: 38, food: 28, transport: 18, guide: 14 },
-        { month: t("mar"), tour: 30, hotel: 40, food: 35, transport: 22, guide: 12 },
-        { month: t("apr"), tour: 45, hotel: 36, food: 30, transport: 28, guide: 15 },
-        { month: t("may"), tour: 38, hotel: 48, food: 27, transport: 24, guide: 18 },
-        { month: t("jun"), tour: 50, hotel: 42, food: 32, transport: 26, guide: 20 },
-        { month: t("jul"), tour: 44, hotel: 39, food: 40, transport: 30, guide: 16 },
-        { month: t("aug"), tour: 36, hotel: 46, food: 33, transport: 25, guide: 22 },
-        { month: t("sep"), tour: 48, hotel: 41, food: 29, transport: 20, guide: 14 },
-        { month: t("oct"), tour: 40, hotel: 37, food: 38, transport: 27, guide: 19 },
-        { month: t("nov"), tour: 46, hotel: 43, food: 34, transport: 23, guide: 15 },
-        { month: t("dec"), tour: 39, hotel: 49, food: 31, transport: 28, guide: 21 },
-    ];
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // { id, email, action: "LOCK"|"UNLOCK" }
 
-    // Danh sách đối tác
-    const partners = [
-        {
-        id: 1,
-        name: "Travel Viet",
-        email: "contact@travelviet.com",
-        serviceType: t("tour"),
-        logo: "https://i.pravatar.cc/80?img=8",
-        status: "active",
-        },
-        {
-        id: 2,
-        name: "Sunrise Hotel",
-        email: "info@sunrisehotel.vn",
-        serviceType: t("hotel"),
-        logo: "https://i.pravatar.cc/80?img=12",
-        status: "active",
-        },
-        {
-        id: 3,
-        name: "Foodies",
-        email: "hello@foodies.vn",
-        serviceType: t("food"),
-        logo: "https://i.pravatar.cc/80?img=15",
-        status: "inactive",
-        },
-    ];
+  const setRowToggling = (id, on) => {
+    setToggleLoadingIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
 
-    // Đơn đăng ký đối tác mới
-    const partnerRequests = [
-        { id: 101, name: "Adventure Life", email: "join@adlife.vn", serviceType: t("tour") },
-        { id: 102, name: "Ocean Hotel", email: "contact@oceanhotel.vn", serviceType: t("hotel") },
-    ];
+  const rowBusy = (id) => toggling || toggleLoadingIds.has(id);
 
-    return (
-        <AdminLayout>
-        <h1 className="text-2xl font-bold mb-6">{t("manage_partners")}</h1>
+  useEffect(() => {
+    load({ role: roleParam });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        {/* Hàng 1: Radar + Line */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Biểu đồ Radar */}
-            <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">
-                {t("partner_service_distribution")}
-            </h2>
-            <ResponsiveContainer width="100%" height={350}>
-                <RadarChart data={serviceStats}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="type" />
-                <Tooltip />
-                <Radar
-                    name={t("quantity")}
-                    dataKey="count"
-                    stroke="#3B82F6"
-                    fill="#3B82F6"
-                    fillOpacity={0.6}
-                />
-                </RadarChart>
-            </ResponsiveContainer>
-            </div>
+  const totalCount = items?.length || 0;
+  const activeCount = useMemo(
+    () => (items || []).filter((x) => x.status === "ACTIVE").length,
+    [items]
+  );
+  const lockedCount = useMemo(
+    () => (items || []).filter((x) => x.status === "LOCKED").length,
+    [items]
+  );
 
-            {/* Biểu đồ đường: đối tác mới / cũ */}
-            <div className="bg-white rounded-lg shadow p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">{t("new_old_partner_ratio")}</h2>
-                <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="px-3 py-1 border rounded text-sm"
-                >
-                <option value="day">{t("by_day")}</option>
-                <option value="week">{t("by_week")}</option>
-                <option value="month">{t("by_month")}</option>
-                <option value="year">{t("by_year")}</option>
-                </select>
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={ratioData}>
-                <XAxis dataKey="label" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                    type="monotone"
-                    dataKey="new"
-                    stroke="#16A34A"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name={t("new_partner")}
-                />
-                <Line
-                    type="monotone"
-                    dataKey="old"
-                    stroke="#EA580C"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name={t("old_partner")}
-                />
-                </LineChart>
-            </ResponsiveContainer>
-            </div>
-        </div>
+  const filtered = useMemo(() => {
+    let list = [...(items || [])];
 
-        {/* Hàng 2: Xu hướng dịch vụ */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">
-                {t("service_trend_12m")}
-            </h2>
-            <span className="text-sm text-gray-400">{t("jan_dec")}</span>
-            </div>
-            <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={serviceTrendData}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="tour" stroke="#3B82F6" strokeWidth={2} dot={{ r: 3 }} name={t("tour")} />
-                <Line type="monotone" dataKey="hotel" stroke="#10B981" strokeWidth={2} dot={{ r: 3 }} name={t("hotel")} />
-                <Line type="monotone" dataKey="food" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} name={t("food")} />
-                <Line type="monotone" dataKey="transport" stroke="#6366F1" strokeWidth={2} dot={{ r: 3 }} name={t("transport")} />
-                <Line type="monotone" dataKey="guide" stroke="#EC4899" strokeWidth={2} dot={{ r: 3 }} name={t("guide")} />
-            </LineChart>
-            </ResponsiveContainer>
-        </div>
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (u) =>
+          u.email?.toLowerCase().includes(q) ||
+          u.fullname?.toLowerCase().includes(q)
+      );
+    }
 
-        {/* Hàng 3: Danh sách đối tác */}
-        <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">{t("current_partner_list")}</h2>
-            <Link
-                to="/admin/partners/request"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+    if (statusFilter === "ACTIVE") list = list.filter((u) => u.status === "ACTIVE");
+    if (statusFilter === "LOCKED") list = list.filter((u) => u.status === "LOCKED");
+
+    // optional: sort by email
+    list.sort((a, b) => (a.email || "").localeCompare(b.email || ""));
+    return list;
+  }, [items, search, statusFilter]);
+
+  const hasAnyFilter = search.trim() || statusFilter !== "ALL";
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("ALL");
+  };
+
+  const requestLock = (id) => {
+    const u = (items || []).find((x) => String(x.id) === String(id));
+    setPendingAction({ id, email: u?.email || id, action: "LOCK" });
+    setConfirmOpen(true);
+  };
+
+  const requestUnlock = (id) => {
+    const u = (items || []).find((x) => String(x.id) === String(id));
+    setPendingAction({ id, email: u?.email || id, action: "UNLOCK" });
+    setConfirmOpen(true);
+  };
+
+  const closeConfirm = () => {
+    setConfirmOpen(false);
+    setPendingAction(null);
+  };
+
+  const confirmToggle = async () => {
+    if (!pendingAction?.id) return;
+    const { id, action } = pendingAction;
+
+    setRowToggling(id, true);
+    try {
+      if (action === "LOCK") {
+        await lock(id);
+        showSuccess("Đã khóa tài khoản đối tác");
+      } else {
+        await unlock(id);
+        showSuccess("Đã mở khóa tài khoản đối tác");
+      }
+
+      // reload để sync đúng DB
+      await load({ role: roleParam });
+    } catch (e) {
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message ||
+            e?.response?.data?.error ||
+            e?.message ||
+            "Thao tác thất bại";
+      showError(msg);
+    } finally {
+      setRowToggling(id, false);
+      closeConfirm();
+    }
+  };
+
+  return (
+    <AdminLayout>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Danh sách tài khoản (PARTNER). Có thể khóa / mở khóa.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`${soft.btn} ${soft.btnGhost} gap-2`}
+              type="button"
             >
-                {t("partner_request")}
-            </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {partners.map((p) => (
-                <PartnerCard key={p.id} partner={p} />
-            ))}
-            </div>
+              <FunnelIcon className="h-5 w-5" />
+              Bộ lọc
+            </button>
+          </div>
         </div>
-        </AdminLayout>
-    );
+
+        <UserStats
+          totalCount={totalCount}
+          activeCount={activeCount}
+          lockedCount={lockedCount}
+          visibleCount={filtered.length}
+        />
+      </div>
+
+      {/* Filters */}
+      <UserFilters
+        open={filtersOpen}
+        search={search}
+        setSearch={setSearch}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        hasAnyFilter={hasAnyFilter}
+        onReset={resetFilters}
+      />
+
+      {/* Table */}
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Không có đối tác phù hợp với bộ lọc hiện tại
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              type="button"
+              className={`${soft.btn} ${soft.btnGhost}`}
+              onClick={resetFilters}
+            >
+              Reset bộ lọc
+            </button>
+          </div>
+        </div>
+      ) : (
+        <UserTable
+          items={filtered}
+          rowBusy={rowBusy}
+          onLock={(id) => {
+            if (rowBusy(id)) return;
+            requestLock(id);
+          }}
+          onUnlock={(id) => {
+            if (rowBusy(id)) return;
+            requestUnlock(id);
+          }}
+        />
+      )}
+
+      {/* Confirm */}
+      <ConfirmModal
+        open={confirmOpen}
+        title={pendingAction?.action === "LOCK" ? "Khóa tài khoản đối tác" : "Mở khóa tài khoản đối tác"}
+        message={
+          pendingAction?.action === "LOCK"
+            ? `Bạn có chắc muốn khóa "${pendingAction?.email || ""}" không?`
+            : `Bạn có chắc muốn mở khóa "${pendingAction?.email || ""}" không?`
+        }
+        confirmText={pendingAction?.action === "LOCK" ? "Khóa" : "Mở khóa"}
+        cancelText="Hủy"
+        onClose={closeConfirm}
+        onConfirm={confirmToggle}
+      />
+    </AdminLayout>
+  );
 }

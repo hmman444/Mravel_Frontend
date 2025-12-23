@@ -29,6 +29,11 @@ export async function createPlan(form, user) {
   return res.data.data;
 }
 
+export async function fetchPlanFeedDetail(id) {
+  const res = await api.get(`${BASE}/${id}/feed`);
+  return res.data.data;
+}
+
 export async function fetchPlans(page = 1, size = 5) {
   const res = await api.get(`${BASE}?page=${page}&size=${size}`);
   return res.data.data;

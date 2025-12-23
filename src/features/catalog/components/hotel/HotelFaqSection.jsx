@@ -119,7 +119,7 @@ export default function HotelFaqSection({ hotel }) {
 
       {/* DRAWER XEM TẤT CẢ – CỐ ĐỊNH MÉP PHẢI, CAO = VIEWPORT */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-40 flex justify-end">
+        <div className="fixed inset-0 z-50 flex justify-end">
           {/* overlay mờ, click để đóng */}
           <button
             type="button"

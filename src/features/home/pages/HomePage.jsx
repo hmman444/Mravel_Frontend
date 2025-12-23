@@ -2,8 +2,6 @@ import Navbar from "../../../components/Navbar";
 import HeroSection from "../components/HeroSection";
 import SearchBar from "../../../components/SearchBar";
 import ServiceList from "../components/ServiceList";
-import PlanSection from "../components/PlanSection";
-import ReviewSection from "../components/ReviewSection";
 import PartnerSection from "../components/PartnerSection";
 import Footer from "../../../components/Footer";
 import FadeInSection from "../../../components/FadeInSection";
@@ -20,14 +18,6 @@ export default function HomePage() {
       <main className="flex-1 space-y-8 md:space-y-12">
         <FadeInSection>
           <ServiceList />
-        </FadeInSection>
-
-        <FadeInSection delay={120}>
-          <PlanSection />
-        </FadeInSection>
-
-        <FadeInSection delay={220}>
-          <ReviewSection />
         </FadeInSection>
 
         <FadeInSection delay={320}>
