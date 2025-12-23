@@ -88,6 +88,7 @@ export default function GuestBookingsList({
               key={b.code}
               booking={b}
               onOpenHotel={onOpenHotel}
+              onRefresh={onRefresh}
               detailScope={detailScope}
             />
           ))}

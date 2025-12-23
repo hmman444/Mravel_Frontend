@@ -156,6 +156,7 @@ export default function BookingLookupForm({
               onOpenRestaurant={onOpenRestaurant}
               detailScope={detailScope}
               lookupCreds={lookupCreds}
+              onRefresh={onSubmit}
             />
           ) : null}
         </div>

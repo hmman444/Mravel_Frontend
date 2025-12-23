@@ -13,6 +13,7 @@ import {
   FaClock,
 } from "react-icons/fa";
 import MravelDatePicker from "../components/MravelDatePicker";
+import { formatLocalDate, addDaysLocal } from "../features/catalog/utils/dateLocal";
 
 import Button from "./Button";
 import DestinationTypeahead from "../components/DestinationTypeahead";
@@ -91,9 +92,6 @@ function TextInput({
     </div>
   );
 }
-
-/* helper format date để gửi query */
-const formatDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
 
 /* helper VN_DATE cho popup Số đêm */
 const VN_DATE = (d) =>
@@ -182,10 +180,18 @@ function HotelSearchForm() {
       return;
     }
 
+    const nightsInt = Math.max(1, Math.min(30, Number(nights) || 1));
+    const checkInDate = checkIn || new Date();
+    const checkOutDate = addDaysLocal(checkInDate, nightsInt);
+
     const qs = new URLSearchParams({
       location: locationVal,
-      checkIn: formatDate(checkIn),
-      nights: String(nights),
+      checkIn: formatLocalDate(checkInDate),
+      nights: String(nightsInt),
+
+      // NEW: đẩy luôn checkOut lên URL để trang hotel khỏi đoán
+      checkOut: formatLocalDate(checkOutDate),
+
       adults: String(adults),
       children: String(children),
       rooms: String(rooms),
@@ -194,6 +200,7 @@ function HotelSearchForm() {
     });
 
     if (Array.isArray(childrenAges) && childrenAges.length) {
+      // bạn đang append nhiều key childrenAges -> ok, BE không dùng thì FE dùng cũng được
       childrenAges.forEach((age) => qs.append("childrenAges", String(age)));
     }
 
@@ -473,6 +480,16 @@ function HotelSearchForm() {
   );
 }
 
+const CUISINE_OPTIONS = [
+  { value: "", label: "Tất cả ẩm thực" },
+  { value: "VIETNAMESE", label: "Việt Nam" },
+  { value: "ASIAN", label: "Châu Á" },
+  { value: "BUFFET_VIET_ASIAN", label: "Buffet & Việt - Á" },
+  { value: "EUROPEAN", label: "Âu" },
+  { value: "FRENCH", label: "Pháp" },
+  { value: "ITALIAN", label: "Ý" },
+];
+
 /* ───────── Restaurant Search Form ───────── */
 // trong SearchBar.jsx — giữ nguyên phần khác, chỉ thay RestaurantSearchForm
 function RestaurantSearchForm() {
@@ -480,13 +497,28 @@ function RestaurantSearchForm() {
 
   const destRef = useRef({ text: "", slug: null });
   const [, setDest] = useState({ text: "", slug: null });
+
   const [date, setDate] = useState(() => new Date());
-  const [cuisine, setCuisine] = useState("");
+
+  // cuisine
+  const [cuisineCode, setCuisineCode] = useState("");
+  const [openCuisine, setOpenCuisine] = useState(false);
+  const cuisineBoxRef = useRef(null);
+
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (cuisineBoxRef.current && !cuisineBoxRef.current.contains(e.target)) {
+        setOpenCuisine(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
 
   const handleDestUpdate = (payload) => {
     const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null };
     destRef.current = next;
-    setDest(next); // để UI nếu cần rerender
+    setDest(next);
   };
 
   const submit = (e) => {
@@ -500,8 +532,8 @@ function RestaurantSearchForm() {
 
     const qs = new URLSearchParams({
       location: locationVal,
-      date: formatDate(date),
-      ...(cuisine ? { cuisine } : {}),
+      date: formatLocalDate(date),
+      ...(cuisineCode ? { cuisine: cuisineCode } : {}),
       page: "0",
       size: "9",
     });
@@ -518,9 +550,9 @@ function RestaurantSearchForm() {
             placeholder="TP.HCM, Hà Nội, Đà Nẵng…"
             className="flex-1 min-w-0 w-full !max-w-none !mx-0"
             buttonSlot={null}
-            onSubmit={handleDestUpdate}                 // nhấn Enter
-            onPick={handleDestUpdate}                   // chọn suggestion
-            onChangeText={(text) => handleDestUpdate({ text, slug: null })} // gõ tay
+            onSubmit={handleDestUpdate}
+            onPick={handleDestUpdate}
+            onChangeText={(text) => handleDestUpdate({ text, slug: null })}
           />
         </RowField>
       </div>
@@ -537,15 +569,42 @@ function RestaurantSearchForm() {
       </div>
 
       <div className="col-span-12 md:col-span-3">
-        <RowField label="Loại ẩm thực">
+        <RowField
+          label="Loại ẩm thực"
+          refBox={cuisineBoxRef}
+          onClick={() => !openCuisine && setOpenCuisine(true)}
+        >
           <FaUtensils className="text-gray-400 mr-2" />
-          <input
-            type="text"
-            value={cuisine}
-            onChange={(e) => setCuisine(e.target.value)}
-            placeholder="Việt, Nhật, BBQ…"
-            className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-100"
-          />
+          <span className={`text-sm ${cuisineCode ? "text-gray-800" : "text-gray-400"}`}>
+            {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || "Chọn loại ẩm thực"}
+          </span>
+          <span className="ml-auto text-gray-400 text-xs">▾</span>
+
+          {openCuisine && (
+            <div
+              className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 bg-white shadow-xl max-h-64 overflow-auto py-2"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              {CUISINE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value || "_all_"}
+                  type="button"
+                  className={`w-full text-left px-3 py-2 text-sm ${
+                    opt.value === cuisineCode
+                      ? "bg-sky-50 text-sky-700 font-semibold"
+                      : "hover:bg-gray-50"
+                  }`}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setCuisineCode(opt.value);
+                    setOpenCuisine(false);
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </RowField>
       </div>
 

@@ -125,8 +125,10 @@ function App() {
           <Route path="/place/:slug" element={<PlaceDetailPage />} />
           <Route path="/locations/search" element={<LocationResultsPage />} />
           <Route path="/hotels" element={<HotelsHomePage />} />
+          <Route path="/hotels/search" element={<HotelsHomePage />} />
           <Route path="/hotels/:slug" element={<HotelDetailPage />} />
           <Route path="/restaurants" element={<RestaurantsHomePage />} />
+          <Route path="/restaurants/search" element={<RestaurantsHomePage />} />
           <Route path="/restaurants/:slug" element={<RestaurantDetailPage />} />
 
           {/* General routes */}

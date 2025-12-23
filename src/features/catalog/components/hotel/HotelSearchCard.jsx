@@ -1,5 +1,6 @@
 // HotelSearchCard.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MravelDatePicker from "../../../../components/MravelDatePicker";
 import "../../../../styles/datepicker.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,6 +15,9 @@ import {
 } from "react-icons/fa";
 import Button from "../../../../components/Button";
 import DestinationTypeahead from "../../../../components/DestinationTypeahead";
+
+// ✅ dùng y chang Home
+import { formatLocalDate, addDaysLocal } from "../../../catalog/utils/dateLocal";
 
 /* ───────── Small helpers ───────── */
 function RowField({ label, children, onClick, refBox, className = "" }) {
@@ -40,18 +44,25 @@ const VN_DATE = (d) =>
   });
 
 /* ───────── Main Component ───────── */
-export default function HotelSearchCard({ onSubmit }) {
-  /* ── Destination ── */
-  const [dest, setDest] = useState({ text: "", slug: null });
+export default function HotelSearchCard() {
+  const navigate = useNavigate();
 
-  /* ── Dates & nights (default: hôm nay + 1 đêm) ── */
-  const [checkIn, setCheckIn] = useState(() => new Date());
-  const [nights, setNights] = useState(1);
-  const checkOut = useMemo(() => {
-    const d = new Date(checkIn ?? new Date());
+  /* ── Destination ── */
+  const destRef = useRef({ text: "", slug: null });
+  const [, setDest] = useState({ text: "", slug: null });
+
+  /* ── Dates & nights ── */
+  const [checkIn, setCheckIn] = useState(() => {
+    const d = new Date();
     d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + (Number.isFinite(nights) ? nights : 1));
     return d;
+  });
+
+  const [nights, setNights] = useState(1);
+
+  const checkOut = useMemo(() => {
+    const base = checkIn || new Date();
+    return addDaysLocal(base, Math.max(1, Math.min(30, Number(nights) || 1)));
   }, [checkIn, nights]);
 
   /* ── Nights dropdown ── */
@@ -77,7 +88,6 @@ export default function HotelSearchCard({ onSubmit }) {
   const [childrenAges, setChildrenAges] = useState([]); // numbers 0..8, where 0= "<1"
 
   useEffect(() => {
-    // sync ages array length with children count
     setChildrenAges((prev) => {
       const next = [...prev];
       if (children > next.length) {
@@ -101,22 +111,50 @@ export default function HotelSearchCard({ onSubmit }) {
 
   const ageOptions = [
     { label: "<1", value: 0 },
-    ...Array.from({ length: 8 }, (_, i) => ({ label: String(i + 1), value: i + 1 })),
+    ...Array.from({ length: 8 }, (_, i) => ({
+      label: String(i + 1),
+      value: i + 1,
+    })),
   ];
 
-  /* ── Submit ── */
+  const handleDestUpdate = (payload) => {
+    const next = {
+      text: (payload?.text || "").trim(),
+      slug: payload?.slug || null,
+    };
+    destRef.current = next;
+    setDest(next);
+  };
+
+  /* ── Submit (✅ giống Home) ── */
   const submit = () => {
-    onSubmit?.({
-      location: dest.slug || dest.text,
-      checkIn: checkIn ? new Date(checkIn).toISOString().slice(0, 10) : "",
-      nights,
-      adults,
-      children,
-      childrenAges,
-      rooms,
-      page: 0,
-      size: 9,
+    const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
+    if (!locationVal) {
+      alert("Vui lòng nhập hoặc chọn Điểm đến.");
+      return;
+    }
+
+    const nightsInt = Math.max(1, Math.min(30, Number(nights) || 1));
+    const checkInDate = checkIn || new Date();
+    const checkOutDate = addDaysLocal(checkInDate, nightsInt);
+
+    const qs = new URLSearchParams({
+      location: locationVal,
+      checkIn: formatLocalDate(checkInDate),
+      nights: String(nightsInt),
+      checkOut: formatLocalDate(checkOutDate), // ✅ y chang Home
+      adults: String(adults),
+      children: String(children),
+      rooms: String(rooms),
+      page: "0",
+      size: "9",
     });
+
+    if (Array.isArray(childrenAges) && childrenAges.length) {
+      childrenAges.forEach((age) => qs.append("childrenAges", String(age)));
+    }
+
+    navigate(`/hotels/search?${qs.toString()}`);
   };
 
   return (
@@ -129,7 +167,7 @@ export default function HotelSearchCard({ onSubmit }) {
 
       {/* Body */}
       <div className="px-5 pb-6 pt-4">
-                {/* Địa điểm */}
+        {/* Địa điểm */}
         <div className="mb-4">
           <div className="text-[13px] font-semibold text-gray-700 mb-1">
             Thành phố, địa điểm hoặc tên khách sạn:
@@ -138,9 +176,12 @@ export default function HotelSearchCard({ onSubmit }) {
             <DestinationTypeahead
               label={null}
               placeholder="Thành phố, khách sạn, điểm đến"
-              onSubmit={({ text, slug }) => setDest({ text, slug })}
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
+              // ✅ bắt đủ case giống Home
+              onSubmit={handleDestUpdate}
+              onPick={handleDestUpdate}
+              onChangeText={(text) => handleDestUpdate({ text, slug: null })}
             />
           </div>
         </div>
@@ -151,14 +192,11 @@ export default function HotelSearchCard({ onSubmit }) {
           <div className="col-span-12 md:col-span-4">
             <RowField label="Nhận phòng:">
               <FaCalendarAlt className="text-gray-400 mr-2" />
-              <MravelDatePicker
-                selected={checkIn}
-                onChange={setCheckIn}
-              />
+              <MravelDatePicker selected={checkIn} onChange={setCheckIn} />
             </RowField>
           </div>
 
-          {/* Số đêm (custom dropdown) */}
+          {/* Số đêm */}
           <div className="col-span-12 md:col-span-4">
             <RowField
               label="Số đêm:"
@@ -179,8 +217,7 @@ export default function HotelSearchCard({ onSubmit }) {
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   {nightList.map((n) => {
-                    const d = new Date(checkIn);
-                    d.setDate(d.getDate() + n);
+                    const d = addDaysLocal(checkIn, n);
                     return (
                       <button
                         key={n}
@@ -195,7 +232,11 @@ export default function HotelSearchCard({ onSubmit }) {
                         }}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                          <span
+                            className={`w-2 h-2 rounded-full inline-block ${
+                              n === nights ? "bg-blue-500" : "bg-gray-300"
+                            }`}
+                          />
                           <span className="font-medium">{n} đêm</span>
                         </div>
                         <div className="text-xs text-gray-500">{VN_DATE(d)}</div>
@@ -207,7 +248,7 @@ export default function HotelSearchCard({ onSubmit }) {
             </RowField>
           </div>
 
-          {/* Trả phòng (read-only, auto from nights) */}
+          {/* Trả phòng */}
           <div className="col-span-12 md:col-span-4">
             <RowField label="Trả phòng:">
               <FaCalendarAlt className="text-gray-400 mr-2" />
@@ -224,7 +265,7 @@ export default function HotelSearchCard({ onSubmit }) {
 
         {/* Hàng: Khách & Phòng + Nút tìm kiếm */}
         <div className="grid grid-cols-12 gap-4 mt-4">
-          {/* Khách & Phòng (custom dropdown) */}
+          {/* Khách & Phòng */}
           <div className="col-span-12 md:col-span-8">
             <RowField
               label="Khách và Phòng:"
@@ -341,7 +382,7 @@ export default function HotelSearchCard({ onSubmit }) {
                     </div>
                   </div>
 
-                  {/* Độ tuổi trẻ em (tối đa 3 select mỗi hàng) */}
+                  {/* Độ tuổi trẻ em */}
                   {children > 0 && (
                     <>
                       <div className="mt-3 text-sm text-gray-600">
