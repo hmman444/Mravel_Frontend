@@ -21,7 +21,7 @@ export function usePaymentMethods() {
           key: "MOMO",
           label: "MoMo",
           supported: true,
-          iconSrc: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
+          iconSrc: "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png",
           icon: FaWallet,
           badge: "Hỗ trợ",
         },

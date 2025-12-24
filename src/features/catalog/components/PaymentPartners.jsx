@@ -5,7 +5,7 @@ const paymentPartners = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Visa_2021.svg/2560px-Visa_2021.svg.png",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/1200px-American_Express_logo_%282018%29.svg.png",
   "https://upload.wikimedia.org/wikipedia/commons/6/68/VietQR_Logo.svg",
-  "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
+  "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png",
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Techcombank_logo.png",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VPBank_logo.svg/2560px-VPBank_logo.svg.png",
   "https://upload.wikimedia.org/wikipedia/commons/5/55/LOGO-VIB-Blue.png",

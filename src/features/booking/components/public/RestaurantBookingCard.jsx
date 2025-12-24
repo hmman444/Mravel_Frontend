@@ -1,4 +1,6 @@
+// src/features/booking/components/public/RestaurantBookingCard.jsx
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { CalendarDays, CreditCard, Hash, UtensilsCrossed, X } from "lucide-react";
 import api from "../../../../utils/axiosInstance";
 import CancelBookingModal from "../public/BookingCancelModal";
@@ -42,7 +44,8 @@ const toReservationDateTime = (dateStr, timeStr) => {
   const [y, m, d] = String(dateStr).split("-").map(Number);
   if (!y || !m || !d) return null;
 
-  let hh = 0, mm = 0;
+  let hh = 0,
+    mm = 0;
   if (timeStr && /^\d{2}:\d{2}/.test(timeStr)) {
     const parts = String(timeStr).split(":").map(Number);
     hh = parts[0] || 0;
@@ -79,10 +82,12 @@ export default function RestaurantBookingCard({
   booking,
   onOpenRestaurant,
   detailScope = "PUBLIC", // PUBLIC | PRIVATE | LOOKUP
-  lookupCreds,            // { phoneLast4, email } - dùng khi detailScope="LOOKUP"
+  lookupCreds,
   onRefresh,
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
@@ -93,10 +98,11 @@ export default function RestaurantBookingCard({
   const [cancelError, setCancelError] = useState(null);
 
   const PENDING_EXPIRE_MINUTES = 30;
-
   const [nowTick, setNowTick] = useState(Date.now());
   const [resuming, setResuming] = useState(false);
   const [resumeError, setResumeError] = useState(null);
+
+  useEffect(() => setMounted(true), []);
 
   const isPendingPay = useMemo(() => {
     const s = String((detail || booking)?.status || "").toUpperCase();
@@ -117,8 +123,6 @@ export default function RestaurantBookingCard({
     return dt ? dt.getTime() > Date.now() : false;
   }, [detail, booking]);
 
-  const showCancelButton = !isPendingPay && canCancel;
-
   const deadlineMs = useMemo(() => {
     const created = (detail || booking)?.createdAt;
     const t = Date.parse(created);
@@ -126,7 +130,7 @@ export default function RestaurantBookingCard({
     return t + PENDING_EXPIRE_MINUTES * 60 * 1000;
   }, [detail, booking]);
 
-  const expiresInMs = deadlineMs ? (deadlineMs - nowTick) : 0;
+  const expiresInMs = deadlineMs ? deadlineMs - nowTick : 0;
   const canResume = isPendingPay && !!deadlineMs && expiresInMs > 0;
 
   useEffect(() => {
@@ -142,84 +146,9 @@ export default function RestaurantBookingCard({
     return `${mm}:${ss}`;
   };
 
-  const onResumePayment = async () => {
-    if (!code) return;
-    try {
-      setResumeError(null);
-      setResuming(true);
+  const showCancelButton = !isPendingPay && canCancel;
 
-      let res;
-
-      if (detailScope === "PRIVATE") {
-        res = await api.post(`/booking/restaurants/${encodeURIComponent(code)}/resume-payment`);
-      } else if (detailScope === "LOOKUP") {
-        res = await api.post(`/booking/public/restaurants/lookup/resume`, {
-          bookingCode: code,
-          phoneLast4: lookupCreds?.phoneLast4,
-          email: lookupCreds?.email?.trim() || null,
-        });
-      } else {
-        res = await api.post(`/booking/public/restaurants/my/${encodeURIComponent(code)}/resume-payment`);
-      }
-
-      const dto = res.data?.data;
-      const payUrl = dto?.payUrl;
-      if (!payUrl) throw new Error("Không nhận được payUrl");
-
-      window.location.assign(payUrl);
-    } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Không thể tiếp tục thanh toán";
-      setResumeError(msg);
-    } finally {
-      setResuming(false);
-    }
-  };
-
-  const callCancelApi = async ({ code, reason }) => {
-    if (detailScope === "PRIVATE") {
-      return api.post(`/booking/restaurants/${encodeURIComponent(code)}/cancel`, { reason });
-    }
-    if (detailScope === "LOOKUP") {
-      return api.post(`/booking/public/restaurants/lookup/cancel`, {
-        bookingCode: code,
-        phoneLast4: lookupCreds?.phoneLast4,
-        email: lookupCreds?.email?.trim() || null,
-        reason,
-      });
-    }
-    return api.post(`/booking/public/restaurants/my/${encodeURIComponent(code)}/cancel`, { reason });
-  };
-
-  const onCancelSubmit = async () => {
-    if (!code) return;
-    try {
-      setCancelError(null);
-      setCancelLoading(true);
-
-      await callCancelApi({ code, reason: (cancelReasonInput || "").trim() });
-
-      // refresh list ở page cha
-      onRefresh?.();
-
-      setCancelOpen(false);
-      setCancelReasonInput("");
-
-      // nếu modal detail đang mở => reload detail (giống hotel)
-      if (open) {
-        setDetail(null);
-        setDetailLoading(true);
-        const data = await fetchDetail(code);
-        setDetail(data ?? null);
-        setDetailLoading(false);
-      }
-    } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Hủy đơn thất bại";
-      setCancelError(msg);
-    } finally {
-      setCancelLoading(false);
-    }
-  };
-
+  // ESC close
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e) => e.key === "Escape" && setOpen(false);
@@ -227,7 +156,16 @@ export default function RestaurantBookingCard({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  //  tách riêng hàm fetchDetail để xử lý LOOKUP/PUBLIC/PRIVATE rõ ràng
+  // Lock scroll
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   const fetchDetail = async (code) => {
     if (detailScope === "PRIVATE") {
       const res = await api.get(`/booking/restaurants/${encodeURIComponent(code)}`);
@@ -243,7 +181,6 @@ export default function RestaurantBookingCard({
       return res.data?.data ?? res.data;
     }
 
-    // PUBLIC (device cookie)
     const res = await api.get(`/booking/public/restaurants/my/${encodeURIComponent(code)}`);
     return res.data?.data ?? res.data;
   };
@@ -261,11 +198,9 @@ export default function RestaurantBookingCard({
         setDetailLoading(true);
 
         const data = await fetchDetail(code);
-
         if (!cancelled) setDetail(data ?? null);
       } catch (e) {
-        const msg =
-          e?.response?.data?.message || e?.message || "Không tải được chi tiết đơn";
+        const msg = e?.response?.data?.message || e?.message || "Không tải được chi tiết đơn";
         if (!cancelled) setDetailError(msg);
       } finally {
         if (!cancelled) setDetailLoading(false);
@@ -277,6 +212,8 @@ export default function RestaurantBookingCard({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, booking?.code, detailScope, lookupCreds?.phoneLast4, lookupCreds?.email]);
+
+  if (!booking) return null;
 
   const b = detail || booking;
 
@@ -312,7 +249,216 @@ export default function RestaurantBookingCard({
     return `${reservationDate} • ${reservationTime || "--:--"}`;
   }, [reservationDate, reservationTime]);
 
-  if (!booking) return null;
+  const onResumePayment = async () => {
+    if (!code) return;
+    try {
+      setResumeError(null);
+      setResuming(true);
+
+      let res;
+
+      if (detailScope === "PRIVATE") {
+        res = await api.post(`/booking/restaurants/${encodeURIComponent(code)}/resume-payment`);
+      } else if (detailScope === "LOOKUP") {
+        res = await api.post(`/booking/public/restaurants/lookup/resume`, {
+          bookingCode: code,
+          phoneLast4: lookupCreds?.phoneLast4,
+          email: lookupCreds?.email?.trim() || null,
+        });
+      } else {
+        res = await api.post(`/booking/public/restaurants/my/${encodeURIComponent(code)}/resume-payment`);
+      }
+
+      const dto = res.data?.data;
+      const payUrl = dto?.payUrl;
+      if (!payUrl) throw new Error("Không nhận được payUrl");
+      window.location.assign(payUrl);
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Không thể tiếp tục thanh toán";
+      setResumeError(msg);
+    } finally {
+      setResuming(false);
+    }
+  };
+
+  const callCancelApi = async ({ code, reason }) => {
+    if (detailScope === "PRIVATE") {
+      return api.post(`/booking/restaurants/${encodeURIComponent(code)}/cancel`, { reason });
+    }
+    if (detailScope === "LOOKUP") {
+      return api.post(`/booking/public/restaurants/lookup/cancel`, {
+        bookingCode: code,
+        phoneLast4: lookupCreds?.phoneLast4,
+        email: lookupCreds?.email?.trim() || null,
+        reason,
+      });
+    }
+    return api.post(`/booking/public/restaurants/my/${encodeURIComponent(code)}/cancel`, { reason });
+  };
+
+  const onCancelSubmit = async () => {
+    if (!code) return;
+    try {
+      setCancelError(null);
+      setCancelLoading(true);
+
+      await callCancelApi({ code, reason: (cancelReasonInput || "").trim() });
+      onRefresh?.();
+
+      setCancelOpen(false);
+      setCancelReasonInput("");
+
+      if (open) {
+        setDetail(null);
+        setDetailLoading(true);
+        const data = await fetchDetail(code);
+        setDetail(data ?? null);
+        setDetailLoading(false);
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Hủy đơn thất bại";
+      setCancelError(msg);
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  const modalNode =
+    open && mounted
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[99999] bg-black/55 backdrop-blur-[1px]"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setOpen(false);
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="fixed inset-0 flex items-center justify-center p-4">
+              <div
+                className="w-full max-w-3xl rounded-2xl bg-white shadow-xl max-h-[85vh] flex flex-col"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-4 py-3 md:px-5 shrink-0">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-gray-900 md:text-base">
+                      Chi tiết đơn đặt bàn
+                    </h3>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Mã: <span className="font-mono">{code}</span>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                    aria-label="Đóng"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="px-4 py-3 md:px-5 md:py-4 overflow-y-auto">
+                  {detailLoading ? <p className="text-xs text-gray-500">Đang tải chi tiết...</p> : null}
+
+                  {detailError ? (
+                    <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                      {detailError}
+                    </div>
+                  ) : null}
+
+                  <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <div className="rounded-xl border border-gray-200 px-3">
+                      <div className="py-3 text-sm font-semibold text-gray-900">Thông tin đơn</div>
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Mã booking" value={code} mono />
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Nhà hàng" value={restaurantName} />
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Giờ đặt" value={reservationLabel} />
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Loại bàn" value={tableTypeName} />
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Số bàn" value={tablesCount} />
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Tạo lúc" value={fmtDateTime(createdAt)} />
+                      <div className="h-px bg-gray-100" />
+                      <DetailRow label="Thanh toán" value={paidAt ? fmtDateTime(paidAt) : "Chưa thanh toán"} />
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-gray-200 px-3">
+                        <div className="py-3 text-sm font-semibold text-gray-900">Thông tin liên hệ</div>
+                        <div className="h-px bg-gray-100" />
+
+                        {guestSessionId ? (
+                          <>
+                            <DetailRow label="Guest SID" value={guestSessionId} mono />
+                            <div className="h-px bg-gray-100" />
+                          </>
+                        ) : null}
+
+                        <DetailRow label="Tên" value={contactName} />
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="SĐT" value={contactPhone} mono />
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="Email" value={contactEmail} />
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="Ghi chú" value={note} />
+                      </div>
+
+                      <div className="rounded-xl border border-gray-200 px-3">
+                        <div className="py-3 text-sm font-semibold text-gray-900">Thanh toán</div>
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="Pay option" value={payOption} />
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="Total" value={totalAmount} />
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="Paid" value={amountPaid} />
+                        <div className="h-px bg-gray-100" />
+                        <DetailRow label="Currency" value={currencyCode} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 border-t border-gray-100 px-4 py-3 md:flex-row md:items-center md:justify-end md:px-5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => code && navigator.clipboard?.writeText(code)}
+                    className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
+                  >
+                    Copy mã booking
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
+                  >
+                    Đóng
+                  </button>
+
+                  {showCancelButton ? (
+                    <button
+                      type="button"
+                      onClick={() => setCancelOpen(true)}
+                      className={[
+                        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold shadow-sm transition",
+                        "border border-red-600 text-red-600 hover:bg-red-50",
+                      ].join(" ")}
+                      title="Hủy đơn"
+                    >
+                      Hủy đơn
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <>
@@ -354,12 +500,14 @@ export default function RestaurantBookingCard({
                   Giờ đặt: <span className="font-semibold">{reservationLabel}</span>
                   {typeof tablesCount === "number" ? (
                     <>
-                      {" "}· <span className="font-semibold">{tablesCount}</span> bàn
+                      {" "}
+                      · <span className="font-semibold">{tablesCount}</span> bàn
                     </>
                   ) : null}
                   {tableTypeName ? (
                     <>
-                      {" "}· <span className="font-semibold">{tableTypeName}</span>
+                      {" "}
+                      · <span className="font-semibold">{tableTypeName}</span>
                     </>
                   ) : null}
                 </p>
@@ -417,11 +565,13 @@ export default function RestaurantBookingCard({
                   disabled={resuming}
                   className={[
                     "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
-                    resuming ? "bg-gray-400 cursor-not-allowed text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white",
+                    resuming
+                      ? "bg-gray-400 cursor-not-allowed text-white"
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white",
                   ].join(" ")}
                   title={`Còn ${fmtCountdown(expiresInMs)} để thanh toán`}
                 >
-                   {resuming ? (
+                  {resuming ? (
                     "Đang mở MoMo..."
                   ) : (
                     <>
@@ -433,9 +583,7 @@ export default function RestaurantBookingCard({
                   )}
                 </button>
 
-                {resumeError ? (
-                  <p className="text-[11px] text-red-600">{resumeError}</p>
-                ) : null}
+                {resumeError ? <p className="text-[11px] text-red-600">{resumeError}</p> : null}
               </>
             ) : null}
 
@@ -456,134 +604,8 @@ export default function RestaurantBookingCard({
         </div>
       </article>
 
-      {open ? (
-        <div
-          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setOpen(false)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="w-full max-w-3xl rounded-2xl bg-white shadow-xl max-h-[85vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-4 py-3 md:px-5 shrink-0">
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 md:text-base">
-                  Chi tiết đơn đặt bàn
-                </h3>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  Mã: <span className="font-mono">{code}</span>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="px-4 py-3 md:px-5 md:py-4 overflow-y-auto">
-              {detailLoading ? (
-                <p className="text-xs text-gray-500">Đang tải chi tiết...</p>
-              ) : null}
-
-              {detailError ? (
-                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                  {detailError}
-                </div>
-              ) : null}
-
-              <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 px-3">
-                  <div className="py-3 text-sm font-semibold text-gray-900">Thông tin đơn</div>
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Mã booking" value={code} mono />
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Nhà hàng" value={restaurantName} />
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Giờ đặt" value={reservationLabel} />
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Loại bàn" value={tableTypeName} />
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Số bàn" value={tablesCount} />
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Tạo lúc" value={fmtDateTime(createdAt)} />
-                  <div className="h-px bg-gray-100" />
-                  <DetailRow label="Thanh toán" value={paidAt ? fmtDateTime(paidAt) : "Chưa thanh toán"} />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-gray-200 px-3">
-                    <div className="py-3 text-sm font-semibold text-gray-900">Thông tin liên hệ</div>
-                    <div className="h-px bg-gray-100" />
-
-                    {guestSessionId ? (
-                      <>
-                        <DetailRow label="Guest SID" value={guestSessionId} mono />
-                        <div className="h-px bg-gray-100" />
-                      </>
-                    ) : null}
-
-                    <DetailRow label="Tên" value={contactName} />
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="SĐT" value={contactPhone} mono />
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="Email" value={contactEmail} />
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="Ghi chú" value={note} />
-                  </div>
-
-                  <div className="rounded-xl border border-gray-200 px-3">
-                    <div className="py-3 text-sm font-semibold text-gray-900">Thanh toán</div>
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="Pay option" value={payOption} />
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="Total" value={totalAmount} />
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="Paid" value={amountPaid} />
-                    <div className="h-px bg-gray-100" />
-                    <DetailRow label="Currency" value={currencyCode} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 border-t border-gray-100 px-4 py-3 md:flex-row md:items-center md:justify-end md:px-5 shrink-0">
-              <button
-                type="button"
-                onClick={() => code && navigator.clipboard?.writeText(code)}
-                className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
-              >
-                Copy mã booking
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
-              >
-                Đóng
-              </button>
-
-              {showCancelButton ? (
-                <button
-                  type="button"
-                  onClick={() => setCancelOpen(true)}
-                  className={[
-                    "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
-                    "border border-red-600 text-red-600 hover:bg-red-50",
-                  ].join(" ")}
-                  title="Hủy đơn"
-                >
-                  Hủy đơn
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {/* MODAL (PORTAL) */}
+      {modalNode}
 
       <CancelBookingModal
         open={cancelOpen}

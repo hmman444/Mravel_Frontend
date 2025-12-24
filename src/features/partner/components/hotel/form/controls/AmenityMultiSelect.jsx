@@ -30,14 +30,14 @@ export default function AmenityMultiSelect({
   value = [],
   onChange,
 
-  // ✅ ưu tiên code để match DB amenityCodes
+  //  ưu tiên code để match DB amenityCodes
   getKey = (a) => a?.code ?? a?.id,
 }) {
   const [q, setQ] = useState("");
   const [openAll, setOpenAll] = useState(false);
   const [openSuggest, setOpenSuggest] = useState(false);
 
-  // ✅ map key(code) -> item để render label VI từ code
+  //  map key(code) -> item để render label VI từ code
   const itemMap = useMemo(() => {
     const m = new Map();
     (items || []).forEach((a) => {
@@ -48,7 +48,7 @@ export default function AmenityMultiSelect({
     return m;
   }, [items, getKey]);
 
-  // ✅ normalize value -> list of keys (string) giữ order
+  //  normalize value -> list of keys (string) giữ order
   const selectedList = useMemo(() => {
     const out = [];
     const seen = new Set();
@@ -83,7 +83,7 @@ export default function AmenityMultiSelect({
   // gợi ý chỉ lấy tối đa 12 cái cho gọn
   const suggestions = useMemo(() => filtered.slice(0, 12), [filtered]);
 
-  // ✅ toggle theo KEY và emit mảng KEY (string) => đồng bộ DB
+  //  toggle theo KEY và emit mảng KEY (string) => đồng bộ DB
   const toggle = (a) => {
     const raw = getKey(a);
     const k = raw == null ? "" : String(raw);
@@ -127,7 +127,7 @@ export default function AmenityMultiSelect({
         </div>
       </div>
 
-      {/* ✅ Search ngoài + dropdown gợi ý */}
+      {/*  Search ngoài + dropdown gợi ý */}
       <div className="relative">
         <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
 
@@ -227,7 +227,7 @@ export default function AmenityMultiSelect({
         )}
       </div>
 
-      {/* ✅ chips đã chọn (hiển thị VI theo code) */}
+      {/*  chips đã chọn (hiển thị VI theo code) */}
       <div className="flex flex-wrap gap-2">
         {selectedList.length === 0 ? (
           <div className="text-xs text-gray-500">Chưa chọn tiện ích nào.</div>
@@ -244,7 +244,7 @@ export default function AmenityMultiSelect({
         )}
       </div>
 
-      {/* ✅ Modal “Xem tất cả” (giữ nguyên phần bạn đang có) */}
+      {/*  Modal “Xem tất cả” (giữ nguyên phần bạn đang có) */}
       {openAll && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"

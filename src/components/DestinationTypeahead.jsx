@@ -53,7 +53,7 @@ export default function DestinationTypeahead({
     setPickedSlug(defaultSlug || null);
   }, [defaultSlug]);
 
-  // ✅ resolve hiển thị đẹp từ slug khi edit (value đang rỗng)
+  //  resolve hiển thị đẹp từ slug khi edit (value đang rỗng)
   const resolvedOnce = useRef(false);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function DestinationTypeahead({
     skipNextFetch.current = true;
     resolvedOnce.current = true;
 
-    // ✅ đẩy ngược lên parent để set destinationName (lần edit sau khỏi resolve)
+    //  đẩy ngược lên parent để set destinationName (lần edit sau khỏi resolve)
     if (typeof onPick === "function") onPick({ text, slug: defaultSlug });
   }, [items, defaultSlug, resetSuggest, onPick]);
 

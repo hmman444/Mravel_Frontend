@@ -10,6 +10,7 @@ import {
   rejectRestaurant,
   blockRestaurant,
   unblockRestaurant,
+  fetchAdminHotelById,
 } from "../services/adminCatalogService";
 
 const apiMessage = (err) => {
@@ -23,15 +24,16 @@ const apiMessage = (err) => {
 };
 
 const initialState = {
-  // mode: "HOTEL" | "RESTAURANT"
   mode: "HOTEL",
-
   items: [],
   loading: false,
 
+  // NEW
+  selected: null,
+  detailLoading: false,
+
   acting: false,
   actionError: null,
-
   error: null,
   lastQuery: null,
 };
@@ -75,6 +77,17 @@ export const actOnService = createAsyncThunk(
   }
 );
 
+export const loadAdminHotelDetail = createAsyncThunk(
+  "adminService/loadAdminHotelDetail",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await fetchAdminHotelById(id);
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
+  }
+);
+
 const adminServiceSlice = createSlice({
   name: "adminService",
   initialState,
@@ -86,10 +99,13 @@ const adminServiceSlice = createSlice({
       state.error = null;
       state.actionError = null;
     },
+    clearSelected(state) {          // NEW
+      state.selected = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // LOAD
+      // LOAD LIST
       .addCase(loadAdminServices.pending, (state, action) => {
         state.loading = true;
         state.error = null;
@@ -104,7 +120,21 @@ const adminServiceSlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      // ACTION
+      // LOAD DETAIL (HOTEL)
+      .addCase(loadAdminHotelDetail.pending, (state) => {
+        state.detailLoading = true;
+        state.error = null;
+      })
+      .addCase(loadAdminHotelDetail.fulfilled, (state, action) => {
+        state.detailLoading = false;
+        state.selected = action.payload;
+      })
+      .addCase(loadAdminHotelDetail.rejected, (state, action) => {
+        state.detailLoading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      // ACTION (approve/reject/block/unblock)
       .addCase(actOnService.pending, (state) => {
         state.acting = true;
         state.actionError = null;
@@ -112,10 +142,16 @@ const adminServiceSlice = createSlice({
       .addCase(actOnService.fulfilled, (state, action) => {
         state.acting = false;
 
-        // update row in-place if it exists
         const updated = action.payload;
+
+        // update row list
         const idx = state.items.findIndex((x) => x.id === updated?.id);
         if (idx !== -1) state.items[idx] = updated;
+
+        // update selected detail if matching
+        if (state.selected?.id && state.selected.id === updated?.id) {
+          state.selected = updated;
+        }
       })
       .addCase(actOnService.rejected, (state, action) => {
         state.acting = false;
@@ -124,5 +160,5 @@ const adminServiceSlice = createSlice({
   },
 });
 
-export const { setMode, clearError } = adminServiceSlice.actions;
+export const { setMode, clearError, clearSelected } = adminServiceSlice.actions;
 export default adminServiceSlice.reducer;

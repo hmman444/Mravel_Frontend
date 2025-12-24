@@ -33,7 +33,7 @@ export default function PartnerHotelFormPage({
 
   // bạn có thể rename hook này thành usePartnerHotelForm cho đúng nghĩa
   const fm = usePartnerHotelCreateForm({
-    initialForm, // ✅ sửa hook để nhận initialForm thay vì tự createInitialHotelForm()
+    initialForm, //  sửa hook để nhận initialForm thay vì tự createInitialHotelForm()
     onCreate: async (payload) => {
       await onSubmit?.(payload);
     },

@@ -8,6 +8,7 @@ export default function ImagesSection({
   setCover,
   removeImageAt,
   updateImageField,
+  disabled = false, // ✅
 }) {
   return (
     <details open className="group">
@@ -19,17 +20,22 @@ export default function ImagesSection({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={addImageByUrl}
-            className="px-3 py-2 border rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2"
+            onClick={() => !disabled && addImageByUrl?.()}
+            className="px-3 py-2 border rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2 disabled:opacity-60"
+            disabled={disabled}
           >
             <PlusIcon className="w-4 h-4" />
             Thêm link ảnh
           </button>
 
-          <label className="px-3 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 cursor-pointer flex items-center gap-2">
+          <label
+            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
+              disabled ? "bg-slate-200 text-slate-500 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+            }`}
+          >
             <ArrowUpTrayIcon className="w-4 h-4" />
             Tải ảnh lên
-            <input type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} />
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => !disabled && onPickFiles?.(e)} disabled={disabled} />
           </label>
         </div>
       </div>
@@ -46,8 +52,9 @@ export default function ImagesSection({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setCover(idx)}
-                  className={`mt-2 w-full text-xs px-2 py-1.5 rounded-xl border ${
+                  onClick={() => !disabled && setCover?.(idx)}
+                  disabled={disabled}
+                  className={`mt-2 w-full text-xs px-2 py-1.5 rounded-xl border disabled:opacity-60 ${
                     img.cover ? "bg-green-50 border-green-200 text-green-700" : "hover:bg-gray-50"
                   }`}
                 >
@@ -58,23 +65,26 @@ export default function ImagesSection({
               <div className="md:col-span-8 space-y-2">
                 <input
                   value={img.url}
-                  onChange={(e) => updateImageField(idx, { url: e.target.value })}
+                  onChange={(e) => !disabled && updateImageField?.(idx, { url: e.target.value })}
                   className="w-full border rounded-xl px-3 py-2 text-sm"
                   placeholder="https://..."
+                  disabled={disabled}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
                   <input
                     value={img.caption}
-                    onChange={(e) => updateImageField(idx, { caption: e.target.value })}
+                    onChange={(e) => !disabled && updateImageField?.(idx, { caption: e.target.value })}
                     className="md:col-span-9 border rounded-xl px-3 py-2 text-sm"
                     placeholder="Caption (tuỳ chọn)"
+                    disabled={disabled}
                   />
                   <input
                     value={img.sortOrder}
-                    onChange={(e) => updateImageField(idx, { sortOrder: e.target.value })}
+                    onChange={(e) => !disabled && updateImageField?.(idx, { sortOrder: e.target.value })}
                     className="md:col-span-3 border rounded-xl px-3 py-2 text-sm"
                     placeholder="Sort"
+                    disabled={disabled}
                   />
                 </div>
               </div>
@@ -82,9 +92,10 @@ export default function ImagesSection({
               <div className="md:col-span-1 flex md:justify-end">
                 <button
                   type="button"
-                  onClick={() => removeImageAt(idx)}
-                  className="p-2 rounded-xl hover:bg-red-50"
+                  onClick={() => !disabled && removeImageAt?.(idx)}
+                  className="p-2 rounded-xl hover:bg-red-50 disabled:opacity-60"
                   title="Xóa ảnh"
+                  disabled={disabled}
                 >
                   <TrashIcon className="w-5 h-5 text-red-600" />
                 </button>
@@ -93,10 +104,6 @@ export default function ImagesSection({
           ))}
         </div>
       )}
-
-      <div className="mt-2 text-xs text-gray-500">
-        * Upload hiện tại dùng base64 (quick). Sau muốn chuẩn: thêm API upload trả URL.
-      </div>
     </details>
   );
 }

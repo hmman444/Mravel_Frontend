@@ -47,6 +47,7 @@ import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
 import AdminPlaceDetailPage from "./features/admin/pages/AdminPlaceDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
+import AdminHotelReviewPage from "./features/admin/pages/AdminHotelReviewPage";
 
 import { useMainSocket } from "./realtime/useMainSocket";
 import { useHydrateRole } from "./features/auth/hooks/useHydrateRole";
@@ -106,6 +107,7 @@ function App() {
             <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
             <Route path="/admin/places/:slug" element={<AdminPlaceDetailPage />} />
             <Route path="/admin/places/new" element={<AdminPlaceDetailPage />} />
+            <Route path="/admin/services/hotels/:id" element={<AdminHotelReviewPage />} />
             <Route path="/admin/places/:placeId" element={<PlaceDetailPageAdmin />} />
           </Route>
 

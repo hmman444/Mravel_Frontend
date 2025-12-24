@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import { useAdminServices } from "../hooks/useAdminServices";
-
+import { useNavigate } from "react-router-dom";
 import ServiceStats from "../components/services/ServiceStats";
 import ServiceFilters from "../components/services/ServiceFilters";
 import ServiceTable from "../components/services/ServiceTable";
@@ -19,239 +19,289 @@ const soft = {
     "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
 };
 
-export default function ManageServicesPage() {
-  const {
-    mode,
-    setMode,
-    items,
-    loading,
-    acting,
-    load,
-    act,
-  } = useAdminServices();
 
-  // filters UI
-  const [filtersOpen, setFiltersOpen] = useState(true);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("ALL");
-  const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | ACTIVE | INACTIVE
-  const [unlockFilter, setUnlockFilter] = useState("ALL"); // ALL | YES | NO
-
-  // reason modal state
-  const [reasonOpen, setReasonOpen] = useState(false);
-  const [reasonMode, setReasonMode] = useState(null); // "REJECT" | "BLOCK"
-  const [target, setTarget] = useState(null); // selected item
-
-  const buildQueryParams = () => {
-    const params = {};
-    const q = search.trim();
-    if (q) params.q = q;
-
-    if (status !== "ALL") params.status = status;
-
-    if (activeFilter === "ACTIVE") params.active = true;
-    if (activeFilter === "INACTIVE") params.active = false;
-
-    if (unlockFilter === "YES") params.unlockRequested = true;
-    if (unlockFilter === "NO") params.unlockRequested = false;
-
-    // paging nếu muốn:
-    // params.page = 0; params.size = 20;
-
-    return params;
-  };
-
-  const reload = async () => {
-    await load({ mode, params: buildQueryParams() });
-  };
-
+// debounce hook
+function useDebounced(value, delay = 350) {
+  const [v, setV] = useState(value);
   useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+    const t = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return v;
+}
 
-  const filtered = useMemo(() => {
-    // Backend đã filter rồi, nhưng vẫn giữ fallback client-side nếu muốn
-    return items || [];
-  }, [items]);
+export default function ManageServicesPage() {
+    const { mode, setMode, items, loading, acting, load, act } = useAdminServices();
 
-  const totalCount = filtered.length;
-  const pendingCount = useMemo(
-    () => filtered.filter((x) => x.moderationStatus === "PENDING_REVIEW").length,
-    [filtered]
-  );
+    /** ================= FILTER UI STATE ================= */
+    const [filtersOpen, setFiltersOpen] = useState(true);
+    const [search, setSearch] = useState("");
+    const [status, setStatus] = useState("ALL");
+    const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | ACTIVE | INACTIVE
+    const [unlockFilter, setUnlockFilter] = useState("ALL"); // ALL | YES | NO
 
-  const hasAnyFilter =
-    search.trim() ||
-    status !== "ALL" ||
-    activeFilter !== "ALL" ||
-    unlockFilter !== "ALL";
+    /** ================= MODAL STATE ================= */
+    const [reasonOpen, setReasonOpen] = useState(false);
+    const [reasonMode, setReasonMode] = useState(null); // "REJECT" | "BLOCK"
+    const [target, setTarget] = useState(null);
 
-  const resetFilters = () => {
-    setSearch("");
-    setStatus("ALL");
-    setActiveFilter("ALL");
-    setUnlockFilter("ALL");
-  };
+    /** ================= DEBOUNCE SEARCH ================= */
+    const debouncedSearch = useDebounced(search, 350);
 
-  // ===== actions =====
-  const onApprove = async (x) => {
-    try {
-      await act({ mode, action: "APPROVE", id: x.id });
-      showSuccess("Đã approve");
-      await reload();
-    } catch (e) {
-      showError(typeof e === "string" ? e : "Approve thất bại");
-    }
-  };
+    /** ================= ANTI-DOUBLE/ANTI-RACE =================
+     * - strictModeRef: tránh gọi 2 lần khi dev StrictMode mount/unmount
+     * - reqSeqRef: đảm bảo request mới nhất thắng, request cũ về trễ bị bỏ
+     */
+    const strictModeRef = useRef(false);
+    const reqSeqRef = useRef(0);
 
-  const openReason = (action, x) => {
-    setReasonMode(action); // REJECT | BLOCK
-    setTarget(x);
-    setReasonOpen(true);
-  };
+    const onOpenRow = (x) => {
+        if (mode === "HOTEL") navigate(`/admin/services/hotels/${x.id}`);
+    };
 
-  const onConfirmReason = async (reason) => {
-    if (!target?.id) return;
-    try {
-      await act({ mode, action: reasonMode, id: target.id, reason });
-      showSuccess(reasonMode === "REJECT" ? "Đã reject" : "Đã block");
-      setReasonOpen(false);
-      setTarget(null);
-      await reload();
-    } catch (e) {
-      showError(typeof e === "string" ? e : "Thao tác thất bại");
-    }
-  };
+    const navigate = useNavigate();
+    /** ================= BUILD PARAMS (memo) ================= */
+    const queryParams = useMemo(() => {
+        const params = {};
 
-  const onUnblock = async (x) => {
-    try {
-      await act({ mode, action: "UNBLOCK", id: x.id });
-      showSuccess("Đã unblock");
-      await reload();
-    } catch (e) {
-      showError(typeof e === "string" ? e : "Unblock thất bại");
-    }
-  };
+        const q = (debouncedSearch || "").trim();
+        if (q) params.q = q;
 
-  return (
-    <AdminLayout>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Quản lý dịch vụ (Moderation)
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Duyệt / từ chối / chặn dịch vụ do partner đăng.
-            </p>
-          </div>
+        if (status && status !== "ALL") params.status = status;
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* mode switch */}
-            <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-              <button
-                type="button"
-                onClick={() => setMode("HOTEL")}
-                className={`px-4 py-2 text-sm font-semibold ${
-                  mode === "HOTEL"
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                    : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
-                }`}
-              >
-                Hotels
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("RESTAURANT")}
-                className={`px-4 py-2 text-sm font-semibold ${
-                  mode === "RESTAURANT"
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                    : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
-                }`}
-              >
-                Restaurants
-              </button>
+        if (activeFilter === "ACTIVE") params.active = true;
+        if (activeFilter === "INACTIVE") params.active = false;
+
+        if (unlockFilter === "YES") params.unlockRequested = true;
+        if (unlockFilter === "NO") params.unlockRequested = false;
+
+        return params;
+    }, [debouncedSearch, status, activeFilter, unlockFilter]);
+
+    /** ================= RELOAD (stable) ================= */
+    const reload = async (nextMode = mode, nextParams = queryParams) => {
+        // seq tăng mỗi lần gọi -> nếu response về trễ mà seq không còn là latest thì bỏ
+        const mySeq = ++reqSeqRef.current;
+
+        try {
+        const data = await load({ mode: nextMode, params: nextParams });
+
+        // nếu đây không phải request mới nhất thì không làm gì (tránh UI nhảy lung tung)
+        if (mySeq !== reqSeqRef.current) return data;
+        return data;
+        } catch (e) {
+        // chỉ show error cho request mới nhất
+        if (mySeq === reqSeqRef.current) {
+            showError(typeof e === "string" ? e : "Không tải được danh sách");
+        }
+        throw e;
+        }
+    };
+
+    /** ================= AUTO LOAD =================
+     *  Load khi:
+     * - đổi mode
+     * - search debounce thay đổi
+     * - status/active/unlock thay đổi
+     *
+     * ❗ Tránh StrictMode dev gọi 2 lần:
+     * - bỏ qua lần effect đầu tiên nếu strictModeRef đã true
+     */
+    useEffect(() => {
+        // StrictMode dev thường chạy effect 2 lần ở lần mount đầu
+        if (!strictModeRef.current) {
+        strictModeRef.current = true;
+        // vẫn load lần đầu luôn cho chắc (nếu bạn muốn bỏ thì return;)
+        // return;
+        }
+        reload(mode, queryParams);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mode, queryParams]);
+
+    /** ================= DERIVED ================= */
+    const list = useMemo(() => items || [], [items]);
+
+    const totalCount = list.length;
+
+    const pendingCount = useMemo(
+        () => list.filter((x) => x.moderationStatus === "PENDING_REVIEW").length,
+        [list]
+    );
+
+    const hasAnyFilter =
+        search.trim() ||
+        status !== "ALL" ||
+        activeFilter !== "ALL" ||
+        unlockFilter !== "ALL";
+
+    const resetFilters = () => {
+        // chỉ reset state, effect sẽ tự reload theo queryParams mới
+        setSearch("");
+        setStatus("ALL");
+        setActiveFilter("ALL");
+        setUnlockFilter("ALL");
+    };
+
+    /** ================= ACTIONS ================= */
+    const onApprove = async (x) => {
+        try {
+        await act({ mode, action: "APPROVE", id: x.id });
+        showSuccess("Đã approve");
+        await reload(mode, queryParams);
+        } catch (e) {
+        showError(typeof e === "string" ? e : "Approve thất bại");
+        }
+    };
+
+    const openReason = (action, x) => {
+        setReasonMode(action);
+        setTarget(x);
+        setReasonOpen(true);
+    };
+
+    const onConfirmReason = async (reason) => {
+        if (!target?.id) return;
+        try {
+        await act({ mode, action: reasonMode, id: target.id, reason });
+        showSuccess(reasonMode === "REJECT" ? "Đã reject" : "Đã block");
+        setReasonOpen(false);
+        setTarget(null);
+        await reload(mode, queryParams);
+        } catch (e) {
+        showError(typeof e === "string" ? e : "Thao tác thất bại");
+        }
+    };
+
+    const onUnblock = async (x) => {
+        try {
+        await act({ mode, action: "UNBLOCK", id: x.id });
+        showSuccess("Đã unblock");
+        await reload(mode, queryParams);
+        } catch (e) {
+        showError(typeof e === "string" ? e : "Unblock thất bại");
+        }
+    };
+
+    return (
+        <AdminLayout>
+        {/* Header */}
+        <div className="mb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Quản lý dịch vụ
+                </h1>
+                <p className="mt-1 text-sm text-slate-500">
+                Duyệt / từ chối / chặn dịch vụ do partner đăng.
+                </p>
             </div>
 
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              className={`${soft.btn} ${soft.btnGhost} gap-2`}
-              type="button"
-            >
-              <FunnelIcon className="h-5 w-5" />
-              Bộ lọc
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+                {/* mode switch */}
+                <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                <button
+                    type="button"
+                    onClick={() => setMode("HOTEL")}
+                    className={`px-4 py-2 text-sm font-semibold ${
+                    mode === "HOTEL"
+                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
+                    }`}
+                >
+                    Hotels
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMode("RESTAURANT")}
+                    className={`px-4 py-2 text-sm font-semibold ${
+                    mode === "RESTAURANT"
+                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
+                    }`}
+                >
+                    Restaurants
+                </button>
+                </div>
 
-            <button
-              onClick={reload}
-              className={`${soft.btn} ${soft.btnPrimary}`}
-              type="button"
-              disabled={loading}
-            >
-              Reload
-            </button>
-          </div>
+                <button
+                onClick={() => setFiltersOpen((v) => !v)}
+                className={`${soft.btn} ${soft.btnGhost} gap-2`}
+                type="button"
+                >
+                <FunnelIcon className="h-5 w-5" />
+                Bộ lọc
+                </button>
+
+                <button
+                onClick={() => reload(mode, queryParams)}
+                className={`${soft.btn} ${soft.btnPrimary}`}
+                type="button"
+                disabled={loading}
+                title="Gọi lại API theo bộ lọc hiện tại"
+                >
+                Reload
+                </button>
+            </div>
+            </div>
+
+            <ServiceStats
+            totalCount={totalCount}
+            pendingCount={pendingCount}
+            visibleCount={list.length}
+            />
         </div>
 
-        <ServiceStats
-          totalCount={totalCount}
-          pendingCount={pendingCount}
-          visibleCount={filtered.length}
+        {/* Filters */}
+        <ServiceFilters
+            open={filtersOpen}
+            search={search}
+            setSearch={setSearch}
+            status={status}
+            setStatus={setStatus}
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+            unlockFilter={unlockFilter}
+            setUnlockFilter={setUnlockFilter}
+            hasAnyFilter={!!hasAnyFilter}
+            onReset={resetFilters}
         />
-      </div>
 
-      {/* Filters */}
-      <ServiceFilters
-        open={filtersOpen}
-        search={search}
-        setSearch={setSearch}
-        status={status}
-        setStatus={setStatus}
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-        unlockFilter={unlockFilter}
-        setUnlockFilter={setUnlockFilter}
-        hasAnyFilter={!!hasAnyFilter}
-        onReset={() => {
-          resetFilters();
-          setTimeout(() => reload(), 0);
-        }}
-      />
+        {/* Table */}
+        {loading ? (
+            <div className="space-y-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                key={i}
+                className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800"
+                />
+            ))}
+            </div>
+        ) : list.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+                Không có dữ liệu phù hợp với bộ lọc hiện tại.
+            </p>
+            </div>
+        ) : (
+            <ServiceTable
+            items={list}
+            onApprove={onApprove}
+            onOpen={onOpenRow}
+            onReject={(x) => openReason("REJECT", x)}
+            onBlock={(x) => openReason("BLOCK", x)}
+            onUnblock={onUnblock}
+            />
+        )}
 
-      {/* Table */}
-      {loading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không có dữ liệu phù hợp với bộ lọc hiện tại.
-          </p>
-        </div>
-      ) : (
-        <ServiceTable
-          items={filtered}
-          onApprove={onApprove}
-          onReject={(x) => openReason("REJECT", x)}
-          onBlock={(x) => openReason("BLOCK", x)}
-          onUnblock={onUnblock}
+        {/* Reason modal */}
+        <ReasonModal
+            open={reasonOpen}
+            title={reasonMode === "REJECT" ? "Từ chối dịch vụ" : "Chặn dịch vụ"}
+            confirmText={reasonMode === "REJECT" ? "Reject" : "Block"}
+            loading={acting}
+            onClose={() => setReasonOpen(false)}
+            onConfirm={onConfirmReason}
         />
-      )}
-
-      {/* Reason modal */}
-      <ReasonModal
-        open={reasonOpen}
-        title={reasonMode === "REJECT" ? "Từ chối dịch vụ" : "Chặn dịch vụ"}
-        confirmText={reasonMode === "REJECT" ? "Reject" : "Block"}
-        loading={acting}
-        onClose={() => setReasonOpen(false)}
-        onConfirm={onConfirmReason}
-      />
-    </AdminLayout>
-  );
+        </AdminLayout>
+    );
 }

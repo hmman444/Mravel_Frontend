@@ -27,6 +27,8 @@ const statusBadge = (s) => {
 
 export default function ServiceTable({
   items,
+  onOpen, // NEW: click row
+  acting = false, // NEW: disable buttons when doing action
   onApprove,
   onReject,
   onBlock,
@@ -52,8 +54,11 @@ export default function ServiceTable({
             <AnimatePresence initial={false}>
               {items.map((x, idx) => {
                 const st = x.moderationStatus;
+
                 const canApprove = st === "PENDING_REVIEW";
                 const canReject = st === "PENDING_REVIEW";
+
+                // bạn có thể nới rule, nhưng theo code bạn đang đặt:
                 const canBlock = st === "APPROVED";
                 const canUnblock = st === "BLOCKED";
 
@@ -66,7 +71,8 @@ export default function ServiceTable({
                     animate="show"
                     exit="exit"
                     transition={{ duration: 0.16 }}
-                    className="border-t border-slate-100 hover:bg-slate-50/70 dark:border-slate-800 dark:hover:bg-slate-800/40"
+                    onClick={() => onOpen?.(x)}
+                    className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70 dark:border-slate-800 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex min-w-[28px] justify-center rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
@@ -76,7 +82,9 @@ export default function ServiceTable({
 
                     <td className="px-4 py-3">
                       <div className="min-w-0">
-                        <div className="truncate font-semibold text-slate-900 dark:text-white">{x.name}</div>
+                        <div className="truncate font-semibold text-slate-900 dark:text-white">
+                          {x.name}
+                        </div>
                         <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                           {x.slug} • {x.cityName || "—"} • {x.destinationSlug || "—"}
                         </div>
@@ -84,21 +92,25 @@ export default function ServiceTable({
                     </td>
 
                     <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+                      <div className="font-medium text-slate-900 dark:text-white">
                         {x.partnerName || "—"}
                       </div>
-                      <div className="text-xs text-slate-500">{x.partnerId || "—"}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        {x.partnerEmail || "—"}
+                      </div>
                     </td>
 
                     <td className="px-4 py-3">
                       <span className={statusBadge(st)}>{st || "—"}</span>
+
                       {x.rejectionReason ? (
-                        <div className="mt-1 text-xs text-rose-600 line-clamp-2">
+                        <div className="mt-1 line-clamp-2 text-xs text-rose-600">
                           Reject: {x.rejectionReason}
                         </div>
                       ) : null}
+
                       {x.blockedReason ? (
-                        <div className="mt-1 text-xs text-slate-600 line-clamp-2">
+                        <div className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-300">
                           Block: {x.blockedReason}
                         </div>
                       ) : null}
@@ -118,7 +130,7 @@ export default function ServiceTable({
 
                     <td className="px-4 py-3 text-center">
                       {x.unlockRequestedAt ? (
-                        <span className="inline-flex items-center gap-1 text-amber-700">
+                        <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
                           <ShieldExclamationIcon className="h-5 w-5" />
                           <span className="text-xs font-semibold">Có</span>
                         </span>
@@ -130,8 +142,11 @@ export default function ServiceTable({
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex items-center gap-2">
                         <button
-                          onClick={() => canApprove && onApprove?.(x)}
-                          disabled={!canApprove}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (canApprove) onApprove?.(x);
+                          }}
+                          disabled={!canApprove || acting}
                           className="rounded-lg p-2 hover:bg-emerald-50 disabled:opacity-40 dark:hover:bg-slate-800"
                           title="Approve"
                         >
@@ -139,8 +154,11 @@ export default function ServiceTable({
                         </button>
 
                         <button
-                          onClick={() => canReject && onReject?.(x)}
-                          disabled={!canReject}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (canReject) onReject?.(x);
+                          }}
+                          disabled={!canReject || acting}
                           className="rounded-lg p-2 hover:bg-rose-50 disabled:opacity-40 dark:hover:bg-slate-800"
                           title="Reject"
                         >
@@ -148,8 +166,11 @@ export default function ServiceTable({
                         </button>
 
                         <button
-                          onClick={() => canBlock && onBlock?.(x)}
-                          disabled={!canBlock}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (canBlock) onBlock?.(x);
+                          }}
+                          disabled={!canBlock || acting}
                           className="rounded-lg p-2 hover:bg-amber-50 disabled:opacity-40 dark:hover:bg-slate-800"
                           title="Block"
                         >
@@ -157,8 +178,11 @@ export default function ServiceTable({
                         </button>
 
                         <button
-                          onClick={() => canUnblock && onUnblock?.(x)}
-                          disabled={!canUnblock}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (canUnblock) onUnblock?.(x);
+                          }}
+                          disabled={!canUnblock || acting}
                           className="rounded-lg p-2 hover:bg-sky-50 disabled:opacity-40 dark:hover:bg-slate-800"
                           title="Unblock"
                         >
