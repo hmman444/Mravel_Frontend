@@ -13,7 +13,7 @@ export function usePartnerHotelCreateForm({
 }) {
   const [form, setForm] = useState(() => initialForm);
 
-  // ✅ khi initialForm đổi (edit service khác), reset lại
+  //  khi initialForm đổi (edit service khác), reset lại
   useEffect(() => {
     setForm(initialForm);
   }, [initialForm]);
@@ -77,7 +77,7 @@ export function usePartnerHotelCreateForm({
         const base = p.images || [];
         const appended = files.map((file, i) => ({
           url: previews[i], // preview
-          file, // ✅ upload thật
+          file, //  upload thật
           caption: "",
           cover: base.length === 0 && i === 0,
           sortOrder: base.length + i,
@@ -176,7 +176,7 @@ export function usePartnerHotelCreateForm({
       });
     }
 
-    // ✅ geocode -> draft.location = [lng, lat]
+    //  geocode -> draft.location = [lng, lat]
     try {
       const geo = await geocodeByAddress(draft);
       if (geo?.lng != null && geo?.lat != null) {

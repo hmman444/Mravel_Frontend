@@ -94,7 +94,7 @@ export function createInitialHotelForm() {
     email: "",
     website: "",
 
-    // ✅ policy (FE fields)
+    //  policy (FE fields)
     defaultCheckInTime: "",   // "14:00"
     defaultCheckOutTime: "",  // "12:00"
     policies: "",
@@ -160,7 +160,7 @@ export function mapHotelDocToForm(raw) {
   const lon = Array.isArray(loc) ? loc[0] : raw?.locationLon ?? raw?.lon;
   const lat = Array.isArray(loc) ? loc[1] : raw?.locationLat ?? raw?.lat;
 
-  // ✅ policy reverse-map
+  //  policy reverse-map
   const policyItems = asArray(raw?.policy?.items ?? []);
   const findByTitle = (t) => asString(policyItems.find((x) => x?.title === t)?.content ?? "");
 
@@ -179,7 +179,7 @@ export function mapHotelDocToForm(raw) {
     email: asString(raw?.email),
     website: asString(raw?.website),
 
-    // ✅ times: ưu tiên field root, fallback policy.*
+    //  times: ưu tiên field root, fallback policy.*
     defaultCheckInTime: toHHmm(raw?.defaultCheckInTime ?? raw?.policy?.checkInFrom),
     defaultCheckOutTime: toHHmm(raw?.defaultCheckOutTime ?? raw?.policy?.checkOutUntil),
     policies: findByTitle("Chính sách"),
@@ -292,7 +292,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
   const tax = form.taxConfig || {};
   const booking = form.bookingConfig || {};
 
-  // ✅ policy items from textarea
+  //  policy items from textarea
   const policyItems = [];
   if (asString(form.policies).trim()) {
     policyItems.push({
@@ -322,7 +322,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
     email: asString(form.email),
     website: asString(form.website),
 
-    // ✅ times root (DTO có)
+    //  times root (DTO có)
     defaultCheckInTime: ci || null,
     defaultCheckOutTime: co || null,
 
@@ -362,7 +362,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
       freeCancelMinutes: toIntOrNull(booking.freeCancelMinutes),
     },
 
-    // ✅ policy DTO
+    //  policy DTO
     policy: {
       checkInFrom: ci || null,
       checkOutUntil: co || null,
@@ -384,7 +384,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
         id: asString(r?.id).trim() || null,
         name: asString(r?.name).trim(),
 
-        // ✅ NEW: map mô tả phòng
+        //  NEW: map mô tả phòng
         shortDescription: desc ? desc.slice(0, 120) : null, // hoặc để null nếu bạn không dùng
         description: desc || null,
 

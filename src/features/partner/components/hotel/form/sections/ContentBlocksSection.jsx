@@ -41,17 +41,17 @@ const makeDefaultBlock = (type) => {
 
 export default function ContentBlocksSection({
   content = [],
-  addBlock,                 // ✅ kỳ vọng: addBlock(payload)
+  addBlock,                 //  kỳ vọng: addBlock(payload)
   removeBlockAt,
   updateBlockField,
-  onPickBlockImage,         // ✅ optional: (idx, event) => upload/convert base64 rồi update imageUrl
+  onPickBlockImage,         //  optional: (idx, event) => upload/convert base64 rồi update imageUrl
 }) {
   const blocks = useMemo(() => asArray(content), [content]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const handleAdd = (type) => {
     try {
-      // ✅ khuyến nghị: addBlock nhận payload
+      //  khuyến nghị: addBlock nhận payload
       addBlock?.(makeDefaultBlock(type));
     } catch (e) {
       // fallback nếu hook bạn vẫn là addBlock() không nhận param
@@ -235,7 +235,7 @@ export default function ContentBlocksSection({
         </div>
       )}
 
-      {/* ✅ Modal chọn loại block */}
+      {/*  Modal chọn loại block */}
       {pickerOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"

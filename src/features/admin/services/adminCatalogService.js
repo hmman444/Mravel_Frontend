@@ -13,6 +13,11 @@ const ensureOk = (res) => {
   return body?.data;
 };
 
+export async function fetchAdminHotelById(id) {
+  const res = await api.get(`${BASE}/hotels/${id}`);
+  return ensureOk(res);
+}
+
 /* ===================== LIST ===================== */
 export async function fetchAdminHotels(params = {}) {
   const query = new URLSearchParams(params).toString();

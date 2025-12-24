@@ -38,37 +38,30 @@ function StarRating({ value, onChange }) {
   );
 }
 
-export default function BasicInfoSection({ form, setField }) {
-  // Khi user sửa slug thủ công => khóa auto-sync từ name
+export default function BasicInfoSection({ form, setField, disabled = false }) {
   const [slugTouched, setSlugTouched] = useState(false);
 
-  // chỉ auto-generate khi:
-  // - chưa touched slug
-  // - và name có giá trị
   useEffect(() => {
+    if (disabled) return;          // ✅ readonly không auto-sync
     if (slugTouched) return;
     const auto = slugifyVN(form.name);
-    // chỉ set nếu khác để tránh re-render thừa
     if ((form.slug || "") !== auto) setField("slug", auto);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, slugTouched]);
-
-  const descMax = 200;
-  const descLen = useMemo(() => (form.description ? String(form.description).length : 0), [form.description]);
+  }, [form.name, slugTouched, disabled]);
 
   const onNameChange = (e) => {
-    const v = e.target.value;
-    setField("name", v);
-    // slug sẽ được sync qua useEffect nếu chưa touched
+    if (disabled) return;
+    setField("name", e.target.value);
   };
 
   const onSlugChange = (e) => {
+    if (disabled) return;
     setSlugTouched(true);
-    // nếu muốn “chuẩn slug” luôn khi gõ, bạn có thể dùng slugifyVN(e.target.value)
     setField("slug", e.target.value);
   };
 
   const regenerateSlug = () => {
+    if (disabled) return;
     setSlugTouched(false);
     setField("slug", slugifyVN(form.name));
   };
@@ -85,6 +78,7 @@ export default function BasicInfoSection({ form, setField }) {
             onChange={onNameChange}
             className="w-full border rounded-xl px-3 py-2"
             placeholder="Ví dụ: Bình An Hotel"
+            disabled={disabled}
           />
         </label>
 
@@ -94,8 +88,9 @@ export default function BasicInfoSection({ form, setField }) {
             <button
               type="button"
               onClick={regenerateSlug}
-              className="text-xs px-2 py-1 rounded-lg border hover:bg-gray-50"
+              className="text-xs px-2 py-1 rounded-lg border hover:bg-gray-50 disabled:opacity-60"
               title="Tạo lại slug từ tên"
+              disabled={disabled}
             >
               Tạo lại
             </button>
@@ -105,23 +100,27 @@ export default function BasicInfoSection({ form, setField }) {
             onChange={onSlugChange}
             className="w-full border rounded-xl px-3 py-2"
             placeholder="binh-an-hotel"
+            disabled={disabled}
           />
         </label>
 
         <label className="text-sm">
           <div className="font-medium mb-1">Hạng sao</div>
-          <StarRating
-            value={Number(form.starRating ?? 1)}
-            onChange={(n) => setField("starRating", n)}
-          />
+          <div className={disabled ? "pointer-events-none opacity-90" : ""}>
+            <StarRating
+              value={Number(form.starRating ?? 1)}
+              onChange={(n) => !disabled && setField("starRating", n)}
+            />
+          </div>
         </label>
 
         <label className="text-sm">
           <div className="font-medium mb-1">Loại khách sạn</div>
           <select
             value={form.hotelType}
-            onChange={(e) => setField("hotelType", e.target.value)}
+            onChange={(e) => !disabled && setField("hotelType", e.target.value)}
             className="w-full border rounded-xl px-3 py-2"
+            disabled={disabled}
           >
             <option value="HOTEL">HOTEL</option>
             <option value="RESORT">RESORT</option>
@@ -136,8 +135,9 @@ export default function BasicInfoSection({ form, setField }) {
           <div className="font-medium mb-1">Mô tả ngắn</div>
           <input
             value={form.shortDescription}
-            onChange={(e) => setField("shortDescription", e.target.value)}
+            onChange={(e) => !disabled && setField("shortDescription", e.target.value)}
             className="w-full border rounded-xl px-3 py-2"
+            disabled={disabled}
           />
         </label>
 
@@ -145,16 +145,12 @@ export default function BasicInfoSection({ form, setField }) {
           <div className="font-medium mb-1">Mô tả</div>
           <textarea
             value={form.description}
-            onChange={(e) => setField("description", e.target.value)}
+            onChange={(e) => !disabled && setField("description", e.target.value)}
             className="w-full border rounded-xl px-3 py-2 min-h-[140px]"
-            maxLength={descMax}
+            maxLength={200}
             placeholder="Tối đa 200 ký tự..."
+            disabled={disabled}
           />
-          <div className="mt-1 flex justify-end">
-            <span className="text-xs text-gray-500">
-              {descLen}/{descMax}
-            </span>
-          </div>
         </label>
       </div>
     </details>
