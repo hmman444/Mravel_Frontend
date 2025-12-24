@@ -4,7 +4,7 @@ import { uploadToCloudinary } from "../../../utils/cloudinaryUpload";
 import { geocodeByAddress } from "../services/geocodeService";
 
 const updateItemAt = (arr, idx, patch) =>
-  arr.map((x, i) => (i === idx ? { ...x, ...patch } : x));
+  arr.map((x, i) => (i === idx ? { ...(x || {}), ...(patch || {}) } : x));
 
 const fileToDataUrl = (file) =>
   new Promise((resolve, reject) => {
@@ -23,7 +23,10 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
   const reset = () => setForm(initialForm);
 
   // required by @Valid: name + destinationSlug
-  const requiredOk = !!(String(form?.name || "").trim() && String(form?.destinationSlug || "").trim());
+  const requiredOk = !!(
+    String(form?.name || "").trim() &&
+    String(form?.destinationSlug || "").trim()
+  );
 
   // ===== images =====
   const addImageByUrl = () => {
@@ -69,8 +72,8 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
       setForm((p) => {
         const base = p.images || [];
         const appended = files.map((file, i) => ({
-          url: previews[i],
-          file,
+          url: previews[i], // preview base64 để hiện UI
+          file,             // file thật để upload
           caption: "",
           cover: base.length === 0 && i === 0,
           sortOrder: base.length + i,
@@ -78,11 +81,13 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
         return { ...p, images: [...base, ...appended] };
       });
     } finally {
-      e.target.value = "";
+      if (e?.target) e.target.value = "";
     }
   };
 
+  // ✅ ĐỂ uploadIfNeeded TRƯỚC, CÙNG SCOPE với uploadArray
   const uploadIfNeeded = async (item) => {
+    // item có file thì upload lên cloudinary
     if (item?.file instanceof File) {
       const remoteUrl = await uploadToCloudinary(item.file);
       return { ...item, url: remoteUrl, file: null };
@@ -90,24 +95,35 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
     return item;
   };
 
+  // ✅ uploadArray nằm TRONG hook (cùng scope) => không còn "not defined"
+  const uploadArray = async (arr) => {
+    if (!Array.isArray(arr)) return [];
+    const uploaded = await Promise.all(arr.map(uploadIfNeeded));
+    return uploaded
+      .filter((x) => x && String(x.url || "").trim())
+      .map(({ url, caption, cover, sortOrder }) => ({
+        url,
+        caption: caption || "",
+        cover: !!cover,
+        sortOrder: Number.isFinite(Number(sortOrder)) ? Math.trunc(Number(sortOrder)) : 0,
+      }));
+  };
+
   const submit = async () => {
     if (!requiredOk) return;
 
-    // deep-ish clone
-    let draft = JSON.parse(JSON.stringify(form));
+    // ❗ Đừng JSON.stringify vì sẽ làm mất File object
+    let draft = {
+      ...form,
+      images: Array.isArray(form.images) ? [...form.images] : [],
+      menuImages: Array.isArray(form.menuImages) ? [...form.menuImages] : [],
+    };
 
-    // upload images
-    if (Array.isArray(form.images)) {
-      const uploaded = await Promise.all(form.images.map(uploadIfNeeded));
-      draft.images = uploaded.map(({ url, caption, cover, sortOrder }) => ({
-        url,
-        caption,
-        cover,
-        sortOrder,
-      }));
-    }
+    // upload images + menuImages đúng 1 lần
+    draft.images = await uploadArray(form.images);
+    draft.menuImages = await uploadArray(form.menuImages);
 
-    // optional: geocode nếu thiếu lat/lng (không bắt buộc)
+    // optional: geocode nếu thiếu lat/lng
     try {
       const lat = Number(draft.latitude);
       const lng = Number(draft.longitude);

@@ -40,9 +40,10 @@ function groupBlackoutDays(blackoutRules = []) {
 export default function RestaurantPolicySection({ restaurant }) {
   const policy = restaurant?.policy;
   const blackoutByMonth = useMemo(
-    () => groupBlackoutDays(policy.blackoutRules),
-    [policy.blackoutRules]
+    () => groupBlackoutDays(policy?.blackoutRules ?? []),
+    [policy?.blackoutRules]
   );
+
   if (!policy) return null;
 
   const depositLine =

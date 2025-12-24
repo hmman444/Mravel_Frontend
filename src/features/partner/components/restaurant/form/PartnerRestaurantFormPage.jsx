@@ -13,6 +13,11 @@ import BasicInfoSection from "./sections/BasicInfoSection";
 import ContactLocationSection from "./sections/ContactLocationSection";
 import BookingConfigSection from "./sections/BookingConfigSection";
 import TableTypesEditor from "./controls/TableTypesEditor";
+import RestaurantMetaSection from "./sections/RestaurantMetaSection";
+import CuisinesEditor from "./controls/CuisinesEditor";
+import OpeningHoursEditor from "./controls/OpeningHoursEditor";
+import CodeNameListEditor from "./controls/CodeNameListEditor";
+import SimpleListEditor from "./controls/SimpleListEditor";
 
 import {
   createInitialRestaurantForm,
@@ -58,9 +63,48 @@ export default function PartnerRestaurantFormPage({
       <div className="bg-white rounded-2xl border p-4 space-y-4">
         <BasicInfoSection form={fm.form} setField={fm.setField} disabled={loading} />
 
+        <RestaurantMetaSection form={fm.form} setField={fm.setField} disabled={loading} />
+
         <DestinationLocationSection form={fm.form} setField={fm.setField} disabled={loading} />
 
         <ContactLocationSection form={fm.form} setField={fm.setField} disabled={loading} />
+
+        <CuisinesEditor
+          value={fm.form.cuisines || []}
+          onChange={(next) => fm.setField("cuisines", next)}
+          disabled={loading}
+        />
+
+        <OpeningHoursEditor
+          value={fm.form.openingHours || []}
+          onChange={(next) => fm.setField("openingHours", next)}
+          disabled={loading}
+        />
+
+        <CodeNameListEditor
+          title="Phù hợp (suitableFor)"
+          hint="Nhập code + tên hiển thị."
+          value={fm.form.suitableFor || []}
+          onChange={(next) => fm.setField("suitableFor", next)}
+          disabled={loading}
+        />
+
+        <CodeNameListEditor
+          title="Không gian (ambience)"
+          hint="Nhập code + tên hiển thị."
+          value={fm.form.ambience || []}
+          onChange={(next) => fm.setField("ambience", next)}
+          disabled={loading}
+        />
+
+        <SimpleListEditor
+          title="Món đặc sắc (signatureDishes)"
+          hint="Chỉ cần nhập tên món."
+          value={(fm.form.signatureDishes || []).map((x) => (typeof x === "string" ? x : x?.name || ""))}
+          onChange={(next) => fm.setField("signatureDishes", next.map((name) => ({ name })))}
+          disabled={loading}
+          placeholder="Ví dụ: Cơm gà Hội An"
+        />
 
         <BookingConfigSection form={fm.form} setField={fm.setField} disabled={loading} />
 
