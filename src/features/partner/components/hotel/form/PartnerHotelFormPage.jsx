@@ -13,6 +13,7 @@ import AmenityMultiSelect from "./controls/AmenityMultiSelect";
 import RoomTypesEditor from "./controls/RoomTypesEditor";
 import DestinationLocationSection from "./sections/DestinationLocationSection";
 import TaxAndFeeSection from "./sections/TaxAndFeeSection";
+import FaqsSection from "./sections/FaqsSection";
 import BookingConfigSection from "./sections/BookingConfigSection";
 
 import { createInitialHotelForm, mapHotelDocToForm, buildHotelPayload } from "../../../utils/hotelFormUtils";
@@ -91,6 +92,8 @@ export default function PartnerHotelFormPage({
           updateBlockField={fm.updateBlockField}
           onPickBlockImage={fm.onPickBlockImage}
         />
+
+        <FaqsSection form={fm.form} setField={fm.setField} disabled={loading} />
       </div>
     </div>
   );
