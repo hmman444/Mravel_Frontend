@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useLoadUser } from "./features/auth/hooks/useLoadUser";
 import { useAuthSync } from "./features/auth/hooks/useAuthSync";
 import Toast from "./components/Toast";
+import "leaflet/dist/leaflet.css";
 
 // Auth
 import LoginPage from "./features/auth/pages/LoginPage";

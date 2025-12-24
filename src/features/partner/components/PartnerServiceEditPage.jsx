@@ -35,8 +35,6 @@ function normalizeContent(rawContent) {
   }));
 }
 
-const stableStringify = (obj) => JSON.stringify(obj, Object.keys(obj).sort());
-
 export default function PartnerServiceEditPage({
   service,
   loading,
@@ -386,7 +384,10 @@ export default function PartnerServiceEditPage({
               <div className="font-medium mb-1">Quận/Huyện</div>
               <input
                 value={form.districtName}
-                onChange={(e) => setField("districtName", e.target.value)}
+                onChange={(opt) => {
+                  setField("districtCode", opt?.code ?? "");
+                  setField("districtName", opt?.name ?? "");
+                }}
                 className="w-full border rounded-md px-3 py-2"
               />
             </label>
