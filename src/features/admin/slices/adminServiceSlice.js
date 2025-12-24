@@ -11,6 +11,7 @@ import {
   blockRestaurant,
   unblockRestaurant,
   fetchAdminHotelById,
+  fetchAdminRestaurantById, // ✅ NEW
 } from "../services/adminCatalogService";
 
 const apiMessage = (err) => {
@@ -28,7 +29,6 @@ const initialState = {
   items: [],
   loading: false,
 
-  // NEW
   selected: null,
   detailLoading: false,
 
@@ -54,7 +54,6 @@ export const actOnService = createAsyncThunk(
   "adminService/actOnService",
   async ({ mode, action, id, reason }, { rejectWithValue }) => {
     try {
-      // HOTEL actions
       if (mode === "HOTEL") {
         if (action === "APPROVE") return await approveHotel(id);
         if (action === "REJECT") return await rejectHotel(id, reason);
@@ -62,7 +61,6 @@ export const actOnService = createAsyncThunk(
         if (action === "UNBLOCK") return await unblockHotel(id);
       }
 
-      // RESTAURANT actions
       if (mode === "RESTAURANT") {
         if (action === "APPROVE") return await approveRestaurant(id);
         if (action === "REJECT") return await rejectRestaurant(id, reason);
@@ -88,6 +86,18 @@ export const loadAdminHotelDetail = createAsyncThunk(
   }
 );
 
+// ✅ NEW
+export const loadAdminRestaurantDetail = createAsyncThunk(
+  "adminService/loadAdminRestaurantDetail",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await fetchAdminRestaurantById(id);
+    } catch (err) {
+      return rejectWithValue(apiMessage(err));
+    }
+  }
+);
+
 const adminServiceSlice = createSlice({
   name: "adminService",
   initialState,
@@ -99,7 +109,7 @@ const adminServiceSlice = createSlice({
       state.error = null;
       state.actionError = null;
     },
-    clearSelected(state) {          // NEW
+    clearSelected(state) {
       state.selected = null;
     },
   },
@@ -120,7 +130,7 @@ const adminServiceSlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      // LOAD DETAIL (HOTEL)
+      // LOAD DETAIL HOTEL
       .addCase(loadAdminHotelDetail.pending, (state) => {
         state.detailLoading = true;
         state.error = null;
@@ -134,7 +144,20 @@ const adminServiceSlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      // ACTION (approve/reject/block/unblock)
+      .addCase(loadAdminRestaurantDetail.pending, (state) => {
+        state.detailLoading = true;
+        state.error = null;
+      })
+      .addCase(loadAdminRestaurantDetail.fulfilled, (state, action) => {
+        state.detailLoading = false;
+        state.selected = action.payload;
+      })
+      .addCase(loadAdminRestaurantDetail.rejected, (state, action) => {
+        state.detailLoading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      // ACTION
       .addCase(actOnService.pending, (state) => {
         state.acting = true;
         state.actionError = null;
@@ -144,11 +167,9 @@ const adminServiceSlice = createSlice({
 
         const updated = action.payload;
 
-        // update row list
         const idx = state.items.findIndex((x) => x.id === updated?.id);
         if (idx !== -1) state.items[idx] = updated;
 
-        // update selected detail if matching
         if (state.selected?.id && state.selected.id === updated?.id) {
           state.selected = updated;
         }

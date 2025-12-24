@@ -57,6 +57,7 @@ export default function ManageServicesPage() {
 
     const onOpenRow = (x) => {
         if (mode === "HOTEL") navigate(`/admin/services/hotels/${x.id}`);
+        if (mode === "RESTAURANT") navigate(`/admin/services/restaurants/${x.id}`);
     };
 
     const navigate = useNavigate();

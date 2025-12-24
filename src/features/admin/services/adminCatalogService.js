@@ -18,6 +18,11 @@ export async function fetchAdminHotelById(id) {
   return ensureOk(res);
 }
 
+export async function fetchAdminRestaurantById(id) {
+  const res = await api.get(`${BASE}/restaurants/${id}`);
+  return ensureOk(res);
+}
+
 /* ===================== LIST ===================== */
 export async function fetchAdminHotels(params = {}) {
   const query = new URLSearchParams(params).toString();
@@ -31,7 +36,7 @@ export async function fetchAdminRestaurants(params = {}) {
   return ensureOk(res);
 }
 
-/* ===================== ACTIONS (adminId lấy từ token ở admin-service) ===================== */
+/* ===================== ACTIONS ===================== */
 export async function approveHotel(id) {
   const res = await api.post(`${BASE}/hotels/${id}:approve`);
   return ensureOk(res);
