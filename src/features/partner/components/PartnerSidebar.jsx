@@ -21,7 +21,6 @@ export default function PartnerSidebar() {
       { to: "/partner/dashboard", label: "Tổng quan", icon: HomeIcon },
       { to: "/partner/services", label: "Dịch vụ của tôi", icon: BuildingStorefrontIcon },
       { to: "/partner/bookings", label: "Đơn đặt", icon: ClipboardDocumentListIcon },
-      { to: "/partner/unlock-requests", label: "Yêu cầu mở khóa", icon: LockClosedIcon },
     ],
     []
   );
