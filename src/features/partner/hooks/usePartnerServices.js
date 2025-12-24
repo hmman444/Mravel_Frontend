@@ -9,6 +9,7 @@ import {
   partnerResumeHotel,
   partnerUnlockHotel,
   partnerUpdateHotel,
+  partnerCreateHotel,
 
   partnerDeleteRestaurant,
   partnerPauseRestaurant,
@@ -70,6 +71,12 @@ export const usePartnerServices = () => {
     [dispatch]
   );
 
+
+  const createHotel = useCallback(
+    (payload) => dispatch(partnerCreateHotel(payload)).unwrap(),
+    [dispatch]
+  );
+
   const updateRestaurant = useCallback(
     ({ id, payload }) =>
       dispatch(partnerUpdateRestaurant({ id, payload })).unwrap(),
@@ -94,6 +101,7 @@ export const usePartnerServices = () => {
     resume,
     requestUnlock,
     updateHotel,
+    createHotel,
     updateRestaurant,
   };
 };

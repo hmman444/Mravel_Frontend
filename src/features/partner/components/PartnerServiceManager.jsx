@@ -11,7 +11,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
 import { usePartnerServices } from "../hooks/usePartnerServices";
-import PartnerServiceEditPage from "../components/PartnerServiceEditPage";
+import PartnerServiceTypePickerModal from "./PartnerServiceTypePickerModal";
+import PartnerHotelFormPage from "../components/hotel/form/PartnerHotelFormPage";
 
 const STATUS_TABS = [
   { key: "all", label: "Tất cả" },
@@ -112,7 +113,7 @@ export default function PartnerServiceManager() {
     resume,
     requestUnlock,
     updateHotel,
-    updateRestaurant,
+    createHotel,
   } = usePartnerServices();
 
   const [tab, setTab] = useState("all");
@@ -142,6 +143,9 @@ export default function PartnerServiceManager() {
 
   const [edit, setEdit] = useState({ open: false, service: null });
   const isEditing = !!(edit.open && edit.service);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [create, setCreate] = useState({ open: false, type: null }); // {HOTEL|RESTAURANT}
+  const isCreating = !!(create.open && create.type);
 
   const statusParam = tab === "all" ? undefined : tab;
   const hotelPage = pageBy.HOTEL[tab] ?? 0;
@@ -394,17 +398,32 @@ export default function PartnerServiceManager() {
     );
   };
 
-  if (isEditing) {
+  if (isEditing && edit.service?.type === "HOTEL") {
     return (
-      <PartnerServiceEditPage
-        service={edit.service}
+      <PartnerHotelFormPage
+        mode="edit"
+        initialRaw={edit.service.raw}
         loading={action.loading}
         onBack={() => setEdit({ open: false, service: null })}
-        onSave={async ({ type, id, payload }) => {
-          if (type === "HOTEL") await updateHotel({ id, payload });
-          else await updateRestaurant({ id, payload });
-          await refreshTypeList(type);
+        onSubmit={async (payload) => {
+          await updateHotel({ id: edit.service.id, payload });
+          await refreshTypeList("HOTEL");
           setEdit({ open: false, service: null });
+        }}
+      />
+    );
+  }
+
+   if (isCreating && create.type === "HOTEL") {
+    return (
+      <PartnerHotelFormPage
+        mode="create"
+        loading={action.loading}
+        onBack={() => setCreate({ open: false, type: null })}
+        onSubmit={async (payload) => {
+          await createHotel(payload);
+          await refreshTypeList("HOTEL");
+          setCreate({ open: false, type: null });
         }}
       />
     );
@@ -419,7 +438,7 @@ export default function PartnerServiceManager() {
         </div>
 
         <button
-          onClick={() => alert("Demo: mở form tạo dịch vụ (Hotel/Restaurant)")}
+          onClick={() => setPickerOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
         >
           <PlusIcon className="w-5 h-5" />
@@ -590,6 +609,16 @@ export default function PartnerServiceManager() {
           </div>
         </div>
       )}
+
+      <PartnerServiceTypePickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={(type) => {
+          setPickerOpen(false);
+          if (type === "HOTEL") setCreate({ open: true, type: "HOTEL" });
+          else alert("Restaurant để sau nhé 😄");
+        }}
+      />
     </div>
   );
 }
