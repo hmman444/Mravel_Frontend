@@ -8,9 +8,10 @@ import PlanComments from "./PlanComments";
 
 import { usePlans } from "../hooks/usePlans";
 import { truncate } from "../utils/utils";
+import { showSuccess } from "../../../utils/toastUtils";
 
 export default function PlanPostCard({ plan, me, onOpenDetail }) {
-  const { sendReact, sendComment } = usePlans();
+  const { sendReact } = usePlans();
   const commentRef = useRef(null);
   const [showDestPopup, setShowDestPopup] = useState(false);
 
@@ -29,7 +30,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
     navigator.clipboard.writeText(
       `${window.location.origin}/plans/${plan.id}`
     );
-    alert("Đã sao chép liên kết!");
+    showSuccess("Đã sao chép liên kết!");
   };
 
   // === Destinations ===
@@ -41,13 +42,6 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
     [plan.destinations]
   );
 
-  const destinationSummary = useMemo(() => {
-    if (!destinationNames.length) return "Chưa chọn điểm đến";
-    if (destinationNames.length <= 2) return destinationNames.join(", ");
-    return `${destinationNames.slice(0, 2).join(", ")} +${
-      destinationNames.length - 2
-    }`;
-  }, [destinationNames]);
 
   const hasDestinations = destinationNames.length > 0;
 

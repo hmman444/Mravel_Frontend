@@ -23,7 +23,7 @@ const initialState = {
   hotelAvailability: { loading: false, error: null, data: null, lastQuery: null },
   payment: { loading: false, error: null, data: null },
 
-  // ✅ NEW: draft để trang PaymentMethodPage dùng
+  //  NEW: draft để trang PaymentMethodPage dùng
   draftPayment: {
     type: null,     // "HOTEL" | "RESTAURANT" (chuẩn bị cho phần res)
     payload: null,  // payload gửi BE để tạo payment
@@ -40,7 +40,7 @@ const bookingSlice = createSlice({
       state.payment.error = null;
     },
 
-    // ✅ NEW
+    //  NEW
     setDraftPayment(state, action) {
       state.draftPayment.type = action.payload?.type ?? null;
       state.draftPayment.payload = action.payload?.payload ?? null;

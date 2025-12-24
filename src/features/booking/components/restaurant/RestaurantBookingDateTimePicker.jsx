@@ -19,8 +19,8 @@ export default function RestaurantBookingDateTimePicker({
   date,
   time,
   onChange, // ({ date, time })
-  openingHours = [],      // ✅ thêm
-  stepMinutes = 30,       // ✅ thêm
+  openingHours = [],      //  thêm
+  stepMinutes = 30,       //  thêm
 }) {
   const [openTime, setOpenTime] = useState(false);
   const timeRef = useRef(null);
@@ -43,7 +43,7 @@ export default function RestaurantBookingDateTimePicker({
     [openingHours, date]
   );
 
-  // ✅ auto-fix time khi đổi ngày / đổi openingHours
+  //  auto-fix time khi đổi ngày / đổi openingHours
   useEffect(() => {
     if (!timeOptions.length) {
       if (time) onChange?.({ date, time: "" });

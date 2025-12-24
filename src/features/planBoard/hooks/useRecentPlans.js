@@ -37,7 +37,6 @@ export function useRecentPlans() {
       showSuccess("Đã xoá khỏi danh sách xem gần đây");
     } catch (e) {
       console.error(e);
-      showError("Không thể xoá khỏi danh sách xem gần đây");
     }
   };
 

@@ -94,7 +94,7 @@ export function useHotelBookingPage() {
 
   const isEnoughRooms = hotelAvailability?.data?.isEnough ?? true;
 
-  // ✅ THAY ĐỔI: onPay giờ chỉ tạo draft + navigate sang PaymentMethodPage
+  //  THAY ĐỔI: onPay giờ chỉ tạo draft + navigate sang PaymentMethodPage
   const onPay = useCallback(async ({ paymentOption }) => {
     if (!hotel || !roomType || !ratePlan) return;
 
@@ -116,7 +116,7 @@ export function useHotelBookingPage() {
 
       payOption,
 
-      // ✅ gateway sẽ được chọn ở trang PaymentMethodPage
+      //  gateway sẽ được chọn ở trang PaymentMethodPage
       // gateway: "MOMO" | "VNPAY" | "ZALOPAY",
 
       rooms: [

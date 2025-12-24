@@ -217,7 +217,7 @@ export default function EventActivityModal({
 
     const cost = {
       currencyCode: "VND",
-      // ✅ estimatedCost chỉ là base (vé) giống các modal khác
+      //  estimatedCost chỉ là base (vé) giống các modal khác
       estimatedCost: baseEstimated > 0 ? baseEstimated : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
@@ -264,7 +264,7 @@ export default function EventActivityModal({
       participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData GỌN: chỉ đặc thù EVENT (KHÔNG nhét tiền/extra/time vào)
+      //  activityData GỌN: chỉ đặc thù EVENT (KHÔNG nhét tiền/extra/time vào)
       activityData: {
         eventName: eventName.trim(),
         venue: venue.trim(),

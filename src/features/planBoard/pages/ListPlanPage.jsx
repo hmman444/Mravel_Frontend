@@ -143,7 +143,7 @@ export default function ListPlanPage() {
       onOpenPlanDashboard={(p) => navigate(`/plans/${p.id}`)}
       onCopyPlan={handleCopyFromSidebar}
       onRemoveRecentPlan={handleRemoveRecentFromSidebar}
-      onDeletePlan={(p) => setConfirmDeletePlan(p)} // ✅ sidebar bấm xoá -> confirm
+      onDeletePlan={(p) => setConfirmDeletePlan(p)} //  sidebar bấm xoá -> confirm
     >
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -338,7 +338,7 @@ export default function ListPlanPage() {
                     </span>
                   )}
 
-                  {/* ✅ Icon actions (xoá + copy) */}
+                  {/*  Icon actions (xoá + copy) */}
                   <div className="absolute top-2 right-2 flex items-center gap-2">
                     <button
                       type="button"

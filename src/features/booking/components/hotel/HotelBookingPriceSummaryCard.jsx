@@ -24,7 +24,7 @@ export default function HotelBookingPriceSummaryCard({
 
   const isPayAtHotel = paymentType === "PAY_AT_HOTEL";
 
-  // ✅ Hiển thị: tối thiểu 1 đêm
+  // Hiển thị: tối thiểu 1 đêm
   const displayNights =
     typeof nights === "number" && nights > 0 ? nights : 1;
 

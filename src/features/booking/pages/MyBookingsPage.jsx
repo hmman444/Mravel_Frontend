@@ -273,7 +273,7 @@ export default function MyBookingsPage() {
             </div>
           </div>
 
-          {/* ✅ Sub-tab nhỏ gạch chân: HOTEL / RESTAURANT */}
+          {/*  Sub-tab nhỏ gạch chân: HOTEL / RESTAURANT */}
           <div className="mb-5">
             <BookingTypeTabs type={type} setType={setType} />
             <p className="mt-2 text-[11px] text-gray-500">

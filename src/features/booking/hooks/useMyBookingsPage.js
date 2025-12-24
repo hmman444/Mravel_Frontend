@@ -51,7 +51,7 @@ export function useMyBookingsPage() {
   const restAcc = useSelector((s) => s.bookingRestaurantPrivate?.my);
   const restClaim = useSelector((s) => s.bookingRestaurantPrivate?.claim);
 
-  // ✅ LOOKUP FORM STATE tách theo type (HOTEL/RESTAURANT)
+  //  LOOKUP FORM STATE tách theo type (HOTEL/RESTAURANT)
   const [lookupForm, setLookupForm] = useState({
     HOTEL: { bookingCode: "", phoneLast4: "", email: "" },
     RESTAURANT: { bookingCode: "", phoneLast4: "", email: "" },
@@ -86,13 +86,13 @@ export function useMyBookingsPage() {
     [type]
   );
 
-  // ✅ luôn load DEVICE list cho CẢ 2 loại
+  //  luôn load DEVICE list cho CẢ 2 loại
   useEffect(() => {
     dispatch(fetchGuestMyBookings());
     dispatch(fetchGuestMyRestaurantBookings());
   }, [dispatch]);
 
-  // ✅ khi vào ACCOUNT và đã login => load CẢ 2 loại
+  //  khi vào ACCOUNT và đã login => load CẢ 2 loại
   useEffect(() => {
     if (tab !== "ACCOUNT") return;
     if (!isLoggedIn) return;
@@ -143,7 +143,7 @@ export function useMyBookingsPage() {
     }
   }, [dispatch, type, isLoggedIn, user?.id, navigate]);
 
-  // ===== Lookup submit (✅ theo type, không dựa prefix nữa) =====
+  // ===== Lookup submit ( theo type, không dựa prefix nữa) =====
   const onSubmitLookup = useCallback(async () => {
     const payload = {
       bookingCode: (form.bookingCode || "").trim().toUpperCase(),
@@ -183,7 +183,7 @@ export function useMyBookingsPage() {
   const claimLoading = type === "HOTEL" ? !!hotelClaim?.loading : !!restClaim?.loading;
   const claimError = type === "HOTEL" ? hotelClaim?.error : restClaim?.error;
 
-  // ✅ LOOKUP state theo type (đúng UI: hotel/res độc lập)
+  //  LOOKUP state theo type (đúng UI: hotel/res độc lập)
   const lookupLoading = type === "HOTEL" ? !!hotelLookup?.loading : !!restLookup?.loading;
   const lookupError = type === "HOTEL" ? hotelLookup?.error : restLookup?.error;
   const lookupResult = type === "HOTEL" ? hotelLookup?.result : restLookup?.result;

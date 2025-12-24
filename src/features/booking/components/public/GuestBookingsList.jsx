@@ -11,7 +11,6 @@ export default function GuestBookingsList({
   rightActions,
   detailScope = "PUBLIC", // PUBLIC | PRIVATE
 
-  // ✅ NEW
   title = "Đơn trên thiết bị này",
   description = "Danh sách này dựa trên cookie trình duyệt. Nếu bạn xoá dữ liệu trình duyệt, danh sách có thể mất.",
   emptyTitle = "Chưa có đơn nào trên thiết bị này.",

@@ -1,307 +1,257 @@
-import { useMemo, useState } from "react";
-import AdminLayout from "../components/AdminLayout";
-import {
-    CheckCircleIcon,
-    XCircleIcon,
-    LockClosedIcon,
-    LockOpenIcon,
-    MagnifyingGlassIcon,
-    PencilIcon,
-    InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { useTranslation } from "react-i18next";
+"use client";
 
-const MOCK_SERVICES = [
-    {
-        id: 1,
-        name: "Tour Đà Lạt 3N2Đ",
-        type: "Tour",
-        price: "3.500.000đ",
-        status: "active",
-        vendor: "Travel Viet",
-        thumbnail: "https://picsum.photos/seed/dalat/600/360",
-        shortDesc: "Khám phá Đà Lạt, lịch trình 3 ngày 2 đêm.",
-    },
-    {
-        id: 2,
-        name: "Khách sạn Sunrise",
-        type: "Khách sạn",
-        price: "1.200.000đ/đêm",
-        status: "suspended",
-        vendor: "Sunrise Group",
-        thumbnail: "https://picsum.photos/seed/sunrise/600/360",
-        shortDesc: "Khách sạn 4*, trung tâm TP, buffet sáng.",
-    },
-    {
-        id: 3,
-        name: "Nhà hàng Biển Xanh",
-        type: "Nhà hàng",
-        price: "500.000đ/người",
-        status: "pending",
-        vendor: "Oceanic",
-        thumbnail: "https://picsum.photos/seed/restaurant/600/360",
-        shortDesc: "Set menu hải sản tươi mỗi ngày.",
-    },
-    {
-        id: 4,
-        name: "Thuê xe 7 chỗ",
-        type: "Vận chuyển",
-        price: "1.000.000đ/ngày",
-        status: "active",
-        vendor: "MoveGo",
-        thumbnail: "https://picsum.photos/seed/car/600/360",
-        shortDesc: "Xe 7 chỗ, tài xế nhiều kinh nghiệm.",
-    },
-    {
-        id: 5,
-        name: "Homestay Đồi Thông",
-        type: "Khách sạn",
-        price: "800.000đ/đêm",
-        status: "pending",
-        vendor: "PineStay",
-        thumbnail: "https://picsum.photos/seed/homestay/600/360",
-        shortDesc: "View rừng thông, decor ấm cúng.",
-    },
-];
+import { useEffect, useMemo, useState } from "react";
+import AdminLayout from "../components/AdminLayout";
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import { useAdminServices } from "../hooks/useAdminServices";
+
+import ServiceStats from "../components/services/ServiceStats";
+import ServiceFilters from "../components/services/ServiceFilters";
+import ServiceTable from "../components/services/ServiceTable";
+import ReasonModal from "../components/services/ReasonModal";
+
+import { showError, showSuccess } from "../../../utils/toastUtils";
+
+const soft = {
+  btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98]",
+  btnPrimary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
+  btnGhost:
+    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+};
 
 export default function ManageServicesPage() {
-    const { t } = useTranslation();
+  const {
+    mode,
+    setMode,
+    items,
+    loading,
+    acting,
+    load,
+    act,
+  } = useAdminServices();
 
-    // Tabs lấy từ file dịch
-    const STATUS_TABS = useMemo(() => [
-        { key: "all", label: t("all") },
-        { key: "pending", label: t("pending") },
-        { key: "active", label: t("active") },
-        { key: "suspended", label: t("suspended") },
-    ], [t]);
+  // filters UI
+  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("ALL");
+  const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | ACTIVE | INACTIVE
+  const [unlockFilter, setUnlockFilter] = useState("ALL"); // ALL | YES | NO
 
-    const [services, setServices] = useState(MOCK_SERVICES);
-    const [tab, setTab] = useState("all");
-    const [search, setSearch] = useState("");
-    const [typeFilter, setTypeFilter] = useState(t("all"));
-    const [modal, setModal] = useState({ open: false, service: null, action: null, note: "" });
+  // reason modal state
+  const [reasonOpen, setReasonOpen] = useState(false);
+  const [reasonMode, setReasonMode] = useState(null); // "REJECT" | "BLOCK"
+  const [target, setTarget] = useState(null); // selected item
 
-    // Lọc loại dịch vụ
-    const types = useMemo(() => {
-        const tps = Array.from(new Set(services.map((s) => s.type)));
-        return [t("all"), ...tps];
-    }, [services, t]);
+  const buildQueryParams = () => {
+    const params = {};
+    const q = search.trim();
+    if (q) params.q = q;
 
-    const filtered = services.filter((s) => {
-        const matchTab = tab === "all" ? true : s.status === tab;
-        const matchSearch =
-            s.name.toLowerCase().includes(search.toLowerCase()) ||
-            s.vendor.toLowerCase().includes(search.toLowerCase());
-        const matchType = typeFilter === t("all") ? true : s.type === typeFilter;
-        return matchTab && matchSearch && matchType;
-    });
+    if (status !== "ALL") params.status = status;
 
-    // Hành động xử lý
-    const approveService = (id) => {
-        setServices((prev) => prev.map((s) => (s.id === id ? { ...s, status: "active" } : s)));
-    };
-    const rejectService = (id) => {
-        setServices((prev) => prev.filter((s) => s.id !== id));
-    };
-    const lockService = (id) => {
-        setServices((prev) => prev.map((s) => (s.id === id ? { ...s, status: "suspended" } : s)));
-    };
-    const unlockService = (id) => {
-        setServices((prev) => prev.map((s) => (s.id === id ? { ...s, status: "active" } : s)));
-    };
+    if (activeFilter === "ACTIVE") params.active = true;
+    if (activeFilter === "INACTIVE") params.active = false;
 
-    const onSubmitModal = () => {
-        const { action, service } = modal;
-        if (!service) return;
-        if (action === "approve") approveService(service.id);
-        if (action === "reject") rejectService(service.id);
-        setModal({ open: false, service: null, action: null, note: "" });
-    };
+    if (unlockFilter === "YES") params.unlockRequested = true;
+    if (unlockFilter === "NO") params.unlockRequested = false;
 
-    return (
-        <AdminLayout>
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">{t("manage_services")}</h1>
+    // paging nếu muốn:
+    // params.page = 0; params.size = 20;
+
+    return params;
+  };
+
+  const reload = async () => {
+    await load({ mode, params: buildQueryParams() });
+  };
+
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
+  const filtered = useMemo(() => {
+    // Backend đã filter rồi, nhưng vẫn giữ fallback client-side nếu muốn
+    return items || [];
+  }, [items]);
+
+  const totalCount = filtered.length;
+  const pendingCount = useMemo(
+    () => filtered.filter((x) => x.moderationStatus === "PENDING_REVIEW").length,
+    [filtered]
+  );
+
+  const hasAnyFilter =
+    search.trim() ||
+    status !== "ALL" ||
+    activeFilter !== "ALL" ||
+    unlockFilter !== "ALL";
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatus("ALL");
+    setActiveFilter("ALL");
+    setUnlockFilter("ALL");
+  };
+
+  // ===== actions =====
+  const onApprove = async (x) => {
+    try {
+      await act({ mode, action: "APPROVE", id: x.id });
+      showSuccess("Đã approve");
+      await reload();
+    } catch (e) {
+      showError(typeof e === "string" ? e : "Approve thất bại");
+    }
+  };
+
+  const openReason = (action, x) => {
+    setReasonMode(action); // REJECT | BLOCK
+    setTarget(x);
+    setReasonOpen(true);
+  };
+
+  const onConfirmReason = async (reason) => {
+    if (!target?.id) return;
+    try {
+      await act({ mode, action: reasonMode, id: target.id, reason });
+      showSuccess(reasonMode === "REJECT" ? "Đã reject" : "Đã block");
+      setReasonOpen(false);
+      setTarget(null);
+      await reload();
+    } catch (e) {
+      showError(typeof e === "string" ? e : "Thao tác thất bại");
+    }
+  };
+
+  const onUnblock = async (x) => {
+    try {
+      await act({ mode, action: "UNBLOCK", id: x.id });
+      showSuccess("Đã unblock");
+      await reload();
+    } catch (e) {
+      showError(typeof e === "string" ? e : "Unblock thất bại");
+    }
+  };
+
+  return (
+    <AdminLayout>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Quản lý dịch vụ (Moderation)
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Duyệt / từ chối / chặn dịch vụ do partner đăng.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* mode switch */}
+            <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+              <button
+                type="button"
+                onClick={() => setMode("HOTEL")}
+                className={`px-4 py-2 text-sm font-semibold ${
+                  mode === "HOTEL"
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                    : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
+                }`}
+              >
+                Hotels
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("RESTAURANT")}
+                className={`px-4 py-2 text-sm font-semibold ${
+                  mode === "RESTAURANT"
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                    : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
+                }`}
+              >
+                Restaurants
+              </button>
             </div>
 
-            {/* Toolbar */}
-            <div className="bg-white rounded-lg shadow p-4 mb-6">
-                <div className="flex flex-wrap items-center gap-3">
-                    {/* Tabs dịch động */}
-                    <div className="flex gap-2">
-                        {STATUS_TABS.map((tabItem) => (
-                            <button
-                                key={tabItem.key}
-                                onClick={() => setTab(tabItem.key)}
-                                className={`px-3 py-1.5 rounded-md text-sm border ${
-                                    tab === tabItem.key
-                                        ? "bg-blue-600 text-white border-blue-600"
-                                        : "bg-white text-gray-700 hover:bg-gray-50"
-                                }`}
-                            >
-                                {tabItem.label}
-                            </button>
-                        ))}
-                    </div>
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`${soft.btn} ${soft.btnGhost} gap-2`}
+              type="button"
+            >
+              <FunnelIcon className="h-5 w-5" />
+              Bộ lọc
+            </button>
 
-                    <div className="flex-1" />
+            <button
+              onClick={reload}
+              className={`${soft.btn} ${soft.btnPrimary}`}
+              type="button"
+              disabled={loading}
+            >
+              Reload
+            </button>
+          </div>
+        </div>
 
-                    {/* Search */}
-                    <div className="relative w-72">
-                        <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder={t("search_by_name_or_vendor")}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-3 py-2 border rounded-md outline-none focus:ring focus:border-blue-500"
-                        />
-                    </div>
+        <ServiceStats
+          totalCount={totalCount}
+          pendingCount={pendingCount}
+          visibleCount={filtered.length}
+        />
+      </div>
 
-                    {/* Filter */}
-                    <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="px-3 py-2 border rounded-md text-sm"
-                    >
-                        {types.map((tType) => (
-                            <option key={tType}>{tType}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
+      {/* Filters */}
+      <ServiceFilters
+        open={filtersOpen}
+        search={search}
+        setSearch={setSearch}
+        status={status}
+        setStatus={setStatus}
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+        unlockFilter={unlockFilter}
+        setUnlockFilter={setUnlockFilter}
+        hasAnyFilter={!!hasAnyFilter}
+        onReset={() => {
+          resetFilters();
+          setTimeout(() => reload(), 0);
+        }}
+      />
 
-            {/* Grid danh sách */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filtered.map((s) => (
-                    <div key={s.id} className="bg-white rounded-lg shadow hover:shadow-md transition overflow-hidden flex flex-col">
-                        <div className="relative">
-                            <img src={s.thumbnail} alt={s.name} className="h-40 w-full object-cover" />
-                            <span
-                                className={`absolute top-3 left-3 px-2 py-1 text-xs rounded-full ${
-                                    s.status === "active"
-                                        ? "bg-green-100 text-green-700"
-                                        : s.status === "pending"
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : "bg-red-100 text-red-700"
-                                }`}
-                            >
-                                {t(s.status)}
-                            </span>
-                        </div>
+      {/* Table */}
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Không có dữ liệu phù hợp với bộ lọc hiện tại.
+          </p>
+        </div>
+      ) : (
+        <ServiceTable
+          items={filtered}
+          onApprove={onApprove}
+          onReject={(x) => openReason("REJECT", x)}
+          onBlock={(x) => openReason("BLOCK", x)}
+          onUnblock={onUnblock}
+        />
+      )}
 
-                        <div className="p-4 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h3 className="font-semibold text-lg">{s.name}</h3>
-                                <p className="text-sm text-gray-500">{s.vendor} • {s.type}</p>
-                                <p className="text-sm text-gray-600 mt-2 line-clamp-2">{s.shortDesc}</p>
-                            </div>
-
-                            <div className="mt-4 flex items-center justify-between">
-                                <span className="text-blue-600 font-semibold">{s.price}</span>
-                                <div className="flex gap-2">
-                                    <button className="p-2 rounded hover:bg-gray-100" title={t("details")}>
-                                        <InformationCircleIcon className="w-5 h-5 text-gray-600" />
-                                    </button>
-                                    <button className="p-2 rounded hover:bg-gray-100" title={t("edit")}>
-                                        <PencilIcon className="w-5 h-5 text-gray-600" />
-                                    </button>
-
-                                    {s.status === "pending" && (
-                                        <>
-                                            <button
-                                                onClick={() => setModal({ open: true, service: s, action: "approve", note: "" })}
-                                                className="p-2 rounded hover:bg-green-50"
-                                                title={t("approve")}
-                                            >
-                                                <CheckCircleIcon className="w-5 h-5 text-green-600" />
-                                            </button>
-                                            <button
-                                                onClick={() => setModal({ open: true, service: s, action: "reject", note: "" })}
-                                                className="p-2 rounded hover:bg-red-50"
-                                                title={t("reject")}
-                                            >
-                                                <XCircleIcon className="w-5 h-5 text-red-600" />
-                                            </button>
-                                        </>
-                                    )}
-
-                                    {s.status === "active" && (
-                                        <button
-                                            onClick={() => lockService(s.id)}
-                                            className="p-2 rounded hover:bg-red-50"
-                                            title={t("lock")}
-                                        >
-                                            <LockClosedIcon className="w-5 h-5 text-red-600" />
-                                        </button>
-                                    )}
-
-                                    {s.status === "suspended" && (
-                                        <button
-                                            onClick={() => unlockService(s.id)}
-                                            className="p-2 rounded hover:bg-green-50"
-                                            title={t("unlock")}
-                                        >
-                                            <LockOpenIcon className="w-5 h-5 text-green-600" />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Modal xác nhận */}
-            {modal.open && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                        <h3 className="text-lg font-semibold mb-2">
-                            {modal.action === "approve" ? t("approve_service") : t("reject_service")}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4">
-                            {t("service")}: <span className="font-medium">{modal.service?.name}</span>
-                        </p>
-
-                        <label className="block text-sm font-medium mb-1">{t("note_optional")}</label>
-                        <textarea
-                            value={modal.note}
-                            onChange={(e) => setModal((m) => ({ ...m, note: e.target.value }))}
-                            placeholder={
-                                modal.action === "approve"
-                                    ? t("note_when_approving")
-                                    : t("note_when_rejecting")
-                            }
-                            className="w-full border rounded p-2 h-24"
-                        />
-
-                        <div className="flex justify-end gap-3 mt-4">
-                            <button
-                                onClick={() => setModal({ open: false, service: null, action: null, note: "" })}
-                                className="px-4 py-2 rounded border hover:bg-gray-100"
-                            >
-                                {t("cancel")}
-                            </button>
-                            {modal.action === "approve" ? (
-                                <button
-                                    onClick={onSubmitModal}
-                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                                >
-                                    {t("confirm_approve")}
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={onSubmitModal}
-                                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                                >
-                                    {t("confirm_reject")}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </AdminLayout>
-    );
+      {/* Reason modal */}
+      <ReasonModal
+        open={reasonOpen}
+        title={reasonMode === "REJECT" ? "Từ chối dịch vụ" : "Chặn dịch vụ"}
+        confirmText={reasonMode === "REJECT" ? "Reject" : "Block"}
+        loading={acting}
+        onClose={() => setReasonOpen(false)}
+        onConfirm={onConfirmReason}
+      />
+    </AdminLayout>
+  );
 }

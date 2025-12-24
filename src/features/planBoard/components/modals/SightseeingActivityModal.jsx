@@ -241,14 +241,14 @@ export default function SightseeingActivityModal({
       typeof p === "number" ? p : p?.memberId
     );
 
-    // ✅ estimatedCost = BASE (tiền vé), không gồm phát sinh
+    //  estimatedCost = BASE (tiền vé), không gồm phát sinh
     const estimatedBase = baseEstimated > 0 ? baseEstimated : null;
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedBase,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
-      // ✅ xoá => "" => null
+      //  xoá => "" => null
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
       participants: normalizedParticipants,

@@ -197,7 +197,7 @@ export function useRestaurantBookingPage() {
       durationMinutes: DEFAULT_DURATION_MINUTES,
       people,                               // adults+children
 
-      // ✅ BE cần tables[]
+      //  BE cần tables[]
       tables: [
         {
           tableTypeId,
@@ -241,7 +241,7 @@ export function useRestaurantBookingPage() {
     return calcMinTables(people, seatsPerTable);
   }, [people, seatsPerTable, tableTypeId]);
 
-  // ✅ AUTO-INCREASE: chỉ chạy khi people/seats đổi (KHÔNG phụ thuộc tablesCount)
+  //  AUTO-INCREASE: chỉ chạy khi people/seats đổi (KHÔNG phụ thuộc tablesCount)
   useEffect(() => {
     if (!tableTypeId) return;
     if (!seatsPerTable || seatsPerTable <= 0) return;

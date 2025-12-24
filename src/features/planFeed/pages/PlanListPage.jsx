@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { Compass, Search, X } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -41,26 +41,82 @@ export default function PlanListPage() {
   } = usePlans();
 
   const loadMoreRef = useRef(null);
-  
+
+  // ====== FIX: tránh "Huỷ" bị useEffect set lại keyword/doSearch lần nữa ======
+  const ignoreNextUrlSyncRef = useRef(false);
+  const prevModeRef = useRef(searchParams.get("mode") || "");
+
   const urlMode = searchParams.get("mode") || "";
   const urlQuery = (searchParams.get("query") || "").trim();
 
+  const handleSearch = useCallback(() => {
+    const q = (keyword || "").trim();
+    if (!q) return;
+
+    // set URL + search luôn để UI phản hồi nhanh
+    setSearchParams({ mode: "search", query: q });
+    doSearch(q);
+  }, [keyword, setSearchParams, doSearch]);
+
+  const clear = useCallback(() => {
+    // 1) báo cho effect biết: đừng sync lại từ URL trong 1 tick
+    ignoreNextUrlSyncRef.current = true;
+
+    // 2) xoá URL trước (thoát mode search)
+    setSearchParams({});
+
+    // 3) clear local + redux search
+    setKeyword("");
+    resetSearch();
+
+    // reload feed sẽ được trigger bởi effect "rời search mode" bên dưới
+  }, [setSearchParams, resetSearch]);
+
+  // Sync state theo URL mode/query (đã chống race)
   useEffect(() => {
-    if (urlMode !== "search") return;
-
-    if (urlQuery) {
-      setKeyword(urlQuery);
-
-      if (!isSearching || (searchQuery || "").trim() !== urlQuery) {
-        doSearch(urlQuery);
-      }
+    if (ignoreNextUrlSyncRef.current) {
+      // bỏ qua 1 vòng effect sau khi clear để tránh doSearch lại
+      ignoreNextUrlSyncRef.current = false;
       return;
     }
 
-    if (isSearching) {
-      resetSearch();
+    if (urlMode !== "search") {
+      // nếu URL không còn search mà store vẫn đang search => reset
+      if (isSearching) resetSearch();
+      return;
     }
-  }, [urlMode, urlQuery, isSearching, searchQuery, doSearch, resetSearch]);
+
+    // urlMode === "search"
+    if (urlQuery) {
+      // đồng bộ keyword từ URL (chỉ khi khác)
+      if ((keyword || "").trim() !== urlQuery) setKeyword(urlQuery);
+
+      // chỉ search khi query khác searchQuery hiện tại
+      if (((searchQuery || "").trim() || "") !== urlQuery) {
+        doSearch(urlQuery);
+      }
+    } else {
+      // mode=search nhưng không có query -> reset search
+      if (isSearching) resetSearch();
+    }
+  }, [
+    urlMode,
+    urlQuery,
+    isSearching,
+    searchQuery,
+    doSearch,
+    resetSearch,
+    keyword,
+  ]);
+
+  // FIX: Khi rời khỏi search mode => reload feed 1 lần (thay vì reload ngay trong clear())
+  useEffect(() => {
+    const prevMode = prevModeRef.current;
+    if (prevMode === "search" && urlMode !== "search") {
+      reload();
+    }
+    prevModeRef.current = urlMode;
+  }, [urlMode, reload]);
 
   // Load 1 lần khi có user
   useEffect(() => {
@@ -79,6 +135,7 @@ export default function PlanListPage() {
     setInitialLoaded(true);
   }, [user?.id, initialLoaded, searchParams, reload]);
 
+  // Infinite scroll (chỉ feed)
   useEffect(() => {
     if (isSearching) return;
     if (!hasMore) return;
@@ -110,21 +167,10 @@ export default function PlanListPage() {
   const isEmpty = !displayLoading && displayPlans.length === 0 && !isSearching;
 
   const isSearchEmpty =
-    isSearching && !searchLoading && (searchPlans?.length || 0) === 0 && (searchUsers?.length || 0) === 0;
-
-  const handleSearch = () => {
-    const q = (keyword || "").trim();
-    if (!q) return;
-
-    setSearchParams({ mode: "search", query: q });
-  };
-
-  const clear = () => {
-    setKeyword("");
-    resetSearch();
-    setSearchParams({});
-    reload();
-  };
+    isSearching &&
+    !searchLoading &&
+    (searchPlans?.length || 0) === 0 &&
+    (searchUsers?.length || 0) === 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-sky-50 via-slate-50 to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -209,7 +255,10 @@ export default function PlanListPage() {
 
                 {isSearching && (
                   <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Kết quả cho: <span className="font-semibold text-gray-700 dark:text-gray-200">{searchQuery}</span>
+                    Kết quả cho:{" "}
+                    <span className="font-semibold text-gray-700 dark:text-gray-200">
+                      {searchQuery}
+                    </span>
                   </div>
                 )}
               </div>
@@ -268,7 +317,10 @@ export default function PlanListPage() {
                     "
                   >
                     <img
-                      src={u.avatar || "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small/default-avatar-profile-icon-of-social-media-user-vector.jpg"}
+                      src={
+                        u.avatar ||
+                        "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+                      }
                       alt={u.fullname || "user"}
                       className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-800"
                     />
@@ -294,7 +346,9 @@ export default function PlanListPage() {
               <div className="w-16 h-16 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center mb-4">
                 <Compass className="w-8 h-8 text-sky-500" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Chưa có lịch trình nào</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Chưa có lịch trình nào
+              </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
                 Hãy là người đầu tiên chia sẻ một lịch trình thật thú vị.
               </p>
@@ -306,9 +360,12 @@ export default function PlanListPage() {
             {isSearchEmpty && (
               <FadeInSection delay={120}>
                 <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/60 p-6 text-center">
-                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Không có kết quả phù hợp</div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    Không có kết quả phù hợp
+                  </div>
                   <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Thử từ khoá khác, hoặc tìm theo <span className="font-semibold">@username</span>.
+                    Thử từ khoá khác, hoặc tìm theo{" "}
+                    <span className="font-semibold">@username</span>.
                   </div>
                 </div>
               </FadeInSection>
@@ -316,7 +373,11 @@ export default function PlanListPage() {
 
             {displayPlans.map((p, i) => (
               <FadeInSection key={p.id} delay={i * 90}>
-                <PlanPostCard plan={p} me={user} onOpenDetail={() => (window.location.href = `/plans/${p.id}`)} />
+                <PlanPostCard
+                  plan={p}
+                  me={user}
+                  onOpenDetail={() => (window.location.href = `/plans/${p.id}`)}
+                />
               </FadeInSection>
             ))}
 
@@ -334,7 +395,9 @@ export default function PlanListPage() {
 
             {!isSearching && !hasMore && items.length > 0 && (
               <FadeInSection delay={200}>
-                <p className="pt-4 text-center text-xs text-gray-400">Bạn đã xem hết các lịch trình hiện có.</p>
+                <p className="pt-4 text-center text-xs text-gray-400">
+                  Bạn đã xem hết các lịch trình hiện có.
+                </p>
               </FadeInSection>
             )}
           </div>

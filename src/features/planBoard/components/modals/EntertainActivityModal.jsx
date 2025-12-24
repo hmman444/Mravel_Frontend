@@ -222,7 +222,7 @@ export default function EntertainActivityModal({
 
     const cost = {
       currencyCode: "VND",
-      // ✅ FIX: estimatedCost = base only (vé) — extra nằm trong extraCosts
+      //  FIX: estimatedCost = base only (vé) — extra nằm trong extraCosts
       estimatedCost: baseEstimated > 0 ? baseEstimated : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
@@ -271,7 +271,7 @@ export default function EntertainActivityModal({
       participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData GỌN: chỉ đặc thù ENTERTAIN
+      //  activityData GỌN: chỉ đặc thù ENTERTAIN
       activityData: {
         placeName: placeName.trim(),
         address: address?.trim() || null,

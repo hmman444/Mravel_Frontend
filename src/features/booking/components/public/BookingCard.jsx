@@ -189,7 +189,7 @@ export default function BookingCard({
   const lookupPhoneLast4 = lookupCreds?.phoneLast4 || "";
   const lookupEmail = lookupCreds?.email || null;
 
-  // ✅ Hook luôn gọi trước mọi return
+  // Hook luôn gọi trước mọi return
   const stayRange = useMemo(() => {
     const ci = booking?.checkInDate;
     const co = booking?.checkOutDate;
@@ -199,19 +199,19 @@ export default function BookingCard({
     const canCancel = useMemo(() => {
       const st = String((detail || booking)?.status || "").trim().toUpperCase();
 
-      // ✅ chỉ cho hủy khi đã xác nhận (đúng yêu cầu của bạn)
+      // chỉ cho hủy khi đã xác nhận (đúng yêu cầu của bạn)
       if (!isConfirmed) return false;
 
-      // ✅ các trạng thái đã hủy thì thôi
+      // các trạng thái đã hủy thì thôi
       if (CANCELLED_SET.has(st)) return false;
 
       const ci = (detail || booking)?.checkInDate;
       const co = (detail || booking)?.checkOutDate;
 
-      // ✅ đã qua thời gian sử dụng => không cho hủy
+      // đã qua thời gian sử dụng => không cho hủy
       if (isUsedTimePassedHotel(co)) return false;
 
-      // ✅ chỉ cho hủy khi chưa tới check-in
+      // chỉ cho hủy khi chưa tới check-in
       const d = toDateSafe(ci);
       return d ? d.getTime() > Date.now() : false;
     }, [detail, booking, isConfirmed]);
@@ -242,14 +242,14 @@ export default function BookingCard({
         let res;
 
         if (detailScope === "LOOKUP") {
-          // ✅ HOTEL lookup detail
+          // HOTEL lookup detail
           res = await api.post(`/booking/public/lookup/detail`, {
             bookingCode: code,
             phoneLast4: lookupPhoneLast4,
             email: lookupEmail,
           });
         } else {
-          // ✅ HOTEL public/private detail
+          // HOTEL public/private detail
           const url =
             detailScope === "PRIVATE"
               ? `/booking/bookings/${encodeURIComponent(code)}`
@@ -280,7 +280,7 @@ export default function BookingCard({
     lookupEmail,
   ]);
 
-  // ✅ return sau hooks
+  // return sau hooks
   if (!booking) return null;
 
   const b = detail || booking;
@@ -378,7 +378,7 @@ export default function BookingCard({
     rooms,
   } = b;
 
-  // ✅ không dùng useMemo ở đây nữa => hết lỗi rules-of-hooks
+  // không dùng useMemo ở đây nữa => hết lỗi rules-of-hooks
   const stayRange2 = fmtRange(checkInDate, checkOutDate);
 
   return (
@@ -601,7 +601,7 @@ export default function BookingCard({
                 </div>
               ) : null}
 
-              {/* ✅ 2 columns */}
+              {/* 2 columns */}
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {/* Cột 1: Thông tin đơn */}
                 <div className="rounded-xl border border-gray-200 px-3">
@@ -611,7 +611,7 @@ export default function BookingCard({
                     <DetailRow label="Mã booking" value={code} mono />
                     <div className="h-px bg-gray-100" />
 
-                    {/* ✅ tách check-in / check-out */}
+                    {/* tách check-in / check-out */}
                     <DetailRow
                     label="Check-in"
                     value={checkInDate ? new Date(checkInDate).toLocaleDateString("vi-VN") : "--"}
@@ -693,7 +693,7 @@ export default function BookingCard({
                 </div>
                 </div>
 
-                {/* ✅ rooms: luôn 1 phòng => đổi title */}
+                {/* rooms: luôn 1 phòng => đổi title */}
                 {Array.isArray(rooms) && rooms.length > 0 ? (
                 <div className="mt-4 rounded-xl border border-gray-200 p-3">
                     <div className="text-sm font-semibold text-gray-900">Chi tiết phòng</div>

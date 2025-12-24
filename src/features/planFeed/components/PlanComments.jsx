@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { usePlans } from "../hooks/usePlans";
 import CommentItem from "./CommentItem";
+import { showError } from "../../../utils/toastUtils";
 
 export default function PlanComments({
   me,
@@ -64,7 +65,7 @@ export default function PlanComments({
       setShowComments(true);
     } catch (err) {
       console.error(err);
-      alert("Không thể gửi bình luận!");
+      showError("Gửi bình luận thất bại, vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
