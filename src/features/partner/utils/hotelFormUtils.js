@@ -120,6 +120,8 @@ export function createInitialHotelForm() {
     images: [],
     content: [],
 
+    faqs: [],
+
     // amenities (objects or codes)
     amenities: [],
 
@@ -204,6 +206,13 @@ export function mapHotelDocToForm(raw) {
       mapLat: b?.mapLat ?? (Array.isArray(b?.map) ? b.map[1] : ""),
     })),
 
+    faqs: Array.isArray(raw?.faqs)
+     ? raw.faqs.map((x) => ({
+         question: asString(x?.question),
+         answer: asString(x?.answer),
+       }))
+     : [],
+
     amenities: asArray(raw?.amenityCodes ?? raw?.amenities ?? []),
 
     taxConfig: {
@@ -274,6 +283,8 @@ export function mapHotelDocToForm(raw) {
 export function buildHotelPayload(form, { mode = "create" } = {}) {
   const lon = toNum(form.locationLon);
   const lat = toNum(form.locationLat);
+
+  const faqs = Array.isArray(form?.faqs) ? form.faqs : [];
 
   const ci = toHHmm(form.defaultCheckInTime);
   const co = toHHmm(form.defaultCheckOutTime);
@@ -430,6 +441,13 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
       blockedReason: asString(form?.moderation?.blockedReason ?? ""),
       unlockRequestReason: asString(form?.moderation?.unlockRequestReason ?? ""),
     },
+
+    faqs: faqs
+     .map((x) => ({
+       question: String(x?.question ?? "").trim(),
+       answer: String(x?.answer ?? "").trim(),
+     }))
+     .filter((x) => x.question && x.answer),
 
     active: form?.active !== false,
   };

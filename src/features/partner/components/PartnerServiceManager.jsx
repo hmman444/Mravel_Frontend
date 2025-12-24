@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { usePartnerServices } from "../hooks/usePartnerServices";
 import PartnerServiceTypePickerModal from "./PartnerServiceTypePickerModal";
 import PartnerHotelFormPage from "../components/hotel/form/PartnerHotelFormPage";
+import PartnerRestaurantFormPage from "../components/restaurant/form/PartnerRestaurantFormPage";
 
 const STATUS_TABS = [
   { key: "all", label: "Tất cả" },
@@ -114,6 +115,8 @@ export default function PartnerServiceManager() {
     requestUnlock,
     updateHotel,
     createHotel,
+    updateRestaurant,
+    createRestaurant,
   } = usePartnerServices();
 
   const [tab, setTab] = useState("all");
@@ -429,6 +432,37 @@ export default function PartnerServiceManager() {
     );
   }
 
+  if (isEditing && edit.service?.type === "RESTAURANT") {
+    return (
+      <PartnerRestaurantFormPage
+        mode="edit"
+        initialRaw={edit.service.raw}
+        loading={action.loading}
+        onBack={() => setEdit({ open: false, service: null })}
+        onSubmit={async (payload) => {
+          await updateRestaurant({ id: edit.service.id, payload });
+          await refreshTypeList("RESTAURANT");
+          setEdit({ open: false, service: null });
+        }}
+      />
+    );
+  }
+
+  if (isCreating && create.type === "RESTAURANT") {
+    return (
+      <PartnerRestaurantFormPage
+        mode="create"
+        loading={action.loading}
+        onBack={() => setCreate({ open: false, type: null })}
+        onSubmit={async (payload) => {
+          await createRestaurant(payload);
+          await refreshTypeList("RESTAURANT");
+          setCreate({ open: false, type: null });
+        }}
+      />
+    );
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -616,7 +650,7 @@ export default function PartnerServiceManager() {
         onPick={(type) => {
           setPickerOpen(false);
           if (type === "HOTEL") setCreate({ open: true, type: "HOTEL" });
-          else alert("Restaurant để sau nhé 😄");
+          if (type === "RESTAURANT") setCreate({ open: true, type: "RESTAURANT" });
         }}
       />
     </div>

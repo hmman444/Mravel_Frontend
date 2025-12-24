@@ -66,11 +66,11 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
                   </span>
                   <div>
                     <div className="text-lg font-bold text-gray-900">Khách sạn</div>
-                    <div className="text-sm text-gray-600">Tạo khách sạn + tiện ích + loại phòng</div>
+                    <div className="text-sm text-gray-600">Tạo khách sạn mà bạn đang kinh doanh</div>
                   </div>
                 </div>
                 <div className="mt-4 text-xs text-gray-500">
-                  Sau khi tạo/ cập nhật sẽ về <b>PENDING</b> chờ admin duyệt (theo rule BE).
+                  Đăng tải dịch vụ Khách sạn - <b>Bước đầu</b> đi đến thành công (theo rule BE).
                 </div>
               </button>
 
@@ -86,11 +86,11 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
                   </span>
                   <div>
                     <div className="text-lg font-bold text-gray-900">Nhà hàng</div>
-                    <div className="text-sm text-gray-600">Tạm để sau cho dễ control</div>
+                    <div className="text-sm text-gray-600">Tạo nhà hàng mà bạn đang kinh doanh</div>
                   </div>
                 </div>
                 <div className="mt-4 text-xs text-gray-500">
-                  (Bạn đang ưu tiên Hotel trước)
+                  (Quá trình tạo nhà hàng đơn giản theo từng bước)
                 </div>
               </button>
             </div>
