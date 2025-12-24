@@ -71,11 +71,12 @@ export const getHotels = async (params = {}) => {
 };
 
 /** GET /api/catalog/hotels/{slug} */
-export const getHotelDetail = async (slug) => {
+export const getHotelDetail = async (slug, options = {}) => {
   try {
-    const res = await api.get(
-      `${HOTELS_PREFIX}/${encodeURIComponent(slug)}`
-    );
+    const { includeInactive = false } = options || {};
+    const res = await api.get(`${HOTELS_PREFIX}/${encodeURIComponent(slug)}`, {
+      params: includeInactive ? { includeInactive: true } : {},
+    });
     return { success: true, data: res.data?.data };
   } catch (error) {
     return toError(error, "Không tải được chi tiết khách sạn");
@@ -125,11 +126,12 @@ export const getRestaurants = async (params = {}) => {
 };
 
 /** GET /api/catalog/restaurants/{slug} */
-export const getRestaurantDetail = async (slug) => {
+export const getRestaurantDetail = async (slug, options = {}) => {
   try {
-    const res = await api.get(
-      `${RESTAURANTS_PREFIX}/${encodeURIComponent(slug)}`
-    );
+    const { includeInactive = false } = options || {};
+    const res = await api.get(`${RESTAURANTS_PREFIX}/${encodeURIComponent(slug)}`, {
+      params: includeInactive ? { includeInactive: true } : {},
+    });
     return { success: true, data: res.data?.data };
   } catch (error) {
     return toError(error, "Không tải được chi tiết quán ăn");

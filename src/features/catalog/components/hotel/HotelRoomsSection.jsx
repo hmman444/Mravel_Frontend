@@ -726,16 +726,18 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
 
   const showPromoPill = promoLabel && promoLabel !== "Chỉ còn 1 phòng";
 
+  const isHotelActive = hotel?.active !== false;
+  console.log("hotel.active =", hotel?.active, typeof hotel?.active);
+
   const footerPriceText =
     priceMode === "INCL_TAX"
       ? "Đã bao gồm thuế và phí"
       : "Chưa bao gồm thuế và phí";
 
   const goBooking = () => {
+    if (!isHotelActive) return;
     navigate(
-      `/booking/hotel?hotelSlug=${encodeURIComponent(
-        hotel.slug
-      )}&roomTypeId=${roomType.id}&ratePlanId=${ratePlan.id}`
+      `/booking/hotel?hotelSlug=${encodeURIComponent(hotel.slug)}&roomTypeId=${roomType.id}&ratePlanId=${ratePlan.id}`
     );
   };
 
@@ -813,7 +815,13 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
         <div className="flex flex-col items-end justify-center gap-1">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg bg-[#007bff] px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-[#ff6b1a] md:text-sm"
+            disabled={!isHotelActive}
+            className={[
+              "inline-flex items-center justify-center rounded-lg px-4 py-1.5 text-xs font-semibold text-white transition md:text-sm",
+              isHotelActive
+                ? "bg-[#007bff] hover:bg-[#ff6b1a]"
+                : "bg-gray-400 cursor-not-allowed",
+            ].join(" ")}
             onClick={goBooking}
           >
             Chọn

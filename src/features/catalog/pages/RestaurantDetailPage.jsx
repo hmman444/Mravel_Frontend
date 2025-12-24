@@ -1,7 +1,7 @@
 // src/features/catalog/pages/RestaurantDetailPage.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation  } from "react-router-dom";
 import { useCatalogRestaurants } from "../hooks/useCatalogRestaurants";
 
 import Navbar from "../../../components/Navbar";
@@ -32,9 +32,14 @@ export default function RestaurantDetailPage() {
     window.scrollTo(0, 0);
   }, []);
 
+  const location = useLocation();
+
+  const fromBooking =
+    new URLSearchParams(location.search).get("fromBooking") === "1";
+
   useEffect(() => {
-    if (slug) dispatch(fetchRestaurantDetail(slug));
-  }, [slug, dispatch]);
+    if (slug) dispatch(fetchRestaurantDetail({ slug, includeInactive: fromBooking }));
+  }, [slug, fromBooking, dispatch]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7fb]">

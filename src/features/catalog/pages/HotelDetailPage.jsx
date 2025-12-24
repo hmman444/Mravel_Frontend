@@ -1,7 +1,7 @@
 // src/features/hotels/pages/HotelDetailPage.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation  } from "react-router-dom";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -18,11 +18,15 @@ import HotelSimilarSection from "../components/hotel/HotelSimilarSection";
 
 export default function HotelDetailPage() {
   const { slug } = useParams();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const { data: hotel, loading, error } = useSelector(
     (s) => s.catalog.hotelDetail
   );
+
+  const fromBooking =
+    new URLSearchParams(location.search).get("fromBooking") === "1";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -30,9 +34,9 @@ export default function HotelDetailPage() {
 
   useEffect(() => {
     if (slug) {
-      dispatch(fetchHotelDetail(slug));
+      dispatch(fetchHotelDetail({ slug, includeInactive: fromBooking }));
     }
-  }, [slug, dispatch]);
+  }, [slug, fromBooking, dispatch]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7fb]">

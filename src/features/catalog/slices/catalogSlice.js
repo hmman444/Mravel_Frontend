@@ -53,8 +53,11 @@ export const fetchPlaceDetail = createAsyncThunk(
 // Detail cho HOTEL (API mới)
 export const fetchHotelDetail = createAsyncThunk(
   "catalog/fetchHotelDetail",
-  async (slug, { rejectWithValue }) => {
-    const res = await getHotelDetail(slug);
+  async (arg, { rejectWithValue }) => {
+    const slug = typeof arg === "string" ? arg : arg?.slug;
+    const includeInactive = typeof arg === "object" ? !!arg?.includeInactive : false;
+
+    const res = await getHotelDetail(slug, { includeInactive });
     if (res.success) return res.data;
     return rejectWithValue(res.message || "Không tìm thấy khách sạn");
   }
@@ -62,8 +65,11 @@ export const fetchHotelDetail = createAsyncThunk(
 
 export const fetchRestaurantDetail = createAsyncThunk(
   "catalog/fetchRestaurantDetail",
-  async (slug, { rejectWithValue }) => {
-    const res = await getRestaurantDetail(slug);
+  async (arg, { rejectWithValue }) => {
+    const slug = typeof arg === "string" ? arg : arg?.slug;
+    const includeInactive = typeof arg === "object" ? !!arg?.includeInactive : false;
+
+    const res = await getRestaurantDetail(slug, { includeInactive });
     if (res.success) return res.data;
     return rejectWithValue(res.message || "Không tìm thấy quán ăn");
   }

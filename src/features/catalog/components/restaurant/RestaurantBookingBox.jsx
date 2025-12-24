@@ -37,6 +37,9 @@ export default function RestaurantBookingBox({
     [openingHours, date]
   );
 
+  const isActive = restaurant?.active !== false;
+  console.log("restaurant.active =", restaurant?.active, typeof restaurant?.active);
+
   //  nếu user đổi ngày mà time hiện tại không còn hợp lệ -> auto chọn slot đầu
   useEffect(() => {
     if (!timeOptions.length) {
@@ -68,7 +71,8 @@ export default function RestaurantBookingBox({
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  const canSubmit = !!restaurant?.slug && !!date && !!time && timeOptions.length > 0;
+  const canSubmit =
+    isActive && !!restaurant?.slug && !!date && !!time && timeOptions.length > 0;
 
   const commit = (e) => {
     e?.preventDefault?.();
@@ -276,7 +280,7 @@ export default function RestaurantBookingBox({
           onClick={commit}
           disabled={!canSubmit}
         >
-          Đặt chỗ ngay
+          {isActive ? "Đặt chỗ ngay" : "Nhà hàng đang tạm dừng nhận đặt chỗ"}
         </Button>
       </div>
     </div>

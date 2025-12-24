@@ -70,8 +70,11 @@ export default function MyBookingsPage() {
     onClearLookupResult,
   } = useMyBookingsPage();
 
-  const onOpenHotel = (hotelSlug) => hotelSlug && navigate(`/hotels/${hotelSlug}`);
-  const onOpenRestaurant = (slug) => slug && navigate(`/restaurants/${slug}`);
+  const onOpenHotel = (hotelSlug) =>
+    hotelSlug && navigate(`/hotels/${hotelSlug}?fromBooking=1`);
+
+  const onOpenRestaurant = (slug) =>
+    slug && navigate(`/restaurants/${slug}?fromBooking=1`);
 
   const goLogin = () =>
     navigate(`/login?redirect=${encodeURIComponent("/my-bookings")}`);
