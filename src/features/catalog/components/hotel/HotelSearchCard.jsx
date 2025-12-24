@@ -16,8 +16,8 @@ import {
 import Button from "../../../../components/Button";
 import DestinationTypeahead from "../../../../components/DestinationTypeahead";
 
-// ✅ dùng y chang Home
 import { formatLocalDate, addDaysLocal } from "../../../catalog/utils/dateLocal";
+import { showError } from "../../../../utils/toastUtils";
 
 /* ───────── Small helpers ───────── */
 function RowField({ label, children, onClick, refBox, className = "" }) {
@@ -126,11 +126,11 @@ export default function HotelSearchCard() {
     setDest(next);
   };
 
-  /* ── Submit (✅ giống Home) ── */
+  /* ── Submit ( giống Home) ── */
   const submit = () => {
     const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
     if (!locationVal) {
-      alert("Vui lòng nhập hoặc chọn Điểm đến.");
+      showError("Vui lòng nhập hoặc chọn Điểm đến.");
       return;
     }
 
@@ -142,7 +142,7 @@ export default function HotelSearchCard() {
       location: locationVal,
       checkIn: formatLocalDate(checkInDate),
       nights: String(nightsInt),
-      checkOut: formatLocalDate(checkOutDate), // ✅ y chang Home
+      checkOut: formatLocalDate(checkOutDate), //  y chang Home
       adults: String(adults),
       children: String(children),
       rooms: String(rooms),
@@ -178,7 +178,7 @@ export default function HotelSearchCard() {
               placeholder="Thành phố, khách sạn, điểm đến"
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
-              // ✅ bắt đủ case giống Home
+              //  bắt đủ case giống Home
               onSubmit={handleDestUpdate}
               onPick={handleDestUpdate}
               onChangeText={(text) => handleDestUpdate({ text, slug: null })}

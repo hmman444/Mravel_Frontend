@@ -84,7 +84,12 @@ export default function PlanDashboardPage() {
 
   useEffect(() => {
     if (!planId) return;
-    load();
+
+    (async () => {
+      await load();
+
+      await reloadRecent?.();
+    })();
   }, [planId]);
 
   useEffect(() => {

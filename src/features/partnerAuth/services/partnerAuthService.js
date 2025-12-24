@@ -1,9 +1,9 @@
 // src/features/partnerAuth/services/partnerAuthService.js
 import partnerApi from "../../../utils/partnerAxiosInstance";
 
-const AUTH_BASE = "/auth";                 // ✅ logout/refresh/... (chung)
-const PARTNER_AUTH_BASE = "/auth/partner"; // ✅ login/register/verify/social
-const ME_PATH = "/partner/me";             // ✅ /api/partner/me
+const AUTH_BASE = "/auth";                 //  logout/refresh/... (chung)
+const PARTNER_AUTH_BASE = "/auth/partner"; //  login/register/verify/social
+const ME_PATH = "/partner/me";             //  /api/partner/me
 
 export const partnerLogin = async (email, password) => {
   try {
@@ -85,7 +85,7 @@ export const partnerResetPassword = async (email, otpCode, newPassword) => {
   }
 };
 
-// ✅ Logout gọi endpoint chung /auth/logout
+//  Logout gọi endpoint chung /auth/logout
 export const partnerLogout = async (refreshToken) => {
   try {
     const res = await partnerApi.post(`${AUTH_BASE}/logout`, { refreshToken });

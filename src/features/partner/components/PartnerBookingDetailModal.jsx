@@ -24,7 +24,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 function DetailRow({ label, value, mono = false }) {
   if (value === undefined || value === null || value === "") return null;
   return (
-    // ✅ thu label column lại chút
+    //  thu label column lại chút
     <div className="grid grid-cols-[120px_1fr] gap-3 py-2">
       <div className="text-xs font-semibold text-gray-600 md:text-sm">{label}</div>
       <div
@@ -51,7 +51,7 @@ export default function PartnerBookingDetailModal({
   onClose,
   onOpenCancelFromDetail,
 }) {
-  // ✅ Hooks luôn gọi ở top-level (không đặt sau early return)
+  //  Hooks luôn gọi ở top-level (không đặt sau early return)
   useEffect(() => {
     if (!open) return;
 
@@ -75,7 +75,7 @@ export default function PartnerBookingDetailModal({
 
   const snapshot = pickSnapshot(data) || {};
 
-  // ✅ các field tổng/tuỳ chọn (nếu BE có trả)
+  //  các field tổng/tuỳ chọn (nếu BE có trả)
   const totalAmount =
     data?.totalAmount ?? data?.amountTotal ?? snapshot?.totalAmount ?? snapshot?.amountTotal ?? null;
 
@@ -90,7 +90,7 @@ export default function PartnerBookingDetailModal({
   const cancelReason = data?.cancelReason ?? snapshot?.cancelReason ?? null;
   const cancelledAt = data?.cancelledAt ?? snapshot?.cancelledAt ?? null;
 
-  // ✅ IMPORTANT: amountPaid phải lấy đúng field amountPaid/amount_paid, KHÔNG fallback sang total
+  //  IMPORTANT: amountPaid phải lấy đúng field amountPaid/amount_paid, KHÔNG fallback sang total
   const amountPaidRaw =
     data?.amountPaid ??
     data?.amount_paid ??
@@ -191,7 +191,7 @@ export default function PartnerBookingDetailModal({
             </div>
           ) : (
             <>
-              {/* ✅ Thu cột “Thông tin đơn” lại chút: trái 0.9fr, phải 1.1fr */}
+              {/*  Thu cột “Thông tin đơn” lại chút: trái 0.9fr, phải 1.1fr */}
               <div className="grid grid-cols-1 gap-3 md:grid-cols-[0.9fr_1.1fr]">
                 {/* Cột trái */}
                 <div className="rounded-xl border border-gray-200 px-3">
@@ -239,7 +239,7 @@ export default function PartnerBookingDetailModal({
                     <DetailRow label="Thành phố" value={service?.city} />
                     <DetailRow label="Địa chỉ" value={service?.address ?? service?.fullAddress ?? null} />
                     <DetailRow label="Slug" value={service?.slug ?? null} mono />
-                    {/* ✅ bỏ Service ID theo yêu cầu */}
+                    {/*  bỏ Service ID theo yêu cầu */}
                   </div>
 
                   {/* Khách hàng */}

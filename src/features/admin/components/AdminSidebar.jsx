@@ -22,7 +22,7 @@ export default function AdminSidebar() {
 
   const menuItems = useMemo(
     () => [
-      { to: "/admin", label: t("overview"), icon: HomeIcon },
+      // { to: "/admin", label: t("overview"), icon: HomeIcon },
       { to: "/admin/users", label: t("manage_users"), icon: UsersIcon },
       { to: "/admin/partners", label: t("manage_partners"), icon: BuildingOfficeIcon },
       { to: "/admin/services", label: t("manage_services"), icon: Cog6ToothIcon },

@@ -1,18 +1,7 @@
 "use client";
 
-// src/features/admin/components/amenity/AmenityFilters.jsx
-import { MagnifyingGlassIcon, XMarkIcon, ArrowsUpDownIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  SCOPE_OPTIONS,
-  GROUP_OPTIONS,
-  SECTION_OPTIONS,
-  SORT_OPTIONS,
-  SCOPE_LABEL,
-  GROUP_LABEL,
-  SECTION_LABEL,
-  labelOf,
-} from "./amenityTerms";
 
 const ui = {
   card:
@@ -53,22 +42,18 @@ const fadeUp = {
   exit: { opacity: 0, y: 8 },
 };
 
-export default function AmenityFilters({
-  t,
+const STATUS_OPTIONS = ["ALL", "PENDING_REVIEW", "APPROVED", "REJECTED", "BLOCKED"];
+
+export default function ServiceFilters({
   open,
   search,
   setSearch,
-  scope,
-  setScope,
-  group,
-  setGroup,
-  section,
-  setSection,
-  // NEW: 3-state filter: "ALL" | "ACTIVE" | "INACTIVE"
+  status,
+  setStatus,
   activeFilter,
   setActiveFilter,
-  sortBy,
-  setSortBy,
+  unlockFilter,
+  setUnlockFilter,
   hasAnyFilter,
   onReset,
 }) {
@@ -84,13 +69,13 @@ export default function AmenityFilters({
           className={`${ui.card} mb-6 p-4`}
         >
           <div className="flex flex-col gap-4">
-            {/* Row 1: Search + Active filter + Reset */}
+            {/* Row 1 */}
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               {/* Search */}
               <div className="w-full lg:max-w-md">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>{t("search_amenity")}</label>
-                  <span className={ui.help}>Tên / Code / Mô tả</span>
+                  <label className={ui.title}>Tìm kiếm</label>
+                  <span className={ui.help}>Tên / slug</span>
                 </div>
 
                 <div className="relative mt-1">
@@ -98,7 +83,7 @@ export default function AmenityFilters({
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Ví dụ: WIFI / PARKING / phòng..."
+                    placeholder="Ví dụ: reverie / hoian..."
                     className={`${ui.input} pl-10`}
                   />
                   {search && (
@@ -114,11 +99,11 @@ export default function AmenityFilters({
                 </div>
               </div>
 
-              {/* Active filter (3-state chips) */}
+              {/* Active filter */}
               <div className="w-full lg:w-auto">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Trạng thái</label>
-                  <span className={ui.help}>Active / Inactive</span>
+                  <label className={ui.title}>Active</label>
+                  <span className={ui.help}>Bật / Tắt</span>
                 </div>
 
                 <div className={`mt-1 ${ui.chipWrap}`}>
@@ -143,6 +128,35 @@ export default function AmenityFilters({
                 </div>
               </div>
 
+              {/* UnlockRequested */}
+              <div className="w-full lg:w-auto">
+                <div className="flex items-center justify-between">
+                  <label className={ui.title}>Yêu cầu mở khoá</label>
+                  <span className={ui.help}>unlockRequested</span>
+                </div>
+
+                <div className={`mt-1 ${ui.chipWrap}`}>
+                  {[
+                    { v: "ALL", label: "Tất cả" },
+                    { v: "YES", label: "Có" },
+                    { v: "NO", label: "Không" },
+                  ].map((x) => {
+                    const on = unlockFilter === x.v;
+                    return (
+                      <button
+                        key={x.v}
+                        type="button"
+                        onClick={() => setUnlockFilter(x.v)}
+                        className={`${ui.chip} ${on ? ui.chipOn : ui.chipOff}`}
+                        aria-pressed={on}
+                      >
+                        {x.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Reset */}
               <div className="flex justify-end">
                 <button
@@ -150,67 +164,23 @@ export default function AmenityFilters({
                   onClick={onReset}
                   className={`${ui.btn} ${ui.btnGhost}`}
                   disabled={!hasAnyFilter}
-                  title="Reset bộ lọc"
                 >
                   Reset
                 </button>
               </div>
             </div>
 
-            {/* Divider */}
             <div className="h-px bg-slate-200/70 dark:bg-slate-800" />
 
-            {/* Row 2: Selects */}
+            {/* Row 2 */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label className={ui.title}>Scope</label>
-                <select value={scope} onChange={(e) => setScope(e.target.value)} className={`${ui.select} mt-1`}>
-                  {SCOPE_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {labelOf(SCOPE_LABEL, s)}
-                    </option>
+                <label className={ui.title}>Trạng thái moderation</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value)} className={`${ui.select} mt-1`}>
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className={ui.title}>Group</label>
-                <select value={group} onChange={(e) => setGroup(e.target.value)} className={`${ui.select} mt-1`}>
-                  {GROUP_OPTIONS.map((g) => (
-                    <option key={g} value={g}>
-                      {labelOf(GROUP_LABEL, g)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={ui.title}>Section</label>
-                <select value={section} onChange={(e) => setSection(e.target.value)} className={`${ui.select} mt-1`}>
-                  {SECTION_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {labelOf(SECTION_LABEL, s)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={ui.title}>Sắp xếp</label>
-                <div className="relative mt-1">
-                  <ArrowsUpDownIcon className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className={`${ui.select} pl-10`}
-                  >
-                    {SORT_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
           </div>

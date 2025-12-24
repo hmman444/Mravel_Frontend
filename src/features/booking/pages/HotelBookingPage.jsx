@@ -62,7 +62,7 @@ export default function HotelBookingPage() {
           onStayChange={handleStayChange}
           onRoomsChange={handleRoomsChange}
 
-          // ✅ thêm
+          //  thêm
           contactName={contactName}
           contactPhone={contactPhone}
           contactEmail={contactEmail}

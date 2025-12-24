@@ -20,7 +20,7 @@ import notificationsReducer from "../features/notifications/slices/notificationS
 import partnerReducer from "../features/partner/slices/partnerSlice";
 import adminUserReducer from "../features/admin/slices/adminUserSlice";
 import adminPartnerReducer from "../features/admin/slices/adminPartnerSlice";
-
+import adminServiceReducer from "../features/admin/slices/adminServiceSlice";
 import { injectStore } from "./storeInjector";
 
 export const store = configureStore({
@@ -46,6 +46,7 @@ export const store = configureStore({
     partner: partnerReducer,
     adminUser: adminUserReducer,
     adminPartners: adminPartnerReducer,
+    adminService: adminServiceReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

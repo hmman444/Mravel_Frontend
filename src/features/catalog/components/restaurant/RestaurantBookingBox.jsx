@@ -26,7 +26,7 @@ export default function RestaurantBookingBox({
 
   const openingHours = restaurant?.openingHours || restaurant?.opening_hours || [];
 
-  // ✅ build timeOptions theo openingHours + date (mỗi 30 phút)
+  //  build timeOptions theo openingHours + date (mỗi 30 phút)
   const timeOptions = useMemo(
     () => buildTimeOptionsFromOpeningHours(openingHours, date, 30),
     [openingHours, date]
@@ -37,7 +37,7 @@ export default function RestaurantBookingBox({
     [openingHours, date]
   );
 
-  // ✅ nếu user đổi ngày mà time hiện tại không còn hợp lệ -> auto chọn slot đầu
+  //  nếu user đổi ngày mà time hiện tại không còn hợp lệ -> auto chọn slot đầu
   useEffect(() => {
     if (!timeOptions.length) {
       setTime("");

@@ -42,7 +42,7 @@ export default function HotelsHomePage() {
       <Navbar />
       <div className="h-[50px] md:h-[60px]" aria-hidden />
 
-      {/* Hero + search có thể hiện luôn, hoặc fade nhẹ nếu thích */}
+      {/* Hero + search */}
       <FadeInSection>
         <HotelHero />
       </FadeInSection>

@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 export default function SocialLogin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ fix
+  const location = useLocation(); // fix
   const [loading, setLoading] = useState(false);
 
   const redirectParam = new URLSearchParams(location.search).get("redirect");
@@ -20,7 +20,7 @@ export default function SocialLogin() {
       navigate(decodeURIComponent(redirectParam));
       return;
     }
-    navigate(role === "ADMIN" ? "/admin" : "/"); // ✅ theo role
+    navigate(role === "ADMIN" ? "/admin" : "/"); // theo role
   };
 
   const loginWithGoogle = useGoogleLogin({
@@ -39,7 +39,7 @@ export default function SocialLogin() {
         );
 
         if (socialLoginUser.fulfilled.match(action)) {
-          goAfterLogin(action.payload.role); // ✅ lấy role từ payload
+          goAfterLogin(action.payload.role); // lấy role từ payload
         } else {
           console.error("Google socialLoginUser rejected:", action.payload);
         }
@@ -72,7 +72,7 @@ export default function SocialLogin() {
       );
 
       if (socialLoginUser.fulfilled.match(action)) {
-        goAfterLogin(action.payload.role); // ✅ theo role
+        goAfterLogin(action.payload.role); // theo role
       } else {
         console.error("Facebook socialLoginUser rejected:", action.payload);
       }

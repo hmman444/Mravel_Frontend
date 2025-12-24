@@ -255,7 +255,7 @@ export default function OtherActivityModal({
 
     const cost = {
       currencyCode: "VND",
-      // ✅ estimatedCost chỉ là chi phí chính
+      //  estimatedCost chỉ là chi phí chính
       estimatedCost: estimatedValue > 0 ? estimatedValue : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
@@ -305,7 +305,7 @@ export default function OtherActivityModal({
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData gọn
+      //  activityData gọn
       activityData: {
         locationText: (locationText || "").trim(),
         otherLocation: slimLocationForStorage(effectiveOtherLocation),

@@ -261,7 +261,7 @@ export default function CinemaActivityModal({
 
     const cost = {
       currencyCode: "VND",
-      // ✅ estimatedCost chỉ là base (vé + combo)
+      //  estimatedCost chỉ là base (vé + combo)
       estimatedCost: baseEstimated > 0 ? baseEstimated : null,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
       actualCost: actualCost ? Number(actualCost) : null,
@@ -315,7 +315,7 @@ export default function CinemaActivityModal({
         splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData gọn: chỉ field đặc thù CINEMA
+      //  activityData gọn: chỉ field đặc thù CINEMA
       activityData: {
         cinemaName: cinemaName.trim(),
         cinemaLocation: slimLocationForStorage(effectiveCinemaLocation),

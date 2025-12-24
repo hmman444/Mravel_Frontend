@@ -1,3 +1,20 @@
+.mravel-datepicker-input {
+  width: 100%;
+  outline: none;
+}
+
+/* Dark input (khi app có class .dark ở html/body) */
+.dark .mravel-datepicker-input {
+  background: rgba(17, 24, 39, 0.75);
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.dark .mravel-datepicker-input::placeholder {
+  color: rgba(229, 231, 235, 0.55);
+}
+
 /* ====== WRAPPER CHUNG ====== */
 .mravel-calendar.react-datepicker {
   border-radius: 16px;
@@ -15,6 +32,17 @@
   transform: translateY(-8px) scale(0.97);
   transform-origin: top center;
   animation: mravel-calendar-drop-in 180ms ease-out forwards;
+
+  background: #ffffff; /* đảm bảo nền light */
+}
+
+/* ====== DARK: WRAPPER CHUNG ====== */
+.dark .mravel-calendar.react-datepicker {
+  background: rgba(15, 23, 42, 0.92); /* slate-900 */
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
 }
 
 /* Popper – để không dính sát mép trái màn hình */
@@ -42,12 +70,22 @@
   border-right: 1px solid #e5e7eb; /* đường kẻ chia 2 tháng */
 }
 
+/* DARK: đường kẻ chia 2 tháng */
+.dark .mravel-calendar .react-datepicker__month-container:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 /* ====== HEADER THÁNG ====== */
 .mravel-calendar .react-datepicker__header {
   background-color: #ffffff;
   border-bottom: none;
   padding-top: 2px;
   padding-bottom: 0;
+}
+
+/* DARK: header */
+.dark .mravel-calendar .react-datepicker__header {
+  background: rgba(2, 6, 23, 0.55); /* gần slate-950 */
 }
 
 /* Hàng chứa tiêu đề + mũi tên */
@@ -65,6 +103,11 @@
   color: #111827;
 }
 
+/* DARK: title */
+.dark .mravel-calendar__header-title {
+  color: rgba(229, 231, 235, 0.92);
+}
+
 /* Nút mũi tên – to hơn, dễ bấm hơn */
 .mravel-calendar__nav-btn {
   border: none;
@@ -77,6 +120,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: inherit;
 }
 
 .mravel-calendar__nav-btn:hover:not([disabled]) {
@@ -88,6 +132,20 @@
   cursor: default;
 }
 
+/* DARK: nav btn */
+.dark .mravel-calendar__nav-btn {
+  color: rgba(229, 231, 235, 0.92);
+  background: transparent;
+}
+
+.dark .mravel-calendar__nav-btn:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.dark .mravel-calendar__nav-btn[disabled] {
+  opacity: 0.45;
+}
+
 /* ====== HÀNG TÊN THỨ + GẠCH NGĂN CÁCH VỚI SỐ ====== */
 .mravel-calendar .react-datepicker__day-names {
   margin-top: 4px;
@@ -95,9 +153,9 @@
   border-bottom: 1px solid #e5e7eb;
 
   display: grid;
-  grid-template-columns: repeat(7, 36px);  /* tăng width ô thứ */
+  grid-template-columns: repeat(7, 36px);
   justify-content: center;
-  column-gap: 4px;                         /* thêm chút khoảng cách ngang */
+  column-gap: 4px;
 }
 
 .mravel-calendar .react-datepicker__day-name {
@@ -109,25 +167,34 @@
   color: #6b7280;
 }
 
+/* DARK: day names + divider */
+.dark .mravel-calendar .react-datepicker__day-names {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark .mravel-calendar .react-datepicker__day-name {
+  color: rgba(229, 231, 235, 0.70);
+}
+
 /* ====== GRID NGÀY & FIX CAO 6 HÀNG ====== */
 .mravel-calendar .react-datepicker__month {
-  padding: 0.35rem 0.7rem 0.4rem;  /* giảm padding trong mỗi tháng */
-  height: 220px;                   /* cố định ~6 hàng */
+  padding: 0.35rem 0.7rem 0.4rem;
+  height: 220px;
   box-sizing: border-box;
 }
 
 .mravel-calendar .react-datepicker__week {
   display: grid;
-  grid-template-columns: repeat(7, 36px); /* tăng width ô ngày */
+  grid-template-columns: repeat(7, 36px);
   justify-content: center;
-  column-gap: 4px;                         /* khoảng cách ngang giữa ngày */
-  row-gap: 12px;                            /* khoảng cách dọc giữa ngày */
+  column-gap: 4px;
+  row-gap: 12px;
   margin: 0;
 }
 
 /* ====== NGÀY THƯỜNG ====== */
 .mravel-calendar__day.react-datepicker__day {
-  width: 36px;               /* lớn hơn 32px */
+  width: 36px;
   line-height: 36px;
   margin: 0;
   text-align: center;
@@ -137,7 +204,7 @@
   font-weight: 400;
 }
 
-/* Không cho ngày ngoài tháng hiện số (chỉ giữ ô trống để căn lề) */
+/* Không cho ngày ngoài tháng hiện số */
 .mravel-calendar .react-datepicker__day--outside-month {
   visibility: hidden;
   pointer-events: none;
@@ -161,6 +228,24 @@
   color: #dc2626;
 }
 
+/* ====== DARK: NGÀY THƯỜNG / HOVER / DISABLED / SUNDAY ====== */
+.dark .mravel-calendar__day.react-datepicker__day {
+  color: rgba(229, 231, 235, 0.92);
+}
+
+.dark .mravel-calendar__day.react-datepicker__day:hover {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.dark .mravel-calendar__day--before-today.react-datepicker__day,
+.dark .mravel-calendar__day.react-datepicker__day--disabled {
+  color: rgba(229, 231, 235, 0.30);
+}
+
+.dark .mravel-calendar__day--sunday.react-datepicker__day {
+  color: rgba(248, 113, 113, 0.95);
+}
+
 /* ====== NGÀY ĐƯỢC CHỌN THỰC SỰ ====== */
 .mravel-calendar .react-datepicker__day--selected {
   background-color: #0ea5e9;
@@ -169,6 +254,16 @@
 
 .mravel-calendar .react-datepicker__day--selected:hover {
   background-color: #0284c7;
+}
+
+/* DARK: selected */
+.dark .mravel-calendar .react-datepicker__day--selected {
+  background: rgba(59, 130, 246, 0.85);
+  color: #0b1220;
+}
+
+.dark .mravel-calendar .react-datepicker__day--selected:hover {
+  background: rgba(37, 99, 235, 0.90);
 }
 
 /* Ngày chỉ đang được focus bằng phím (keyboard-selected)
@@ -199,6 +294,15 @@
   white-space: nowrap;
 }
 
+/* DARK: today border + label */
+.dark .mravel-calendar .react-datepicker__day--today {
+  border: 1px solid rgba(59, 130, 246, 0.95);
+}
+
+.dark .mravel-calendar .react-datepicker__day--today::before {
+  color: rgba(147, 197, 253, 0.95);
+}
+
 /* Không dùng pseudo dưới nữa */
 .mravel-calendar .react-datepicker__day--today::after {
   content: none;
@@ -221,19 +325,17 @@
   }
 }
 
-/* ====== OVERRIDE RIÊNG CHO SEARCH RESTAURANT ====== */
-
 /* Popper dùng trong RestaurantSearchCard (có class thêm) */
 .react-datepicker-popper.mravel-calendar-popper--restaurant {
-  z-index: 80; /* cao hơn mọi thứ bên dưới, kể cả các section khác */
+  z-index: 80;
 }
 
 /* Cho restaurant: khoảng cách nhỏ hơn để khỏi đụng "Quán ăn phổ biến" */
 .react-datepicker-popper.mravel-calendar-popper--restaurant[data-placement^="bottom"] {
-  margin-top: 8px !important;  /* ưu tiên hơn rule 50px ở trên */
+  margin-top: 8px !important;
 }
 
-/* Time picker cho Restaurant – gọn hơn calendar ngày */
+/* ====== TIME PICKER (Restaurant) ====== */
 .mravel-timepicker.react-datepicker {
   min-width: auto;
   width: 180px;
@@ -260,34 +362,39 @@
 
 /* popup giờ cho Restaurant */
 .react-datepicker-popper.mravel-timepicker-popper {
-  z-index: 80; /* cao hơn card + section bên dưới */
+  z-index: 80;
 }
 
 .react-datepicker-popper.mravel-timepicker-popper[data-placement^="bottom"] {
-  margin-top: 8px !important;  /* nhỏ thôi, ngay dưới ô "Giờ" */
+  margin-top: 8px !important;
 }
 
-/* Time picker gọn gàng */
-.mravel-timepicker.react-datepicker {
-  min-width: auto;
-  width: 180px;
-  padding: 8px 10px;
+/* ====== DARK: TIME PICKER ====== */
+.dark .mravel-timepicker.react-datepicker {
+  background: rgba(15, 23, 42, 0.92);
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
 }
 
-.mravel-timepicker .react-datepicker__time-container {
-  border-left: none;
+.dark .mravel-timepicker .react-datepicker__time-container {
+  background: transparent;
 }
 
-.mravel-timepicker .react-datepicker__time-box {
-  width: 100%;
+.dark .mravel-timepicker .react-datepicker__time-list {
+  background: transparent;
 }
 
-.mravel-timepicker .react-datepicker__time-list-item {
-  font-size: 13px;
-  padding: 6px 8px;
+.dark .mravel-timepicker .react-datepicker__time-list-item {
+  color: rgba(229, 231, 235, 0.92);
 }
 
-.mravel-timepicker .react-datepicker__time-list-item--selected {
-  background-color: #0ea5e9;
-  color: #fff;
+.dark .mravel-timepicker .react-datepicker__time-list-item:hover {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.dark .mravel-timepicker .react-datepicker__time-list-item--selected {
+  background: rgba(59, 130, 246, 0.85);
+  color: #0b1220;
 }

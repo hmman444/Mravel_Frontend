@@ -45,7 +45,7 @@ const slice = createSlice({
   name: "bookingRestaurantPublic",
   initialState: {
     my: { loading: false, error: null, items: [] },
-    // ✅ thêm scope
+    //  thêm scope
     lookup: { loading: false, error: null, result: null, scope: "PUBLIC" },
   },
   reducers: {

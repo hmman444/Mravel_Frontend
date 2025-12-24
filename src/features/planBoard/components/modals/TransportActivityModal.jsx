@@ -305,7 +305,7 @@ export default function TransportActivityModal({
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p.memberId));
 
-    // ✅ estimatedCost = BASE (không gồm extra)
+    //  estimatedCost = BASE (không gồm extra)
     const estimatedBase = baseEstimated > 0 ? baseEstimated : null;
 
     const cost = {
@@ -352,7 +352,7 @@ export default function TransportActivityModal({
       participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData gọn: chỉ đặc thù TRANSPORT
+      //  activityData gọn: chỉ đặc thù TRANSPORT
       activityData: {
         fromPlace: fromPlaceText.trim(),
         toPlace: toPlaceText.trim(),

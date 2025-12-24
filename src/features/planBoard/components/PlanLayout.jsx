@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "./SidebarPlans";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -15,12 +15,31 @@ export default function PlanLayout({
   onOpenPlanDashboard,
   onCopyPlan,
   onRemoveRecentPlan,
-
-  onDeletePlan, // (plan) => Promise
+  onDeletePlan,
 }) {
   const [collapsed, setCollapsed] = useState(false);
-
   const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
+
+  // 1) Set id để lọc trùng
+  const myPlanIdSet = useMemo(() => {
+    return new Set((myPlans || []).map((p) => String(p.id)));
+  }, [myPlans]);
+
+  // 2) recentFiltered = recent - myPlans
+  const recentFiltered = useMemo(() => {
+    return (recentPlans || []).filter((p) => !myPlanIdSet.has(String(p.id)));
+  }, [recentPlans, myPlanIdSet]);
+
+  // 3) Auto dọn recent bị trùng mỗi lần myPlans/recentPlans đổi
+  useEffect(() => {
+    if (!onRemoveRecentPlan) return;
+
+    (recentPlans || []).forEach((p) => {
+      if (myPlanIdSet.has(String(p.id))) {
+        onRemoveRecentPlan(p); // gọi removeRecent(plan.id) từ page
+      }
+    });
+  }, [recentPlans, myPlanIdSet, onRemoveRecentPlan]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
@@ -31,13 +50,12 @@ export default function PlanLayout({
           collapsed={collapsed}
           activePlanId={activePlanId}
           myPlans={myPlans}
-          recentPlans={recentPlans}
+          recentPlans={recentFiltered}   
           onOpenPlanList={onOpenPlanList}
           onOpenCalendar={onOpenCalendar}
           onOpenPlanDashboard={onOpenPlanDashboard}
           onCopyPlan={onCopyPlan}
           onRemoveRecentPlan={onRemoveRecentPlan}
-
           onDeletePlan={(plan) => setConfirmDeletePlan(plan)}
         />
 
@@ -73,13 +91,13 @@ export default function PlanLayout({
         <ConfirmModal
           open={true}
           title="Xoá lịch trình"
-          message={`Xác nhận xoá "${confirmDeletePlan.title || "Chưa đặt tên"}"? Hành động này không thể hoàn tác.`}
+          message={`Xác nhận xoá "${
+            confirmDeletePlan.title || "Chưa đặt tên"
+          }"? Hành động này không thể hoàn tác.`}
           confirmText="Xoá"
           onClose={() => setConfirmDeletePlan(null)}
           onConfirm={async () => {
             try {
-              console.log("Confirm delete:", confirmDeletePlan);
-    console.log("onDeletePlan exists:", !!onDeletePlan);
               await onDeletePlan?.(confirmDeletePlan);
             } finally {
               setConfirmDeletePlan(null);

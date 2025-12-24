@@ -25,7 +25,7 @@ const safeJson = (s) => {
 
 const typeIcon = (type, dataJson) => {
   if (type === "FRIEND_REQUEST") return "👋";
-  if (type === "FRIEND_ACCEPTED") return "✅";
+  if (type === "FRIEND_ACCEPTED") return "";
   if (type === "PLAN_INVITE") return "🗺️";
   if (type === "COMMENT") return "💬";
   if (type === "REPLY_COMMENT") return "↩️";

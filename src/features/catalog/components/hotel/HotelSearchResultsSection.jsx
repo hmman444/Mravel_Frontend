@@ -153,7 +153,7 @@ export default function HotelSearchResultsSection() {
       {/* list */}
       {!loading && !error && data.items?.length > 0 && (
         <>
-          {/* ✅ grid nhỏ giống “🌴”: card max 280px và canh giữa */}
+          {/*  grid nhỏ giống “🌴”: card max 280px và canh giữa */}
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
             {data.items.map((hotel) => (
               <HotelMiniCard
@@ -192,7 +192,7 @@ export default function HotelSearchResultsSection() {
   );
 }
 
-/* ✅ Card giống WeekendNearbyHotels nhưng dùng cho grid (w-full max-w-[280px]) */
+/*  Card giống WeekendNearbyHotels nhưng dùng cho grid (w-full max-w-[280px]) */
 function HotelMiniCard({ hotel, onClick }) {
   const {
     name,

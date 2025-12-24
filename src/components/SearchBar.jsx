@@ -17,6 +17,7 @@ import { formatLocalDate, addDaysLocal } from "../features/catalog/utils/dateLoc
 
 import Button from "./Button";
 import DestinationTypeahead from "../components/DestinationTypeahead";
+import { showError } from "../utils/toastUtils";
 
 /* ───────── Small helpers ───────── */
 function RowField({ label, children, onClick, refBox, className = "" }) {
@@ -176,7 +177,7 @@ function HotelSearchForm() {
 
     const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
     if (!locationVal) {
-      alert("Vui lòng nhập hoặc chọn Điểm đến.");
+      showError("Vui lòng nhập hoặc chọn Điểm đến.");
       return;
     }
 
@@ -526,7 +527,7 @@ function RestaurantSearchForm() {
 
     const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
     if (!locationVal) {
-      alert("Vui lòng nhập hoặc chọn Khu vực / Thành phố.");
+      showError("Vui lòng nhập hoặc chọn Điểm đến.");
       return;
     }
 
