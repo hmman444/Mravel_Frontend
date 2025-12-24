@@ -289,14 +289,14 @@ export default function StayActivityModal({
       typeof p === "number" ? p : p?.memberId
     );
 
-    // ✅ QUAN TRỌNG: estimatedCost = base (KHÔNG gồm extra)
+    //  QUAN TRỌNG: estimatedCost = base (KHÔNG gồm extra)
     const estimatedBase = baseEstimated > 0 ? baseEstimated : null;
 
     const cost = {
       currencyCode: "VND",
       estimatedCost: estimatedBase,
       budgetAmount: budgetAmount ? Number(budgetAmount) : null,
-      // ✅ user xoá => "" => null -> BE auto mode
+      //  user xoá => "" => null -> BE auto mode
       actualCost: actualCost ? Number(actualCost) : null,
       participantCount: splitEnabled ? Number(parsedParticipants || 0) : null,
       participants: normalizedParticipants,

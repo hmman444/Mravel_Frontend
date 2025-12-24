@@ -29,7 +29,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     actionLoading,
   } = usePlanBoard(planId);
 
-  // ✅ guest = xem được board nhưng không phải member (myRole = null)
+  //  guest = xem được board nhưng không phải member (myRole = null)
   // hook của bạn hiện đang expose isOwner/isEditor/isViewer; nếu cả 3 đều false => guest
   const isGuestViewer = !isOwner && !isEditor && !isViewer;
 
@@ -58,7 +58,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [requestRoles, setRequestRoles] = useState({});
 
-  // ✅ nếu BE không cho guest gọi shareInfo -> fallback modal vẫn chạy
+  //  nếu BE không cho guest gọi shareInfo -> fallback modal vẫn chạy
   const [shareError, setShareError] = useState(null);
 
   const currentUserId = useMemo(() => {
@@ -305,7 +305,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
               </div>
             )}
 
-            {/* ✅ Banner chế độ chỉ xem (guest) */}
+            {/*  Banner chế độ chỉ xem (guest) */}
             {phase === "default" && isGuestViewer && (
               <div className="mb-4 rounded-xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/80 dark:bg-amber-900/10 p-3">
                 <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
@@ -429,7 +429,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       </span>
                     </div>
 
-                    {/* ✅ nếu không phải owner => disable thật sự */}
+                    {/*  nếu không phải owner => disable thật sự */}
                     <div
                       className={!canChangeVisibility ? "opacity-60 pointer-events-none" : ""}
                       title={!canChangeVisibility ? "Chỉ chủ sở hữu mới đổi quyền hiển thị" : ""}
@@ -438,7 +438,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                     </div>
                   </div>
 
-                  {/* ✅ Chỉ owner mới thấy phần invite */}
+                  {/*  Chỉ owner mới thấy phần invite */}
                   {canInvite && (
                     <div className="mt-2">
                       <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
@@ -488,7 +488,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                     </div>
                   )}
 
-                  {/* ✅ Nếu là guest, show tip */}
+                  {/*  Nếu là guest, show tip */}
                   {isGuestViewer && (
                     <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
                       Bạn có thể sao chép liên kết để chia sẻ. Quản lý thành viên/chia sẻ chỉ dành cho thành viên của lịch trình.
@@ -512,7 +512,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       Thành viên ({share ? accessList.length : "—"})
                     </button>
 
-                    {/* ✅ chỉ owner mới có tab requests */}
+                    {/*  chỉ owner mới có tab requests */}
                     {canSeeRequests && (
                       <button
                         onClick={() => setActiveTab("requests")}
@@ -538,7 +538,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                 {/* MEMBERS TAB */}
                 {activeTab === "members" && (
                   <div className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-2.5 space-y-1.5 mb-5">
-                    {/* ✅ fallback khi loadShare fail */}
+                    {/*  fallback khi loadShare fail */}
                     {!share && shareError && (
                       <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
                         Không thể tải danh sách thành viên. Bạn vẫn có thể sao chép liên kết hoặc gửi yêu cầu quyền.
@@ -565,7 +565,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                         let canChangeRoleRow = false;
                         let canRemoveRow = false;
 
-                        // ✅ guest: không có action
+                        //  guest: không có action
                         if (!isGuestViewer) {
                           if (isOwner) {
                             if (!u.owner && !u.pending) {
@@ -654,7 +654,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
 
                 {/* FOOTER ACTIONS */}
                 <div className="flex justify-end gap-2 mt-2 pt-3 border-t border-slate-200/70 dark:border-slate-800">
-                  {/* ✅ viewer member -> request edit (cũ) */}
+                  {/*  viewer member -> request edit (cũ) */}
                   {isViewer && (
                     <button
                       onClick={handleRequestEdit}
@@ -672,7 +672,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                     </button>
                   )}
 
-                  {/* ✅ guest -> cũng cho request edit (giống PlanDashboardPage: xem được nhưng không sửa) */}
+                  {/*  guest -> cũng cho request edit (giống PlanDashboardPage: xem được nhưng không sửa) */}
                   {isGuestViewer && (
                     <button
                       onClick={handleRequestEdit}

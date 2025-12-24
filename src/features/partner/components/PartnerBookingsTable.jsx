@@ -117,7 +117,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                       </div>
                     ) : null}
 
-                    {/* ✅ chỉ render badge trạng thái dịch vụ khi có serviceStatus */}
+                    {/*  chỉ render badge trạng thái dịch vụ khi có serviceStatus */}
                     {service?.serviceStatus ? (
                       <div className="flex flex-wrap gap-2 mt-1.5">
                         <Badge
@@ -161,7 +161,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                         Chi tiết
                       </button>
 
-                      {/* ✅ luôn render, nhưng nếu không được hủy thì invisible để giữ chỗ */}
+                      {/*  luôn render, nhưng nếu không được hủy thì invisible để giữ chỗ */}
                       <button
                         onClick={() => showCancel && onCancel(b)}
                         className={`px-3 py-2 rounded-md text-sm flex items-center gap-2 border border-red-600 text-red-600 hover:bg-red-50

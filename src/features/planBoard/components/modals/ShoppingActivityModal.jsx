@@ -267,7 +267,7 @@ export default function ShoppingActivityModal({
 
     const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p?.memberId));
 
-    // ✅ estimatedCost = BASE (tổng giá món) - KHÔNG cộng extra
+    //  estimatedCost = BASE (tổng giá món) - KHÔNG cộng extra
     const estimatedBase = totalItemCost > 0 ? totalItemCost : null;
 
     const cost = {
@@ -313,7 +313,7 @@ export default function ShoppingActivityModal({
       participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData GỌN: chỉ đặc thù SHOPPING (không nhét time/cost/extra vào đây)
+      //  activityData GỌN: chỉ đặc thù SHOPPING (không nhét time/cost/extra vào đây)
       activityData: {
         storeName: storeName.trim(),
         address: address?.trim() || null, // fallback UI (optional)

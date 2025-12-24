@@ -1,5 +1,6 @@
 // src/features/catalog/components/restaurant/RestaurantDirectionsSection.jsx
 import React, { useMemo } from "react";
+import { showSuccess } from "../../../../utils/toastUtils";
 
 function makeLatLng(location) {
   if (Array.isArray(location) && location.length === 2) {
@@ -41,7 +42,7 @@ export default function RestaurantDirectionsSection({ restaurant }) {
     const text = `${restaurant?.name || ""} - ${addr}${viewUrl ? `\n${viewUrl}` : ""}`;
     try {
         await navigator.clipboard.writeText(text);
-        alert("Đã sao chép địa chỉ/đường dẫn vào clipboard!");
+        showSuccess("Đã sao chép địa chỉ & liên kết!");
     } catch (err) {
         console.error("Clipboard copy failed:", err);
         // Fallback: mở prompt để người dùng tự copy

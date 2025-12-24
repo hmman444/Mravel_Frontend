@@ -61,7 +61,7 @@ export function useHotelPricing(ratePlan, checkIn, checkOut, roomsCount) {
 
     if (perNightIncl == null || perNightExcl == null) return null;
 
-    // ✅ NHÂN THEO SỐ ĐÊM (KHÔNG PHẢI SỐ NGÀY)
+    //  NHÂN THEO SỐ ĐÊM (KHÔNG PHẢI SỐ NGÀY)
     const roomPrice = perNightExcl * nights;
     const taxAndFee = (perNightIncl - perNightExcl) * nights;
     const finalTotal = perNightIncl * nights;

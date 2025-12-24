@@ -24,16 +24,13 @@ export default function MravelDatePicker({ selected, onChange, ...rest }) {
       dateFormat="dd/MM/yyyy"
       minDate={today}
       monthsShown={2}
+      className="mravel-datepicker-input"
+      wrapperClassName="mravel-datepicker-wrapper"
       calendarClassName="mravel-calendar"
       popperClassName="mravel-calendar-popper"
-      popperPlacement="bottom"      // 1. Luôn mở bên dưới input
+      popperPlacement="bottom"
       popperModifiers={[
-        {
-          name: "offset",
-          options: {
-            offset: [0, 0],             // lệch xuống 10px, không lệch ngang
-          },
-        },
+        { name: "offset", options: { offset: [0, 0] } },
       ]}
       openToDate={selected || today}
       focusSelectedMonth

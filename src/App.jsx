@@ -69,7 +69,7 @@ import PartnerServicesPage from "./features/partner/pages/PartnerServicesPage";
 import PartnerBookingsPage from "./features/partner/pages/PartnerBookingsPage";
 import PartnerUnlockRequestsPage from "./features/partner/pages/PartnerUnlockRequestsPage";
 
-// ✅ Guard
+// Guard
 import PartnerProtectedRoute from "./features/partnerAuth/components/PartnerProtectedRoute";
 
 // Others

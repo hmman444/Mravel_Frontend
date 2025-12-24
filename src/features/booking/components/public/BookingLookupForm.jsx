@@ -55,10 +55,10 @@ export default function BookingLookupForm({
             console.log("SUBMIT fired", { bookingCode, phoneLast4, email });
 
             try {
-              await onSubmit?.(); // ✅ await
+              await onSubmit?.(); // await
               console.log("SUBMIT done");
             } catch (err) {
-              console.error("SUBMIT error:", err); // ✅ thấy lỗi rõ ràng
+              console.error("SUBMIT error:", err); //thấy lỗi rõ ràng
             }
           }}
         >

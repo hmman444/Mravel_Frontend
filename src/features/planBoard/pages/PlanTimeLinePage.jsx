@@ -79,7 +79,7 @@ const statusLabels = {
   CANCELLED: "Đã hủy",
 };
 
-// ✅ sidebar muốn Hoàn thành + Đã hủy lên trên cùng
+//  sidebar muốn Hoàn thành + Đã hủy lên trên cùng
 const STATUS_ORDER = ["COMPLETED", "CANCELLED", "ACTIVE", "DRAFT"];
 
 // pastel nền nhẹ, không trong suốt
@@ -94,7 +94,7 @@ const statusCardStyle = {
     "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-500/15 dark:border-rose-400/25 dark:text-rose-100",
 };
 
-// ✅ pill highlight theo status
+//  pill highlight theo status
 const statusPillStyle = {
   DRAFT: "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-100",
   ACTIVE: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-100",
@@ -109,7 +109,7 @@ export default function PlanTimeLinePage() {
   const [openNewPlan, setOpenNewPlan] = useState(false);
   const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
 
-  // ✅ filter theo status khi click bên trái
+  //  filter theo status khi click bên trái
   const [statusFilter, setStatusFilter] = useState(""); // "" | ACTIVE | DRAFT | COMPLETED | CANCELLED
 
   const { plans: myPlans, loading, reload: reloadMyPlans } = useMyPlans(true);
@@ -134,7 +134,7 @@ export default function PlanTimeLinePage() {
       .filter((p) => p._start && p._end);
   }, [myPlans]);
 
-  // ✅ apply status filter cho cả trang
+  //  apply status filter cho cả trang
   const normalizedPlans = useMemo(() => {
     if (!statusFilter) return normalizedPlansAll;
     return normalizedPlansAll.filter((p) => (p.status || "DRAFT") === statusFilter);
@@ -313,7 +313,7 @@ export default function PlanTimeLinePage() {
                 )}
               </div>
 
-              {/* ✅ thanh filter status (click để lọc + sáng) */}
+              {/*  thanh filter status (click để lọc + sáng) */}
               <div className="mt-3 flex flex-wrap gap-2">
                 {STATUS_ORDER.map((st) => {
                   const count = (normalizedPlansAll || []).filter(

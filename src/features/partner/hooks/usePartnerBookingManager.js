@@ -13,7 +13,7 @@ import {
   isFuture,
   CANCELLED_SET,
 
-  // ✅ ADD
+  //  ADD
   isUsedTimePassed,
   isConfirmedLike,
 } from "../utils/partnerBookingUtils";
@@ -52,8 +52,8 @@ export function usePartnerBookingManager() {
 
   // ===== Fetch list theo filter =====
   useEffect(() => {
-    // ✅ COMPLETED là tab suy ra từ thời gian => không gửi status=COMPLETED lên BE
-    // ✅ CONFIRMED cũng có thể bao gồm PAID => tốt nhất fetch rộng rồi FE tự filter
+    //  COMPLETED là tab suy ra từ thời gian => không gửi status=COMPLETED lên BE
+    //  CONFIRMED cũng có thể bao gồm PAID => tốt nhất fetch rộng rồi FE tự filter
     const shouldFetchAllStatus = tab === "all" || tab === "COMPLETED" || tab === "CONFIRMED";
     const status = shouldFetchAllStatus ? undefined : tab;
 
@@ -99,13 +99,13 @@ export function usePartnerBookingManager() {
       return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
     });
 
-    // ✅ TAB filter (COMPLETED/CONFIRMED là derived)
+    //  TAB filter (COMPLETED/CONFIRMED là derived)
     if (tab !== "all") {
       if (tab === "COMPLETED") {
-        // ✅ Hoàn tất: đã xác nhận (CONFIRMED/PAID) + đã qua thời gian sử dụng
+        //  Hoàn tất: đã xác nhận (CONFIRMED/PAID) + đã qua thời gian sử dụng
         list = list.filter((b) => isConfirmedLike(b) && isUsedTimePassed(b));
       } else if (tab === "CONFIRMED") {
-        // ✅ Đã xác nhận: CONFIRMED/PAID + CHƯA qua thời gian sử dụng
+        //  Đã xác nhận: CONFIRMED/PAID + CHƯA qua thời gian sử dụng
         list = list.filter((b) => isConfirmedLike(b) && !isUsedTimePassed(b));
       } else {
         // các tab khác giữ theo status thật từ BE
@@ -127,7 +127,7 @@ export function usePartnerBookingManager() {
     });
   }, [hotelBookings.items, restaurantBookings.items, typeFilter, search, tab]);
 
-  // ✅ Bonus: không cho hủy nếu đã qua thời gian sử dụng
+  //  Bonus: không cho hủy nếu đã qua thời gian sử dụng
   const canCancel = (b) => {
     if (!b) return false;
     const type = b?.__type;
@@ -135,7 +135,7 @@ export function usePartnerBookingManager() {
 
     if (CANCELLED_SET.has(st)) return false;
 
-    // ✅ đã qua thời gian sử dụng => không cho hủy
+    //  đã qua thời gian sử dụng => không cho hủy
     if (isUsedTimePassed(b)) return false;
 
     // chỉ hủy khi chưa tới thời điểm bắt đầu dịch vụ
@@ -178,7 +178,7 @@ export function usePartnerBookingManager() {
     try {
       const res = await cancel({ type, code, reason });
       if (res?.meta?.requestStatus === "fulfilled") {
-        // ✅ giống logic fetch ở useEffect: nếu tab là COMPLETED/CONFIRMED thì status undefined
+        //  giống logic fetch ở useEffect: nếu tab là COMPLETED/CONFIRMED thì status undefined
         const shouldFetchAllStatus = tab === "all" || tab === "COMPLETED" || tab === "CONFIRMED";
         const status = shouldFetchAllStatus ? undefined : tab;
 

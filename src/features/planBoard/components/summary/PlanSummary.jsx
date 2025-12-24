@@ -414,19 +414,27 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
 
   const handleImageUpload = async (e) => {
     if (!canEdit || !planId) return;
+
+    if (imagesSaving) {
+      e.target.value = "";
+      return;
+    }
+
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
     setImagesSaving(true);
+
     try {
       for (const f of files) {
         const action = await addImage(planId, f).unwrap();
-        const url =
-          typeof action === "string" ? action : action?.url || action;
+        const url = typeof action === "string" ? action : action?.url || action;
+
         if (url) {
-          setImages((prev) => [...prev, url]);
+          setImages((prev) => (prev.includes(url) ? prev : [...prev, url]));
         }
       }
+
       showSuccess("Đã thêm hình ảnh");
     } catch (err) {
       console.error(err);
@@ -436,6 +444,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       e.target.value = "";
     }
   };
+
 
   const handleRemoveImage = async (url) => {
     if (!canEdit || !planId) return;

@@ -42,7 +42,7 @@ export default function LoginPage() {
         return;
       }
 
-      navigate(role === "ADMIN" ? "/admin" : "/");
+      navigate(role === "ADMIN" ? "/admin/users" : "/");
     }
   };
 

@@ -23,7 +23,7 @@ export default function HotelBookingLayout({
   onStayChange,
   onRoomsChange,
 
-  // ✅ form props
+  // form props
   contactName,
   contactPhone,
   contactEmail,
@@ -33,7 +33,7 @@ export default function HotelBookingLayout({
   onContactEmailChange,
   onNoteChange,
 
-  // ✅ pay props
+  // pay props
   onPay,
   payLoading,
 }) {

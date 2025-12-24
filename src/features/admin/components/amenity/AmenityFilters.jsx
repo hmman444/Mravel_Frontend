@@ -64,7 +64,7 @@ export default function AmenityFilters({
   setGroup,
   section,
   setSection,
-  // ✅ NEW: 3-state filter: "ALL" | "ACTIVE" | "INACTIVE"
+  // NEW: 3-state filter: "ALL" | "ACTIVE" | "INACTIVE"
   activeFilter,
   setActiveFilter,
   sortBy,

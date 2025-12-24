@@ -1,31 +1,38 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Sun, Moon } from "lucide-react";
 
-export default function DarkModeToggle() {
-    const [dark, setDark] = useState(
-      () => localStorage.getItem("theme") === "dark"
-    );
+export default function DarkModeToggle({ variant = "icon" }) {
+  const [dark, setDark] = useState(
+    () => localStorage.getItem("theme") === "dark"
+  );
 
-    const { t } = useTranslation();
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
 
-    useEffect(() => {
-      if (dark) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("theme", "light");
-      }
-    }, [dark]);
+  if (variant !== "icon") return null;
 
-    return (
-      <button
-        onClick={() => setDark(!dark)}
-        className="ml-4 px-3 py-1 rounded border text-sm
-                  text-accent dark:text-gray-200 
-                  hover:bg-secondary hover:text-primary"
-      >
-        {dark ? `☀️ ${t("light_mode")}` : `🌙 ${t("dark_mode")}`}
-      </button>
-    );
+  return (
+    <button
+      type="button"
+      onClick={() => setDark((v) => !v)}
+      className="
+        grid place-items-center w-10 h-10 rounded-full
+        text-gray-700 dark:text-gray-200
+        hover:bg-gray-100 dark:hover:bg-gray-800
+        transition
+      "
+      aria-label="Đổi chế độ sáng tối"
+      title="Chế độ sáng / tối"
+    >
+      {dark ? (
+        <Moon className="w-5 h-5" />
+      ) : (
+        <Sun className="w-5 h-5" />
+      )}
+    </button>
+  );
 }

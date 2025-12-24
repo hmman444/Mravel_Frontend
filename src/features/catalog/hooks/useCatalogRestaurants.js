@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchRestaurants } from "../slices/catalogSlice";
+import { showError } from "../../../utils/toastUtils";
 
 export const useCatalogRestaurants = () => {
   const dispatch = useDispatch();
@@ -14,7 +15,7 @@ export const useCatalogRestaurants = () => {
     [dispatch]
   );
 
-  // ✅ gộp luôn handleBookingSubmit ở đây
+  //  gộp luôn handleBookingSubmit ở đây
   const handleBookingSubmit = useCallback(
     (payload) => {
       const slug = payload?.restaurantSlug;
@@ -27,7 +28,7 @@ export const useCatalogRestaurants = () => {
 
       // nếu bạn muốn bắt buộc chọn giờ/ngày
       if (!date || !time) {
-        alert("Vui lòng chọn ngày và giờ đến.");
+        showError("Vui lòng chọn ngày và giờ trước khi đặt bàn.");
         return;
       }
 

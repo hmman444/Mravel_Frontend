@@ -152,7 +152,81 @@ export default function Navbar() {
         </nav>
 
         {/* RIGHT */}
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setDark((v) => !v)}
+            className={`
+              grid place-items-center w-10 h-10 rounded-full
+              hover:bg-gray-200 dark:hover:bg-gray-800 transition
+              ${solid ? "" : "bg-white/10 hover:bg-white/15"}
+            `}
+            aria-label="Đổi chế độ sáng tối"
+            title="Chế độ sáng/tối"
+          >
+            {dark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          </button>
+
+          <div className="relative" ref={langRef}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setUserMenuOpen(false);
+                setNotiOpen(false);
+                setLangOpen((v) => !v);
+              }}
+              className={`
+                flex items-center gap-2 px-3 h-10 rounded-full
+                hover:bg-gray-100 dark:hover:bg-gray-800 transition
+                ${solid ? "" : "bg-white/10 hover:bg-white/15"}
+              `}
+              aria-label="Ngôn ngữ"
+              title="Ngôn ngữ"
+            >
+              <Globe className="w-5 h-5" />
+              <span className="hidden md:inline text-sm font-medium">
+                {currentLang?.code?.toUpperCase()}
+              </span>
+            </button>
+
+            {langOpen && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="
+                  absolute right-0 mt-2 w-48 z-[90]
+                  rounded-2xl border border-gray-200 dark:border-gray-800
+                  bg-white dark:bg-gray-900 shadow-xl overflow-hidden
+                  text-gray-900 dark:text-gray-100
+                "
+              >
+                {langs.map((l) => {
+                  const active = currentLang?.code === l.code;
+                  return (
+                    <button
+                      key={l.code}
+                      onClick={() => {
+                        i18n.changeLanguage(l.code);
+                        localStorage.setItem("language", l.code);
+                        setLangOpen(false);
+                      }}
+                      className="
+                        w-full flex items-center justify-between px-3 py-2 text-sm
+                        hover:bg-slate-100 dark:hover:bg-slate-800 transition
+                      "
+                    >
+                      <span className={active ? "font-semibold" : "font-medium"}>
+                        {l.label}
+                      </span>
+                      {active && <Check className="w-4 h-4 text-sky-500" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ❗Chưa login: chỉ hiện Login/Register */}
           {!accessToken ? (
             <>
               <Link className="font-medium hover:text-sky-600 transition" to="/login">
@@ -172,82 +246,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {/* THEME (đưa ra ngoài) */}
-              <button
-                type="button"
-                onClick={() => setDark((v) => !v)}
-                className={`
-                  grid place-items-center w-10 h-10 rounded-full
-                  hover:bg-gray-200 dark:hover:bg-gray-800 transition
-                  ${solid ? "" : "bg-white/10 hover:bg-white/15"}
-                `}
-                aria-label="Đổi chế độ sáng tối"
-                title="Chế độ sáng/tối"
-              >
-                {dark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </button>
-
-              {/* LANGUAGE (đưa ra ngoài) */}
-              <div className="relative" ref={langRef}>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setUserMenuOpen(false);
-                    setNotiOpen(false);
-                    setLangOpen((v) => !v);
-                  }}
-                  className={`
-                    flex items-center gap-2 px-3 h-10 rounded-full
-                    hover:bg-gray-100 dark:hover:bg-gray-800 transition
-                    ${solid ? "" : "bg-white/10 hover:bg-white/15"}
-                  `}
-                  aria-label="Ngôn ngữ"
-                  title="Ngôn ngữ"
-                >
-                  <Globe className="w-5 h-5" />
-                  <span className="hidden md:inline text-sm font-medium">
-                    {currentLang?.code?.toUpperCase()}
-                  </span>
-                </button>
-
-                {langOpen && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="
-                      absolute right-0 mt-2 w-48 z-[90]
-                      rounded-2xl border border-gray-200 dark:border-gray-800
-                      bg-white dark:bg-gray-900 shadow-xl overflow-hidden
-                      text-gray-900 dark:text-gray-100
-                    "
-                  >
-                    {langs.map((l) => {
-                      const active = currentLang?.code === l.code;
-                      return (
-                        <button
-                          key={l.code}
-                          onClick={() => {
-                            i18n.changeLanguage(l.code);
-                            localStorage.setItem("language", l.code);
-                            setLangOpen(false);
-                          }}
-                          className="
-                            w-full flex items-center justify-between px-3 py-2 text-sm
-                            hover:bg-slate-100 dark:hover:bg-slate-800 transition
-                          "
-                        >
-                          <span className={active ? "font-semibold" : "font-medium"}>
-                            {l.label}
-                          </span>
-                          {active && <Check className="w-4 h-4 text-sky-500" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* NOTIFICATION */}
+              {/* Có login: hiển thị NOTIFICATION + AVATAR như cũ */}
               <div className="relative" ref={notiWrapRef}>
                 <button
                   type="button"
@@ -294,7 +293,6 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* AVATAR MENU */}
               <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
@@ -382,6 +380,7 @@ export default function Navbar() {
             </>
           )}
         </div>
+
       </div>
     </header>
   );

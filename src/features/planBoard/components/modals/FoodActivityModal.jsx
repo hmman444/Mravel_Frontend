@@ -231,7 +231,7 @@ export default function FoodActivityModal({
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p.memberId));
 
-    // ✅ estimatedCost = BASE (không gồm extra)
+    //  estimatedCost = BASE (không gồm extra)
     const estimatedBase = baseEstimated > 0 ? baseEstimated : null;
 
     const cost = {
@@ -277,7 +277,7 @@ export default function FoodActivityModal({
       participantCount: splitEnabled && parsedParticipants > 0 ? parsedParticipants : null,
       participants,
 
-      // ✅ activityData gọn: chỉ đặc thù FOOD
+      //  activityData gọn: chỉ đặc thù FOOD
       activityData: {
         restaurantName: restaurantName.trim(),
         restaurantLocation: slimLocationForStorage(effectiveFoodLocation),

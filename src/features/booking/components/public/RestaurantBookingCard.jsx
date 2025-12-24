@@ -198,7 +198,7 @@ export default function RestaurantBookingCard({
 
       await callCancelApi({ code, reason: (cancelReasonInput || "").trim() });
 
-      // ✅ refresh list ở page cha
+      // refresh list ở page cha
       onRefresh?.();
 
       setCancelOpen(false);
@@ -227,7 +227,7 @@ export default function RestaurantBookingCard({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  // ✅ tách riêng hàm fetchDetail để xử lý LOOKUP/PUBLIC/PRIVATE rõ ràng
+  //  tách riêng hàm fetchDetail để xử lý LOOKUP/PUBLIC/PRIVATE rõ ràng
   const fetchDetail = async (code) => {
     if (detailScope === "PRIVATE") {
       const res = await api.get(`/booking/restaurants/${encodeURIComponent(code)}`);

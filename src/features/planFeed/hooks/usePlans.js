@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { loadPlans, reactPlan, commentPlan, searchAll, clearSearch, loadPlanFeedDetail } from "../slices/planSlice";
+import { loadPlans, reactPlan, commentPlan, 
+  searchAll, clearSearch, loadPlanFeedDetail } from "../slices/planSlice";
 
 export function usePlans() {
   const dispatch = useDispatch();

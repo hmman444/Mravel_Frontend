@@ -114,7 +114,7 @@ export default function ProfileSidebar({
                   key={friend.id}
                   type="button"
                   className="text-left group"
-                  onClick={() => navigate(`/u/${friend.id}`)}
+                  onClick={() => navigate(`/profile/${friend.id}`)}
                 >
                   <div className="aspect-square rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-800 mb-1.5">
                     {avatar ? (

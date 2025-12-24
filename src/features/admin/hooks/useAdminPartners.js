@@ -12,11 +12,11 @@ import {
 export function useAdminPartners() {
   const dispatch = useDispatch();
 
-  // ✅ Đổi key slice cho đúng với store của bạn:
+  // Đổi key slice cho đúng với store của bạn:
   // ví dụ: state.adminPartners hoặc state.adminPartner
   const slice = useSelector((s) => s.adminPartners);
 
-  // ✅ tránh destructure khi slice chưa mount
+  // tránh destructure khi slice chưa mount
   const items = slice?.items ?? [];
   const loading = slice?.loading ?? false;
   const toggling = slice?.toggling ?? false;

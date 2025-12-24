@@ -89,7 +89,7 @@ export default function ProfileFriendsAboutSection({
               <div
                 key={friend.id}
                 className="flex gap-3 items-center rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-3.5 sm:p-4 bg-slate-50/80 dark:bg-slate-900/70 cursor-pointer hover:bg-slate-100/90 dark:hover:bg-slate-900 transition"
-                onClick={() => navigate(`/u/${friend.id}`)}
+                onClick={() => navigate(`/profile/${friend.id}`)}
               >
                 <div className="shrink-0">
                   <img

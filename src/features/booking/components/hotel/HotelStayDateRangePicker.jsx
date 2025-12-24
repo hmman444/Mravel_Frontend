@@ -127,7 +127,7 @@ export default function HotelStayDateRangePicker({
                 s.setHours(0, 0, 0, 0);
                 e.setHours(0, 0, 0, 0);
 
-                // ✅ ÉP checkout > checkin (tránh case 15->15)
+                // ÉP checkout > checkin (tránh case 15->15)
                 if (e.getTime() <= s.getTime()) {
                   e = addDays(s, 1);
                   e.setHours(0, 0, 0, 0);

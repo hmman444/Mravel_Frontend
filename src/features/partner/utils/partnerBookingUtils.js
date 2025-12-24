@@ -81,7 +81,7 @@ export const pickBookingStatus = (b) => b?.bookingStatus || b?.status || b?.book
 export const pickPaymentStatus = (b) => b?.paymentStatus || b?.payment?.status || b?.payStatus || b?.payment_status;
 
 /**
- * ✅ FIX: cột "Số tiền" cần render "số tiền gốc" (totalAmount/amountPayable),
+ *  FIX: cột "Số tiền" cần render "số tiền gốc" (totalAmount/amountPayable),
  * không ưu tiên amountPaid (vì đơn hủy thường amountPaid = 0).
  */
 export const pickAmount = (b) =>
@@ -96,7 +96,7 @@ export const pickAmount = (b) =>
 export const pickCreatedAt = (b) => b?.createdAt || b?.created_at || b?.createdDate;
 
 /**
- * ✅ FIX: cột "Dịch vụ" đang trống vì list trả hotelName/restaurantName ở root
+ *  FIX: cột "Dịch vụ" đang trống vì list trả hotelName/restaurantName ở root
  * mà fallback chỉ đọc serviceName/name.
  */
 export const pickService = (b) =>
@@ -123,7 +123,7 @@ export const pickUsedStart = (b, type) => {
 
   if (type === "HOTEL") return b?.checkInAt || b?.checkInDate || b?.startDate;
 
-  // ✅ BONUS FIX: nếu booking quán ăn trả reservationDate + reservationTime thì join lại
+  //  BONUS FIX: nếu booking quán ăn trả reservationDate + reservationTime thì join lại
   if (b?.reservationDate && b?.reservationTime) {
     // reservationTime có thể là "19:00" hoặc "19:00:00"
     const t = String(b.reservationTime);
