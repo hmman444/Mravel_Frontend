@@ -16,6 +16,7 @@ import {
   partnerResumeRestaurant,
   partnerUnlockRestaurant,
   partnerUpdateRestaurant,
+  partnerCreateRestaurant,
 } from "../slices/partnerSlice";
 
 export const usePartnerServices = () => {
@@ -31,6 +32,11 @@ export const usePartnerServices = () => {
 
   const fetchRestaurants = useCallback(
     (params) => dispatch(fetchPartnerRestaurants(params)),
+    [dispatch]
+  );
+
+  const createRestaurant = useCallback(
+    (payload) => dispatch(partnerCreateRestaurant(payload)).unwrap(),
     [dispatch]
   );
 
@@ -103,5 +109,6 @@ export const usePartnerServices = () => {
     updateHotel,
     createHotel,
     updateRestaurant,
+    createRestaurant,
   };
 };
