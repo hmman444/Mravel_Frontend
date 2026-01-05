@@ -18,7 +18,7 @@ class MainSocket {
   _createClient() {
     const client = new Client({
       brokerURL:
-        import.meta.env.VITE_REALTIME_WS_URL || "ws://localhost:8080/ws",
+        import.meta.env.VITE_REALTIME_WS_URL || "/ws",
 
       // Tự reconnect nếu server rớt, network drop, ...
       reconnectDelay: 5000,

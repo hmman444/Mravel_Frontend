@@ -5,7 +5,7 @@ import { getStore } from "../redux/storeInjector";
 
 import { setTokensRedux, setUser } from "../features/auth/slices/authSlice";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 const api = axios.create({
   baseURL: BASE_URL,

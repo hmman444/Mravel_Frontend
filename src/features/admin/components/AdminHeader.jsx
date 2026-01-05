@@ -73,7 +73,7 @@ export default function AdminHeader() {
           className="flex items-center gap-2 text-2xl font-extrabold tracking-tight shrink-0"
         >
           <img
-            src="/src/assets/Mravel-logo.png"
+            src="/assets/Mravel-logo.png"
             alt="Mravel Logo"
             className="h-8 w-8 object-contain"
           />

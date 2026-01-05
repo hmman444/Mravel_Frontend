@@ -1,10 +1,9 @@
-import bg from "../../../assets/mountain-bg.jpg";
 
 export default function AuthLayout({ children }) {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${bg})` }}
+      style={{ backgroundImage: "url(/assets/mountain-bg.jpg)" }}
     >
       <div className="absolute inset-0 bg-black/40" />
 
