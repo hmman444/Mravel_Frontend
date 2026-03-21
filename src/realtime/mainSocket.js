@@ -1,5 +1,6 @@
 // src/realtime/mainSocket.js
 import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client/dist/sockjs";
 
 class MainSocket {
   client = null;
@@ -16,14 +17,33 @@ class MainSocket {
   }
 
   _createClient() {
+    const rawRealtimeUrl =
+      import.meta.env.VITE_REALTIME_WS_URL || "http://localhost:8090/ws";
+    const sockJsUrl = rawRealtimeUrl
+      .replace(/^ws:/i, "http:")
+      .replace(/^wss:/i, "https:");
+    const nativeWsUrl = rawRealtimeUrl
+      .replace(/^http:/i, "ws:")
+      .replace(/^https:/i, "wss:");
+    const useSockJs = import.meta.env.VITE_REALTIME_USE_SOCKJS !== "false";
+
     const client = new Client({
-      brokerURL:
-        import.meta.env.VITE_REALTIME_WS_URL || "/ws",
+      ...(useSockJs
+        ? {
+            webSocketFactory: () => new SockJS(sockJsUrl),
+          }
+        : {
+            brokerURL: nativeWsUrl,
+          }),
 
       // Tự reconnect nếu server rớt, network drop, ...
       reconnectDelay: 5000,
 
-      debug: (str) => {
+      // Do not require broker heartbeats; Spring simple broker may not emit them.
+      heartbeatIncoming: 0,
+      heartbeatOutgoing: useSockJs ? 0 : 10000,
+
+      debug: () => {
         // console.log("[STOMP]", str);
       },
 
@@ -90,7 +110,10 @@ class MainSocket {
     };
   }
 
-  connect() {
+  connect(accessToken) {
+    // Always refresh token used by CONNECT headers before activating/reconnecting.
+    this.setAccessToken(accessToken || null);
+
     // Nếu chưa có client (lần đầu hoặc sau khi logout) → tạo
     if (!this.client) {
       this._createClient();
@@ -124,6 +147,7 @@ class MainSocket {
 
     this.client = null;
     this.connected = false;
+    this.accessToken = null;
   }
 
   /**
