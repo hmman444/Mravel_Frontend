@@ -315,12 +315,14 @@ export const sendAccessRequest = createAsyncThunk(
     try {
       return await requestAccess(planId, { type });
     } catch (err) {
+      const status = err?.response?.status;
+      const code = err?.response?.data?.data?.code;
       const message =
         err?.response?.data?.message ||
         err?.message ||
         "Không thể gửi yêu cầu truy cập";
 
-      return rejectWithValue(message);
+      return rejectWithValue({ status, code, message });
     }
   }
 );
@@ -402,13 +404,13 @@ const planBoardSlice = createSlice({
         lists,
       };
 
-      console.log(
-        "After local reorder:",
-        state.board.lists.map((l) => ({
-          id: l.id,
-          cards: l.cards.map((c) => c.id),
-        }))
-      );
+      // console.log(
+      //   "After local reorder:",
+      //   state.board.lists.map((l) => ({
+      //     id: l.id,
+      //     cards: l.cards.map((c) => c.id),
+      //   }))
+      // );
     },
 
     syncBoardFromRealtime(state, action) {

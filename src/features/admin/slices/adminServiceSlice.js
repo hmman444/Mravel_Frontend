@@ -11,7 +11,7 @@ import {
   blockRestaurant,
   unblockRestaurant,
   fetchAdminHotelById,
-  fetchAdminRestaurantById, // ✅ NEW
+  fetchAdminRestaurantById, //  NEW
 } from "../services/adminCatalogService";
 
 const apiMessage = (err) => {
@@ -86,7 +86,7 @@ export const loadAdminHotelDetail = createAsyncThunk(
   }
 );
 
-// ✅ NEW
+//  NEW
 export const loadAdminRestaurantDetail = createAsyncThunk(
   "adminService/loadAdminRestaurantDetail",
   async (id, { rejectWithValue }) => {

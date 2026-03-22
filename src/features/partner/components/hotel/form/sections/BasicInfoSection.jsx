@@ -42,7 +42,7 @@ export default function BasicInfoSection({ form, setField, disabled = false }) {
   const [slugTouched, setSlugTouched] = useState(false);
 
   useEffect(() => {
-    if (disabled) return;          // ✅ readonly không auto-sync
+    if (disabled) return;          //  readonly không auto-sync
     if (slugTouched) return;
     const auto = slugifyVN(form.name);
     if ((form.slug || "") !== auto) setField("slug", auto);

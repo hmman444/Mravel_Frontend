@@ -40,7 +40,7 @@ export function useAdminServices() {
     act: ({ mode, action, id, reason }) => dispatch(actOnService({ mode, action, id, reason })).unwrap(),
 
     loadHotelDetail: (id) => dispatch(loadAdminHotelDetail(id)).unwrap(),
-    loadRestaurantDetail: (id) => dispatch(loadAdminRestaurantDetail(id)).unwrap(), // ✅ NEW
+    loadRestaurantDetail: (id) => dispatch(loadAdminRestaurantDetail(id)).unwrap(), //  NEW
     clearSelected: () => dispatch(clearSelected()),
   };
 }

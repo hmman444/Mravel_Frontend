@@ -89,7 +89,7 @@ export default function AdminRestaurantReviewPage() {
     return p?.partnerEmail || p?.partnerName || p?.partnerId || "—";
   }, [restaurant]);
 
-  /** ✅ map doc -> form, đúng như PartnerRestaurantFormPage */
+  /**  map doc -> form, đúng như PartnerRestaurantFormPage */
   const form = useMemo(() => {
     return mapRestaurantDocToForm(restaurant || {});
   }, [restaurant]);

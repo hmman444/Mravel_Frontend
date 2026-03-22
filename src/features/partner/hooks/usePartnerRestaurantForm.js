@@ -85,7 +85,7 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
     }
   };
 
-  // ✅ ĐỂ uploadIfNeeded TRƯỚC, CÙNG SCOPE với uploadArray
+  //  ĐỂ uploadIfNeeded TRƯỚC, CÙNG SCOPE với uploadArray
   const uploadIfNeeded = async (item) => {
     // item có file thì upload lên cloudinary
     if (item?.file instanceof File) {
@@ -95,7 +95,7 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
     return item;
   };
 
-  // ✅ uploadArray nằm TRONG hook (cùng scope) => không còn "not defined"
+  //  uploadArray nằm TRONG hook (cùng scope) => không còn "not defined"
   const uploadArray = async (arr) => {
     if (!Array.isArray(arr)) return [];
     const uploaded = await Promise.all(arr.map(uploadIfNeeded));
