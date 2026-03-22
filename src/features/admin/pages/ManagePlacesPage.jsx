@@ -19,7 +19,7 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
-/* ===================== toast error from BE ===================== */
+/* ====== toast error from BE ====== */
 const toastErr = (e) => {
   const msg =
     typeof e === "string"
@@ -151,7 +151,7 @@ export default function ManagePlacesPage() {
     }
   };
 
-  /* ===================== confirm flows ===================== */
+  /* ====== confirm flows ====== */
   const closeConfirm = () => {
     setConfirmOpen(false);
     setPendingDelete(null);
@@ -226,7 +226,7 @@ export default function ManagePlacesPage() {
   const confirmText =
     confirmMode === "DELETE" ? "Xóa" : confirmMode === "LOCK" ? "Khóa" : "Mở khóa";
 
-  /* ===================== render ===================== */
+  /* ====== render ====== */
   return (
     <AdminLayout>
       {/* Header */}

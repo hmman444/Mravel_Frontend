@@ -42,7 +42,7 @@ export default function HotelMainInfoPanel({ hotel }) {
     typeof avgRating === "number" ? avgRating.toFixed(1) : "8,9";
   const reviews = reviewsCount ?? 0;
 
-  /* ================= GIÁ THẤP NHẤT TỪ RATE PLAN ================= */
+  /* == GIÁ THẤP NHẤT TỪ RATE PLAN == */
   const findBestPriceFromRooms = (rooms) => {
     if (!Array.isArray(rooms)) return null;
     let best = null;
@@ -86,7 +86,7 @@ export default function HotelMainInfoPanel({ hotel }) {
   const keywords = hotel.reviewStats?.keywords ?? [];
   const topKeywords = keywords.slice(0, 4);
 
-  /* ================= TIỆN ÍCH CHÍNH ================= */
+  /* == TIỆN ÍCH CHÍNH == */
   const amenityList = Array.isArray(amenities) ? amenities : [];
   const prioritizedCodes = [
     "ac",
@@ -145,7 +145,7 @@ export default function HotelMainInfoPanel({ hotel }) {
     }
   })();
 
-  /* ================= GALLERY ================= */
+  /* == GALLERY == */
   const galleryImages = (images && images.length ? images : []).map(
     (img) => img.url
   );
@@ -166,7 +166,7 @@ export default function HotelMainInfoPanel({ hotel }) {
   const ratingScore =
     typeof avgRating === "number" ? avgRating.toFixed(1) : null;
 
-  /* ================= NEARBY + XEM THÊM ================= */
+  /* == NEARBY + XEM THÊM == */
   const allNearby = Array.isArray(nearbyPlaces) ? nearbyPlaces : [];
   const MAX_NEARBY_COLLAPSED = 7;
   const hasManyNearby = allNearby.length > MAX_NEARBY_COLLAPSED;
@@ -175,7 +175,7 @@ export default function HotelMainInfoPanel({ hotel }) {
       ? allNearby.slice(0, MAX_NEARBY_COLLAPSED)
       : allNearby;
 
-  /* ================= OVERVIEW TỪ CONTENT SECTION ================= */
+  /* == OVERVIEW TỪ CONTENT SECTION == */
   const contentBlocks = Array.isArray(content) ? content : [];
 
   const getSectionName = (b) => {
@@ -243,7 +243,7 @@ export default function HotelMainInfoPanel({ hotel }) {
   const shouldShowOverviewButton =
     hasOverview || descriptionText.length > 160;
 
-  /* ================= HANDLER GALLERY ================= */
+  /* == HANDLER GALLERY == */
   const openGalleryAt = (idx) => {
     if (totalImages === 0) return;
     setCurrentImageIndex(

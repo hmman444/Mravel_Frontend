@@ -42,24 +42,7 @@ export default function SidebarPlans({
       `}
     >
       <div className="h-full flex flex-col">
-        {/* BRAND / HEADER */}
-        <div className="px-3 pt-3 pb-2 border-b border-slate-200/80 dark:border-gray-800 bg-gradient-to-r from-sky-50 via-slate-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm font-semibold shadow-sm">
-              M
-            </div>
-            {!collapsed && (
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Mravel Plans
-                </span>
-                <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                  Quản lý chuyến đi của bạn
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
+
 
         {/* CONTENT */}
         <div className="flex-1 p-3 overflow-y-auto sidebar-scroll space-y-4">

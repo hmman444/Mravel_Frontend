@@ -33,22 +33,22 @@ function useDebounced(value, delay = 350) {
 export default function ManageServicesPage() {
     const { mode, setMode, items, loading, acting, load, act } = useAdminServices();
 
-    /** ================= FILTER UI STATE ================= */
+    /** == FILTER UI STATE == */
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("ALL");
     const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | ACTIVE | INACTIVE
     const [unlockFilter, setUnlockFilter] = useState("ALL"); // ALL | YES | NO
 
-    /** ================= MODAL STATE ================= */
+    /** == MODAL STATE == */
     const [reasonOpen, setReasonOpen] = useState(false);
     const [reasonMode, setReasonMode] = useState(null); // "REJECT" | "BLOCK"
     const [target, setTarget] = useState(null);
 
-    /** ================= DEBOUNCE SEARCH ================= */
+    /** == DEBOUNCE SEARCH == */
     const debouncedSearch = useDebounced(search, 350);
 
-    /** ================= ANTI-DOUBLE/ANTI-RACE =================
+    /** == ANTI-DOUBLE/ANTI-RACE ==
      * - strictModeRef: tránh gọi 2 lần khi dev StrictMode mount/unmount
      * - reqSeqRef: đảm bảo request mới nhất thắng, request cũ về trễ bị bỏ
      */
@@ -61,7 +61,7 @@ export default function ManageServicesPage() {
     };
 
     const navigate = useNavigate();
-    /** ================= BUILD PARAMS (memo) ================= */
+    /** == BUILD PARAMS (memo) == */
     const queryParams = useMemo(() => {
         const params = {};
 
@@ -79,7 +79,7 @@ export default function ManageServicesPage() {
         return params;
     }, [debouncedSearch, status, activeFilter, unlockFilter]);
 
-    /** ================= RELOAD (stable) ================= */
+    /** == RELOAD (stable) == */
     const reload = async (nextMode = mode, nextParams = queryParams) => {
         // seq tăng mỗi lần gọi -> nếu response về trễ mà seq không còn là latest thì bỏ
         const mySeq = ++reqSeqRef.current;
@@ -99,7 +99,7 @@ export default function ManageServicesPage() {
         }
     };
 
-    /** ================= AUTO LOAD =================
+    /** == AUTO LOAD ==
      *  Load khi:
      * - đổi mode
      * - search debounce thay đổi
@@ -119,7 +119,7 @@ export default function ManageServicesPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode, queryParams]);
 
-    /** ================= DERIVED ================= */
+    /** == DERIVED == */
     const list = useMemo(() => items || [], [items]);
 
     const totalCount = list.length;
@@ -143,7 +143,7 @@ export default function ManageServicesPage() {
         setUnlockFilter("ALL");
     };
 
-    /** ================= ACTIONS ================= */
+    /** == ACTIONS == */
     const onApprove = async (x) => {
         try {
         await act({ mode, action: "APPROVE", id: x.id });

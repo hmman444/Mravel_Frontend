@@ -144,9 +144,9 @@ const normalizeList = (payload) => {
 // - realtime event: eventId
 const getNotiKey = (n) => n?.id ?? n?.eventId ?? null;
 
-/** =========================
+/** ==========
  * Thunks
- * ========================= */
+ * ========== */
 
 export const loadNotifications = createAsyncThunk(
   "notifications/load",
@@ -194,9 +194,9 @@ export const markAllReadThunk = createAsyncThunk(
   }
 );
 
-/** =========================
+/** ==========
  * Slice
- * ========================= */
+ * ========== */
 
 const notificationsSlice = createSlice({
   name: "notifications",

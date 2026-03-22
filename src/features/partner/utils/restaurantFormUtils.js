@@ -1,8 +1,8 @@
 // src/features/partner/utils/restaurantFormUtils.js
 
-// ==============================
+// 
 // Helpers
-// ==============================
+// 
 export const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 export const asArray = (v) => (Array.isArray(v) ? v : []);
 export const asString = (v, fb = "") => (v == null ? fb : String(v));
@@ -59,9 +59,9 @@ export const parseIntList = (raw) => {
     .map((n) => Math.trunc(n));
 };
 
-// ==============================
+// 
 // Existing (already in your FE)
-// ==============================
+// 
 export const normalizeTableType = (t) => {
   const o = isObj(t) ? t : {};
   return {
@@ -102,14 +102,14 @@ export const normalizeBookingConfig = (cfg) => {
   };
 };
 
-// ==============================
+// 
 // ADD: UI enums (optional)
-// ==============================
+// 
 export const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
-// ==============================
+// 
 // ADD: Small object normalizers
-// ==============================
+// 
 export const normalizeCodeName = (x) => {
   const o = isObj(x) ? x : {};
   return {
@@ -224,9 +224,9 @@ export const normalizePolicy = (x) => {
   };
 };
 
-// ==============================
+// 
 // ADD: Menu sections (basic)
-// ==============================
+// 
 export const normalizeMenuItem = (x) => {
   const o = isObj(x) ? x : {};
   return {
@@ -250,9 +250,9 @@ export const normalizeMenuSection = (x) => {
   };
 };
 
-// ==============================
+// 
 // Form: initial
-// ==============================
+// 
 export function createInitialRestaurantForm() {
   return {
     // required
@@ -324,9 +324,9 @@ export function createInitialRestaurantForm() {
   };
 }
 
-// ==============================
+// 
 // Map doc -> form
-// ==============================
+// 
 export function mapRestaurantDocToForm(raw) {
   const r = isObj(raw) ? raw : {};
   const imgs = asArray(r.images).map(normalizeImageReq).filter((x) => x.url);
@@ -396,9 +396,9 @@ export function mapRestaurantDocToForm(raw) {
   };
 }
 
-// ==============================
+// 
 // Build payload (form -> API)
-// ==============================
+// 
 export function buildRestaurantPayload(formDraft = {}) {
   const f = isObj(formDraft) ? formDraft : {};
 
