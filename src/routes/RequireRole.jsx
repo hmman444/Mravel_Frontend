@@ -20,7 +20,6 @@ export default function RequireRole({ allow = [] }) {
   }
 
   // Chưa có role (chưa hydrate) -> có thể chờ load user (tạm thời chặn render)
-  // Bạn có thể thay bằng LoadingOverlay nếu muốn
   if (!role) return null;
 
   // Sai role -> logout và về login

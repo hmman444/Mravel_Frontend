@@ -2,7 +2,7 @@
 import { useMemo, useRef, useState } from "react";
 import { PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-// ✅ TẠM THỜI: bạn có thể thay bằng options fetch từ API rồi truyền vào prop `options`
+//  TẠM THỜI: bạn có thể thay bằng options fetch từ API rồi truyền vào prop `options`
 const CUISINE_SEED = [
   { code: "VIETNAMESE", name: "Việt Nam", region: "CENTRAL" },
   { code: "ASIAN", name: "Châu Á", region: "ASIA" },
@@ -39,7 +39,7 @@ export default function CuisinesEditor({
   value = [],
   onChange,
   disabled,
-  options = CUISINE_SEED, // ✅ sau này bạn fetch API xong truyền vào đây
+  options = CUISINE_SEED, //  sau này bạn fetch API xong truyền vào đây
 }) {
   const list = Array.isArray(value) ? value : [];
   const emit = (next) => onChange?.(next);

@@ -160,7 +160,8 @@ export default function PlanDashboardPage() {
         showError("Không thể tạo bản sao lịch trình");
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      showError("Không thể tạo bản sao lịch trình");
     }
   }
 

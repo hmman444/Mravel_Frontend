@@ -2,6 +2,7 @@ import axios from "axios";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
 import { showError } from "./toastUtils";
 import { getStore } from "../redux/storeInjector";
+import { ErrorCodes } from "../constants/errorCodes";
 
 import { setTokensRedux, setUser } from "../features/auth/slices/authSlice";
 
@@ -40,6 +41,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
     const message = error.response?.data?.message || "";
+    const errorCode = error.response?.data?.data?.code;
 
     if (
       (status === 401 ||
@@ -92,12 +94,19 @@ api.interceptors.response.use(
     }
 
     // access requests
-    if (message.includes("Bạn đã gửi yêu cầu trước đó")) {
+    if (
+      errorCode === ErrorCodes.ACCESS_REQUEST_ALREADY_SUBMITTED ||
+      message.includes("Bạn đã gửi yêu cầu trước đó")
+    ) {
       showError("Bạn đã gửi yêu cầu trước đó.");
       return Promise.reject(error);
     }
 
-    if (message.includes("Bạn đã có quyền truy cập")) {
+    if (
+      errorCode === ErrorCodes.ACCESS_ALREADY_GRANTED ||
+      errorCode === ErrorCodes.ACCESS_VIEW_ALREADY_GRANTED ||
+      message.includes("Bạn đã có quyền truy cập")
+    ) {
       showError("Bạn đã có quyền truy cập.");
       return Promise.reject(error);
     }

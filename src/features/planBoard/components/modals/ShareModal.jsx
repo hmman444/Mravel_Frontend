@@ -30,7 +30,6 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   } = usePlanBoard(planId);
 
   //  guest = xem được board nhưng không phải member (myRole = null)
-  // hook của bạn hiện đang expose isOwner/isEditor/isViewer; nếu cả 3 đều false => guest
   const isGuestViewer = !isOwner && !isEditor && !isViewer;
 
   // Quyền trong modal (giống PlanDashboardPage: chỉ member mới sửa)
@@ -165,9 +164,6 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     const backend = map[newDisplayRole];
     if (!backend) return;
 
-    // giữ rule cũ của bạn:
-    // - viewer không được đổi ai
-    // - editor không được đổi role người khác (chỉ owner được)
     if (isViewer) return;
     if (isEditor && user.userId !== currentUserId) return;
 

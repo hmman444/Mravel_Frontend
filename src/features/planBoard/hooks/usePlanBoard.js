@@ -26,6 +26,7 @@ import {
 } from "../slices/planBoardSlice";
 import { updateVisibility, deletePlan  } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
+import { ErrorCodes } from "../../../constants/errorCodes";
 
 // api error handling with toast
 async function tryCall(promise, fallbackMessage) {
@@ -238,9 +239,19 @@ export function usePlanBoard(planId) {
         showSuccess("Gửi yêu cầu thành công");
         return result;
       } catch (err) {
-        console.log(err);
-        // Toast thông báo lỗi
-        showError("Bạn đã gửi yêu cầu trước đó, vui lòng đợi xác nhận!");
+        console.error(err);
+        const code = err?.code;
+
+        if (code === ErrorCodes.ACCESS_REQUEST_ALREADY_SUBMITTED) {
+          showError("Bạn đã gửi yêu cầu trước đó, vui lòng đợi xác nhận!");
+        } else if (
+          code === ErrorCodes.ACCESS_ALREADY_GRANTED ||
+          code === ErrorCodes.ACCESS_VIEW_ALREADY_GRANTED
+        ) {
+          showError("Bạn đã có quyền truy cập.");
+        } else {
+          showError(err?.message || "Không thể gửi yêu cầu truy cập");
+        }
         return null;
       }
     },
