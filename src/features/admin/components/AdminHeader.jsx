@@ -17,7 +17,7 @@ export default function AdminHeader() {
   const { handleLogout } = useLogout();
   const location = useLocation();
 
-  /* ================= SCROLL ================= */
+  /* == SCROLL == */
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -28,24 +28,24 @@ export default function AdminHeader() {
 
   const solid = scrolled;
 
-  /* ================= NOTIFICATIONS (UI giống user) ================= */
+  /* == NOTIFICATIONS (UI giống user) == */
   const { items, loading, saving, unreadCount, load, markAllRead, markRead } =
     useNotifications(); // sau này đổi sang useAdminNotifications()
 
   const [notiOpen, setNotiOpen] = useState(false);
   const notiWrapRef = useRef(null);
 
-  /* ================= USER MENU ================= */
+  /* == USER MENU == */
   const [userOpen, setUserOpen] = useState(false);
   const userRef = useRef(null);
 
-  /* ================= CLOSE ON ROUTE CHANGE ================= */
+  /* == CLOSE ON ROUTE CHANGE == */
   useEffect(() => {
     setNotiOpen(false);
     setUserOpen(false);
   }, [location.pathname, location.search]);
 
-  /* ================= OUTSIDE CLICK (capture) ================= */
+  /* == OUTSIDE CLICK (capture) == */
   useEffect(() => {
     const onPointerDown = (e) => {
       const el = e.target;

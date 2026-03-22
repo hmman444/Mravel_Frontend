@@ -70,8 +70,6 @@ export default function PlanDashboardPage() {
   const [openShare, setOpenShare] = useState(false);
 
   const [editingListId, setEditingListId] = useState(null);
-  const [activeListMenu, setActiveListMenu] = useState(null);
-  const [activeCardMenu, setActiveCardMenu] = useState(null);
 
   const [confirmDeleteCard, setConfirmDeleteCard] = useState(null);
   const [confirmDeleteList, setConfirmDeleteList] = useState(null);
@@ -293,11 +291,11 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await createCard(listId, payload);
-      await load();
       showSuccess("Đã thêm hoạt động");
     } catch (e) {
       console.error(e);
       showError("Không thêm được hoạt động");
+      load(); // resync board to remove any phantom WS-applied card on server error
     }
   };
 
@@ -305,7 +303,6 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await updateCard(listId, cardId, payload);
-      await load();
       showSuccess("Đã cập nhật hoạt động");
     } catch (e) {
       console.error(e);
@@ -316,11 +313,14 @@ export default function PlanDashboardPage() {
   const handleRemoveCard = async ({ listId, cardId }) => {
     try {
       await deleteCard(listId, cardId);
-      await load();
       showSuccess("Đã xoá thẻ");
     } catch {
       showError("Không thể xoá thẻ");
     }
+  };
+
+  const handleDuplicateCard = async (listId, cardId) => {
+    await duplicateCard(listId, cardId);
   };
 
   const toggleDone = async (listId, cardId) => {
@@ -340,7 +340,6 @@ export default function PlanDashboardPage() {
   const handleAddList = async () => {
     try {
       await createList({ title: null });
-      await load();
       showSuccess("Đã thêm danh sách");
     } catch {
       showError("Không thể thêm danh sách");
@@ -571,17 +570,13 @@ export default function PlanDashboardPage() {
             handleAddCard={createCard}
             updateCard={updateCard}
             toggleDone={toggleDone}
-            duplicateCard={duplicateCard}
+            duplicateCard={handleDuplicateCard}
             deleteCard={deleteCard}
             // DRAG
             handleDragEnd={handleDragEnd}
             // UI
             editingListId={editingListId}
             setEditingListId={setEditingListId}
-            activeListMenu={activeListMenu}
-            setActiveListMenu={setActiveListMenu}
-            activeCardMenu={activeCardMenu}
-            setActiveCardMenu={setActiveCardMenu}
             setConfirmDeleteCard={setConfirmDeleteCard}
             setConfirmDeleteList={setConfirmDeleteList}
           />
@@ -640,8 +635,6 @@ export default function PlanDashboardPage() {
                     console.error("Reorder khi kéo calendar lỗi:", err);
                   }
                 }
-
-                await load();
               } catch (e) {
                 console.error(e);
                 showError("Không thể cập nhật hoạt động từ calendar");
@@ -712,7 +705,6 @@ export default function PlanDashboardPage() {
           onClose={() => setConfirmDeleteList(null)}
           onConfirm={async () => {
             await deleteList(confirmDeleteList.id);
-            await load();
             setConfirmDeleteList(null);
           }}
         />

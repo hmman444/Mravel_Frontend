@@ -121,9 +121,10 @@ export function usePlanBoard(planId) {
     duplicateList: (listId) =>
       tryCall(
         (async () => {
-          await dispatch(duplicateListThunk({ planId, listId }));
+          await dispatch(duplicateListThunk({ planId, listId })).unwrap();
 
           await dispatch(loadBoard(planId));
+          showSuccess("Đã sao chép danh sách");
         })(),
         "Không thể sao chép danh sách"
       ),
@@ -162,6 +163,7 @@ export function usePlanBoard(planId) {
          await dispatch(
            duplicateCardThunk({ planId, listId, cardId })
          ).unwrap();
+         showSuccess("Đã sao chép thẻ");
        })(),
        "Không thể sao chép thẻ"
      ),

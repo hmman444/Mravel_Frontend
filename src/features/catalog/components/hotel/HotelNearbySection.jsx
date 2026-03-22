@@ -114,7 +114,7 @@ export default function HotelNearbySection({ hotel }) {
   );
 }
 
-/* =============== SUB COMPONENTS =============== */
+/*  SUB COMPONENTS  */
 
 function NearbyColumn({ icon, title, places }) {
   if (!places || !places.length) return null;
@@ -149,7 +149,7 @@ function NearbyColumn({ icon, title, places }) {
   );
 }
 
-/* =============== HELPERS =============== */
+/*  HELPERS  */
 
 // Lấy lat/lng từ DTO: ưu tiên latitude/longitude, fallback sang mảng location nếu có
 function getHotelLatLng(hotel) {

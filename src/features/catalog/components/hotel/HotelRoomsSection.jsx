@@ -132,7 +132,7 @@ export default function HotelRoomsSection({ hotel }) {
   );
 }
 
-/* ======================= SUB COMPONENTS ======================= */
+/* ======== SUB COMPONENTS ======== */
 
 function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }) {
   const {
@@ -379,7 +379,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
   );
 }
 
-/* =================== MODAL CHI TIẾT PHÒNG =================== */
+/* ==== MODAL CHI TIẾT PHÒNG ==== */
 
 function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
   const {

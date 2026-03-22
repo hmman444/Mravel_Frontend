@@ -13,7 +13,7 @@ import {
 import { usePartnerStats } from "../hooks/usePartnerStats";
 import { listPartnerHotels, listPartnerRestaurants } from "../services/partnerService";
 
-/* ====================== UI ====================== */
+/* ======= UI ======= */
 
 function StatCard({
   label,
@@ -42,7 +42,7 @@ function StatCard({
   );
 }
 
-/* ====================== DATE HELPERS ====================== */
+/* ======= DATE HELPERS ======= */
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
@@ -138,7 +138,7 @@ const toVietnameseStatusLabel = (rawKey) => {
   return typeLabel ? `${typeLabel}: ${statusLabel}` : statusLabel;
 };
 
-/* ====================== PARSERS (robust) ====================== */
+/* ======= PARSERS (robust) ======= */
 
 const coerceNum = (v) => {
   if (v === null || v === undefined) return 0;
@@ -239,7 +239,7 @@ const formatMillion = (amountMaybeVnd) => {
   });
 };
 
-/* ====================== COMPONENT ====================== */
+/* ======= COMPONENT ======= */
 
 export default function PartnerDashboard() {
   const [filter, setFilter] = useState("weekly");

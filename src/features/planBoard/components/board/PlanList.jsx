@@ -11,6 +11,10 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaMapMarkerAlt } from "react-icons/fa";
+
+let suppressListMenuOpenUntil = 0;
+const LIST_MENU_SUPPRESS_MS = 700;
+
 const ACTIVITY_TYPES = [
   {
     id: "TRANSPORT",
@@ -85,10 +89,6 @@ export default function PlanList({
   setEditingListId,
   renameList,
   duplicateCard,
-  activeListMenu,
-  setActiveListMenu,
-  activeCardMenu,
-  setActiveCardMenu,
   toggleDone,
   setConfirmDeleteCard,
   setConfirmDeleteList,
@@ -100,6 +100,7 @@ export default function PlanList({
 }) {
   const [tempTitle, setTempTitle] = useState(list.title || "");
   const [showTypePicker, setShowTypePicker] = useState(false);
+  const [isListMenuOpen, setIsListMenuOpen] = useState(false);
 
   const btnRef = useRef(null);
   const menuRef = useRef(null);
@@ -112,7 +113,7 @@ export default function PlanList({
   // Tính vị trí menu 3 chấm
   useEffect(() => {
     if (isTrash) return;
-    if (activeListMenu === list.id && btnRef.current && menuRef.current) {
+    if (isListMenuOpen && btnRef.current && menuRef.current) {
       const btnRect = btnRef.current.getBoundingClientRect();
       const menuRect = menuRef.current.getBoundingClientRect();
       const spacing = 6;
@@ -122,12 +123,12 @@ export default function PlanList({
         left: btnRect.right - menuRect.width,
       });
     }
-  }, [activeListMenu, isTrash, list.id]);
+  }, [isListMenuOpen, isTrash]);
 
   // Click ra ngoài đóng menu
   useEffect(() => {
     if (isTrash) return;
-    if (activeListMenu !== list.id) return;
+    if (!isListMenuOpen) return;
 
     const close = (e) => {
       if (
@@ -135,15 +136,15 @@ export default function PlanList({
         !menuRef.current.contains(e.target) &&
         !btnRef.current?.contains(e.target)
       ) {
-        setActiveListMenu(null);
+        setIsListMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
-  }, [activeListMenu, isTrash, list.id, setActiveListMenu]);
+  }, [isListMenuOpen, isTrash]);
 
   const menu =
-    !isTrash && activeListMenu === list.id
+    !isTrash && isListMenuOpen
       ? createPortal(
           <div
             ref={menuRef}
@@ -154,9 +155,14 @@ export default function PlanList({
             {canEdit && (
               <>
                 <button
-                  onClick={() => {
-                    duplicateList(list.id);
-                    setActiveListMenu(null);
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    suppressListMenuOpenUntil = Date.now() + LIST_MENU_SUPPRESS_MS;
+                  }}
+                  onClick={async () => {
+                    setIsListMenuOpen(false);
+                    await duplicateList(list.id);
                   }}
                   className="flex items-center w-full px-3 py-2 text-sm 
                     text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 gap-2"
@@ -164,9 +170,13 @@ export default function PlanList({
                   <FaCopy className="text-gray-500" /> Tạo bản sao
                 </button>
                 <button
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                   onClick={() => {
                     setConfirmDeleteList(list);
-                    setActiveListMenu(null);
+                    setIsListMenuOpen(false);
                   }}
                   className="flex items-center w-full px-3 py-2 text-sm 
                     text-red-600 hover:bg-red-50/70 dark:hover:bg-red-900/30 gap-2"
@@ -250,8 +260,6 @@ export default function PlanList({
                         toggleDone={toggleDone}
                         duplicateCard={duplicateCard}
                         setConfirmDeleteCard={setConfirmDeleteCard}
-                        activeMenu={activeCardMenu}
-                        setActiveMenu={setActiveCardMenu}
                         canEdit={canEdit}
                         onOpenActivityModal={onOpenActivityModal}
                         isInTrash={true}
@@ -357,9 +365,8 @@ export default function PlanList({
                   ref={btnRef}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setActiveListMenu(
-                      activeListMenu === list.id ? null : list.id
-                    );
+                    if (Date.now() < suppressListMenuOpenUntil) return;
+                    setIsListMenuOpen((prev) => !prev);
                   }}
                   className="p-2 rounded-lg hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition"
                 >
@@ -400,8 +407,6 @@ export default function PlanList({
                               toggleDone={toggleDone}
                               duplicateCard={duplicateCard}
                               setConfirmDeleteCard={setConfirmDeleteCard}
-                              activeMenu={activeCardMenu}
-                              setActiveMenu={setActiveCardMenu}
                               canEdit={canEdit}
                               onOpenActivityModal={onOpenActivityModal}
                               isInTrash={false}

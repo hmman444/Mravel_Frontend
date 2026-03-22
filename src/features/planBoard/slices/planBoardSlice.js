@@ -244,14 +244,11 @@ export const reorder = createAsyncThunk(
             return await reorderBoard(planId, payload);
           }
 
-          const sourceCards = [...(sourceList.cards || [])];
-          const [movedCard] = sourceCards.splice(payload.sourceIndex, 1);
-          if (!movedCard) {
-            throw new Error("Không tìm thấy thẻ để sắp xếp");
-          }
-
-          sourceCards.splice(payload.destIndex, 0, movedCard);
-          const positions = sourceCards.map((c, idx) => ({
+          // IMPORTANT:
+          // localReorder() already applied optimistic move before this thunk runs.
+          // Re-applying sourceIndex/destIndex here would shift cards by 1 position.
+          const cardsInCurrentOrder = [...(sourceList.cards || [])];
+          const positions = cardsInCurrentOrder.map((c, idx) => ({
             cardId: c.id,
             position: idx,
           }));
@@ -484,16 +481,30 @@ const planBoardSlice = createSlice({
             // Avoid duplicate if realtime and optimistic update both fired
             const alreadyExists = lists.some((l) => String(l.id) === String(patch.listId));
             if (!alreadyExists) {
-              lists.push({
+              const position = patch.position ?? lists.length;
+              // Insert at correct position instead of pushing + sorting
+              // This avoids disrupting DragDropContext when new lists arrive via realtime
+              const newList = {
                 id: patch.listId,
                 title: patch.title,
-                position: patch.position ?? lists.length,
+                position,
                 type: patch.type ?? "NORMAL",
                 dayDate: patch.dayDate || null,
                 cards: [],
-              });
-              // Keep lists sorted by position
-              lists.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+              };
+              
+              // Insert at the correct position to maintain sorted order
+              let inserted = false;
+              for (let i = 0; i < lists.length; i++) {
+                if ((lists[i].position ?? 0) > position) {
+                  lists.splice(i, 0, newList);
+                  inserted = true;
+                  break;
+                }
+              }
+              if (!inserted) {
+                lists.push(newList);
+              }
             }
             break;
           }
@@ -502,7 +513,8 @@ const planBoardSlice = createSlice({
             const list = lists.find((l) => String(l.id) === String(entityId));
             if (list) {
               if (patch.title != null) list.title = patch.title;
-              if (patch.position != null) list.position = patch.position;
+              // Don't update position here — position changes should only happen via REORDER events
+              // Updating position on every UPDATE can break DragDropContext tracking
               if (patch.type != null) list.type = patch.type;
               if (patch.dayDate !== undefined) list.dayDate = patch.dayDate || null;
             }
@@ -541,8 +553,22 @@ const planBoardSlice = createSlice({
               const alreadyExists = targetList.cards.some((c) => String(c.id) === String(patch.id ?? entityId));
               if (!alreadyExists) {
                 const { listId: _listId, ...cardFields } = patch;
-                targetList.cards.push({ ...cardFields, id: patch.id ?? entityId });
-                targetList.cards.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+                const cardPosition = cardFields.position ?? targetList.cards.length;
+                const newCard = { ...cardFields, id: patch.id ?? entityId, position: cardPosition };
+                
+                // Insert at correct position instead of pushing + sorting
+                // This avoids disrupting DragDropContext when new cards arrive via realtime
+                let inserted = false;
+                for (let i = 0; i < targetList.cards.length; i++) {
+                  if ((targetList.cards[i].position ?? 0) > cardPosition) {
+                    targetList.cards.splice(i, 0, newCard);
+                    inserted = true;
+                    break;
+                  }
+                }
+                if (!inserted) {
+                  targetList.cards.push(newCard);
+                }
               }
             }
             break;
@@ -596,10 +622,23 @@ const planBoardSlice = createSlice({
             if (cardIdx === -1) break;
 
             const [card] = srcList.cards.splice(cardIdx, 1);
-            card.position = patch.targetPosition ?? 0;
+            const targetPosition = patch.targetPosition ?? 0;
+            card.position = targetPosition;
+            
+            // Insert at correct position instead of pushing + sorting
+            // This avoids disrupting DragDropContext when cards move between lists
             if (!dstList.cards) dstList.cards = [];
-            dstList.cards.splice(patch.targetPosition ?? dstList.cards.length, 0, card);
-            dstList.cards.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+            let inserted = false;
+            for (let i = 0; i < dstList.cards.length; i++) {
+              if ((dstList.cards[i].position ?? 0) > targetPosition) {
+                dstList.cards.splice(i, 0, card);
+                inserted = true;
+                break;
+              }
+            }
+            if (!inserted) {
+              dstList.cards.push(card);
+            }
             break;
           }
 
@@ -621,6 +660,11 @@ const planBoardSlice = createSlice({
           default:
             break;
         }
+      } else if (entityType === "PLAN" && operationType === "UPDATE") {
+        Object.assign(state.board, patch);
+      } else if (entityType === "BOARD" && operationType === "CLEAR_TRASH") {
+        const trash = lists.find((l) => l.type === "TRASH");
+        if (trash) trash.cards = [];
       }
 
       // Advance revision watermark
@@ -713,6 +757,22 @@ const planBoardSlice = createSlice({
           list.cards = list.cards.filter(
             (c) => String(c.id) !== String(cardId)
           );
+        }
+      })
+
+      // Duplicate card
+      .addCase(duplicateCardThunk.fulfilled, (s, a) => {
+        if (!s.board?.lists || !a.payload?.id) return;
+        const card = normalizeCardTimes(a.payload);
+        const { listId } = a.meta.arg;
+        const list = s.board.lists.find((l) => String(l.id) === String(listId));
+        if (list) {
+          if (!list.cards) list.cards = [];
+          const alreadyExists = list.cards.some((c) => String(c.id) === String(card.id));
+          if (!alreadyExists) {
+            list.cards = [...list.cards, card];
+            list.cards.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+          }
         }
       })
 

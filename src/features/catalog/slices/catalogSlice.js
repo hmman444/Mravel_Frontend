@@ -11,7 +11,7 @@ import {
   suggestGeoLocations,
 } from "../services/catalogService";
 
-/* ====================== THUNKS ====================== */
+/* ======= THUNKS ======= */
 
 export const searchHotels = createAsyncThunk(
   "catalog/searchHotels",
@@ -89,7 +89,7 @@ export const suggestGeoLocationsThunk = createAsyncThunk(
   }
 );
 
-/* ====================== STATE ====================== */
+/* ======= STATE ======= */
 
 const initialListState = {
   items: [],
@@ -123,7 +123,7 @@ const initialState = {
   geoSuggest: { items: [], loading: false, error: null, q: "" },
 };
 
-/* ====================== SLICE ====================== */
+/* ======= SLICE ======= */
 
 const catalogSlice = createSlice({
   name: "catalog",

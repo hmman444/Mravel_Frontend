@@ -21,8 +21,10 @@ import { normalizeBoardPayload } from "../features/planBoard/utils/timeUtils";
  * - If offline >= GAP_STALE_THRESHOLD_MS : full board reload
  */
 const GAP_STALE_THRESHOLD_MS = 60_000;
-const RECONCILE_IDLE_THRESHOLD_MS = 10_000;
-const RECONCILE_INTERVAL_MS = 8_000;
+const RECONCILE_IDLE_THRESHOLD_MS = 30_000;
+const RECONCILE_INTERVAL_MS = 20_000;
+const DISCONNECTED_GRACE_MS = 5_000;
+const DISCONNECTED_POLL_INTERVAL_MS = 15_000;
 
 export function usePlanBoardRealtimeV2(planId) {
   const dispatch = useDispatch();
@@ -40,6 +42,7 @@ export function usePlanBoardRealtimeV2(planId) {
   const pendingEventsRef = useRef([]);
   const gapRecoveryInProgressRef = useRef(false);
   const initialReloadIssuedRef = useRef(false);
+  const disconnectedSinceRef = useRef(null);
 
   useEffect(() => {
     lastRevisionRef.current = lastRevision;
@@ -102,7 +105,7 @@ export function usePlanBoardRealtimeV2(planId) {
       }
       syncReloadTimerRef.current = setTimeout(() => {
         dispatch(loadBoard(planId));
-      }, 350);
+      }, 1500);
     };
 
     const destination = `/topic/plans/${planId}/board/v2`;
@@ -116,7 +119,7 @@ export function usePlanBoardRealtimeV2(planId) {
       lastEventTimeRef.current = Date.now();
 
       const isBoardSyncEvent =
-        payload.entityType === "BOARD" || payload.operationType === "SYNC";
+        payload.entityType === "BOARD" && payload.operationType === "SYNC";
 
       // SYNC events are control signals from legacy/v1 bridge. Handle first,
       // regardless of revision monotonicity quality.
@@ -184,7 +187,18 @@ export function usePlanBoardRealtimeV2(planId) {
     if (!planId || !accessToken) return;
 
     const pollWhenDisconnected = () => {
-      if (mainSocket.connected) return;
+      if (mainSocket.connected) {
+        disconnectedSinceRef.current = null;
+        return;
+      }
+
+      if (disconnectedSinceRef.current == null) {
+        disconnectedSinceRef.current = Date.now();
+      }
+
+      const disconnectedFor = Date.now() - disconnectedSinceRef.current;
+      if (disconnectedFor < DISCONNECTED_GRACE_MS) return;
+
       if (gapRecoveryInProgressRef.current) return;
 
       const knownRevision = lastRevisionRef.current;
@@ -199,7 +213,10 @@ export function usePlanBoardRealtimeV2(planId) {
       }
     };
 
-    fallbackPollTimerRef.current = setInterval(pollWhenDisconnected, 3000);
+    fallbackPollTimerRef.current = setInterval(
+      pollWhenDisconnected,
+      DISCONNECTED_POLL_INTERVAL_MS
+    );
     pollWhenDisconnected();
 
     return () => {
@@ -207,6 +224,7 @@ export function usePlanBoardRealtimeV2(planId) {
         clearInterval(fallbackPollTimerRef.current);
       }
       initialReloadIssuedRef.current = false;
+      disconnectedSinceRef.current = null;
     };
   }, [planId, accessToken, dispatch, recoverGap]);
 }
