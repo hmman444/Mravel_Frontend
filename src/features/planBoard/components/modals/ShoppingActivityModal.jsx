@@ -77,7 +77,7 @@ export default function ShoppingActivityModal({
   const [internalShoppingLocation, setInternalShoppingLocation] = useState(null);
   const effectiveShoppingLocation = internalShoppingLocation || null;
 
-  // ===== LOAD DỮ LIỆU =====
+  //  LOAD DỮ LIỆU 
   useEffect(() => {
     if (!open) return;
 
@@ -160,7 +160,7 @@ export default function ShoppingActivityModal({
     }
   }, [open, editingCard]);
 
-  // ===== SYNC location -> name + address =====
+  //  SYNC location -> name + address 
   useEffect(() => {
     if (!effectiveShoppingLocation) return;
 
@@ -171,7 +171,7 @@ export default function ShoppingActivityModal({
     if (full) setAddress(full);
   }, [effectiveShoppingLocation]);
 
-  // ===== ITEMS CRUD =====
+  //  ITEMS CRUD 
   const handleAddItem = () => setItems((prev) => [...prev, { name: "", price: "" }]);
 
   const handleChangeItem = (idx, key, value) => {
@@ -184,7 +184,7 @@ export default function ShoppingActivityModal({
 
   const handleRemoveItem = (idx) => setItems((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== EXTRA COSTS CRUD =====
+  //  EXTRA COSTS CRUD 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -201,7 +201,7 @@ export default function ShoppingActivityModal({
 
   const removeExtraCost = (idx) => setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== COST CALC =====
+  //  COST CALC 
   // BASE (không gồm extra)
   const totalItemCost = useMemo(
     () =>
@@ -222,7 +222,7 @@ export default function ShoppingActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -254,7 +254,7 @@ export default function ShoppingActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
 
@@ -283,7 +283,7 @@ export default function ShoppingActivityModal({
     return { cost, split: splitPayload, participants: normalizedParticipants, filteredItems };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -328,7 +328,7 @@ export default function ShoppingActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

@@ -58,7 +58,7 @@ class MainSocket {
     // Gắn client hiện tại
     this.client = client;
 
-    // ========== HANDLER ==========
+    //  HANDLER 
     client.onConnect = () => {
       // Chặn callback của client cũ (trong trường hợp đã create client mới)
       if (this.client !== client) {

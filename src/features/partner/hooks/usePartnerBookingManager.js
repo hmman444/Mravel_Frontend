@@ -50,7 +50,7 @@ export function usePartnerBookingManager() {
     clearDetail,
   } = usePartnerBookings();
 
-  // ===== Fetch list theo filter =====
+  //  Fetch list theo filter 
   useEffect(() => {
     //  COMPLETED là tab suy ra từ thời gian => không gửi status=COMPLETED lên BE
     //  CONFIRMED cũng có thể bao gồm PAID => tốt nhất fetch rộng rồi FE tự filter
@@ -80,7 +80,7 @@ export function usePartnerBookingManager() {
       ? restaurantBookings.error
       : hotelBookings.error || restaurantBookings.error;
 
-  // ===== Merge + Search + TAB filter =====
+  //  Merge + Search + TAB filter 
   const filtered = useMemo(() => {
     const hotels = (hotelBookings.items || []).map((x) => ({ ...x, __type: "HOTEL" }));
     const restaurants = (restaurantBookings.items || []).map((x) => ({ ...x, __type: "RESTAURANT" }));

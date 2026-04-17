@@ -28,7 +28,7 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
     String(form?.destinationSlug || "").trim()
   );
 
-  // ===== images =====
+  //  images 
   const addImageByUrl = () => {
     setForm((p) => ({
       ...p,
@@ -112,7 +112,6 @@ export function usePartnerRestaurantForm({ initialForm, onSubmit, buildPayload }
   const submit = async () => {
     if (!requiredOk) return;
 
-    // ❗ Đừng JSON.stringify vì sẽ làm mất File object
     let draft = {
       ...form,
       images: Array.isArray(form.images) ? [...form.images] : [],

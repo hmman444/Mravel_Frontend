@@ -21,7 +21,6 @@ import {
   handleRequest,
   clearTrash,
   copyPlan,
-  // Phase 3d — granular command endpoints
   createListCmd,
   renameListCmd,
   deleteListCmd,
@@ -52,7 +51,6 @@ const initialState = {
   error: null,
   errorStatus: null,
   requests: [],
-  // Phase 2f — tracks the last applied boardRevision for gap detection
   lastRevision: null,
 };
 
@@ -427,43 +425,21 @@ const planBoardSlice = createSlice({
 
       state.board = normalized;
 
-      // Phase 2f — keep lastRevision in sync when full board is synced
       if (normalized.boardRevision != null) {
         state.lastRevision = normalized.boardRevision;
       }
     },
 
-    // Phase 2f — explicit revision setter used by gap recovery and v2 hook
     setLastRevision(state, action) {
       state.lastRevision = action.payload;
     },
 
-    /**
-     * Phase 4c — restore board to a previously captured snapshot.
-     * Used to roll back an optimistic update (e.g. drag-drop) when the server
-     * returns an error. Pass the value of state.board captured before the mutation.
-     */
     rollbackToSnapshot(state, action) {
       if (action.payload) {
         state.board = action.payload;
       }
     },
 
-    /**
-     * Phase 4a — apply a patch-only v2 event to local board state.
-     *
-     * Payload shape (CommandResponse or PlanBoardEventV2):
-     *   { entityType, entityId, operationType, patch, revision }
-     *
-     * Handled combinations:
-     *   LIST  × CREATE | UPDATE | DELETE | REORDER
-     *   CARD  × CREATE | UPDATE | DELETE | MOVE   | REORDER
-     *
-     * Guards:
-     *   - No-op if board is null
-     *   - No-op if revision <= lastRevision (duplicate / already applied)
-     *   - Always advances lastRevision on successful application
-     */
     applyPatchEvent(state, action) {
       if (!state.board) return;
 
@@ -691,7 +667,6 @@ const planBoardSlice = createSlice({
         const normalized = normalizeBoardPayload(a.payload);
         normalized.myRole = prevMyRole ?? normalized.myRole ?? null;
         s.board = normalized;
-        // Phase 2f — seed lastRevision from initial load
         if (normalized.boardRevision != null) {
           s.lastRevision = normalized.boardRevision;
         }

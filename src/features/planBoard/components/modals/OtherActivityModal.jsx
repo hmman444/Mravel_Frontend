@@ -76,7 +76,7 @@ export default function OtherActivityModal({
 
   const [errors, setErrors] = useState({});
 
-  // ===== LOAD WHEN OPEN =====
+  //  LOAD WHEN OPEN 
   useEffect(() => {
     if (!open) return;
 
@@ -152,7 +152,7 @@ export default function OtherActivityModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editingCard]);
 
-  // ===== SYNC MAP -> locationText =====
+  //  SYNC MAP -> locationText 
   useEffect(() => {
     if (!effectiveOtherLocation) return;
 
@@ -165,7 +165,7 @@ export default function OtherActivityModal({
     }
   }, [effectiveOtherLocation]);
 
-  // ===== COST LOGIC =====
+  //  COST LOGIC 
   const estimatedValue = useMemo(() => Number(estimatedCost || 0), [estimatedCost]);
 
   const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
@@ -182,7 +182,7 @@ export default function OtherActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -214,7 +214,7 @@ export default function OtherActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COST CRUD =====
+  //  EXTRA COST CRUD 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -232,7 +232,7 @@ export default function OtherActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== CUSTOM FIELDS CRUD =====
+  //  CUSTOM FIELDS CRUD 
   const handleAddField = () => setCustomFields((prev) => [...prev, { key: "", value: "" }]);
 
   const handleChangeField = (index, field, value) => {
@@ -246,7 +246,7 @@ export default function OtherActivityModal({
   const handleRemoveField = (index) =>
     setCustomFields((prev) => prev.filter((_, i) => i !== index));
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) =>
@@ -272,7 +272,7 @@ export default function OtherActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -321,7 +321,7 @@ export default function OtherActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER + FOOTER =====
+  //  HEADER + FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

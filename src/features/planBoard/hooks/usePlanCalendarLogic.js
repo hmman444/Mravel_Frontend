@@ -64,7 +64,6 @@ export function usePlanCalendarLogic({
   const weekDays = useMemo(() => getWeekDays(anchorDate), [anchorDate]);
   const dayListMap = useMemo(() => buildDayListMap(board), [board?.lists]);
 
-  // ❗ KHÔNG useMemo nữa để luôn sync với board hiện tại
   const events = buildCalendarEventsFromBoard(board);
 
   const eventsByDate = useMemo(() => {

@@ -91,7 +91,7 @@ export default function CinemaActivityModal({
   const [internalCinemaLocation, setInternalCinemaLocation] = useState(null);
   const effectiveCinemaLocation = internalCinemaLocation || null;
 
-  // ===== LOAD WHEN OPEN =====
+  //  LOAD WHEN OPEN 
   useEffect(() => {
     if (!open) return;
 
@@ -161,7 +161,7 @@ export default function CinemaActivityModal({
     }
   }, [open, editingCard]);
 
-  // ===== SYNC MAP -> CINEMA NAME + ADDRESS =====
+  //  SYNC MAP -> CINEMA NAME + ADDRESS 
   useEffect(() => {
     if (!effectiveCinemaLocation) return;
 
@@ -180,7 +180,7 @@ export default function CinemaActivityModal({
     }
   }, [effectiveCinemaLocation]);
 
-  // ===== EXTRA COST CRUD =====
+  //  EXTRA COST CRUD 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -198,7 +198,7 @@ export default function CinemaActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== COST LOGIC (MATCH NEW STANDARD) =====
+  //  COST LOGIC (MATCH NEW STANDARD) 
   // baseEstimated = vé + combo (không bao gồm extra)
   const baseEstimated = useMemo(() => {
     const t = Number(ticketPrice || 0);
@@ -220,7 +220,7 @@ export default function CinemaActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -252,7 +252,7 @@ export default function CinemaActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) =>
@@ -278,7 +278,7 @@ export default function CinemaActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -334,7 +334,7 @@ export default function CinemaActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

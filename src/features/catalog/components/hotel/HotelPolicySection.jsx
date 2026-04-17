@@ -101,7 +101,7 @@ export default function HotelPolicySection({ hotel }) {
 
         {/* RIGHT SIDE */}
         <div className="border-l border-gray-100 px-6 py-6 space-y-5">
-          {/* --- Chính sách lưu trú (thẻ trên cùng) --- */}
+          {/*  Chính sách lưu trú (thẻ trên cùng)  */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#e6f2ff] text-[#0064d2]">
@@ -118,7 +118,7 @@ export default function HotelPolicySection({ hotel }) {
             </div>
           </div>
 
-          {/* --- Thời gian nhận / trả phòng --- */}
+          {/*  Thời gian nhận / trả phòng  */}
           <PolicyCard
             icon={<Clock className="h-4 w-4" />}
             title={checkinItem?.title || "Thời gian nhận phòng/trả phòng"}
@@ -141,7 +141,7 @@ export default function HotelPolicySection({ hotel }) {
             </div>
           </PolicyCard>
 
-          {/* --- Giấy tờ bắt buộc --- */}
+          {/*  Giấy tờ bắt buộc  */}
           {requiredDocs && (
             <PolicyCard
               icon={<FileText className="h-4 w-4" />}
@@ -153,7 +153,7 @@ export default function HotelPolicySection({ hotel }) {
             </PolicyCard>
           )}
 
-          {/* --- Hướng dẫn nhận phòng chung --- */}
+          {/*  Hướng dẫn nhận phòng chung  */}
           {guide && (
             <PolicyCard icon={<Info className="h-4 w-4" />} title={guide.title}>
               <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
@@ -162,7 +162,7 @@ export default function HotelPolicySection({ hotel }) {
             </PolicyCard>
           )}
 
-          {/* --- Nút Đọc tất cả / Thu gọn --- */}
+          {/*  Nút Đọc tất cả / Thu gọn  */}
           {extraPolicies.length > 0 && (
             <button
               type="button"
@@ -174,7 +174,7 @@ export default function HotelPolicySection({ hotel }) {
             </button>
           )}
 
-          {/* --- Các policy khác, chỉ hiện khi showAll === true --- */}
+          {/*  Các policy khác, chỉ hiện khi showAll === true  */}
           {showAll && extraPolicies.length > 0 && (
             <div className="grid gap-4 md:grid-cols-2">
               {extraPolicies.map(({ key, icon, item }) => (
@@ -187,7 +187,7 @@ export default function HotelPolicySection({ hotel }) {
             </div>
           )}
 
-          {/* --- Thông tin chung (bảng như Traveloka) --- */}
+          {/*  Thông tin chung (bảng như Traveloka)  */}
           {generalInfo && (
             <div className="mt-4 border border-gray-200">
               <div className="border-b border-gray-200 bg-[#f4f7ff] px-4 py-3">
@@ -273,7 +273,7 @@ export default function HotelPolicySection({ hotel }) {
   );
 }
 
-// --- Sub components ---
+//  Sub components 
 
 function PolicyCard({ icon, title, children }) {
   return (

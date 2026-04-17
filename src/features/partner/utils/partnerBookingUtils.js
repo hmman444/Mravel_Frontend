@@ -1,6 +1,6 @@
 // src/features/partner/utils/partnerBookingUtils.js
 
-// ===== Helpers =====
+//  Helpers 
 export const fmtMoney = (v) => {
   if (v == null) return "--";
   try {
@@ -40,7 +40,7 @@ export const isFuture = (iso) => {
   return Number.isFinite(t) ? t > Date.now() : false;
 };
 
-// ===== Status configs =====
+//  Status configs 
 export const BOOKING_STATUS = {
   PENDING_PAYMENT: { label: "Chờ thanh toán", cls: "bg-yellow-100 text-yellow-700" },
   PAID: { label: "Đã thanh toán", cls: "bg-emerald-100 text-emerald-700" },
@@ -75,7 +75,7 @@ export const SERVICE_STATUS = {
   ADMIN_BLOCKED: { label: "Admin khóa", cls: "bg-red-100 text-red-700" },
 };
 
-// ===== pick helpers =====
+//  pick helpers 
 export const pickCode = (b) => b?.code || b?.bookingCode || b?.booking_code || b?.id;
 export const pickBookingStatus = (b) => b?.bookingStatus || b?.status || b?.booking_status;
 export const pickPaymentStatus = (b) => b?.paymentStatus || b?.payment?.status || b?.payStatus || b?.payment_status;
@@ -164,7 +164,7 @@ export const CANCELLED_SET = new Set([
   "REFUNDED",
 ]);
 
-// ===== time helpers (ADD) =====
+//  time helpers (ADD) 
 const isDateOnly = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
 
 const parseLocalDateOnly = (yyyyMMdd) => {

@@ -132,7 +132,7 @@ export default function HotelRoomsSection({ hotel }) {
   );
 }
 
-/* ======== SUB COMPONENTS ======== */
+/* === SUB COMPONENTS === */
 
 function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }) {
   const {
@@ -379,7 +379,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
   );
 }
 
-/* ==== MODAL CHI TIẾT PHÒNG ==== */
+/*  MODAL CHI TIẾT PHÒNG  */
 
 function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
   const {
@@ -825,7 +825,7 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
   );
 }
 
-/* ---------- small helpers ---------- */
+/*  small helpers  */
 
 function FilterChip({ children, active, onClick }) {
   const base =
@@ -856,7 +856,7 @@ function RoomAmenityIcon({ code }) {
   return <FaBath className="h-3.5 w-3.5" />;
 }
 
-/* --- Icons cho từng loại condition trong bảng giá --- */
+/*  Icons cho từng loại condition trong bảng giá  */
 
 function BoardTypeIcon({ boardType }) {
   const c = (boardType || "").toUpperCase();

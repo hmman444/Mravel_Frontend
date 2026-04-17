@@ -145,7 +145,7 @@ function App() {
           <Route path="/booking/restaurant" element={<RestaurantBookingPage />} />
           <Route path="/booking/payment-method" element={<PaymentMethodPage />} />
 
-          {/* ====== PARTNER (PUBLIC) ====== */}
+          {/* = PARTNER (PUBLIC) = */}
           <Route path="/partner" element={<PartnerLandingPage />} />
           <Route path="/partner/login" element={<PartnerLoginPage />} />
           <Route path="/partner/register" element={<PartnerRegisterPage />} />
@@ -153,7 +153,7 @@ function App() {
           <Route path="/partner/reset-password" element={<PartnerResetPasswordPage />} />
           <Route path="/partner/verify-otp" element={<PartnerVerifyOtpPage />} />
 
-          {/* ====== PARTNER (PROTECTED) ====== */}
+          {/* = PARTNER (PROTECTED) = */}
           <Route element={<PartnerProtectedRoute />}>
             <Route path="/partner/dashboard" element={<PartnerDashboardPage />} />
             <Route path="/partner/services" element={<PartnerServicesPage />} />

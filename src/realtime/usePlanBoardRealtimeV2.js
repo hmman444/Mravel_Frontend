@@ -1,7 +1,4 @@
 // src/realtime/usePlanBoardRealtimeV2.js
-// Phase 5 — subscribes to v2 patch-only event stream.
-// All v2 events are now patch-only (no board snapshot).
-// Gap recovery uses the /board/snapshot endpoint.
 
 import { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";

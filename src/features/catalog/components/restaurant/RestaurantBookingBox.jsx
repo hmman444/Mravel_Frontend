@@ -46,7 +46,7 @@ export default function RestaurantBookingBox({
     if (!time || !timeOptions.includes(time)) setTime(timeOptions[0]);
   }, [timeOptions]); // eslint-disable-line
 
-  /* ===== popover: guests ===== */
+  /*  popover: guests  */
   const [openGuests, setOpenGuests] = useState(false);
   const guestsRef = useRef(null);
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function RestaurantBookingBox({
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  /* ===== popover: time ===== */
+  /*  popover: time  */
   const [openTime, setOpenTime] = useState(false);
   const timeRef = useRef(null);
   useEffect(() => {

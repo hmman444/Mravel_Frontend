@@ -279,9 +279,9 @@ export function buildPlanStats(board) {
   };
 }
 
-/* ============
+/* ==
    Badges
-============ */
+== */
 export function getAccuracyBadge(pct) {
   if (pct >= 90)
     return {
@@ -337,9 +337,9 @@ export function getHealthBadge(score) {
   };
 }
 
-/* ============
+/* ==
    Labels
-============ */
+== */
 
 export function labelActivityType(type) {
   const t = String(type || "OTHER").toUpperCase();
@@ -381,9 +381,9 @@ export function typeEmoji(type) {
   return map[t] || "📌";
 }
 
-/* ============
+/* ==
    Internals
-============ */
+== */
 
 function issue(code, severity, title, message) {
   return { code, severity, title, message };

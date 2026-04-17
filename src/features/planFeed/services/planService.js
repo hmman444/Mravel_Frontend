@@ -67,11 +67,32 @@ export async function fetchMyPlans(page = 1, size = 5) {
   return res.data.data;
 }
 
-export async function searchPlansAndUsers(q, page = 1, size = 10) {
+/**
+ * Advanced search — cursor-based pagination via Elasticsearch search_after.
+ *
+ * @param {string}      q       — free-text keyword
+ * @param {object}      filters — { budgetMin, budgetMax, daysMin, daysMax,
+ *                                  startDateFrom, startDateTo, destinations[],
+ *                                  sortBy }
+ * @param {string|null} cursor  — opaque cursor from previous response; null = first page
+ * @param {number}      size
+ */
+export async function searchPlansAndUsers(q, filters = {}, cursor = null, size = 10) {
   const params = new URLSearchParams();
   params.set("q", q || "");
-  params.set("page", String(page));
   params.set("size", String(size));
+
+  if (cursor)                 params.set("cursor",         cursor);
+  if (filters.budgetMin)      params.set("budgetMin",      String(filters.budgetMin));
+  if (filters.budgetMax)      params.set("budgetMax",      String(filters.budgetMax));
+  if (filters.daysMin)        params.set("daysMin",        String(filters.daysMin));
+  if (filters.daysMax)        params.set("daysMax",        String(filters.daysMax));
+  if (filters.startDateFrom)  params.set("startDateFrom",  filters.startDateFrom);
+  if (filters.startDateTo)    params.set("startDateTo",    filters.startDateTo);
+  if (filters.sortBy)         params.set("sortBy",         filters.sortBy);
+
+  // Repeated param for array
+  (filters.destinations || []).forEach((d) => params.append("destinations", d));
 
   const res = await api.get(`${BASE}/search?${params.toString()}`);
   return res.data.data;

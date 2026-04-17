@@ -73,7 +73,7 @@ export default function FoodActivityModal({
   const [internalFoodLocation, setInternalFoodLocation] = useState(null);
   const effectiveFoodLocation = internalFoodLocation || null;
 
-  // ===== LOAD WHEN OPEN =====
+  //  LOAD WHEN OPEN 
   useEffect(() => {
     if (!open) return;
 
@@ -153,7 +153,7 @@ export default function FoodActivityModal({
     }
   }, [open, editingCard]);
 
-  // ===== SYNC FROM LOCATION -> NAME + ADDRESS =====
+  //  SYNC FROM LOCATION -> NAME + ADDRESS 
   useEffect(() => {
     if (!effectiveFoodLocation) return;
 
@@ -165,7 +165,7 @@ export default function FoodActivityModal({
     }
   }, [effectiveFoodLocation]);
 
-  // ===== COST CALC =====
+  //  COST CALC 
   const baseEstimated = useMemo(() => {
     const p = Number(pricePerPerson || 0);
     const c = Number(peopleCount || 0);
@@ -181,7 +181,7 @@ export default function FoodActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
@@ -209,7 +209,7 @@ export default function FoodActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COSTS =====
+  //  EXTRA COSTS 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -226,7 +226,7 @@ export default function FoodActivityModal({
 
   const removeExtraCost = (idx) => setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p.memberId));
@@ -247,7 +247,7 @@ export default function FoodActivityModal({
     return { cost, split: splitPayload, participants: normalizedParticipants };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -292,7 +292,7 @@ export default function FoodActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

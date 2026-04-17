@@ -8,7 +8,7 @@ export default function RestaurantGallery({ restaurant }) {
 
   if (!restaurant) return null;
 
-  /* ========== LẤY DANH SÁCH ẢNH ========== */
+  /*  LẤY DANH SÁCH ẢNH  */
   const rawImages = Array.isArray(restaurant.images) ? restaurant.images : [];
   const galleryImages = rawImages
     .map((img) => img?.url || img?.imageUrl || img?.src)
@@ -24,7 +24,7 @@ export default function RestaurantGallery({ restaurant }) {
   const SIDE_SLOTS = 6;
   const sideImages = galleryImages.slice(1, SIDE_SLOTS + 1);
 
-  /* ========== HANDLER GALLERY FULLSCREEN ========== */
+  /*  HANDLER GALLERY FULLSCREEN  */
   const openGalleryAt = (idx) => {
     if (!totalImages) return;
     const safeIndex =
@@ -49,7 +49,7 @@ export default function RestaurantGallery({ restaurant }) {
 
   return (
     <>
-      {/* ==== GALLERY CHÍNH (1 ảnh lớn + 6 ảnh nhỏ) ==== */}
+      {/*  GALLERY CHÍNH (1 ảnh lớn + 6 ảnh nhỏ)  */}
       <section className="rounded-3xl overflow-hidden bg-gray-200">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-[4px] bg-white">
           {/* ẢNH LỚN BÊN TRÁI (≈ 2/3 width) */}
@@ -114,7 +114,7 @@ export default function RestaurantGallery({ restaurant }) {
         </div>
       </section>
 
-      {/* ==== OVERLAY XEM ẢNH FULLSCREEN ==== */}
+      {/*  OVERLAY XEM ẢNH FULLSCREEN  */}
       {isGalleryOpen &&
         totalImages > 0 &&
         createPortal(

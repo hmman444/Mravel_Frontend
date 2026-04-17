@@ -99,21 +99,9 @@ export default function ManageServicesPage() {
         }
     };
 
-    /** == AUTO LOAD ==
-     *  Load khi:
-     * - đổi mode
-     * - search debounce thay đổi
-     * - status/active/unlock thay đổi
-     *
-     * ❗ Tránh StrictMode dev gọi 2 lần:
-     * - bỏ qua lần effect đầu tiên nếu strictModeRef đã true
-     */
     useEffect(() => {
-        // StrictMode dev thường chạy effect 2 lần ở lần mount đầu
         if (!strictModeRef.current) {
         strictModeRef.current = true;
-        // vẫn load lần đầu luôn cho chắc (nếu bạn muốn bỏ thì return;)
-        // return;
         }
         reload(mode, queryParams);
         // eslint-disable-next-line react-hooks/exhaustive-deps

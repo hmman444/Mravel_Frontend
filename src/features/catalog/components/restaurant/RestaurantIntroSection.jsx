@@ -4,7 +4,7 @@ import { useState } from "react";
 export default function RestaurantIntroSection() {
   const [expanded, setExpanded] = useState(false);
 
-  // ───────── SHORT CONTENT: 3 đoạn mở đầu ─────────
+  // ─ SHORT CONTENT: 3 đoạn mở đầu ─
   const shortHtml = `
 <p>
   Vào năm 2025, Mravel ra mắt dịch vụ <strong>đặt bàn nhà hàng trực tuyến</strong> ngay trên website và ứng dụng của mình. Dịch vụ này giúp người dùng dễ dàng tìm kiếm và giữ chỗ tại các nhà hàng yêu thích mà không cần phải gọi điện nhiều nơi hay mất thời gian đến trực tiếp để đặt chỗ.
@@ -19,7 +19,7 @@ export default function RestaurantIntroSection() {
 </p>
 `;
 
-  // ───────── FULL CONTENT: toàn bộ phần còn lại ─────────
+  // ─ FULL CONTENT: toàn bộ phần còn lại ─
   const fullHtml = `
 ${shortHtml}
 

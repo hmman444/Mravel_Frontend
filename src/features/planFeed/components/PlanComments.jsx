@@ -38,7 +38,6 @@ export default function PlanComments({
     setIsReady(true);
   }, [me]);
 
-  // ❗ Từ đây trở xuống KHÔNG còn hook nào nữa
   if (!isReady || !me) {
     return (
       <div className="mt-3 flex items-center gap-2 text-sm text-gray-500 animate-pulse">

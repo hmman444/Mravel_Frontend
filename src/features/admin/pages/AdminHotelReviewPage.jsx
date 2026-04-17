@@ -110,7 +110,7 @@ export default function AdminHotelReviewPage() {
 
   return (
     <AdminLayout>
-      {/* ===== Header + Moderation actions ===== */}
+      {/*  Header + Moderation actions  */}
       <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
@@ -192,7 +192,7 @@ export default function AdminHotelReviewPage() {
         </div>
       </div>
 
-      {/* ===== Partner-form structure (READONLY) ===== */}
+      {/*  Partner-form structure (READONLY)  */}
       {detailLoading && !hotel ? (
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (

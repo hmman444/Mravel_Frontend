@@ -9,6 +9,17 @@ import {
   fetchPlanFeedDetail, 
 } from "../services/planService";
 
+export const DEFAULT_FILTERS = {
+  budgetMin: "",
+  budgetMax: "",
+  daysMin: "",
+  daysMax: "",
+  startDateFrom: "",
+  startDateTo: "",
+  destinations: [],
+  sortBy: "RELEVANCE",
+};
+
 const initialState = {
   items: [],
   current: null,
@@ -28,7 +39,11 @@ const initialState = {
   searchLoading: false,
   searchPlans: [],
   searchUsers: [],
-  searchMeta: { page: 1, size: 10, total: 0, hasMore: false },
+  searchMeta: { nextCursor: null, size: 10, total: 0, hasMore: false },
+
+  // Advanced filter state
+  activeFilters: { ...DEFAULT_FILTERS },
+  filterSidebarOpen: false,
 
   error: null,
 };
@@ -78,10 +93,13 @@ export const loadMyPlans = createAsyncThunk(
   }
 );
 
-export const searchAll = createAsyncThunk("plan/searchAll", async ({ q, page = 1, size = 10 }) => {
-  const res = await searchPlansAndUsers(q, page, size);
-  return { q, res };
-});
+export const searchAll = createAsyncThunk(
+  "plan/searchAll",
+  async ({ q, filters = {}, cursor = null, size = 10 }) => {
+    const res = await searchPlansAndUsers(q, filters, cursor, size);
+    return { q, res, isLoadMore: cursor != null };
+  }
+);
 
 const planSlice = createSlice({
   name: "plan",
@@ -97,7 +115,16 @@ const planSlice = createSlice({
       state.searchLoading = false;
       state.searchPlans = [];
       state.searchUsers = [];
-      state.searchMeta = { page: 1, size: 10, total: 0, hasMore: false };
+      state.searchMeta = { nextCursor: null, size: 10, total: 0, hasMore: false };
+    },
+    setActiveFilters(state, action) {
+      state.activeFilters = { ...DEFAULT_FILTERS, ...action.payload };
+    },
+    resetFilters(state) {
+      state.activeFilters = { ...DEFAULT_FILTERS };
+    },
+    setFilterSidebarOpen(state, action) {
+      state.filterSidebarOpen = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -186,19 +213,35 @@ const planSlice = createSlice({
         state.myLoading = false;
         state.error = action.error.message;
       })
-      .addCase(searchAll.pending, (state) => {
+      .addCase(searchAll.pending, (state, action) => {
         state.searchLoading = true;
+        // Always update the visible query label immediately
+        state.searchQuery = action.meta.arg.q;
       })
       .addCase(searchAll.fulfilled, (state, action) => {
-        const { q, res } = action.payload;
+        const { q, res, isLoadMore } = action.payload;
 
         state.searchLoading = false;
         state.searchQuery = q;
 
-        state.searchPlans = res?.plans?.items || [];
-        state.searchUsers = res?.users || [];
+        const newPlans = res?.plans?.items || [];
+
+        if (isLoadMore) {
+          // Append, deduplicating by id to guard against React Strict Mode
+          // double-firing the IntersectionObserver callback.
+          const existingIds = new Set(state.searchPlans.map((p) => p.id));
+          state.searchPlans = [
+            ...state.searchPlans,
+            ...newPlans.filter((p) => !existingIds.has(p.id)),
+          ];
+        } else {
+          // Fresh search — replace the list and reset user results
+          state.searchPlans = newPlans;
+          state.searchUsers = res?.users || [];
+        }
+
         state.searchMeta = {
-          page: res?.plans?.page || 1,
+          nextCursor: res?.plans?.nextCursor || null,
           size: res?.plans?.size || 10,
           total: res?.plans?.total || 0,
           hasMore: !!res?.plans?.hasMore,
@@ -223,5 +266,11 @@ const planSlice = createSlice({
   },
 });
 
-export const { resetPlans, clearSearch } = planSlice.actions;
+export const {
+  resetPlans,
+  clearSearch,
+  setActiveFilters,
+  resetFilters,
+  setFilterSidebarOpen,
+} = planSlice.actions;
 export default planSlice.reducer;
