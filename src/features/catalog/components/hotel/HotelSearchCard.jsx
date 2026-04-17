@@ -19,7 +19,7 @@ import DestinationTypeahead from "../../../../components/DestinationTypeahead";
 import { formatLocalDate, addDaysLocal } from "../../../catalog/utils/dateLocal";
 import { showError } from "../../../../utils/toastUtils";
 
-/* ───────── Small helpers ───────── */
+/* ─ Small helpers ─ */
 function RowField({ label, children, onClick, refBox, className = "" }) {
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
@@ -43,15 +43,15 @@ const VN_DATE = (d) =>
     year: "numeric",
   });
 
-/* ───────── Main Component ───────── */
+/* ─ Main Component ─ */
 export default function HotelSearchCard() {
   const navigate = useNavigate();
 
-  /* ── Destination ── */
+  /*  Destination  */
   const destRef = useRef({ text: "", slug: null });
   const [, setDest] = useState({ text: "", slug: null });
 
-  /* ── Dates & nights ── */
+  /*  Dates & nights  */
   const [checkIn, setCheckIn] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -65,7 +65,7 @@ export default function HotelSearchCard() {
     return addDaysLocal(base, Math.max(1, Math.min(30, Number(nights) || 1)));
   }, [checkIn, nights]);
 
-  /* ── Nights dropdown ── */
+  /*  Nights dropdown  */
   const [openNights, setOpenNights] = useState(false);
   const nightsBoxRef = useRef(null);
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function HotelSearchCard() {
   }, []);
   const nightList = Array.from({ length: 30 }, (_, i) => i + 1);
 
-  /* ── Guests & rooms dropdown ── */
+  /*  Guests & rooms dropdown  */
   const [openGuests, setOpenGuests] = useState(false);
   const guestsBoxRef = useRef(null);
   const [adults, setAdults] = useState(1);
@@ -126,7 +126,7 @@ export default function HotelSearchCard() {
     setDest(next);
   };
 
-  /* ── Submit ( giống Home) ── */
+  /*  Submit ( giống Home)  */
   const submit = () => {
     const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
     if (!locationVal) {

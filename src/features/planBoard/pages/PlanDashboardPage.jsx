@@ -184,7 +184,6 @@ export default function PlanDashboardPage() {
       destIndex: destination.index,
     };
 
-    // Phase 4c — capture snapshot before optimistic update for rollback
     const boardSnapshot = board ? { ...board, lists: board.lists?.map(l => ({ ...l, cards: l.cards ? [...l.cards] : [] })) } : null;
 
     localReorder(payload);

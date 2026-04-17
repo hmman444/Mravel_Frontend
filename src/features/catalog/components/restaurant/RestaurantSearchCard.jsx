@@ -33,13 +33,13 @@ const CUISINE_OPTIONS = [
 ];
 
 export default function RestaurantSearchCard({ onSubmit }) {
-  // ---- Địa điểm
+  //  Địa điểm
   const [dest, setDest] = useState({ text: "", slug: null });
 
-  // ---- Ngày dùng bữa
+  //  Ngày dùng bữa
   const [date, setDate] = useState(() => new Date());
 
-  // ---- Giờ
+  //  Giờ
   const timeOptions = useMemo(buildTimeOptions, []);
   const [time, setTime] = useState("");
   const [openTime, setOpenTime] = useState(false);
@@ -55,10 +55,10 @@ export default function RestaurantSearchCard({ onSubmit }) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  // ---- Số người
+  //  Số người
   const [people, setPeople] = useState(2);
 
-  // ---- Ẩm thực (dropdown)
+  //  Ẩm thực (dropdown)
   const [cuisineCode, setCuisineCode] = useState(""); // lưu CODE (VD: "VIETNAMESE")
   const [openCuisine, setOpenCuisine] = useState(false);
   const cuisineBoxRef = useRef(null);

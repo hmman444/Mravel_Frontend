@@ -50,7 +50,7 @@ export function useAdminPlaceDetail() {
   const isLockedReadOnly = !isEditing && !isCreate;
   const headerTitle = useMemo(() => (isCreate ? "Thêm địa điểm" : "Chi tiết địa điểm"), [isCreate]);
 
-  // ------- effects -------
+  //  effects 
   useEffect(() => {
     clearDetail();
     if (!isCreate) loadDetail(slug).catch(toastErr);
@@ -80,7 +80,7 @@ export function useAdminPlaceDetail() {
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty, isCreate, isEditing]);
 
-  // ------- helpers -------
+  //  helpers 
   const markDirty = () => setDirty(true);
 
   const setField = (key, val) => {
@@ -93,7 +93,7 @@ export function useAdminPlaceDetail() {
     setLeaveOpen(true);
   };
 
-  // ------- navigation / edit -------
+  //  navigation / edit 
   const goBack = () => {
     if ((isCreate || isEditing) && dirty) return openLeaveConfirm(() => nav(-1));
     nav(-1);
@@ -204,7 +204,7 @@ export function useAdminPlaceDetail() {
     }
   };
 
-  // ------- IMAGES -------
+  //  IMAGES 
   const addImage = () => {
     setForm((s) => ({
       ...s,
@@ -255,7 +255,7 @@ export function useAdminPlaceDetail() {
     }
   };
 
-  // ------- CONTENT BLOCKS -------
+  //  CONTENT BLOCKS 
   const addBlock = (type) => {
     setForm((s) => ({ ...s, content: [...(s.content || []), emptyBlock(type)] }));
     setDirty(true);
@@ -303,7 +303,7 @@ export function useAdminPlaceDetail() {
     }
   };
 
-  // ------- GALLERY inside blocks -------
+  //  GALLERY inside blocks 
   const uploadGalleryItem = async (blockIdx, itemIdx, file) => {
     try {
       const url = await uploadToCloudinary(file);

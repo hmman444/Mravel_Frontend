@@ -12,7 +12,7 @@ function slugifyVN(input) {
     .replace(/đ/g, "d")
     .replace(/[^a-z0-9\s-]/g, "") // bỏ ký tự lạ
     .replace(/\s+/g, "-") // space -> -
-    .replace(/-+/g, "-") // gộp ---
+    .replace(/-+/g, "-") // gộp 
     .replace(/^-+|-+$/g, ""); // bỏ - đầu/cuối
   return s;
 }

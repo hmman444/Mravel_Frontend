@@ -42,7 +42,7 @@ export default function HotelStorySection({ hotel }) {
 
   if (!storyBlocks.length) return null;
 
-  // --- Logic xem thêm / thu gọn ---
+  //  Logic xem thêm / thu gọn 
   const MAX_BLOCKS_COLLAPSED = 6; // số block hiển thị khi thu gọn
 
   const shouldShowToggle = storyBlocks.length > MAX_BLOCKS_COLLAPSED;

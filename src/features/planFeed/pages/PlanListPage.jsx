@@ -63,7 +63,7 @@ function HighlightText({ text, query }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+//  Main component 
 export default function PlanListPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -121,7 +121,7 @@ export default function PlanListPage() {
   const urlQuery = (searchParams.get("query") || "").trim();
 
 
-  // ── Search history helpers ────────────────────────────────────────────────
+  //  Search history helpers 
   const saveSearchHistory = useCallback((q) => {
     if (!q.trim()) return;
     setRecentSearches((prev) => {
@@ -149,7 +149,7 @@ export default function PlanListPage() {
     if (filterSidebarOpen) setDraftFilters(activeFilters);
   }, [filterSidebarOpen, activeFilters]);
 
-  // ── Core search trigger ───────────────────────────────────────────────────
+  //  Core search trigger ─
   const triggerSearch = useCallback(
     (q, filters) => {
       const resolvedFilters = filters || activeFilters;
@@ -169,7 +169,7 @@ export default function PlanListPage() {
   }, [keyword, activeFilters, triggerSearch, saveSearchHistory]);
 
 
-  // ── Clear all ─────────────────────────────────────────────────────────────
+  //  Clear all ─
   const clear = useCallback(() => {
     ignoreNextUrlSyncRef.current = true;
     setSearchParams({});
@@ -181,7 +181,7 @@ export default function PlanListPage() {
     setShowSuggestions(false);
   }, [setSearchParams, resetSearch, clearFilters]);
 
-  // ── Apply filters from sidebar ────────────────────────────────────────────
+  //  Apply filters from sidebar 
   const handleApplyFilters = useCallback(
     (newFilters) => {
       updateFilters(newFilters);
@@ -193,7 +193,7 @@ export default function PlanListPage() {
     [keyword, updateFilters, setSearchParams, doSearch]
   );
 
-  // ── Remove single filter chip ─────────────────────────────────────────────
+  //  Remove single filter chip ─
   const handleRemoveChip = useCallback(
     (key, value) => {
       let next = { ...activeFilters };
@@ -217,7 +217,7 @@ export default function PlanListPage() {
     [activeFilters, keyword, updateFilters, doSearch]
   );
 
-  // ── Click outside closes suggestions ─────────────────────────────────────
+  //  Click outside closes suggestions ─
   useEffect(() => {
     const handler = (e) => {
       if (
@@ -231,7 +231,7 @@ export default function PlanListPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── URL sync ──────────────────────────────────────────────────────────────
+  //  URL sync 
   useEffect(() => {
     if (ignoreNextUrlSyncRef.current) {
       ignoreNextUrlSyncRef.current = false;
@@ -311,7 +311,7 @@ export default function PlanListPage() {
     return () => observer.disconnect();
   }, [isSearching, searchMeta?.hasMore, searchLoading, loadMoreSearch]);
 
-  // ── Suggestions data ──────────────────────────────────────────────────────
+  //  Suggestions data 
   const suggestions = useMemo(() => {
     const q = keyword.toLowerCase();
     if (!q) {
@@ -343,7 +343,7 @@ export default function PlanListPage() {
     [activeFilters, triggerSearch, saveSearchHistory]
   );
 
-  // ── Display data ──────────────────────────────────────────────────────────
+  //  Display data 
   const displayPlans = useMemo(
     () => (isSearching ? searchPlans || [] : items || []),
     [isSearching, searchPlans, items]
@@ -359,14 +359,14 @@ export default function PlanListPage() {
     (searchPlans?.length || 0) === 0 &&
     (searchUsers?.length || 0) === 0;
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  //  Render 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8fafc] dark:bg-gray-950">
       <Navbar />
 
       <main className="flex-1 w-full mx-auto pt-24 pb-16 px-3 sm:px-4 max-w-5xl">
 
-        {/* ── Main layout (Sidebar + Content Column) ──────────────────── */}
+        {/*  Main layout (Sidebar + Content Column)  */}
         <div className="flex flex-col lg:flex-row items-start justify-center gap-0 lg:gap-0">
           
           <PlanFilterSidebar
@@ -384,7 +384,7 @@ export default function PlanListPage() {
             activeCount={activeFilterCount}
           />
 
-          {/* ── Content column (Search + Feed) ────────────────────────── */}
+          {/*  Content column (Search + Feed)  */}
           <div
             className={`
               w-full min-w-0 max-w-2xl
@@ -433,7 +433,7 @@ export default function PlanListPage() {
               </div>
             </div>
 
-            {/* ── Prominent search bar ──────────────────────────────────── */}
+            {/*  Prominent search bar  */}
             <div className="mt-6 relative z-10" ref={searchWrapperRef}>
               <div className="relative">
                 {/* Input row */}
@@ -536,7 +536,7 @@ export default function PlanListPage() {
                   </button>
                 </div>
 
-                {/* ── Suggestion dropdown ────────────────────────────── */}
+                {/*  Suggestion dropdown  */}
                 {showSuggestions && hasSuggestions && (
                   <div className="absolute left-0 right-0 top-full z-50 bg-white dark:bg-gray-900 border-2 border-t-0 border-sky-500 rounded-b-2xl shadow-xl overflow-hidden">
                     {/* Recent searches */}
@@ -601,7 +601,7 @@ export default function PlanListPage() {
               </div>
             </div>
 
-            {/* ── Filter toggle + search status bar ────────────────────── */}
+            {/*  Filter toggle + search status bar  */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -646,7 +646,7 @@ export default function PlanListPage() {
           </section>
         </FadeInSection>
 
-            {/* ── Results feed ────────────────────────────────────────────── */}
+            {/*  Results feed  */}
             <div className="min-w-0">
 
             {/* Search users section */}
@@ -692,7 +692,7 @@ export default function PlanListPage() {
                 </FadeInSection>
               )}
 
-            {/* ── Empty feed state ────────────────────────────────────── */}
+            {/*  Empty feed state  */}
             {isEmpty && !displayLoading ? (
               <FadeInSection delay={200}>
                 <div className="mt-16 flex flex-col items-center text-center py-12">
@@ -722,7 +722,7 @@ export default function PlanListPage() {
                 </div>
               </FadeInSection>
             ) : isSearchEmpty ? (
-              /* ── Search empty state ─────────────────────────────────── */
+              /*  Search empty state ─ */
               <FadeInSection delay={120}>
                 <div className="mt-12 flex flex-col items-center text-center py-12">
                   <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
@@ -769,7 +769,7 @@ export default function PlanListPage() {
                 </div>
               </FadeInSection>
             ) : (
-              /* ── Results feed (Facebook-style) ────────────────────── */
+              /*  Results feed (Facebook-style)  */
               <>
                 <div className="flex flex-col gap-5">
                   {displayPlans.map((p, i) => (

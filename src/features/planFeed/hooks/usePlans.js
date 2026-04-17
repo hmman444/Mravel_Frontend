@@ -39,7 +39,7 @@ export function usePlans() {
   const sendReact   = (planId, type)    => dispatch(reactPlan({ planId, type }));
   const sendComment = (planId, comment) => dispatch(commentPlan({ planId, comment }));
 
-  // ── Search ──────────────────────────────────────────────────────────────────
+  //  Search 
   /** Fresh search — always resets to first page (cursor: null). */
   const doSearch = (q, filters) =>
     dispatch(searchAll({ q, filters: filters ?? activeFilters, cursor: null, size: 10 }));
@@ -61,7 +61,7 @@ export function usePlans() {
 
   const loadFeedDetail = (id) => dispatch(loadPlanFeedDetail({ id }));
 
-  // ── Filters ─────────────────────────────────────────────────────────────────
+  //  Filters ─
   const updateFilters = (newFilters) => dispatch(setActiveFilters(newFilters));
   const clearFilters  = () => dispatch(resetFilters());
 

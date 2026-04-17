@@ -94,7 +94,7 @@ const adminAmenitySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      /* -------- LOAD -------- */
+      /*  LOAD  */
       .addCase(loadAmenities.pending, (state) => {
         state.loading = true;
       })
@@ -107,7 +107,7 @@ const adminAmenitySlice = createSlice({
         state.error = action.error.message;
       })
 
-      /* -------- GROUPED -------- */
+      /*  GROUPED  */
       .addCase(loadGroupedAmenities.pending, (state) => {
         state.loading = true;
       })
@@ -120,7 +120,7 @@ const adminAmenitySlice = createSlice({
         state.error = action.error.message;
       })
 
-      /* -------- CREATE -------- */
+      /*  CREATE  */
       .addCase(createAmenityThunk.pending, (state) => {
         state.saving = true;
       })
@@ -133,7 +133,7 @@ const adminAmenitySlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      /* -------- UPDATE -------- */
+      /*  UPDATE  */
       .addCase(updateAmenityThunk.pending, (state) => {
         state.saving = true;
       })
@@ -147,7 +147,7 @@ const adminAmenitySlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      /* -------- DELETE -------- */
+      /*  DELETE  */
       .addCase(deleteAmenityThunk.pending, (state) => {
         state.deleting = true;
       })

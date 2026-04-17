@@ -21,7 +21,7 @@ export default function CommentItem({ comment, me, onReply }) {
     }
   }, [showReplyInput]);
 
-  // ==== ROOT USER + AVATAR (fallback nhiều tầng) ====
+  //  ROOT USER + AVATAR (fallback nhiều tầng) 
   const rootUser = comment.user || {};
   const rootAvatar =
     rootUser.avatar ||
@@ -87,7 +87,7 @@ export default function CommentItem({ comment, me, onReply }) {
 
   return (
     <div className="mt-3">
-      {/* ===== ROOT COMMENT ===== */}
+      {/*  ROOT COMMENT  */}
       <div className="flex items-start gap-2">
         {/* Avatar gốc (không còn đường nối) */}
         <Link
@@ -155,7 +155,7 @@ export default function CommentItem({ comment, me, onReply }) {
             </button>
           )}
 
-          {/* ===== REPLIES + Ô REPLY ===== */}
+          {/*  REPLIES + Ô REPLY  */}
           <div
             className={`
               transition-all duration-200 ease-out overflow-hidden
@@ -225,7 +225,7 @@ export default function CommentItem({ comment, me, onReply }) {
  * Reply item
  */
 function ReplyItem({ reply, parentUser, onClickReply }) {
-  // ==== USER + AVATAR (fallback nhiều field) ====
+  //  USER + AVATAR (fallback nhiều field) 
   const user = reply.user || {};
   const name = user.name || reply.userName || "Người dùng";
 

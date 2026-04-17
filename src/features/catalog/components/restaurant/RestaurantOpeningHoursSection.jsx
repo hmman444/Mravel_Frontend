@@ -10,7 +10,7 @@ const VN_DAYS = {
   5: "Thứ sáu", 6: "Thứ bảy", 7: "Chủ nhật",
 };
 
-/* ========= helpers ========= */
+/*  helpers  */
 const z = (n) => String(n).padStart(2, "0");
 const hhmm = (h, m) => `${z(h)}:${z(m)}`;
 const parseHHMM = (s) => {

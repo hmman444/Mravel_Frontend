@@ -11,7 +11,7 @@ export default function RestaurantBookingGuide() {
   return (
     <section className="w-full bg-white">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-12">
-        {/* ===== TIÊU ĐỀ + ĐOẠN MỞ ĐẦU ===== */}
+        {/*  TIÊU ĐỀ + ĐOẠN MỞ ĐẦU  */}
         <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 mb-4">
           Đặt Bàn Tại Mravel Giúp Bạn Thoải Mái Tận Hưởng Bữa Ăn
         </h2>
@@ -28,7 +28,7 @@ export default function RestaurantBookingGuide() {
           suôn sẻ.
         </p>
 
-        {/* ===== BLOCK 1: TRƯỚC KHI ĐẶT BÀN (Hình trái – chữ phải) ===== */}
+        {/*  BLOCK 1: TRƯỚC KHI ĐẶT BÀN (Hình trái – chữ phải)  */}
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
           {/* Hình */}
           <div className="flex justify-center">
@@ -69,7 +69,7 @@ export default function RestaurantBookingGuide() {
           </div>
         </div>
 
-        {/* ===== BLOCK 2: SAU KHI ĐẶT BÀN (1–2, chữ trái – hình phải) ===== */}
+        {/*  BLOCK 2: SAU KHI ĐẶT BÀN (1–2, chữ trái – hình phải)  */}
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
           {/* Text trái */}
           <div>
@@ -101,7 +101,7 @@ export default function RestaurantBookingGuide() {
           </div>
         </div>
 
-        {/* ===== BLOCK 3: TIẾP TỤC 3–5 (Hình trái – chữ phải) ===== */}
+        {/*  BLOCK 3: TIẾP TỤC 3–5 (Hình trái – chữ phải)  */}
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
           {/* Hình trái */}
           <div className="flex justify-center">

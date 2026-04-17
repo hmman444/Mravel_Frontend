@@ -8,11 +8,6 @@ export async function fetchBoard(planId) {
   return res.data.data;
 }
 
-/**
- * Phase 2f — gap recovery.
- * Returns { mode, currentRevision, events?, board? }
- * mode = "incremental" | "full_snapshot"
- */
 export async function fetchBoardSnapshot(planId, afterRevision) {
   const params = afterRevision != null ? { afterRevision } : {};
   const res = await api.get(`${BASE}/${planId}/board/snapshot`, { params });
@@ -165,10 +160,6 @@ export async function deletePlan(planId) {
   const res = await api.delete(`${BASE}/${planId}`);
   return res.data.data;
 }
-
-// ── Phase 3d — granular command API ──────────────────────────────────────────
-// Each function sends an Idempotency-Key header so retries are safe.
-// Returns CommandResponse: { entityType, entityId, operationType, patch, operationId, revision, occurredAt }
 
 function genIdempotencyKey() {
   return crypto.randomUUID();

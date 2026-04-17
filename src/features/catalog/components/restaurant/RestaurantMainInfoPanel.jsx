@@ -1,6 +1,6 @@
 import { FaMapMarkerAlt, FaFlag, FaDollarSign, FaClock, FaStar } from "react-icons/fa";
 
-/* ===== Helpers ===== */
+/*  Helpers  */
 const formatCurrencyVND = (v) => {
   if (v === null || v === undefined) return null;
   const n = typeof v === "number" ? v : Number(v);

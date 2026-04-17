@@ -226,7 +226,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ❗Chưa login: chỉ hiện Login/Register */}
+          {/* Chưa login: chỉ hiện Login/Register */}
           {!accessToken ? (
             <>
               <Link className="font-medium hover:text-sky-600 transition" to="/login">

@@ -74,7 +74,7 @@ export default function SightseeingActivityModal({
   const [internalSightLocation, setInternalSightLocation] = useState(null);
   const effectiveSightLocation = internalSightLocation || null;
 
-  // ===== LOAD =====
+  //  LOAD 
   useEffect(() => {
     if (!open) return;
 
@@ -171,7 +171,7 @@ export default function SightseeingActivityModal({
     if (full) setAddress(full);
   }, [effectiveSightLocation]);
 
-  // ===== COST CALC =====
+  //  COST CALC 
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
     const c = Number(peopleCount || 0);
@@ -189,7 +189,7 @@ export default function SightseeingActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT =====
+  //  SPLIT 
   const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
@@ -217,7 +217,7 @@ export default function SightseeingActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA CRUD =====
+  //  EXTRA CRUD 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -234,7 +234,7 @@ export default function SightseeingActivityModal({
 
   const removeExtraCost = (idx) => setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) =>
@@ -258,7 +258,7 @@ export default function SightseeingActivityModal({
     return { cost, split: splitPayload, participants: normalizedParticipants };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -303,7 +303,7 @@ export default function SightseeingActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

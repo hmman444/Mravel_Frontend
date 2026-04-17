@@ -139,7 +139,7 @@ export default function MemberRow({
       document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  // ==== CHANGE ROLE ====
+  //  CHANGE ROLE 
   const handleRoleChange = (newRole) => {
     if (!canManageMembers || isOwnerRow) return;
 
@@ -156,7 +156,7 @@ export default function MemberRow({
     setMenuOpen(false);
   };
 
-  // ==== DROPDOWN UI ====
+  //  DROPDOWN UI 
   const dropdown =
     menuOpen && menuReady
       ? createPortal(

@@ -15,7 +15,7 @@
   color: rgba(229, 231, 235, 0.55);
 }
 
-/* ====== WRAPPER CHUNG ====== */
+/* = WRAPPER CHUNG = */
 .mravel-calendar.react-datepicker {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -36,7 +36,7 @@
   background: #ffffff; /* đảm bảo nền light */
 }
 
-/* ====== DARK: WRAPPER CHUNG ====== */
+/* = DARK: WRAPPER CHUNG = */
 .dark .mravel-calendar.react-datepicker {
   background: rgba(15, 23, 42, 0.92); /* slate-900 */
   color: #e5e7eb;
@@ -59,7 +59,7 @@
   margin-top: 50px;
 }
 
-/* ====== 2 CỘT THÁNG ====== */
+/* = 2 CỘT THÁNG = */
 .mravel-calendar .react-datepicker__month-container {
   float: left;
   width: 50%;
@@ -75,7 +75,7 @@
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* ====== HEADER THÁNG ====== */
+/* = HEADER THÁNG = */
 .mravel-calendar .react-datepicker__header {
   background-color: #ffffff;
   border-bottom: none;
@@ -146,7 +146,7 @@
   opacity: 0.45;
 }
 
-/* ====== HÀNG TÊN THỨ + GẠCH NGĂN CÁCH VỚI SỐ ====== */
+/* = HÀNG TÊN THỨ + GẠCH NGĂN CÁCH VỚI SỐ = */
 .mravel-calendar .react-datepicker__day-names {
   margin-top: 4px;
   padding-bottom: 6px;
@@ -176,7 +176,7 @@
   color: rgba(229, 231, 235, 0.70);
 }
 
-/* ====== GRID NGÀY & FIX CAO 6 HÀNG ====== */
+/* = GRID NGÀY & FIX CAO 6 HÀNG = */
 .mravel-calendar .react-datepicker__month {
   padding: 0.35rem 0.7rem 0.4rem;
   height: 220px;
@@ -192,7 +192,7 @@
   margin: 0;
 }
 
-/* ====== NGÀY THƯỜNG ====== */
+/* = NGÀY THƯỜNG = */
 .mravel-calendar__day.react-datepicker__day {
   width: 36px;
   line-height: 36px;
@@ -228,7 +228,7 @@
   color: #dc2626;
 }
 
-/* ====== DARK: NGÀY THƯỜNG / HOVER / DISABLED / SUNDAY ====== */
+/* = DARK: NGÀY THƯỜNG / HOVER / DISABLED / SUNDAY = */
 .dark .mravel-calendar__day.react-datepicker__day {
   color: rgba(229, 231, 235, 0.92);
 }
@@ -246,7 +246,7 @@
   color: rgba(248, 113, 113, 0.95);
 }
 
-/* ====== NGÀY ĐƯỢC CHỌN THỰC SỰ ====== */
+/* = NGÀY ĐƯỢC CHỌN THỰC SỰ = */
 .mravel-calendar .react-datepicker__day--selected {
   background-color: #0ea5e9;
   color: #ffffff;
@@ -274,7 +274,7 @@
   color: inherit;
 }
 
-/* ====== HÔM NAY ====== */
+/* = HÔM NAY = */
 .mravel-calendar .react-datepicker__day--today {
   border-radius: 999px;
   border: 1px solid #0ea5e9;
@@ -335,7 +335,7 @@
   margin-top: 8px !important;
 }
 
-/* ====== TIME PICKER (Restaurant) ====== */
+/* = TIME PICKER (Restaurant) = */
 .mravel-timepicker.react-datepicker {
   min-width: auto;
   width: 180px;
@@ -369,7 +369,7 @@
   margin-top: 8px !important;
 }
 
-/* ====== DARK: TIME PICKER ====== */
+/* = DARK: TIME PICKER = */
 .dark .mravel-timepicker.react-datepicker {
   background: rgba(15, 23, 42, 0.92);
   color: #e5e7eb;

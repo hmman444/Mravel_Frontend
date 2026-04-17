@@ -19,7 +19,7 @@ import Button from "./Button";
 import DestinationTypeahead from "../components/DestinationTypeahead";
 import { showError } from "../utils/toastUtils";
 
-/* ───────── Small helpers ───────── */
+/* ─ Small helpers ─ */
 function RowField({ label, children, onClick, refBox, className = "" }) {
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -103,7 +103,7 @@ const VN_DATE = (d) =>
     year: "numeric",
   });
 
-/* ───────── Hotel Search Form ───────── */
+/* ─ Hotel Search Form ─ */
 function HotelSearchForm() {
   const navigate = useNavigate();
 
@@ -491,7 +491,7 @@ const CUISINE_OPTIONS = [
   { value: "ITALIAN", label: "Ý" },
 ];
 
-/* ───────── Restaurant Search Form ───────── */
+/* ─ Restaurant Search Form ─ */
 // trong SearchBar.jsx — giữ nguyên phần khác, chỉ thay RestaurantSearchForm
 function RestaurantSearchForm() {
   const navigate = useNavigate();
@@ -619,7 +619,7 @@ function RestaurantSearchForm() {
   );
 }
 
-/* ───────── Main SearchBar ───────── */
+/* ─ Main SearchBar ─ */
 export default function SearchBar() {
   const [activeTab, setActiveTab] = useState("hotel");
   const navigate = useNavigate();

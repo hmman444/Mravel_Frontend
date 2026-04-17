@@ -151,7 +151,7 @@ export default function PlanFilterSidebar({
   // Shared sidebar content
   const content = (
     <div className="flex flex-col h-auto">
-      {/* ── Header ── */}
+      {/*  Header  */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-5 h-5 text-sky-500" />
@@ -171,7 +171,7 @@ export default function PlanFilterSidebar({
         </button>
       </div>
 
-      {/* ── Scrollable filter body ── */}
+      {/*  Scrollable filter body  */}
       <div className="flex-1 px-5 py-4 space-y-0">
 
         {/* Sort */}
@@ -358,7 +358,7 @@ export default function PlanFilterSidebar({
         </Section>
       </div>
 
-      {/* ── Footer actions ── */}
+      {/*  Footer actions  */}
       <div className="px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 shrink-0">
         <button
           type="button"
@@ -392,7 +392,7 @@ export default function PlanFilterSidebar({
 
   return (
     <>
-      {/* ── Desktop sidebar ── */}
+      {/*  Desktop sidebar  */}
       <aside
         className={`
           hidden lg:flex flex-col self-start mb-10 shrink-0 overflow-hidden
@@ -408,7 +408,7 @@ export default function PlanFilterSidebar({
         {content}
       </aside>
 
-      {/* ── Mobile drawer overlay ── */}
+      {/*  Mobile drawer overlay  */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           {/* Backdrop */}

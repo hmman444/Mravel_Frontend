@@ -99,7 +99,7 @@ export default function StayActivityModal({
   const effectiveStayLocation =
     internalStayLocation || normalizedPropLocation || null;
 
-  // ===== LOAD WHEN OPEN =====
+  //  LOAD WHEN OPEN 
   useEffect(() => {
     if (!open) return;
 
@@ -216,7 +216,7 @@ export default function StayActivityModal({
     if (full) setAddress(full);
   }, [effectiveStayLocation]);
 
-  // ===== COST CALC (UI) =====
+  //  COST CALC (UI) 
   const baseEstimated = useMemo(
     () => Number(pricePerNight || 0),
     [pricePerNight]
@@ -236,7 +236,7 @@ export default function StayActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
@@ -264,7 +264,7 @@ export default function StayActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== EXTRA COSTS =====
+  //  EXTRA COSTS 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -282,7 +282,7 @@ export default function StayActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) =>
@@ -306,7 +306,7 @@ export default function StayActivityModal({
     return { cost, split: splitPayload, participants: normalizedParticipants };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -354,7 +354,7 @@ export default function StayActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

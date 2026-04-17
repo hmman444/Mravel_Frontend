@@ -72,7 +72,7 @@ export default function EventActivityModal({
   const [internalEventLocation, setInternalEventLocation] = useState(null);
   const effectiveEventLocation = internalEventLocation || null;
 
-  // ===== LOAD WHEN OPEN =====
+  //  LOAD WHEN OPEN 
   useEffect(() => {
     if (!open) return;
 
@@ -133,7 +133,7 @@ export default function EventActivityModal({
     }
   }, [open, editingCard]);
 
-  // ===== SYNC label from location -> venue/address =====
+  //  SYNC label from location -> venue/address 
   useEffect(() => {
     if (!effectiveEventLocation) return;
 
@@ -145,7 +145,7 @@ export default function EventActivityModal({
     }
   }, [effectiveEventLocation]);
 
-  // ===== EXTRA COSTS CRUD =====
+  //  EXTRA COSTS CRUD 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -163,7 +163,7 @@ export default function EventActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== COST (FIX ESTIMATED COST LIKE OTHER MODALS) =====
+  //  COST (FIX ESTIMATED COST LIKE OTHER MODALS) 
   // baseEstimated = vé (không bao gồm extra). Extra tách riêng trong extraCosts.
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
@@ -182,7 +182,7 @@ export default function EventActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
@@ -210,7 +210,7 @@ export default function EventActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p?.memberId));
@@ -229,7 +229,7 @@ export default function EventActivityModal({
     return { cost, split: splitPayload, participants: normalizedParticipants, normalizedExtraCosts };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -281,7 +281,7 @@ export default function EventActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}
