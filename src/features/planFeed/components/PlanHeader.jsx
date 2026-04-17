@@ -52,7 +52,7 @@ export default function PlanHeader({ author, createdAt, visibility, views }) {
         {author?.id ? (
           <Link
             to={`/profile/${author.id}`}
-            className="hover:underline"
+            className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
             title="Xem trang cá nhân"
           >
             {author.name}
@@ -61,19 +61,19 @@ export default function PlanHeader({ author, createdAt, visibility, views }) {
           author.name
         )}
       </div>
-        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-          <span>{timeAgo(createdAt)}</span>
+        <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400">
+          <span className="inline-flex items-center gap-1">{timeAgo(createdAt)}</span>
           <span
             className={`
-              inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+              inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-medium
               ${meta.color}
             `}
           >
             {meta.icon}
             <span>{meta.label}</span>
           </span>
-          <span className="inline-flex items-center gap-1">
-            <EyeIcon className="w-3.5 h-3.5" /> {views} lượt xem
+          <span className="inline-flex items-center gap-1 font-medium">
+            <EyeIcon className="w-3.5 h-3.5" /> {views}
           </span>
         </div>
       </div>

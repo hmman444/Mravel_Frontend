@@ -51,12 +51,12 @@ export default function ReactionPicker({ value, onChange }) {
         type="button"
         onClick={() => handleClick(current ? current.key : "like")}
         className={`
-          flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium
+          flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
           transition-all duration-150
           ${
             current
-              ? `${getColor(current.key)} bg-sky-50/70 dark:bg-sky-900/30`
-              : "text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              ? `${getColor(current.key)} bg-sky-50 dark:bg-sky-900/30 shadow-sm`
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:hover:text-gray-300"
           }
         `}
       >
@@ -76,9 +76,9 @@ export default function ReactionPicker({ value, onChange }) {
       <div
         className={`
           absolute -top-16 left-1/2 -translate-x-1/2
-          bg-white/95 dark:bg-gray-900/95
-          rounded-full shadow-xl border border-gray-200/80 dark:border-gray-700
-          px-3 py-2 flex gap-2 z-20
+          bg-white dark:bg-gray-900
+          rounded-lg shadow-lg dark:shadow-black/60 border border-gray-200/80 dark:border-gray-700
+          px-3 py-2 flex gap-2 z-20 backdrop-blur-sm
           transition-all duration-200 ease-out
           ${
             open
