@@ -243,7 +243,7 @@ const authSlice = createSlice({
       })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload; // user info từ backend
+        state.user = action.payload?.data ?? action.payload; // user info từ backend
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
                 console.error("❌ [Reducer] fetchCurrentUser.rejected:", action.payload);

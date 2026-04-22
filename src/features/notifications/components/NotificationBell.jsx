@@ -9,6 +9,7 @@ export default function NotificationBell({ solid, onOpen }) {
     toggle,
     close,
     unreadCount,
+    initialized,
     load,
     loading,
     items,
@@ -33,8 +34,10 @@ export default function NotificationBell({ solid, onOpen }) {
   }, [dropdownOpen, close]);
 
   useEffect(() => {
-    if (dropdownOpen && !loading) load().catch(() => {});
-  }, [dropdownOpen, load, loading]);
+    if (!dropdownOpen) return;
+    if (initialized || items.length > 0 || loading) return;
+    load().catch(() => {});
+  }, [dropdownOpen, initialized, load, loading, items.length]);
 
   return (
     <div className="relative" ref={wrapRef}>
