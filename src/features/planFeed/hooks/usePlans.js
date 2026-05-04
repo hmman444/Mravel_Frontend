@@ -3,6 +3,7 @@ import {
   loadPlans,
   reactPlan,
   commentPlan,
+  reactComment,
   searchAll,
   clearSearch,
   loadPlanFeedDetail,
@@ -36,8 +37,9 @@ export function usePlans() {
   const fetchNext = () => dispatch(loadPlans({ page: page + 1 }));
   const reload    = () => dispatch(loadPlans({ page: 1 }));
 
-  const sendReact   = (planId, type)    => dispatch(reactPlan({ planId, type }));
-  const sendComment = (planId, comment) => dispatch(commentPlan({ planId, comment }));
+  const sendReact         = (planId, type)               => dispatch(reactPlan({ planId, type }));
+  const sendComment       = (planId, comment)            => dispatch(commentPlan({ planId, comment }));
+  const sendCommentReact  = (planId, commentId, type)    => dispatch(reactComment({ planId, commentId, type }));
 
   //  Search 
   /** Fresh search — always resets to first page (cursor: null). */
@@ -91,6 +93,7 @@ export function usePlans() {
     // Reactions / comments
     sendReact,
     sendComment,
+    sendCommentReact,
 
     // Search
     isSearching,
