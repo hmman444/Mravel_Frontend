@@ -249,5 +249,37 @@
     "highlight_french_village": "Ancient French Village, Fantasy Park amusement area",
     "highlight_city_view": "Panoramic view of Da Nang city",
     "review_comment_1": "Just visited Ba Na Hills, an amazing experience. Friendly guide, beautiful scenery, and great food.",
-    "review_comment_2": "Cool air, European-style landscape. The Golden Bridge is stunning!"
+    "review_comment_2": "Cool air, European-style landscape. The Golden Bridge is stunning!",
+
+    "chat": {
+        "title": "Messages",
+        "new_message": "New message",
+        "search_conversations": "Search conversations...",
+        "search_users": "Search users...",
+        "no_conversations": "No conversations yet",
+        "no_results": "No conversations found",
+        "no_users_found": "No users found",
+        "type_message": "Type a message...",
+        "select_conversation": "Select a conversation",
+        "select_conversation_hint": "Choose a conversation from the list to start chatting",
+        "private_chat": "Direct message",
+        "group_chat": "Group chat",
+        "group_name_placeholder": "Group name...",
+        "start_chat": "Start chat",
+        "create_group": "Create group",
+        "group_info": "Group info",
+        "members": "Members",
+        "leave_group": "Leave group",
+        "add_member": "Add member",
+        "remove_member": "Remove member",
+        "transfer_ownership": "Transfer ownership",
+        "rename_group": "Rename group",
+        "role_owner": "Owner",
+        "role_admin": "Admin",
+        "role_member": "Member",
+        "friends": "Friends",
+        "friends_section": "Your friends",
+        "friend_badge": "Friend",
+        "creating": "Creating..."
+    }
 }

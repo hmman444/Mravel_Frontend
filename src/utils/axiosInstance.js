@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
+import { decodeJwtPayload } from "./jwt";
 import { showError } from "./toastUtils";
 import { getStore } from "../redux/storeInjector";
 import { ErrorCodes } from "../constants/errorCodes";
@@ -20,6 +21,19 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    const store = getStore();
+    const authState = store?.getState?.()?.auth;
+    const tokenPayload = accessToken ? decodeJwtPayload(accessToken) : null;
+    const userId =
+      authState?.user?.id ??
+      authState?.user?.userId ??
+      tokenPayload?.id ??
+      tokenPayload?.userId;
+    if (userId) {
+      config.headers["X-User-Id"] = userId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

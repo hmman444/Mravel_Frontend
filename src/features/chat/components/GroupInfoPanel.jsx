@@ -1,0 +1,241 @@
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import {
+  loadConversationDetail,
+  loadConversations,
+} from "../slices/chatSlice";
+import {
+  removeMember,
+  leaveConversation,
+  changeMemberRole,
+  transferOwnership,
+  renameGroup,
+} from "../services/chatService";
+import AddMembersModal from "./AddMembersModal";
+import {
+  XMarkIcon,
+  PencilIcon,
+  UserMinusIcon,
+  ArrowRightOnRectangleIcon,
+  ShieldCheckIcon,
+  UserPlusIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+
+const ROLE_LABELS = { OWNER: "Chủ nhóm", ADMIN: "Quản trị", MEMBER: "Thành viên" };
+const ROLE_COLORS = {
+  OWNER: "text-yellow-600 bg-yellow-50",
+  ADMIN: "text-blue-600 bg-blue-50",
+  MEMBER: "text-gray-500 bg-gray-100",
+};
+
+function MemberItem({ member, myRole, myUserId, conversationId, onRefresh }) {
+  const [open, setOpen] = useState(false);
+  const isMe = member.userId === myUserId;
+  const canManage = (myRole === "OWNER" || myRole === "ADMIN") && !isMe && member.role !== "OWNER";
+  const canPromote = myRole === "OWNER" && member.role === "MEMBER";
+  const canDemote = myRole === "OWNER" && member.role === "ADMIN";
+
+  const doRemove = async () => {
+    await removeMember(conversationId, member.userId);
+    onRefresh();
+  };
+  const doPromote = async () => {
+    await changeMemberRole(conversationId, member.userId, "ADMIN");
+    onRefresh();
+  };
+  const doDemote = async () => {
+    await changeMemberRole(conversationId, member.userId, "MEMBER");
+    onRefresh();
+  };
+  const doTransfer = async () => {
+    await transferOwnership(conversationId, member.userId);
+    onRefresh();
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => canManage && setOpen((v) => !v)}
+        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${canManage ? "hover:bg-gray-50 cursor-pointer" : ""}`}
+      >
+        {member.avatar ? (
+          <img src={member.avatar} alt={member.fullname} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0">
+            {(member.fullname || "?")[0].toUpperCase()}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate">
+            {member.fullname}{isMe && <span className="text-gray-400 ml-1">(bạn)</span>}
+          </p>
+          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${ROLE_COLORS[member.role]}`}>
+            {ROLE_LABELS[member.role]}
+          </span>
+        </div>
+        {canManage && <ChevronRightIcon className="w-4 h-4 text-gray-400" />}
+      </button>
+
+      {open && canManage && (
+        <div className="absolute right-2 top-10 bg-white shadow-xl rounded-xl border border-gray-100 z-20 min-w-44 py-1 text-sm">
+          {canPromote && (
+            <button onClick={doPromote} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50">
+              <ShieldCheckIcon className="w-4 h-4 text-blue-500" /> Thăng lên Admin
+            </button>
+          )}
+          {canDemote && (
+            <button onClick={doDemote} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50">
+              <ShieldCheckIcon className="w-4 h-4 text-gray-400" /> Hạ xuống Thành viên
+            </button>
+          )}
+          {myRole === "OWNER" && (
+            <button onClick={doTransfer} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-orange-600">
+              <ShieldCheckIcon className="w-4 h-4" /> Chuyển quyền chủ nhóm
+            </button>
+          )}
+          <button onClick={doRemove} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-red-500">
+            <UserMinusIcon className="w-4 h-4" /> Xóa khỏi nhóm
+          </button>
+          <button onClick={() => setOpen(false)} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-500">
+            <XMarkIcon className="w-4 h-4" /> Đóng
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function GroupInfoPanel({ conversationId, onClose }) {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const myUserId = useSelector((s) => s.auth?.user?.id);
+  const detail = useSelector((s) => s.chat.conversationDetails[conversationId]);
+  const [editName, setEditName] = useState(false);
+  const [newName, setNewName] = useState(detail?.name || "");
+  const [showAddMembersModal, setShowAddMembersModal] = useState(false);
+
+  if (!detail) return null;
+
+  const myMember = detail.members?.find((m) => m.userId === myUserId);
+  const myRole = myMember?.role;
+
+  const refresh = () => {
+    dispatch(loadConversationDetail(conversationId));
+    dispatch(loadConversations());
+  };
+
+  const handleRename = async () => {
+    if (newName.trim() && newName.trim() !== detail.name) {
+      await renameGroup(conversationId, newName.trim());
+      refresh();
+    }
+    setEditName(false);
+  };
+
+  const handleLeave = async () => {
+    await leaveConversation(conversationId);
+    dispatch(loadConversations());
+    onClose();
+  };
+
+  return (
+    <>
+      <div className="w-72 flex flex-col h-full bg-white border-l border-gray-200">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <h3 className="font-semibold text-gray-900 text-sm">{t("chat.group_info")}</h3>
+          <div className="flex items-center gap-1">
+            {(myRole === "OWNER" || myRole === "ADMIN") && (
+              <button
+                onClick={() => setShowAddMembersModal(true)}
+                className="p-1 rounded hover:bg-blue-50 text-blue-500 transition-colors"
+                title="Thêm thành viên"
+              >
+                <UserPlusIcon className="w-5 h-5" />
+              </button>
+            )}
+            <button onClick={onClose} className="p-1 rounded hover:bg-gray-100">
+              <XMarkIcon className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {/* Group Name */}
+        <div className="px-4 py-4 border-b border-gray-100">
+          {editName ? (
+            <div className="flex gap-2">
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleRename()}
+              />
+              <button onClick={handleRename} className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm">
+                Lưu
+              </button>
+              <button onClick={() => setEditName(false)} className="px-2 py-1.5 text-gray-500">
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-900">{detail.name}</span>
+              {(myRole === "OWNER" || myRole === "ADMIN") && (
+                <button onClick={() => { setNewName(detail.name); setEditName(true); }}
+                  className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                  <PencilIcon className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+          <p className="text-xs text-gray-400 mt-1">{detail.memberCount} thành viên</p>
+        </div>
+
+        {/* Members */}
+        <div className="px-2 py-2">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-2 mb-2">
+            {t("chat.members")}
+          </p>
+          <div className="space-y-0.5">
+            {(detail.members || []).map((m) => (
+              <MemberItem
+                key={m.userId}
+                member={m}
+                myRole={myRole}
+                myUserId={myUserId}
+                conversationId={conversationId}
+                onRefresh={refresh}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Leave */}
+      <div className="p-4 border-t border-gray-100">
+        <button
+          onClick={handleLeave}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors"
+        >
+          <ArrowRightOnRectangleIcon className="w-4 h-4" />
+          {t("chat.leave_group")}
+        </button>
+      </div>
+    </div>
+
+    {/* Add Members Modal */}
+    {showAddMembersModal && (
+      <AddMembersModal
+        conversationId={conversationId}
+        members={detail.members}
+        onClose={() => setShowAddMembersModal(false)}
+        onAdded={refresh}
+      />
+    )}
+  </>
+  );
+}

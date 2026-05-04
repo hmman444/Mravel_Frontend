@@ -78,6 +78,7 @@ import PartnerProtectedRoute from "./features/partnerAuth/components/PartnerProt
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 import RequireRole from "./routes/RequireRole";
 import { useNotificationRealtime } from "./realtime/useNotificationRealtime";
+import ChatPage from "./features/chat/pages/ChatPage";
 function App() {
   useLoadUser();
   useAuthSync();
@@ -123,6 +124,10 @@ function App() {
             {/* User routes */}
             <Route path="/account/profile" element={<AccountProfilePage />} />
             <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
+
+            {/* Chat routes */}
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:conversationId" element={<ChatPage />} />
           </Route>
 
           {/* Catalog routes */}

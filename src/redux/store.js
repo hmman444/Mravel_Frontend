@@ -18,6 +18,7 @@ import profileReducer from "../features/user/slices/profileSlice";
 import adminPlaceReducer from "../features/admin/slices/adminPlaceSlice";
 import notificationsReducer from "../features/notifications/slices/notificationSlice";
 import partnerReducer from "../features/partner/slices/partnerSlice";
+import chatReducer from "../features/chat/slices/chatSlice";
 import adminUserReducer from "../features/admin/slices/adminUserSlice";
 import adminPartnerReducer from "../features/admin/slices/adminPartnerSlice";
 import adminServiceReducer from "../features/admin/slices/adminServiceSlice";
@@ -44,6 +45,7 @@ export const store = configureStore({
     adminPlace: adminPlaceReducer,
     notifications:notificationsReducer,
     partner: partnerReducer,
+    chat: chatReducer,
     adminUser: adminUserReducer,
     adminPartners: adminPartnerReducer,
     adminService: adminServiceReducer,
