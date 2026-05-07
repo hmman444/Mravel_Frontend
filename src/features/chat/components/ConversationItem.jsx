@@ -66,6 +66,10 @@ export default function ConversationItem({ conversation, active, onClick, isOnli
   const lastText = lastMessage
     ? lastMessage.deleted
       ? "Tin nhắn đã bị xóa"
+      : lastMessage.messageType === "IMAGE"
+      ? "[Hình ảnh]"
+      : lastMessage.messageType === "VIDEO"
+      ? "[Video]"
       : lastMessage.content
     : "";
 

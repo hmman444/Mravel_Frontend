@@ -178,7 +178,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         </p>
       )}
 
-      <PlanMedia images={plan.images} />
+      <PlanMedia images={plan.images} videos={plan.videos} />
 
       <div className="mt-4">
         <PlanActions

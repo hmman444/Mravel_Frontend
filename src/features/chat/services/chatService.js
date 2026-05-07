@@ -35,8 +35,8 @@ export const transferOwnership = (id, newOwnerId) =>
 export const fetchMessages = (conversationId, params = {}) =>
   api.get(`${BASE}/${conversationId}/messages`, { params }).then((r) => r.data.data);
 
-export const sendMessage = (conversationId, content) =>
-  api.post(`${BASE}/${conversationId}/messages`, { content }).then((r) => r.data.data);
+export const sendMessage = (conversationId, payload) =>
+  api.post(`${BASE}/${conversationId}/messages`, payload).then((r) => r.data.data);
 
 export const markSeen = (conversationId, lastMessageId) =>
   api.post(`${BASE}/${conversationId}/messages/seen`, { lastMessageId }).then((r) => r.data);

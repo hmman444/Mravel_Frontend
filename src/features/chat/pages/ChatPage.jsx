@@ -36,7 +36,7 @@ export default function ChatPage() {
   const showPanel = !!activeId;
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="fixed inset-0 flex bg-gray-50 overflow-hidden">
       {/* Conversation list — always visible on desktop, hidden on mobile when chat is open */}
       <div
         className={`

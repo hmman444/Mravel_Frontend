@@ -8,9 +8,11 @@ import {
   apiUpdateThumbnail,
   apiAddImage,
   apiRemoveImage,
+  apiAddVideo,
+  apiRemoveVideo,
   apiUpdateBudget,
 } from "../services/planGeneralService";
-import { uploadToCloudinary } from "../../../utils/cloudinaryUpload";
+import { uploadToCloudinary, uploadVideoToCloudinary } from "../../../utils/cloudinaryUpload";
 
 const asyncAction = (type, fn) =>
   createAsyncThunk(`planGeneral/${type}`, async (payload) => await fn(payload));
@@ -45,6 +47,17 @@ export const addPlanImage = asyncAction("addImage", async ({ planId, file }) => 
 
 export const removePlanImage = asyncAction("removeImage", async ({ planId, url }) => {
   await apiRemoveImage(planId, url);
+  return url;
+});
+
+export const addPlanVideo = asyncAction("addVideo", async ({ planId, file }) => {
+  const url = await uploadVideoToCloudinary(file);
+  await apiAddVideo(planId, url);
+  return url;
+});
+
+export const removePlanVideo = asyncAction("removeVideo", async ({ planId, url }) => {
+  await apiRemoveVideo(planId, url);
   return url;
 });
 

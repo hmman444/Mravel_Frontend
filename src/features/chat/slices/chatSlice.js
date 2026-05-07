@@ -46,9 +46,11 @@ export const loadMessages = createAsyncThunk(
 
 export const sendChatMessage = createAsyncThunk(
   "chat/sendMessage",
-  async ({ conversationId, content }, { rejectWithValue }) => {
+  async ({ conversationId, content, messageType = "TEXT", mediaUrl }, { rejectWithValue }) => {
     try {
-      const msg = await sendMessageApi(conversationId, content);
+      const payload = { content, messageType };
+      if (mediaUrl) payload.mediaUrl = mediaUrl;
+      const msg = await sendMessageApi(conversationId, payload);
       return { conversationId, message: msg };
     } catch (e) {
       return rejectWithValue(e?.response?.data?.message || "Không thể gửi tin nhắn");
@@ -151,6 +153,7 @@ const chatSlice = createSlice({
               senderName: msg.senderName,
               content: msg.content,
               messageType: msg.messageType,
+              mediaUrl: msg.mediaUrl || null,
               createdAt: msg.createdAt,
               deleted: msg.deleted,
             };
@@ -176,6 +179,7 @@ const chatSlice = createSlice({
                 senderName: msg.senderName,
                 content: msg.content,
                 messageType: msg.messageType,
+                mediaUrl: msg.mediaUrl || null,
                 createdAt: msg.createdAt,
                 deleted: msg.deleted,
               },
@@ -376,7 +380,7 @@ const chatSlice = createSlice({
     },
 
     addOptimisticMessage(state, action) {
-      const { conversationId, tempId, content, senderId, senderName, senderAvatar } = action.payload;
+      const { conversationId, tempId, content, senderId, senderName, senderAvatar, messageType = "TEXT", mediaUrl } = action.payload;
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = [];
       }
@@ -387,7 +391,8 @@ const chatSlice = createSlice({
         senderName: senderName || `User ${senderId}`,
         senderAvatar: senderAvatar || null,
         content,
-        messageType: "TEXT",
+        messageType,
+        mediaUrl: mediaUrl || null,
         createdAt: new Date().toISOString(),
         deleted: false,
         seenBy: [],

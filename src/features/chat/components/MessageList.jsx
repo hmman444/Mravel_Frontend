@@ -20,25 +20,35 @@ export default function MessageList({ conversationId, isGroup }) {
   const bottomRef = useRef(null);
   const listRef = useRef(null);
   const isInitialLoad = useRef(true);
+  const userScrolledUp = useRef(false);
+  const isProgrammaticScroll = useRef(false);
   const markSeenTimerRef = useRef(null);
 
   // Initial load
   useEffect(() => {
     if (conversationId) {
       isInitialLoad.current = true;
+      userScrolledUp.current = false;
       dispatch(loadMessages({ conversationId }));
     }
   }, [conversationId, dispatch]);
 
-  // Auto-scroll to bottom on new messages (only if near bottom already)
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
+    if (messages.length === 0) return;
     const el = listRef.current;
-    if (!el || messages.length === 0) return;
+    if (!el) return;
 
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-    if (isInitialLoad.current || isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: isInitialLoad.current ? "instant" : "smooth" });
-      isInitialLoad.current = false;
+    if (isInitialLoad.current || !userScrolledUp.current) {
+      isProgrammaticScroll.current = true;
+      el.scrollTop = el.scrollHeight;
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        userScrolledUp.current = false;
+      }
+      requestAnimationFrame(() => {
+        isProgrammaticScroll.current = false;
+      });
     }
   }, [messages]);
 
@@ -55,11 +65,18 @@ export default function MessageList({ conversationId, isGroup }) {
     return () => clearTimeout(markSeenTimerRef.current);
   }, [messages, conversationId, dispatch]);
 
-  // Load more on scroll to top
+  // Load more on scroll to top; also track whether user has scrolled away from bottom
   const handleScroll = useCallback(() => {
     const el = listRef.current;
-    if (!el || loading || !hasMore) return;
-    if (el.scrollTop < 80) {
+    if (!el) return;
+
+    // Ignore scroll events triggered by our own programmatic scrolls
+    if (!isProgrammaticScroll.current) {
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+      userScrolledUp.current = !isNearBottom;
+    }
+
+    if (!loading && hasMore && el.scrollTop < 80) {
       const prevScrollHeight = el.scrollHeight;
       dispatch(loadMessages({ conversationId, before: nextCursor })).then(() => {
         // Maintain scroll position after prepend
@@ -88,7 +105,7 @@ export default function MessageList({ conversationId, isGroup }) {
     });
 
   return (
-    <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-1">
+    <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-1" style={{ overflowAnchor: "none" }}>
       {/* Load more indicator */}
       {hasMore && (
         <div className="flex justify-center py-2">
