@@ -234,13 +234,13 @@ export default function PlanBoard({
             <button
               onClick={handleAddListClick}
               className="
-                fixed bottom-6 right-6 z-50 rounded-full p-4 
-                bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
-                shadow-lg shadow-blue-500/40 hover:shadow-xl hover:-translate-y-1 
-                transition-all
+                inline-flex items-center gap-2 rounded-full px-3 py-2
+                text-xs font-semibold shadow-sm transition-all
+                bg-blue-50 text-blue-700 hover:bg-blue-100
               "
             >
-              <FaPlus />
+              <FaPlus className="text-[11px]" />
+              <span>Thêm ngày</span>
             </button>
           )}
           
