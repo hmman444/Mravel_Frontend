@@ -280,6 +280,7 @@
         "friends": "Friends",
         "friends_section": "Your friends",
         "friend_badge": "Friend",
-        "creating": "Creating..."
+        "creating": "Creating...",
+        "open": "Open chat"
     }
 }

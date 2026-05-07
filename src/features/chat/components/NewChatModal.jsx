@@ -32,15 +32,15 @@ function UserResult({ user, selected, onToggle, badge }) {
   );
 }
 
-export default function NewChatModal({ onClose, onCreated }) {
+export default function NewChatModal({ onClose, onCreated, initialMode = "private", initialSelected = [] }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { friends, friendsLoaded } = useSelector((s) => s.chat);
 
-  const [mode, setMode] = useState("private"); // "private" | "group"
+  const [mode, setMode] = useState(initialMode);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(initialSelected);
   const [groupName, setGroupName] = useState("");
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);

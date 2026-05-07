@@ -11,7 +11,7 @@ import {
 import { createPrivateConversation } from "../services/chatService";
 import ConversationItem from "./ConversationItem";
 import NewChatModal from "./NewChatModal";
-import { PencilSquareIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 function FriendRow({ friend, onStartChat }) {
   return (
@@ -31,7 +31,7 @@ function FriendRow({ friend, onStartChat }) {
   );
 }
 
-export default function ConversationList({ activeId }) {
+export default function ConversationList({ activeId, onClose }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { conversations, conversationsLoading, conversationsLoaded, friends, friendsLoaded } = useSelector((s) => s.chat);
@@ -102,13 +102,24 @@ export default function ConversationList({ activeId }) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <h2 className="text-lg font-bold text-gray-900">{t("chat.title")}</h2>
-        <button
-          onClick={() => setShowNewChat(true)}
-          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-blue-600 transition-colors"
-          title={t("chat.new_message")}
-        >
-          <PencilSquareIcon className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowNewChat(true)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-blue-600 transition-colors"
+            title={t("chat.new_message")}
+          >
+            <PencilSquareIcon className="w-5 h-5" />
+          </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Đóng"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search */}

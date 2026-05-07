@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveConversation } from "../slices/chatSlice";
-import { useChatRealtime } from "../hooks/useChatRealtime";
 import ConversationList from "../components/ConversationList";
 import ChatPanel from "../components/ChatPanel";
 
@@ -29,8 +28,7 @@ export default function ChatPage() {
     }
   }, [activeId]); // eslint-disable-line
 
-  // Realtime subscriptions
-  useChatRealtime(activeId);
+  // Realtime subscriptions are handled globally by FloatingChatWidget.
 
   const showList = !activeId;
   const showPanel = !!activeId;

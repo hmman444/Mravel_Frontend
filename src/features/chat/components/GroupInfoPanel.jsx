@@ -113,7 +113,7 @@ function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnl
   );
 }
 
-export default function GroupInfoPanel({ conversationId, onClose }) {
+export default function GroupInfoPanel({ conversationId, onClose, compact = false }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const myUserId = useSelector((s) => s.auth?.user?.id);
@@ -131,9 +131,13 @@ export default function GroupInfoPanel({ conversationId, onClose }) {
     }
   }, [detail, conversationId, dispatch]);
 
+  const panelCls = compact
+    ? "w-full flex flex-col h-full bg-white"
+    : "w-72 flex flex-col h-full bg-white border-l border-gray-200";
+
   if (!detail) {
     return (
-      <div className="w-72 flex items-center justify-center h-full bg-white border-l border-gray-200">
+      <div className={`${panelCls} items-center justify-center`}>
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -162,7 +166,7 @@ export default function GroupInfoPanel({ conversationId, onClose }) {
 
   return (
     <>
-      <div className="w-72 flex flex-col h-full bg-white border-l border-gray-200">
+      <div className={panelCls}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900 text-sm">{t("chat.group_info")}</h3>

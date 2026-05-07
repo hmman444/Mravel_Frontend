@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   loadConversationDetail,
   setActiveConversation,
   resetConversationUnread,
+  upsertConversation,
 } from "../slices/chatSlice";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import GroupInfoPanel from "./GroupInfoPanel";
+import NewChatModal from "./NewChatModal";
 import {
   ChevronLeftIcon,
   InformationCircleIcon,
   EllipsisHorizontalIcon,
+  XMarkIcon,
+  UserIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
 function Avatar({ src, name, size = "sm" }) {
@@ -26,10 +32,15 @@ function Avatar({ src, name, size = "sm" }) {
   );
 }
 
-export default function ChatPanel({ conversationId }) {
+export default function ChatPanel({ conversationId, compact = false, onClose }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const myUserId = useSelector((s) => s.auth?.user?.id);
+
   const [showInfo, setShowInfo] = useState(false);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [showNewGroupModal, setShowNewGroupModal] = useState(false);
 
   const conversations = useSelector((s) => s.chat.conversations);
   const detail = useSelector((s) => s.chat.conversationDetails[conversationId]);
@@ -42,6 +53,12 @@ export default function ChatPanel({ conversationId }) {
       dispatch(resetConversationUnread(conversationId));
     }
   }, [conversationId, dispatch]);
+
+  // Close avatar menu when conversation changes
+  useEffect(() => {
+    setAvatarMenuOpen(false);
+    setShowInfo(false);
+  }, [conversationId]);
 
   if (!conversationId) {
     return (
@@ -60,20 +77,90 @@ export default function ChatPanel({ conversationId }) {
 
   const isGroup = conv?.type === "GROUP";
 
+  // The other person in a private chat (for profile link / create group with)
+  const otherMember = !isGroup
+    ? (conv?.members || []).find((m) => m.userId !== myUserId)
+    : null;
+
+  const handleNewGroupCreated = (newConv) => {
+    dispatch(upsertConversation(newConv));
+    dispatch(setActiveConversation(newConv.id));
+    setShowNewGroupModal(false);
+  };
+
   return (
-    <div className="flex-1 flex overflow-hidden">
+    // relative needed so the group-info overlay can cover this panel in compact mode
+    <div className="flex-1 flex overflow-hidden relative">
       {/* Main panel */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-white flex-shrink-0">
           <button
             onClick={() => dispatch(setActiveConversation(null))}
-            className="sm:hidden p-1 rounded hover:bg-gray-100 text-gray-500"
+            className={`${compact ? "" : "sm:hidden"} p-1 rounded hover:bg-gray-100 text-gray-500`}
           >
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
 
-          <Avatar src={conv?.avatarUrl} name={conv?.name} size="md" />
+          {/* Clickable avatar — opens context menu */}
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={() => conv && setAvatarMenuOpen((v) => !v)}
+              className="rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1"
+              aria-label="Tuỳ chọn"
+            >
+              <Avatar src={conv?.avatarUrl} name={conv?.name} size="md" />
+            </button>
+
+            {/* Avatar context menu */}
+            {avatarMenuOpen && conv && (
+              <>
+                {/* Invisible backdrop to close on outside click */}
+                <div
+                  className="fixed inset-0 z-[100]"
+                  onClick={() => setAvatarMenuOpen(false)}
+                />
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-xl rounded-xl border border-gray-100 z-[101] min-w-[176px] py-1 text-sm">
+                  {!isGroup && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setAvatarMenuOpen(false);
+                          navigate(`/profile/${otherMember?.userId}`);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-700"
+                      >
+                        <UserIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        Xem trang cá nhân
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAvatarMenuOpen(false);
+                          setShowNewGroupModal(true);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-700"
+                      >
+                        <UserGroupIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        Tạo nhóm với
+                      </button>
+                    </>
+                  )}
+                  {isGroup && (
+                    <button
+                      onClick={() => {
+                        setAvatarMenuOpen(false);
+                        setShowInfo(true);
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-700"
+                    >
+                      <InformationCircleIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      Thông tin nhóm
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
 
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm truncate">{conv?.name}</p>
@@ -83,13 +170,22 @@ export default function ChatPanel({ conversationId }) {
           </div>
 
           <div className="flex items-center gap-1">
-            {isGroup && (
+            {isGroup && !compact && (
               <button
                 onClick={() => setShowInfo((v) => !v)}
                 className={`p-2 rounded-lg transition-colors ${showInfo ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100 text-gray-500"}`}
                 title={t("chat.group_info")}
               >
                 <InformationCircleIcon className="w-5 h-5" />
+              </button>
+            )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Đóng"
+              >
+                <XMarkIcon className="w-5 h-5" />
               </button>
             )}
           </div>
@@ -108,9 +204,34 @@ export default function ChatPanel({ conversationId }) {
 
       {/* Group Info Panel */}
       {showInfo && isGroup && (
-        <GroupInfoPanel
-          conversationId={conversationId}
-          onClose={() => setShowInfo(false)}
+        compact ? (
+          // In widget: overlay covering the full panel
+          <div className="absolute inset-0 z-10 overflow-hidden">
+            <GroupInfoPanel
+              conversationId={conversationId}
+              compact
+              onClose={() => setShowInfo(false)}
+            />
+          </div>
+        ) : (
+          <GroupInfoPanel
+            conversationId={conversationId}
+            onClose={() => setShowInfo(false)}
+          />
+        )
+      )}
+
+      {/* Create group modal — triggered from avatar menu on private chats */}
+      {showNewGroupModal && (
+        <NewChatModal
+          initialMode="group"
+          initialSelected={
+            otherMember
+              ? [{ id: otherMember.userId, fullname: otherMember.fullname, avatar: otherMember.avatar || null }]
+              : []
+          }
+          onClose={() => setShowNewGroupModal(false)}
+          onCreated={handleNewGroupCreated}
         />
       )}
     </div>

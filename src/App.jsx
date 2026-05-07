@@ -79,6 +79,7 @@ import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 import RequireRole from "./routes/RequireRole";
 import { useNotificationRealtime } from "./realtime/useNotificationRealtime";
 import ChatPage from "./features/chat/pages/ChatPage";
+import FloatingChatWidget from "./features/chat/components/FloatingChatWidget";
 function App() {
   useLoadUser();
   useAuthSync();
@@ -88,6 +89,7 @@ function App() {
   return (
     <>
       <Router>
+        <FloatingChatWidget />
         <Routes>
           {/* Auth routes */}
           <Route path="/login" element={<LoginPage />} />
