@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { useChatPresence } from "../hooks/useChatPresence";
 import {
   loadConversations,
   loadFriends,
@@ -33,7 +34,20 @@ function FriendRow({ friend, onStartChat }) {
 export default function ConversationList({ activeId }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { conversations, conversationsLoading, friends, friendsLoaded } = useSelector((s) => s.chat);
+  const { conversations, conversationsLoading, conversationsLoaded, friends, friendsLoaded } = useSelector((s) => s.chat);
+  const myUserId = useSelector((s) => s.auth?.user?.id);
+
+  // Collect other-member IDs from private conversations for presence polling
+  const presenceUserIds = useMemo(() => {
+    const ids = new Set();
+    conversations.forEach((c) => {
+      if (c.type === "PRIVATE" && c.members) {
+        c.members.forEach((m) => { if (m.userId !== myUserId) ids.add(m.userId); });
+      }
+    });
+    return [...ids].sort((a, b) => a - b);
+  }, [conversations, myUserId]);
+  const onlineIds = useChatPresence(presenceUserIds);
 
   const [search, setSearch] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
@@ -41,8 +55,8 @@ export default function ConversationList({ activeId }) {
   const [startingChat, setStartingChat] = useState(null);
 
   useEffect(() => {
-    dispatch(loadConversations());
-  }, [dispatch]);
+    if (!conversationsLoaded) dispatch(loadConversations());
+  }, [dispatch, conversationsLoaded]);
 
   useEffect(() => {
     if (!friendsLoaded) dispatch(loadFriends());
@@ -127,6 +141,9 @@ export default function ConversationList({ activeId }) {
                 conversation={conv}
                 active={conv.id === activeId}
                 onClick={() => dispatch(setActiveConversation(conv.id))}
+                isOnline={conv.type === "PRIVATE"
+                  ? conv.members?.some((m) => m.userId !== myUserId && onlineIds.has(m.userId))
+                  : false}
               />
             ))
           )}

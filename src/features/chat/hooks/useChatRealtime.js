@@ -7,6 +7,7 @@ import {
   receiveChatEvent,
   receiveConversationListEvent,
   clearTypingUser,
+  removeConversationFromList,
 } from "../slices/chatSlice";
 
 const TYPING_TIMEOUT_MS = 3000;
@@ -44,6 +45,14 @@ export function useChatRealtime(activeConversationId) {
     const dest = `/topic/users/${userId}/conversations`;
     userSubRef.current = mainSocket.subscribe(dest, (payload) => {
       dispatch(receiveConversationListEvent(payload));
+
+      // When current user is removed/leaves a group, purge it from their list
+      if (
+        (payload.eventType === "MEMBER_REMOVED" || payload.eventType === "MEMBER_LEFT") &&
+        payload.affectedUserIds?.includes(userId)
+      ) {
+        dispatch(removeConversationFromList(payload.conversationId));
+      }
     });
 
     return () => {

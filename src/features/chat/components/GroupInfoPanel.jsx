@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import {
   loadConversationDetail,
-  loadConversations,
+  removeConversationFromList,
 } from "../slices/chatSlice";
+import { useChatPresence } from "../hooks/useChatPresence";
 import {
   removeMember,
   leaveConversation,
@@ -30,7 +31,7 @@ const ROLE_COLORS = {
   MEMBER: "text-gray-500 bg-gray-100",
 };
 
-function MemberItem({ member, myRole, myUserId, conversationId, onRefresh }) {
+function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnline }) {
   const [open, setOpen] = useState(false);
   const isMe = member.userId === myUserId;
   const canManage = (myRole === "OWNER" || myRole === "ADMIN") && !isMe && member.role !== "OWNER";
@@ -60,13 +61,18 @@ function MemberItem({ member, myRole, myUserId, conversationId, onRefresh }) {
         onClick={() => canManage && setOpen((v) => !v)}
         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${canManage ? "hover:bg-gray-50 cursor-pointer" : ""}`}
       >
-        {member.avatar ? (
-          <img src={member.avatar} alt={member.fullname} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0">
-            {(member.fullname || "?")[0].toUpperCase()}
-          </div>
-        )}
+        <div className="relative flex-shrink-0">
+          {member.avatar ? (
+            <img src={member.avatar} alt={member.fullname} className="w-8 h-8 rounded-full object-cover" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center font-semibold">
+              {(member.fullname || "?")[0].toUpperCase()}
+            </div>
+          )}
+          {isOnline && (
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" />
+          )}
+        </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">
             {member.fullname}{isMe && <span className="text-gray-400 ml-1">(bạn)</span>}
@@ -115,15 +121,29 @@ export default function GroupInfoPanel({ conversationId, onClose }) {
   const [editName, setEditName] = useState(false);
   const [newName, setNewName] = useState(detail?.name || "");
   const [showAddMembersModal, setShowAddMembersModal] = useState(false);
+  const memberUserIds = (detail?.members || []).map((m) => m.userId);
+  const onlineIds = useChatPresence(memberUserIds);
 
-  if (!detail) return null;
+  // Auto-load detail if invalidated (e.g. after member event)
+  useEffect(() => {
+    if (!detail && conversationId) {
+      dispatch(loadConversationDetail(conversationId));
+    }
+  }, [detail, conversationId, dispatch]);
+
+  if (!detail) {
+    return (
+      <div className="w-72 flex items-center justify-center h-full bg-white border-l border-gray-200">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const myMember = detail.members?.find((m) => m.userId === myUserId);
   const myRole = myMember?.role;
 
   const refresh = () => {
     dispatch(loadConversationDetail(conversationId));
-    dispatch(loadConversations());
   };
 
   const handleRename = async () => {
@@ -136,7 +156,7 @@ export default function GroupInfoPanel({ conversationId, onClose }) {
 
   const handleLeave = async () => {
     await leaveConversation(conversationId);
-    dispatch(loadConversations());
+    dispatch(removeConversationFromList(conversationId));
     onClose();
   };
 
@@ -209,6 +229,7 @@ export default function GroupInfoPanel({ conversationId, onClose }) {
                 myUserId={myUserId}
                 conversationId={conversationId}
                 onRefresh={refresh}
+                isOnline={onlineIds.has(m.userId)}
               />
             ))}
           </div>

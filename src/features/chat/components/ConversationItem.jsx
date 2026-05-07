@@ -53,7 +53,7 @@ function GroupAvatarStack({ members }) {
   );
 }
 
-export default function ConversationItem({ conversation, active, onClick }) {
+export default function ConversationItem({ conversation, active, onClick, isOnline }) {
   const { i18n } = useTranslation();
   const locale = i18n.language === "vi" ? vi : enUS;
 
@@ -82,7 +82,12 @@ export default function ConversationItem({ conversation, active, onClick }) {
       {type === "GROUP" && members?.length > 0 ? (
         <GroupAvatarStack members={members} />
       ) : (
-        <Avatar src={avatarUrl} name={name} />
+        <div className="relative flex-shrink-0">
+          <Avatar src={avatarUrl} name={name} />
+          {isOnline && (
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full" />
+          )}
+        </div>
       )}
 
       {/* Content */}

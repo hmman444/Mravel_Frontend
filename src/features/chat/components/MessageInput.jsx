@@ -1,19 +1,20 @@
 import { useState, useRef, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { sendChatMessage } from "../slices/chatSlice";
+import { sendChatMessage, addOptimisticMessage, removeOptimisticMessage } from "../slices/chatSlice";
 import { sendTyping } from "../services/chatService";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
 export default function MessageInput({ conversationId }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const authUser = useSelector((s) => s.auth?.user);
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
   const typingTimeoutRef = useRef(null);
 
   const handleTyping = useCallback(() => {
-    if (typingTimeoutRef.current) return; // already sent recently
+    if (typingTimeoutRef.current) return;
     sendTyping(conversationId).catch(() => {});
     typingTimeoutRef.current = setTimeout(() => {
       typingTimeoutRef.current = null;
@@ -30,11 +31,26 @@ export default function MessageInput({ conversationId }) {
     if (!text || sending) return;
     setSending(true);
     setContent("");
+
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    if (authUser) {
+      dispatch(addOptimisticMessage({
+        conversationId,
+        tempId,
+        content: text,
+        senderId: authUser.id,
+        senderName: authUser.fullname || authUser.name || `User ${authUser.id}`,
+        senderAvatar: authUser.avatar || null,
+      }));
+    }
+
     try {
       await dispatch(sendChatMessage({ conversationId, content: text })).unwrap();
     } catch {
       setContent(text);
     } finally {
+      // Remove optimistic message — real message arrived via WebSocket or fulfilled handler
+      dispatch(removeOptimisticMessage({ conversationId, tempId }));
       setSending(false);
     }
   };

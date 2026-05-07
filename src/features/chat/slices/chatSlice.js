@@ -234,11 +234,31 @@ const chatSlice = createSlice({
           break;
         }
 
-        case "GROUP_UPDATED":
-        case "MEMBER_ADDED":
-        case "MEMBER_REMOVED":
-        case "MEMBER_LEFT":
-        case "ROLE_CHANGED": {
+        case "GROUP_UPDATED": {
+          const convPayload = event.conversation;
+          if (convPayload) {
+            const idx = state.conversations.findIndex((c) => c.id === conversationId);
+            if (idx !== -1) {
+              state.conversations[idx] = {
+                ...state.conversations[idx],
+                name: convPayload.name ?? state.conversations[idx].name,
+                avatarUrl: convPayload.avatarUrl ?? state.conversations[idx].avatarUrl,
+                ownerId: convPayload.ownerId ?? state.conversations[idx].ownerId,
+              };
+            }
+            if (state.conversationDetails[conversationId]) {
+              state.conversationDetails[conversationId] = {
+                ...state.conversationDetails[conversationId],
+                name: convPayload.name ?? state.conversationDetails[conversationId].name,
+                avatarUrl: convPayload.avatarUrl ?? state.conversationDetails[conversationId].avatarUrl,
+                ownerId: convPayload.ownerId ?? state.conversationDetails[conversationId].ownerId,
+              };
+            }
+          }
+          break;
+        }
+
+        case "MEMBER_ADDED": {
           const convPayload = event.conversation;
           if (convPayload) {
             const idx = state.conversations.findIndex((c) => c.id === conversationId);
@@ -251,8 +271,62 @@ const chatSlice = createSlice({
               };
             }
           }
-          // Invalidate detail so it reloads
+          // Invalidate detail so GroupInfoPanel reloads with new member list
           delete state.conversationDetails[conversationId];
+          break;
+        }
+
+        case "MEMBER_REMOVED":
+        case "MEMBER_LEFT": {
+          const convPayload = event.conversation;
+          const affectedIds = event.affectedUserIds || [];
+          if (convPayload) {
+            const idx = state.conversations.findIndex((c) => c.id === conversationId);
+            if (idx !== -1) {
+              state.conversations[idx] = {
+                ...state.conversations[idx],
+                name: convPayload.name ?? state.conversations[idx].name,
+                avatarUrl: convPayload.avatarUrl ?? state.conversations[idx].avatarUrl,
+                ownerId: convPayload.ownerId ?? state.conversations[idx].ownerId,
+              };
+            }
+          }
+          // Remove affected members from detail in-place (no full reload needed)
+          if (affectedIds.length > 0 && state.conversationDetails[conversationId]) {
+            const detail = state.conversationDetails[conversationId];
+            state.conversationDetails[conversationId] = {
+              ...detail,
+              members: (detail.members || []).filter((m) => !affectedIds.includes(m.userId)),
+              memberCount: Math.max(0, (detail.memberCount || 0) - affectedIds.length),
+            };
+          }
+          break;
+        }
+
+        case "ROLE_CHANGED": {
+          const convPayload = event.conversation;
+          const affectedIds = event.affectedUserIds || [];
+          if (convPayload) {
+            const idx = state.conversations.findIndex((c) => c.id === conversationId);
+            if (idx !== -1) {
+              state.conversations[idx] = {
+                ...state.conversations[idx],
+                name: convPayload.name ?? state.conversations[idx].name,
+                avatarUrl: convPayload.avatarUrl ?? state.conversations[idx].avatarUrl,
+                ownerId: convPayload.ownerId ?? state.conversations[idx].ownerId,
+              };
+            }
+            if (state.conversationDetails[conversationId]) {
+              state.conversationDetails[conversationId] = {
+                ...state.conversationDetails[conversationId],
+                ownerId: convPayload.ownerId ?? state.conversationDetails[conversationId].ownerId,
+              };
+            }
+          }
+          // Invalidate detail so member roles reload fresh (new ownerId may affect multiple members)
+          if (affectedIds.length > 0) {
+            delete state.conversationDetails[conversationId];
+          }
           break;
         }
 
@@ -298,6 +372,45 @@ const chatSlice = createSlice({
         state.conversations[idx] = conv;
       } else {
         state.conversations.unshift(conv);
+      }
+    },
+
+    addOptimisticMessage(state, action) {
+      const { conversationId, tempId, content, senderId, senderName, senderAvatar } = action.payload;
+      if (!state.messages[conversationId]) {
+        state.messages[conversationId] = [];
+      }
+      state.messages[conversationId].push({
+        id: tempId,
+        conversationId,
+        senderId,
+        senderName: senderName || `User ${senderId}`,
+        senderAvatar: senderAvatar || null,
+        content,
+        messageType: "TEXT",
+        createdAt: new Date().toISOString(),
+        deleted: false,
+        seenBy: [],
+        pending: true,
+      });
+    },
+
+    removeOptimisticMessage(state, action) {
+      const { conversationId, tempId } = action.payload;
+      if (state.messages[conversationId]) {
+        state.messages[conversationId] = state.messages[conversationId].filter(
+          (m) => m.id !== tempId
+        );
+      }
+    },
+
+    removeConversationFromList(state, action) {
+      const conversationId = action.payload;
+      state.conversations = state.conversations.filter((c) => c.id !== conversationId);
+      delete state.conversationDetails[conversationId];
+      delete state.messages[conversationId];
+      if (state.activeConversationId === conversationId) {
+        state.activeConversationId = null;
       }
     },
   },
@@ -421,6 +534,9 @@ export const {
   clearTypingUser,
   resetConversationUnread,
   upsertConversation,
+  addOptimisticMessage,
+  removeOptimisticMessage,
+  removeConversationFromList,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

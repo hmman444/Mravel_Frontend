@@ -20,6 +20,7 @@ export default function MessageList({ conversationId, isGroup }) {
   const bottomRef = useRef(null);
   const listRef = useRef(null);
   const isInitialLoad = useRef(true);
+  const markSeenTimerRef = useRef(null);
 
   // Initial load
   useEffect(() => {
@@ -41,15 +42,17 @@ export default function MessageList({ conversationId, isGroup }) {
     }
   }, [messages]);
 
-  // Auto-mark seen when messages are visible
+  // Debounced markSeen: fires 1s after messages stop changing to avoid per-message API calls.
   useEffect(() => {
     if (messages.length === 0 || !conversationId) return;
-    const lastRealMessage = [...messages].reverse().find((msg) => msg.messageType !== "SYSTEM");
-    // Always mark as seen when messages are loaded, regardless of sender
-    // This ensures server state syncs even for newly added members with old messages
-    if (lastRealMessage) {
-      dispatch(markConversationSeen({ conversationId, lastMessageId: lastRealMessage.id }));
-    }
+    if (markSeenTimerRef.current) clearTimeout(markSeenTimerRef.current);
+    markSeenTimerRef.current = setTimeout(() => {
+      const lastReal = [...messages].reverse().find((m) => m.messageType !== "SYSTEM" && !m.pending);
+      if (lastReal) {
+        dispatch(markConversationSeen({ conversationId, lastMessageId: lastReal.id }));
+      }
+    }, 1000);
+    return () => clearTimeout(markSeenTimerRef.current);
   }, [messages, conversationId, dispatch]);
 
   // Load more on scroll to top
