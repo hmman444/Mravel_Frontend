@@ -8,6 +8,8 @@ import {
   updatePlanThumbnail,
   addPlanImage,
   removePlanImage,
+  addPlanVideo,
+  removePlanVideo,
   updatePlanBudget,
 } from "../slices/planGeneralSlice";
 
@@ -38,6 +40,12 @@ export const usePlanGeneral = () => {
 
     removeImage: (planId, url) =>
       dispatch(removePlanImage({ planId, url })),
+
+    addVideo: (planId, file) =>
+      dispatch(addPlanVideo({ planId, file })),
+
+    removeVideo: (planId, url) =>
+      dispatch(removePlanVideo({ planId, url })),
 
     updateBudget: (planId, payload) =>
       dispatch(updatePlanBudget({ planId, ...payload })),

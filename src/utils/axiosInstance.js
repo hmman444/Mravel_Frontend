@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
+import { decodeJwtPayload } from "./jwt";
 import { showError } from "./toastUtils";
 import { getStore } from "../redux/storeInjector";
 import { ErrorCodes } from "../constants/errorCodes";
@@ -20,6 +21,19 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    const store = getStore();
+    const authState = store?.getState?.()?.auth;
+    const tokenPayload = accessToken ? decodeJwtPayload(accessToken) : null;
+    const userId =
+      authState?.user?.id ??
+      authState?.user?.userId ??
+      tokenPayload?.id ??
+      tokenPayload?.userId;
+    if (userId) {
+      config.headers["X-User-Id"] = userId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -77,8 +91,9 @@ api.interceptors.response.use(
         store.dispatch(setTokensRedux({ accessToken, refreshToken: newRefresh }));
 
         const me = await api.get("/auth/me");
+        const currentUser = me?.data?.data ?? me?.data ?? null;
 
-        store.dispatch(setUser(me.data.data));
+        store.dispatch(setUser(currentUser));
 
         onRefreshed(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -88,6 +103,9 @@ api.interceptors.response.use(
       } catch (err) {
         console.error("❌ Refresh token failed:", err);
         clearTokens();
+        const store = getStore();
+        store.dispatch(setTokensRedux({ accessToken: null, refreshToken: null }));
+        store.dispatch(setUser(null));
         window.location.href = "/login";
         return Promise.reject(err);
       }

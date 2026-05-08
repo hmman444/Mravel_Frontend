@@ -3,10 +3,11 @@ import {
   fetchPlans,
   sendReaction,
   sendComment,
+  reactToComment,
   sharePlan,
   fetchMyPlans,
   searchPlansAndUsers,
-  fetchPlanFeedDetail, 
+  fetchPlanFeedDetail,
 } from "../services/planService";
 
 export const DEFAULT_FILTERS = {
@@ -79,6 +80,14 @@ export const commentPlan = createAsyncThunk("plan/commentPlan", async ({ planId,
   const res = await sendComment(planId, comment);
   return { planId, data: res };
 });
+
+export const reactComment = createAsyncThunk(
+  "plan/reactComment",
+  async ({ planId, commentId, type }) => {
+    const res = await reactToComment(commentId, type);
+    return { planId, ...res }; // { planId, commentId, reactions, myReaction }
+  }
+);
 
 export const sharePlanInvite = createAsyncThunk("plan/sharePlanInvite", async ({ planId, email }) => {
   const res = await sharePlan(planId, email);
@@ -156,6 +165,32 @@ const planSlice = createSlice({
           update(state.myItems.find(p => p.id === planId));
           update(state.searchPlans.find((p) => p.id === planId));
           update(state.current && state.current.id === planId ? state.current : null);
+      })
+      .addCase(reactComment.fulfilled, (state, action) => {
+        const { planId, commentId, reactions, myReaction, reactionUsers } = action.payload;
+
+        const updateInTree = (comments) => {
+          for (const c of comments) {
+            if (c.id === commentId) {
+              c.reactions = reactions;
+              c.myReaction = myReaction ?? null;
+              c.reactionUsers = reactionUsers ?? [];
+              return true;
+            }
+            if (c.replies && updateInTree(c.replies)) return true;
+          }
+          return false;
+        };
+
+        const updatePlan = (plan) => {
+          if (!plan) return;
+          updateInTree(plan.comments || []);
+        };
+
+        updatePlan(state.items.find((p) => p.id === planId));
+        updatePlan(state.myItems.find((p) => p.id === planId));
+        updatePlan(state.searchPlans.find((p) => p.id === planId));
+        updatePlan(state.current && state.current.id === planId ? state.current : null);
       })
       .addCase(commentPlan.fulfilled, (state, action) => {
         const { planId, data } = action.payload;

@@ -81,7 +81,8 @@ partnerApi.interceptors.response.use(
 
       // Partner me endpoint
       const meRes = await partnerApi.get("/auth/partner/me");
-      store.dispatch(setPartnerUser(meRes.data.data || meRes.data));
+      const currentPartner = meRes?.data?.data ?? meRes?.data ?? null;
+      store.dispatch(setPartnerUser(currentPartner));
 
       onRefreshed(accessToken);
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;

@@ -7,10 +7,13 @@ class MainSocket {
   connected = false;
   accessToken = null;
 
-  subscribers = new Map(); // subId -> () => unsubscribe
+  // subId -> { destination, handler, unsub | null }
+  // Only contains subscriptions that have been successfully registered with STOMP.
+  subscribers = new Map();
   nextSubId = 1;
 
-  pendingSubs = []; // { id, destination, handler }
+  // Queued while disconnected; flushed on next onConnect.
+  pendingSubs = [];
 
   setAccessToken(token) {
     this.accessToken = token;
@@ -29,25 +32,16 @@ class MainSocket {
 
     const client = new Client({
       ...(useSockJs
-        ? {
-            webSocketFactory: () => new SockJS(sockJsUrl),
-          }
-        : {
-            brokerURL: nativeWsUrl,
-          }),
+        ? { webSocketFactory: () => new SockJS(sockJsUrl) }
+        : { brokerURL: nativeWsUrl }),
 
-      // Tự reconnect nếu server rớt, network drop, ...
       reconnectDelay: 5000,
 
-      // Do not require broker heartbeats; Spring simple broker may not emit them.
       heartbeatIncoming: 0,
       heartbeatOutgoing: useSockJs ? 0 : 10000,
 
-      debug: () => {
-        // console.log("[STOMP]", str);
-      },
+      debug: () => {},
 
-      // Mỗi lần chuẩn bị connect/reconnect, gắn lại header từ accessToken hiện tại
       beforeConnect: () => {
         client.connectHeaders = this.accessToken
           ? { Authorization: `Bearer ${this.accessToken}` }
@@ -55,12 +49,9 @@ class MainSocket {
       },
     });
 
-    // Gắn client hiện tại
     this.client = client;
 
-    //  HANDLER 
     client.onConnect = () => {
-      // Chặn callback của client cũ (trong trường hợp đã create client mới)
       if (this.client !== client) {
         console.warn("[WS] Ignore onConnect from stale client");
         return;
@@ -69,57 +60,68 @@ class MainSocket {
       console.log("[WS] Connected STOMP");
       this.connected = true;
 
-      // Flush pendingSubs
+      // Re-subscribe all active subscriptions that were lost during disconnect.
+      // This ensures hooks don't need to re-run their effects on every reconnect.
+      this.subscribers.forEach((entry) => {
+        try {
+          const stomp_sub = client.subscribe(entry.destination, (msg) => {
+            try {
+              entry.handler(JSON.parse(msg.body));
+            } catch (e) {
+              console.error("[WS] Parse error on re-subscribe:", e);
+            }
+          });
+          entry.unsub = () => stomp_sub.unsubscribe();
+        } catch (e) {
+          console.warn("[WS] Re-subscribe failed for", entry.destination, e);
+        }
+      });
+
+      // Flush subscriptions that arrived while disconnected.
       const pending = [...this.pendingSubs];
       this.pendingSubs = [];
-
       pending.forEach(({ id, destination, handler }) => {
-        const sub = client.subscribe(destination, (msg) => {
-          try {
-            const payload = JSON.parse(msg.body);
-            handler(payload);
-          } catch (e) {
-            console.error("Parse WS payload error:", e);
-          }
-        });
-        this.subscribers.set(id, () => sub.unsubscribe());
+        try {
+          const stomp_sub = client.subscribe(destination, (msg) => {
+            try {
+              handler(JSON.parse(msg.body));
+            } catch (e) {
+              console.error("[WS] Parse error on pending flush:", e);
+            }
+          });
+          this.subscribers.set(id, {
+            destination,
+            handler,
+            unsub: () => stomp_sub.unsubscribe(),
+          });
+        } catch (e) {
+          console.warn("[WS] Pending sub failed for", destination, e);
+        }
       });
     };
 
     client.onStompError = (frame) => {
-      console.error(
-        "STOMP error:",
-        frame.headers["message"],
-        frame.body
-      );
+      console.error("[WS] STOMP error:", frame.headers["message"], frame.body);
     };
 
     client.onWebSocketClose = (event) => {
-      // Nếu đã có client mới => bỏ qua close của client cũ
       if (this.client !== client) {
         console.warn("[WS] WebSocket closed on stale client");
         return;
       }
-
       console.warn("[WS] Socket closed:", event.code, event.reason);
       this.connected = false;
-
-      // KHÔNG set this.client = null ở đây
-      // để STOMP tự reconnect với reconnectDelay
-      // Chỉ khi logout mới disconnect() và null.
+      // Do NOT null out this.client — STOMP auto-reconnects via reconnectDelay.
     };
   }
 
   connect(accessToken) {
-    // Always refresh token used by CONNECT headers before activating/reconnecting.
     this.setAccessToken(accessToken || null);
 
-    // Nếu chưa có client (lần đầu hoặc sau khi logout) → tạo
     if (!this.client) {
       this._createClient();
     }
 
-    // Nếu đang active rồi thì thôi
     if (this.client.active) return;
 
     this.client.activate();
@@ -128,12 +130,11 @@ class MainSocket {
   disconnect() {
     if (!this.client) return;
 
-    // Huỷ hết subscriptions
-    this.subscribers.forEach((unsub) => {
+    this.subscribers.forEach((entry) => {
       try {
-        unsub();
+        entry.unsub?.();
       } catch (e) {
-        console.warn("[WS] Error when unsubscribing during disconnect:", e);
+        console.warn("[WS] Error unsubscribing during disconnect:", e);
       }
     });
     this.subscribers.clear();
@@ -142,7 +143,7 @@ class MainSocket {
     try {
       this.client.deactivate();
     } catch (e) {
-      console.warn("[WS] Error when deactivating client:", e);
+      console.warn("[WS] Error deactivating client:", e);
     }
 
     this.client = null;
@@ -150,38 +151,28 @@ class MainSocket {
     this.accessToken = null;
   }
 
-  /**
-   * Đăng ký subscribe 1 topic
-   * @param {string} destination - ví dụ `/topic/plans/123/board`
-   * @param {(msgBody:any)=>void} handler
-   * @returns {number} subId để sau này hủy
-   */
   subscribe(destination, handler) {
     const id = this.nextSubId++;
 
-    const subscribeNow = () => {
-      // Phòng trường hợp vừa disconnect xong, client bị null
-      if (!this.client) {
-        console.warn(
-          "[WS] subscribeNow but client is null, push back to pending"
-        );
-        this.pendingSubs.push({ id, destination, handler });
-        return;
-      }
-
-      const sub = this.client.subscribe(destination, (msg) => {
-        try {
-          const payload = JSON.parse(msg.body);
-          handler(payload);
-        } catch (e) {
-          console.error("Parse WS payload error:", e);
-        }
-      });
-      this.subscribers.set(id, () => sub.unsubscribe());
-    };
-
     if (this.client && this.connected) {
-      subscribeNow();
+      try {
+        const stomp_sub = this.client.subscribe(destination, (msg) => {
+          try {
+            handler(JSON.parse(msg.body));
+          } catch (e) {
+            console.error("[WS] Parse error:", e);
+          }
+        });
+        this.subscribers.set(id, {
+          destination,
+          handler,
+          unsub: () => stomp_sub.unsubscribe(),
+        });
+      } catch (e) {
+        // Socket closed mid-subscribe — queue for next connect
+        console.warn("[WS] Subscribe failed, queuing:", destination, e);
+        this.pendingSubs.push({ id, destination, handler });
+      }
     } else {
       this.pendingSubs.push({ id, destination, handler });
     }
@@ -190,18 +181,14 @@ class MainSocket {
   }
 
   unsubscribe(subId) {
-    // Bỏ khỏi pending nếu chưa kịp subscribe
     this.pendingSubs = this.pendingSubs.filter((p) => p.id !== subId);
 
-    const unsub = this.subscribers.get(subId);
-    if (unsub) {
+    const entry = this.subscribers.get(subId);
+    if (entry) {
       try {
-        unsub();
+        entry.unsub?.();
       } catch (e) {
-        console.warn(
-          "[WS] Error when unsubscribing (socket may be closing):",
-          e
-        );
+        console.warn("[WS] Error unsubscribing:", e);
       }
       this.subscribers.delete(subId);
     }

@@ -57,6 +57,12 @@ export async function sendComment(planId, comment) {
   return res.data.data;
 }
 
+export async function reactToComment(commentId, type) {
+  const params = new URLSearchParams({ type });
+  const res = await api.post(`${BASE}/comments/${commentId}/reactions?${params.toString()}`);
+  return res.data.data; // CommentReactionResponse: { commentId, reactions, myReaction }
+}
+
 export async function sharePlan(planId, email) {
   const res = await api.post(`${BASE}/${planId}/share`, { email });
   return res.data.data;
@@ -77,6 +83,16 @@ export async function fetchMyPlans(page = 1, size = 5) {
  * @param {string|null} cursor  — opaque cursor from previous response; null = first page
  * @param {number}      size
  */
+export async function addPlanVideo(planId, url) {
+  const res = await api.post(`${BASE}/${planId}/videos`, { url });
+  return res.data;
+}
+
+export async function removePlanVideo(planId, url) {
+  const res = await api.delete(`${BASE}/${planId}/videos`, { data: { url } });
+  return res.data;
+}
+
 export async function searchPlansAndUsers(q, filters = {}, cursor = null, size = 10) {
   const params = new URLSearchParams();
   params.set("q", q || "");

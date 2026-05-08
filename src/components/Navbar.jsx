@@ -31,7 +31,7 @@ export default function Navbar() {
   const solid = scrolled || !isTransparentPage;
 
   /* == NOTIFICATIONS == */
-  const { items, loading, saving, unreadCount, load, markAllRead, markRead } =
+  const { items, loading, saving, unreadCount, initialized, load, markAllRead, markRead } =
     useNotifications();
 
   const [notiOpen, setNotiOpen] = useState(false);
@@ -41,8 +41,13 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
 
-  const fullname = user?.fullname || "Người dùng";
-  const avatar = user?.avatar || "https://ui-avatars.com/api/?name=User";
+  const fullname = user?.fullname || user?.fullName || user?.name || user?.username || "Người dùng";
+  const avatar =
+    user?.avatar ||
+    user?.picture ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}`;
+
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}`;
 
   /* == LANGUAGE == */
   const langs = useMemo(
@@ -64,13 +69,6 @@ export default function Navbar() {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
-
-  /* == LOAD NOTI ON LOGIN == */
-  useEffect(() => {
-    if (!accessToken || !user?.id) return;
-    load().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, user?.id]);
 
   /* == CLOSE ON ROUTE CHANGE == */
   useEffect(() => {
@@ -255,7 +253,7 @@ export default function Navbar() {
                     setUserMenuOpen(false);
                     setLangOpen(false);
                     setNotiOpen((v) => !v);
-                    if (!notiOpen) load().catch(() => {});
+                    if (!notiOpen && !initialized && !loading) load().catch(() => {});
                   }}
                   className={`
                     relative grid place-items-center w-10 h-10 rounded-full
@@ -314,6 +312,10 @@ export default function Navbar() {
                   <img
                     src={avatar}
                     alt="avatar"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackAvatar;
+                    }}
                     className={`w-9 h-9 rounded-full object-cover border ${
                       solid ? "border-gray-300" : "border-white/50"
                     }`}

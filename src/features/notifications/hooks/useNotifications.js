@@ -15,6 +15,7 @@ import {
 export function useNotifications() {
   const dispatch = useDispatch();
   const n = useSelector((s) => s.notifications);
+  const accessToken = useSelector((s) => s.auth.accessToken);
   const userId = useSelector((s) => s.auth.user?.id);
 
   const recipientParams = useMemo(
@@ -25,7 +26,7 @@ export function useNotifications() {
   const loadedOnceRef = useRef(false);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!accessToken || !userId) return;
 
     // reset khi user đổi
     loadedOnceRef.current = false;
@@ -41,7 +42,7 @@ export function useNotifications() {
     );
 
     loadedOnceRef.current = true;
-  }, [userId, dispatch, n.size]);
+  }, [accessToken, userId, dispatch, n.size]);
 
 
   const open = useCallback(() => dispatch(setDropdownOpen(true)), [dispatch]);

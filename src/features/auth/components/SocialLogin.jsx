@@ -28,12 +28,17 @@ export default function SocialLogin() {
       try {
         setLoading(true);
 
-        const idToken = tokenResponse.access_token || tokenResponse.credential;
+        // useGoogleLogin(flow="implicit") returns OAuth access_token for backend verification.
+        const googleToken = tokenResponse?.access_token;
+        if (!googleToken) {
+          console.error("Google login failed: missing access_token");
+          return;
+        }
 
         const action = await dispatch(
           socialLoginUser({
             provider: "google",
-            token: idToken,
+            token: googleToken,
             rememberMe: true,
           })
         );
