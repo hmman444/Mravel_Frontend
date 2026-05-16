@@ -87,10 +87,10 @@ export default function HotelAmenitiesSection({ hotel }) {
   if (!categories.length && !images.length) return null;
 
   return (
-    <section id="hotel-amenities-section" className="mt-6 border border-gray-200 bg-white">
+    <section id="hotel-amenities-section" className="mt-6 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* HEADER + GALLERY */}
       <div className="px-6 pt-5 pb-4">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
           Tất cả những tiện ích tại {hotel.name}
         </h2>
 
@@ -99,7 +99,7 @@ export default function HotelAmenitiesSection({ hotel }) {
             {images.map((img, idx) => (
               <div
                 key={img.url || idx}
-                className="relative h-32 overflow-hidden bg-gray-200"
+                className="relative h-32 overflow-hidden bg-gray-200 dark:bg-gray-700"
               >
                 {img.url && (
                   <img
@@ -122,7 +122,7 @@ export default function HotelAmenitiesSection({ hotel }) {
       </div>
 
       {/* GRID 3 CỘT – TỰ XUỐNG HÀNG */}
-      <div className="border-t border-gray-100 px-6 py-5">
+      <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-5">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {categories.map((cat) => (
             <AmenityColumn
@@ -149,12 +149,12 @@ function AmenityColumn({ title, icon, items }) {
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e6f2ff] text-[#0064d2] shadow-sm ring-1 ring-[#c6ddff]">
           {icon}
         </div>
-        <h3 className="text-[14px] font-bold leading-snug text-gray-900">
+        <h3 className="text-[14px] font-bold leading-snug text-gray-900 dark:text-gray-100">
           {title}
         </h3>
       </div>
 
-      <ul className="ml-8 space-y-1.5 text-sm text-gray-700">
+      <ul className="ml-8 space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
         {items.map((a) => (
           <li
             key={a.code || a.name}

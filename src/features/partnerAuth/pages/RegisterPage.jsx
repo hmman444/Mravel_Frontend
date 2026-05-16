@@ -107,7 +107,7 @@ export default function RegisterPage() {
 
         <SocialLogin />
 
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           Đã có tài khoản?{" "}
           <a href="/partner/login" className="text-blue-500">
             Đăng nhập ngay

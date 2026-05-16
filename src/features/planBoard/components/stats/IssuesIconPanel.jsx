@@ -17,7 +17,7 @@ export default function IssuesIconPanel({
   const issuesToShow = showAll ? issues : issues.slice(0, 6);
 
   return (
-    <div className="rounded-3xl border border-slate-200/70 bg-white shadow-[0_12px_40px_rgba(2,6,23,0.08)] dark:border-slate-800/70 dark:bg-slate-900">
+    <div className="rounded-3xl border border-slate-200/70 bg-white dark:bg-gray-800 shadow-[0_12px_40px_rgba(2,6,23,0.08)] dark:border-slate-800/70 dark:bg-slate-900">
       <div className="flex items-center justify-between gap-3 p-5">
         <div>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -30,7 +30,7 @@ export default function IssuesIconPanel({
 
         <button
           onClick={onToggle}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200/70 bg-white hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:hover:bg-slate-800/60 transition"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200/70 bg-white dark:bg-gray-800 hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:hover:bg-slate-800/60 transition"
           title={open ? "Đóng cảnh báo" : "Mở cảnh báo"}
         >
           {issues.length === 0 ? iconWhenEmpty : iconWhenHas}
@@ -55,7 +55,7 @@ export default function IssuesIconPanel({
                 {issues.length > 6 && (
                   <button
                     onClick={onToggleShowAll}
-                    className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-200/70 bg-white hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:hover:bg-slate-800/60 transition"
+                    className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-200/70 bg-white dark:bg-gray-800 hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:hover:bg-slate-800/60 transition"
                   >
                     {showAll ? (
                       <>

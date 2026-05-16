@@ -10,7 +10,7 @@ const ROLE_COLORS = {
   EDITOR:
     "bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200",
   VIEWER:
-    "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+    "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 dark:bg-gray-800 dark:text-gray-200",
 };
 
 function formatCurrency(amount) {

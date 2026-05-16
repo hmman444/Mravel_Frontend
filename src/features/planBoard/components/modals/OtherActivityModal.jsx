@@ -441,7 +441,7 @@ export default function OtherActivityModal({
               >
                 <div
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl
-                    bg-slate-50 text-slate-600 border border-slate-100
+                    bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700
                     dark:bg-slate-900/40 dark:text-slate-200 dark:border-slate-700"
                 >
                   <FaMapMarkerAlt />
@@ -471,7 +471,7 @@ export default function OtherActivityModal({
                         </span>
                         {effectiveOtherLocation?.lat != null &&
                           effectiveOtherLocation?.lng != null && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-200">
+                            <span className="px-1.5 py-0.5 rounded-full bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 dark:bg-slate-900/40 dark:text-slate-200">
                               {effectiveOtherLocation.lat.toFixed(4)},{" "}
                               {effectiveOtherLocation.lng.toFixed(4)}
                             </span>

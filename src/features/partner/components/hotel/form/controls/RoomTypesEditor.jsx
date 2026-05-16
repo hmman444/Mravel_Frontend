@@ -80,11 +80,11 @@ export default function RoomTypesEditor({ roomAmenities = [], value = [], onChan
   };
 
   return (
-    <div className="rounded-2xl border bg-white p-4 space-y-3">
+    <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-gray-900">{TEXT.SECTION_TITLE}</div>
-          <div className="text-xs text-gray-500 mt-0.5">{TEXT.SECTION_HINT}</div>
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{TEXT.SECTION_TITLE}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{TEXT.SECTION_HINT}</div>
         </div>
 
         <button
@@ -98,17 +98,17 @@ export default function RoomTypesEditor({ roomAmenities = [], value = [], onChan
       </div>
 
       {rooms.length === 0 ? (
-        <div className="text-sm text-gray-500">Chưa có loại phòng.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa có loại phòng.</div>
       ) : (
         <div className="space-y-3">
           {rooms.map((r, idx) => (
             <div key={idx} className="rounded-2xl border p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">
                     {TEXT.ROOM_PREFIX} #{idx + 1} — {r.name || TEXT.ROOM_UNNAMED}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     {TEXT.CODE_LABEL}: {r.code || "—"}
                   </div>
                 </div>

@@ -16,7 +16,7 @@ const InputField = ({
     <div>
       <label
         htmlFor={id}
-        className="block text-left text-sm font-medium text-gray-700 mb-1"
+        className="block text-left text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
       >
         {name.charAt(0).toUpperCase() + name.slice(1)}
       </label>
@@ -39,7 +39,7 @@ const InputField = ({
             Icon ? "pl-9" : "pl-3"
           } pr-3 py-3 border ${
             error ? "border-[#FF7E67]" : "border-[#A2D5F2]"
-          } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#07689F] focus:border-transparent`}
+          } placeholder-gray-500 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#07689F] focus:border-transparent`}
           aria-invalid={error ? "true" : "false"}
         />
       </div>

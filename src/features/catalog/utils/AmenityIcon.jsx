@@ -20,5 +20,5 @@ export function AmenityIcon({ iconKey, className = "h-5 w-5" }) {
     return <Icon icon={`lucide:${normalized.replace(/_/g, "-")}`} className={className} />;
   }
 
-  return <span className="text-xs font-bold text-slate-600">?</span>;
+  return <span className="text-xs font-bold text-slate-600 dark:text-slate-400">?</span>;
 }

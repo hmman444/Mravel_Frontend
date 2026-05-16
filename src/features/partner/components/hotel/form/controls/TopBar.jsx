@@ -15,10 +15,10 @@ export default function TopBar({
   submittingLabel = "Đang lưu...",
 }) {
   return (
-    <div className="bg-white rounded-2xl border p-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <div className="text-xl font-bold">{title}</div>
-        {subtitle ? <div className="text-xs text-gray-500">{subtitle}</div> : null}
+        {subtitle ? <div className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</div> : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

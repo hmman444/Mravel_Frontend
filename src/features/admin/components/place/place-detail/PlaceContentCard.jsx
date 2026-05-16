@@ -44,7 +44,7 @@ export default function PlaceContentCard({
                 </span>
               </summary>
 
-              <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-950">
+              <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-xl dark:border-slate-800 dark:bg-slate-950">
                 {BLOCK_TYPES.filter((b) => !["HEADING", "PARAGRAPH", "IMAGE"].includes(b.type)).map((b) => (
                   <button
                     key={b.type}
@@ -64,7 +64,7 @@ export default function PlaceContentCard({
 
       <div className={ui.cardBody}>
         {!blocks || blocks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+          <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-6 text-sm text-slate-600 dark:text-slate-400 dark:border-slate-700 dark:text-slate-300">
             Chưa có nội dung. Hãy thêm Heading/Paragraph để bắt đầu.
           </div>
         ) : (
@@ -88,7 +88,7 @@ export default function PlaceContentCard({
           </div>
         )}
 
-        <div className="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+        <div className="mt-5 rounded-xl bg-slate-50 dark:bg-gray-900 p-4 text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
           <b>Gợi ý seed-style:</b> Heading → Quote → Paragraph → Image → Paragraph → Gallery → Info → Divider → Map.
         </div>
       </div>

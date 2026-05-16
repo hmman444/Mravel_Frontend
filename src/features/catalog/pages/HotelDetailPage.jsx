@@ -15,6 +15,7 @@ import HotelAmenitiesSection from "../components/hotel/HotelAmenitiesSection";
 import HotelPolicySection from "../components/hotel/HotelPolicySection";
 import HotelFaqSection from "../components/hotel/HotelFaqSection";
 import HotelSimilarSection from "../components/hotel/HotelSimilarSection";
+import ReviewSection from "../../review/components/ReviewSection";
 
 export default function HotelDetailPage() {
   const { slug } = useParams();
@@ -46,7 +47,7 @@ export default function HotelDetailPage() {
       <main className="flex-1 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
           {loading && (
-            <p className="py-10 text-center text-gray-500">
+            <p className="py-10 text-center text-gray-500 dark:text-gray-400">
               Đang tải thông tin khách sạn...
             </p>
           )}
@@ -56,7 +57,7 @@ export default function HotelDetailPage() {
           )}
 
           {!loading && !error && hotel && (
-            <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
               {/* 🔥 Chỉ bọc phần trên bằng FadeInSection */}
               <FadeInSection>
                 <div>
@@ -72,6 +73,7 @@ export default function HotelDetailPage() {
               <HotelPolicySection hotel={hotel} />
               <HotelFaqSection hotel={hotel} />
               <HotelSimilarSection hotel={hotel} />
+              <ReviewSection targetType="HOTEL" targetId={hotel.id} />
             </div>
           )}
         </div>

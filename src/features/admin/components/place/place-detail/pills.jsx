@@ -23,6 +23,6 @@ export function KindPill({ kind }) {
 export function StatusPill({ active }) {
   const cls = active
     ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-200 dark:border-emerald-900"
-    : "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800";
+    : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800";
   return <span className={`${ui.pill} ${cls}`}>{active ? "Đang hoạt động" : "Đã khóa"}</span>;
 }

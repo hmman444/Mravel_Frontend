@@ -60,7 +60,7 @@ export default function PartnerRestaurantFormPage({
         submittingLabel="Đang lưu..."
       />
 
-      <div className="bg-white rounded-2xl border p-4 space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4">
         <BasicInfoSection form={fm.form} setField={fm.setField} disabled={loading} />
 
         <RestaurantMetaSection form={fm.form} setField={fm.setField} disabled={loading} />

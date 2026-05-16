@@ -78,7 +78,7 @@ export default function ManageReportsPage() {
         <h1 className="text-2xl font-bold mb-6">{t("manage_reports")}</h1>
 
         {/* Toolbar */}
-        <div className="bg-white shadow rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-center">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-center">
             {/* Tabs */}
             <div className="flex gap-2">
             {STATUS_TABS.map((tabItem) => (
@@ -88,7 +88,7 @@ export default function ManageReportsPage() {
                 className={`px-3 py-1.5 rounded-md text-sm border ${
                     tab === tabItem.key
                     ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
                 }`}
                 >
                 {tabItem.label}
@@ -126,11 +126,11 @@ export default function ManageReportsPage() {
             {filtered.map((r) => (
             <div
                 key={r.id}
-                className="bg-white rounded-lg shadow p-4 flex justify-between items-start hover:shadow-md transition"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex justify-between items-start hover:shadow-md transition"
             >
                 <div>
                 <h3 className="font-semibold">{r.content}</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     {t("reporter")}: {r.reporter} • {r.date} • {t("type")}: {r.type}
                 </p>
                 <span
@@ -141,7 +141,7 @@ export default function ManageReportsPage() {
                         ? "bg-blue-100 text-blue-700"
                         : r.status === "resolved"
                         ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                     }`}
                 >
                     {STATUS_TABS.find((s) => s.key === r.status)?.label}
@@ -154,7 +154,7 @@ export default function ManageReportsPage() {
                     className="p-2 rounded hover:bg-gray-100"
                     title={t("view_detail")}
                 >
-                    <EyeIcon className="w-5 h-5 text-gray-600" />
+                    <EyeIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </button>
 
                 {r.status === "pending" && (
@@ -192,7 +192,7 @@ export default function ManageReportsPage() {
                     className="p-2 rounded hover:bg-gray-50"
                     title={t("archive")}
                     >
-                    <ArchiveBoxIcon className="w-5 h-5 text-gray-600" />
+                    <ArchiveBoxIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     </button>
                 )}
 
@@ -213,7 +213,7 @@ export default function ManageReportsPage() {
         {/* Detail modal */}
         {detail && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
                 <h3 className="text-lg font-semibold mb-2">{t("report_detail")}</h3>
                 <p className="mb-2">
                 <span className="font-medium">{t("content")}:</span>{" "}

@@ -46,8 +46,8 @@ export const BOOKING_STATUS = {
   PAID: { label: "Đã thanh toán", cls: "bg-emerald-100 text-emerald-700" },
   CONFIRMED: { label: "Đã xác nhận", cls: "bg-blue-100 text-blue-700" },
   COMPLETED: { label: "Hoàn tất", cls: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "Đã hủy", cls: "bg-gray-100 text-gray-600" },
-  CANCELLED_BY_GUEST: { label: "Khách hủy", cls: "bg-gray-100 text-gray-600" },
+  CANCELLED: { label: "Đã hủy", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
+  CANCELLED_BY_GUEST: { label: "Khách hủy", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
   CANCELLED_BY_PARTNER: { label: "Đối tác hủy", cls: "bg-red-100 text-red-700" },
   REFUNDED: { label: "Đã hoàn tiền", cls: "bg-purple-100 text-purple-700" },
 
@@ -56,14 +56,14 @@ export const BOOKING_STATUS = {
 };
 
 export const PAYMENT_STATUS = {
-  PENDING: { label: "Chờ thanh toán", cls: "bg-gray-100 text-gray-600" },
+  PENDING: { label: "Chờ thanh toán", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
   SUCCESS: { label: "Thành công", cls: "bg-green-100 text-green-700" },
   FAILED: { label: "Thất bại", cls: "bg-red-100 text-red-700" },
   REFUNDED: { label: "Đã hoàn tiền", cls: "bg-purple-100 text-purple-700" },
   PARTIAL_REFUNDED: { label: "Hoàn một phần", cls: "bg-purple-100 text-purple-700" },
 
   // fallback cũ
-  UNPAID: { label: "Chưa thanh toán", cls: "bg-gray-100 text-gray-600" },
+  UNPAID: { label: "Chưa thanh toán", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
   PAID: { label: "Đã thanh toán", cls: "bg-green-100 text-green-700" },
 };
 
@@ -71,7 +71,7 @@ export const SERVICE_STATUS = {
   ACTIVE: { label: "Đang hoạt động", cls: "bg-green-100 text-green-700" },
   PENDING: { label: "Chờ duyệt", cls: "bg-yellow-100 text-yellow-700" },
   REJECTED: { label: "Bị từ chối", cls: "bg-red-100 text-red-700" },
-  PARTNER_PAUSED: { label: "Đối tác tạm khóa", cls: "bg-gray-100 text-gray-600" },
+  PARTNER_PAUSED: { label: "Đối tác tạm khóa", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
   ADMIN_BLOCKED: { label: "Admin khóa", cls: "bg-red-100 text-red-700" },
 };
 

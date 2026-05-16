@@ -939,14 +939,14 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                   />
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
-                  <span className="px-2 py-0.5 rounded-full bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
                     Ước tính:{" "}
                     <span className="font-semibold">
                       {fmtMoney(totalEstimated)}
                       {currencySuffix}
                     </span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
                     Thực tế:{" "}
                     <span className="font-semibold">
                       {fmtMoney(totalActual)}

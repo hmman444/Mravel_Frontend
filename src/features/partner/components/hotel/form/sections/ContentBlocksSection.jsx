@@ -83,7 +83,7 @@ export default function ContentBlocksSection({
       <summary className="cursor-pointer select-none font-semibold">Content blocks</summary>
 
       <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="text-sm text-gray-600">{blocks.length} block</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">{blocks.length} block</div>
 
         <button
           type="button"
@@ -96,7 +96,7 @@ export default function ContentBlocksSection({
       </div>
 
       {blocks.length === 0 ? (
-        <div className="mt-3 text-sm text-gray-500">Chưa có content.</div>
+        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có content.</div>
       ) : (
         <div className="mt-3 space-y-3">
           {blocks.map((b = {}, idx) => {
@@ -109,7 +109,7 @@ export default function ContentBlocksSection({
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-medium">
                     Block #{idx + 1}{" "}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       ({section} • {type})
                     </span>
                   </div>
@@ -126,7 +126,7 @@ export default function ContentBlocksSection({
                 {/* meta row: section + sort (type không cần dropdown nữa, vì type chọn từ lúc tạo) */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
                   <label className="md:col-span-4 text-sm">
-                    <div className="text-xs text-gray-500 mb-1">Vị trí (section)</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vị trí (section)</div>
                     <select
                       value={section}
                       onChange={(e) => update(idx, { section: e.target.value })}
@@ -141,7 +141,7 @@ export default function ContentBlocksSection({
                   </label>
 
                   <label className="md:col-span-3 text-sm">
-                    <div className="text-xs text-gray-500 mb-1">Sort</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Sort</div>
                     <input
                       type="number"
                       value={asInt(b.sortOrder, 0)}
@@ -152,8 +152,8 @@ export default function ContentBlocksSection({
                   </label>
 
                   <div className="md:col-span-5 text-sm">
-                    <div className="text-xs text-gray-500 mb-1">Loại block</div>
-                    <div className="w-full border rounded-xl px-3 py-2 text-sm bg-gray-50">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Loại block</div>
+                    <div className="w-full border rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900">
                       {type}
                     </div>
                   </div>
@@ -161,18 +161,18 @@ export default function ContentBlocksSection({
 
                 {/* body fields by type */}
                 {type === "DIVIDER" ? (
-                  <div className="text-sm text-gray-500 italic">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                     Divider không có nội dung.
                   </div>
                 ) : type === "IMAGE" ? (
                   <div className="space-y-2">
                     {/* preview */}
                     {b.imageUrl ? (
-                      <div className="w-full max-w-md h-40 bg-gray-100 rounded-2xl overflow-hidden border">
+                      <div className="w-full max-w-md h-40 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden border">
                         <img src={b.imageUrl} alt="" className="w-full h-full object-cover" />
                       </div>
                     ) : (
-                      <div className="w-full max-w-md h-40 bg-gray-50 rounded-2xl border flex items-center justify-center text-sm text-gray-400">
+                      <div className="w-full max-w-md h-40 bg-gray-50 dark:bg-gray-900 rounded-2xl border flex items-center justify-center text-sm text-gray-400">
                         Chưa có ảnh
                       </div>
                     )}
@@ -191,7 +191,7 @@ export default function ContentBlocksSection({
                       </label>
 
                       {/* hint */}
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         Ảnh sẽ thuộc section: <b>{section}</b>
                       </div>
                     </div>
@@ -243,11 +243,11 @@ export default function ContentBlocksSection({
             if (e.target === e.currentTarget) setPickerOpen(false);
           }}
         >
-          <div className="w-full max-w-2xl rounded-3xl bg-white border shadow-xl overflow-hidden">
+          <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-gray-800 border shadow-xl overflow-hidden">
             <div className="px-5 py-3 border-b flex items-center justify-between">
               <div>
-                <div className="text-base font-bold text-gray-900">Chọn loại block</div>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-base font-bold text-gray-900 dark:text-gray-100">Chọn loại block</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Chọn loại trước để form hiển thị đúng field
                 </div>
               </div>
@@ -257,7 +257,7 @@ export default function ContentBlocksSection({
                 className="rounded-xl p-2 hover:bg-gray-100"
                 title="Đóng"
               >
-                <XMarkIcon className="h-5 w-5 text-gray-600" />
+                <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
 
@@ -270,8 +270,8 @@ export default function ContentBlocksSection({
                     onClick={() => handleAdd(x.type)}
                     className="w-full text-left rounded-2xl border p-4 hover:bg-gray-50"
                   >
-                    <div className="text-sm font-semibold text-gray-900">{x.label}</div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{x.label}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {x.type === "IMAGE"
                         ? "Thêm ảnh + caption + upload từ máy tính"
                         : x.type === "DIVIDER"
@@ -283,11 +283,11 @@ export default function ContentBlocksSection({
               </div>
             </div>
 
-            <div className="px-5 py-3 border-t bg-gray-50 flex items-center justify-end">
+            <div className="px-5 py-3 border-t bg-gray-50 dark:bg-gray-900 flex items-center justify-end">
               <button
                 type="button"
                 onClick={() => setPickerOpen(false)}
-                className="px-4 py-2 text-sm rounded-xl border bg-white hover:bg-gray-50"
+                className="px-4 py-2 text-sm rounded-xl border bg-white dark:bg-gray-800 hover:bg-gray-50"
               >
                 Hủy
               </button>

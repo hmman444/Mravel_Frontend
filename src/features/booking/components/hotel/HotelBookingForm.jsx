@@ -53,17 +53,17 @@ export default function HotelBookingForm({
   }, [checkIn, checkOut]);
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-5 space-y-5">
+    <section className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm md:p-5 space-y-5">
       {/* HEADER */}
       <div className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
           <Mail className="h-4 w-4" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 md:text-base">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             Liên hệ đặt chỗ
           </h2>
-          <p className="text-xs text-gray-500 md:text-sm">
+          <p className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
             Thêm liên hệ để nhận xác nhận đặt chỗ.
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function HotelBookingForm({
       <div className="space-y-4">
         {/* Họ tên */}
         <div>
-          <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+          <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
             Họ tên <span className="text-red-500">*</span>
           </label>
           <input
@@ -85,7 +85,7 @@ export default function HotelBookingForm({
               "w-full rounded-lg border px-3 py-2 text-sm md:text-base outline-none",
               nameError
                 ? "border-red-400 focus:border-red-500"
-                : "border-gray-300 focus:border-blue-500",
+                : "border-gray-300 dark:border-gray-700 focus:border-blue-500",
               "transition",
             ].join(" ")}
             placeholder="Ví dụ: Nguyễn Văn A"
@@ -99,10 +99,10 @@ export default function HotelBookingForm({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Phone */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+            <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
               Số điện thoại <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 focus-within:border-blue-500">
+            <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Phone className="mr-2 h-3.5 w-3.5 text-gray-400" />
               <input
                 type="tel"
@@ -112,17 +112,17 @@ export default function HotelBookingForm({
                 placeholder="VD: 0901234567"
               />
             </div>
-            <p className="mt-1 text-[11px] text-gray-500">
+            <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
               Vui lòng nhập số điện thoại di động tại Việt Nam.
             </p>
           </div>
 
           {/* Email */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+            <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
               Email <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 focus-within:border-blue-500">
+            <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Mail className="mr-2 h-3.5 w-3.5 text-gray-400" />
               <input
                 type="email"
@@ -140,7 +140,7 @@ export default function HotelBookingForm({
           <div className="flex flex-col gap-3 md:flex-row md:items-end">
             {/* Thời gian lưu trú (thu hẹp) */}
             <div className="flex-1 min-w-0">
-              <div className="mb-1 text-[13px] font-semibold text-gray-700">
+              <div className="mb-1 text-[13px] font-semibold text-gray-700 dark:text-gray-300">
                 Thời gian lưu trú
               </div>
               <HotelStayDateRangePicker
@@ -152,11 +152,11 @@ export default function HotelBookingForm({
 
             {/* Số phòng */}
             <div className="w-full md:w-36">
-              <label className="mb-1 block text-[13px] font-semibold text-gray-700">
+              <label className="mb-1 block text-[13px] font-semibold text-gray-700 dark:text-gray-300">
                 Số phòng
               </label>
 
-              <div className="flex items-center rounded-lg border border-gray-300 bg-white">
+              <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <input
                   type="number"
                   min={1}
@@ -169,18 +169,18 @@ export default function HotelBookingForm({
                     if (v > 20) v = 20;
                     onRoomsChange(v);
                   }}
-                  className="w-full text-center border-x border-gray-200 h-10 outline-none text-sm"
+                  className="w-full text-center border-x border-gray-200 dark:border-gray-700 h-10 outline-none text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
             Ngày nhận và trả phòng sẽ được gửi kèm trong thông tin đặt chỗ của
             bạn.
           </p>
           {nights > 0 && stayDays > 0 && (
-            <p className="mt-0.5 text-[11px] text-gray-500">
+            <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
               Bạn đã chọn {stayDays} ngày {nights} đêm.
             </p>
           )}
@@ -188,7 +188,7 @@ export default function HotelBookingForm({
 
         {/* GHI CHÚ */}
         <div>
-          <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+          <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
             Ghi chú (tối đa {NOTE_MAX} ký tự)
           </label>
 
@@ -198,7 +198,7 @@ export default function HotelBookingForm({
             onChange={(e) => onNoteChange?.(e.target.value)}
             rows={4}
             className={[
-              "w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2",
+              "w-full resize-none rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2",
               "text-sm md:text-base outline-none focus:border-blue-500",
               "transition",
               note.length >= NOTE_MAX ? "border-orange-400 focus:border-orange-500" : "",
@@ -207,10 +207,10 @@ export default function HotelBookingForm({
           />
 
           <div className="mt-1 flex items-center justify-between">
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400">
               Ghi chú này sẽ được gửi kèm cho khách sạn (không đảm bảo đáp ứng).
             </p>
-            <span className="text-[11px] text-gray-500">
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">
               {note.length}/{NOTE_MAX}
             </span>
           </div>

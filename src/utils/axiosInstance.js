@@ -74,13 +74,16 @@ api.interceptors.response.use(
         const store = getStore();
         store.dispatch(setTokensRedux({ accessToken, refreshToken: newRefresh }));
 
-        const me = await api.get("/auth/me");
-
-        store.dispatch(setUser(me.data.data));
-
+        // Release the refresh lock BEFORE any further api calls to prevent deadlock.
+        // Any request that arrived while isRefreshing=true will now proceed.
         onRefreshed(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         isRefreshing = false;
+
+        // Update user profile non-blocking — must be outside the refresh lock
+        api.get("/auth/me")
+          .then((me) => store.dispatch(setUser(me.data.data)))
+          .catch(() => {});
 
         return api(originalRequest);
       } catch (err) {

@@ -51,7 +51,7 @@ export default function PlaceContentRenderer({ content = [] }) {
                   loading="lazy"
                 />
                 {b.image?.caption && (
-                  <figcaption className="mt-2 text-sm text-gray-500 text-center italic">
+                  <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center italic">
                     {b.image.caption}
                   </figcaption>
                 )}
@@ -70,7 +70,7 @@ export default function PlaceContentRenderer({ content = [] }) {
                       loading="lazy"
                     />
                     {g.caption && (
-                      <figcaption className="mt-2 text-xs text-gray-500 text-center italic">
+                      <figcaption className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center italic">
                         {g.caption}
                       </figcaption>
                     )}
@@ -83,14 +83,14 @@ export default function PlaceContentRenderer({ content = [] }) {
             return (
               <blockquote
                 key={i}
-                className="border-l-4 border-gray-300 pl-4 italic text-gray-700 py-2 bg-gray-50 rounded-lg whitespace-pre-line"
+                className="border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic text-gray-700 dark:text-gray-300 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg whitespace-pre-line"
               >
                 {b.text}
               </blockquote>
             );
 
           case "DIVIDER":
-            return <hr key={i} className="my-8 border-gray-200" />;
+            return <hr key={i} className="my-8 border-gray-200 dark:border-gray-700" />;
 
           case "INFOBOX":
             return <Infobox key={i} text={b.text} />;

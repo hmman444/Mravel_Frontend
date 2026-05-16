@@ -33,7 +33,7 @@ export default function PartnerHotelCreatePage({ loading, onBack, onCreate }) {
         canSubmit={fm.requiredOk}
       />
 
-      <div className="bg-white rounded-2xl border p-4 space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4">
         <BasicInfoSection form={fm.form} setField={fm.setField} />
         <ContactLocationSection form={fm.form} setField={fm.setField} />
         <PolicySection form={fm.form} setField={fm.setField} />

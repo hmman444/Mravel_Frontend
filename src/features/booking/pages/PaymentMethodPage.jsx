@@ -20,7 +20,7 @@ function MethodCard({ method, disabled, onClick }) {
       onClick={onClick}
       className={[
         "group relative flex flex-col items-start gap-2 rounded-3xl p-4 text-left transition",
-        "bg-white hover:-translate-y-[1px] hover:shadow-md",
+        "bg-white dark:bg-gray-800 hover:-translate-y-[1px] hover:shadow-md",
         disabled ? "opacity-60 cursor-not-allowed hover:translate-y-0 hover:shadow-none" : "",
       ].join(" ")}
       title={method.label}
@@ -29,7 +29,7 @@ function MethodCard({ method, disabled, onClick }) {
         <div
           className={[
             "flex h-11 w-11 items-center justify-center rounded-2xl overflow-hidden",
-            method.supported ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-700",
+            method.supported ? "bg-blue-50 text-blue-700" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
           ].join(" ")}
         >
           {showImg ? (
@@ -51,7 +51,7 @@ function MethodCard({ method, disabled, onClick }) {
         <span
           className={[
             "rounded-full px-2 py-1 text-[10px] font-semibold",
-            method.supported ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500",
+            method.supported ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400",
           ].join(" ")}
         >
           {method.supported ? (method.badge || "Hỗ trợ") : "Chưa hỗ trợ"}
@@ -59,8 +59,8 @@ function MethodCard({ method, disabled, onClick }) {
       </div>
 
       <div className="mt-1">
-        <div className="text-sm font-semibold text-gray-900">{method.label}</div>
-        <div className="mt-0.5 text-[11px] text-gray-500">
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{method.label}</div>
+        <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
           {method.supported ? "Chuyển đến trang QR để thanh toán" : "Chỉ hiển thị icon minh hoạ"}
         </div>
       </div>
@@ -88,19 +88,19 @@ export default function PaymentMethodPage() {
   } = usePaymentMethodPage();
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <div className="h-[50px] md:h-[60px]" aria-hidden />
 
       <main className="flex-1 w-full">
         <div className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 md:px-6 md:pt-8">
           {/* Header modern */}
-          <div className="mb-6 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div className="mb-6 rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <button
                 type="button"
                 onClick={goBack}
-                className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
@@ -111,7 +111,7 @@ export default function PaymentMethodPage() {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="text-right">
-                  <div className="text-gray-500 font-medium">Bảo mật thanh toán</div>
+                  <div className="text-gray-500 dark:text-gray-400 font-medium">Bảo mật thanh toán</div>
                   <div className="text-emerald-700">Cổng thanh toán</div>
                 </div>
               </div>
@@ -119,17 +119,17 @@ export default function PaymentMethodPage() {
 
             <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 md:text-2xl">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 md:text-2xl">
                   Chọn phương thức thanh toán
                 </h1>
-                <p className="mt-1 text-xs text-gray-600 md:text-sm">
+                <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
                   {meta?.subTitle ? (
                     <>
-                      Đơn: <span className="font-semibold text-gray-900">{meta.subTitle}</span>
+                      Đơn: <span className="font-semibold text-gray-900 dark:text-gray-100">{meta.subTitle}</span>
                       {amountText ? (
                         <>
                           {" "}
-                          · Tổng: <span className="font-semibold text-gray-900">{amountText}</span>
+                          · Tổng: <span className="font-semibold text-gray-900 dark:text-gray-100">{amountText}</span>
                         </>
                       ) : null}
                     </>
@@ -140,8 +140,8 @@ export default function PaymentMethodPage() {
               </div>
 
               {/* tiny progress */}
-              <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-4 py-2 text-xs text-gray-700">
-                <Lock className="h-4 w-4 text-gray-500" />
+              <div className="flex items-center gap-2 rounded-2xl bg-gray-50 dark:bg-gray-900 px-4 py-2 text-xs text-gray-700 dark:text-gray-300">
+                <Lock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <span>1/2 Chọn phương thức</span>
                 <span className="text-gray-400">→</span>
                 <span className="text-gray-400">2/2 Quét QR</span>
@@ -172,10 +172,10 @@ export default function PaymentMethodPage() {
           ) : (
             <div className="space-y-6">
               {groups.map((g) => (
-                <section key={g.title} className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+                <section key={g.title} className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-gray-900 md:text-base">{g.title}</h2>
-                    <span className="text-[11px] text-gray-500">
+                    <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">{g.title}</h2>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
                       {payLoading ? "Đang tạo thanh toán..." : "Chọn để tiếp tục"}
                     </span>
                   </div>

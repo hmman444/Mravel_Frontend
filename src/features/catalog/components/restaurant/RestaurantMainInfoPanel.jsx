@@ -1,4 +1,5 @@
 import { FaMapMarkerAlt, FaFlag, FaDollarSign, FaClock, FaStar } from "react-icons/fa";
+import FavoriteButton from "../../../../components/FavoriteButton";
 
 /* ===== Helpers ===== */
 const formatCurrencyVND = (v) => {
@@ -95,7 +96,7 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
       ? "text-emerald-600"
       : openStatus?.kind === "soon"
       ? "text-amber-600"
-      : "text-gray-500";
+      : "text-gray-500 dark:text-gray-400";
 
   const score =
     typeof restaurant?.avgRating === "number"
@@ -107,16 +108,31 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
     <section className="p-4 md:p-5">
       {/* Tên + rating */}
       <div className="flex items-start justify-between gap-3">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-snug">
-          {restaurant?.name || restaurant?.slug || "Nhà hàng"}
-        </h1>
+        <div className="flex-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug">
+            {restaurant?.name || restaurant?.slug || "Nhà hàng"}
+          </h1>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-3">
+        <FavoriteButton
+          targetType="RESTAURANT"
+          targetId={restaurant.id}
+          showCount={true}
+          initialCount={restaurant.favoriteCount || 0}
+          variant="detail"
+        />
 
         {score && (
-          <div className="flex items-center gap-1 text-sm font-semibold text-gray-800">
-            <FaStar className="text-[#fbbf24]" />
-            <span>{score}</span>
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
+            <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700">
+              <FaStar className="text-[#fbbf24]" />
+              <span>{score}</span>
+            </div>
             {typeof restaurant?.reviewsCount === "number" && (
-              <span className="text-gray-500">({restaurant.reviewsCount})</span>
+              <span className="text-gray-500 dark:text-gray-400 font-normal">({restaurant.reviewsCount} đánh giá)</span>
             )}
           </div>
         )}
@@ -124,8 +140,8 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
 
       {/* Địa chỉ */}
       {address && (
-        <div className="mt-2 flex items-start gap-2 text-[15px] text-gray-800">
-          <FaMapMarkerAlt className="mt-0.5 shrink-0 text-gray-600" />
+        <div className="mt-2 flex items-start gap-2 text-[15px] text-gray-800 dark:text-gray-200">
+          <FaMapMarkerAlt className="mt-0.5 shrink-0 text-gray-600 dark:text-gray-400" />
           <span>{address}</span>
         </div>
       )}
@@ -133,9 +149,9 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
       {/* Loại hình + Ẩm thực */}
       {typeCuisine && (
         <div className="mt-2 flex items-start gap-2 text-[15px]">
-          <FaFlag className="mt-0.5 shrink-0 text-gray-600" />
+          <FaFlag className="mt-0.5 shrink-0 text-gray-600 dark:text-gray-400" />
           <span>
-            <span className="text-gray-700">Loại hình:&nbsp;</span>
+            <span className="text-gray-700 dark:text-gray-300">Loại hình:&nbsp;</span>
             <span className="font-medium text-rose-600">{typeCuisine}</span>
           </span>
         </div>
@@ -144,7 +160,7 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
       {/* Khoảng giá */}
       {(minV || maxV || priceLevelSym) && (
         <div className="mt-2 flex items-start gap-2 text-[15px]">
-          <FaDollarSign className="mt-0.5 shrink-0 text-gray-600" />
+          <FaDollarSign className="mt-0.5 shrink-0 text-gray-600 dark:text-gray-400" />
           <div className="flex flex-wrap items-center gap-2">
             {priceLevelSym && (
               <span className="text-amber-600 tracking-[2px]">
@@ -152,16 +168,16 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
               </span>
             )}
             {(minV || maxV) && (
-              <span className="text-gray-800">
-                <span className="text-gray-700">Khoảng giá:&nbsp;</span>
+              <span className="text-gray-800 dark:text-gray-200">
+                <span className="text-gray-700 dark:text-gray-300">Khoảng giá:&nbsp;</span>
                 {minV ? `${minV}` : "—"}
                 {minV || maxV ? " - " : ""}
                 {maxV ? `${maxV}` : "—"}
-                &nbsp;<span className="text-gray-500">đ/người</span>
+                &nbsp;<span className="text-gray-500 dark:text-gray-400">đ/người</span>
               </span>
             )}
             {currency !== "VND" && (
-              <span className="text-xs text-gray-500">({currency})</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">({currency})</span>
             )}
           </div>
         </div>
@@ -170,7 +186,7 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
       {/* Trạng thái mở cửa */}
       {openStatus?.label && (
         <div className="mt-2 flex items-start gap-2 text-[15px]">
-          <FaClock className="mt-0.5 shrink-0 text-gray-600" />
+          <FaClock className="mt-0.5 shrink-0 text-gray-600 dark:text-gray-400" />
           <span className={`font-medium ${openClass}`}>{openStatus.label}</span>
         </div>
       )}

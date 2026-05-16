@@ -15,7 +15,7 @@ export default function ImagesSection({
       <summary className="cursor-pointer select-none font-semibold">Ảnh (Gallery)</summary>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-gray-600">{images.length} ảnh</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">{images.length} ảnh</div>
 
         <div className="flex items-center gap-2">
           <button
@@ -30,7 +30,7 @@ export default function ImagesSection({
 
           <label
             className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
-              disabled ? "bg-slate-200 text-slate-500 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+              disabled ? "bg-slate-200 dark:bg-gray-700 text-slate-500 dark:text-slate-400 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
             }`}
           >
             <ArrowUpTrayIcon className="w-4 h-4" />
@@ -41,13 +41,13 @@ export default function ImagesSection({
       </div>
 
       {images.length === 0 ? (
-        <div className="mt-3 text-sm text-gray-500">Chưa có ảnh.</div>
+        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có ảnh.</div>
       ) : (
         <div className="mt-3 space-y-3">
           {images.map((img, idx) => (
             <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start border rounded-2xl p-3">
               <div className="md:col-span-3">
-                <div className="w-full aspect-[16/10] bg-gray-100 rounded-xl overflow-hidden">
+                <div className="w-full aspect-[16/10] bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden">
                   {img.url ? <img src={img.url} alt="" className="w-full h-full object-cover" /> : null}
                 </div>
                 <button

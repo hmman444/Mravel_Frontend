@@ -315,7 +315,7 @@ export default function Navbar() {
                     src={avatar}
                     alt="avatar"
                     className={`w-9 h-9 rounded-full object-cover border ${
-                      solid ? "border-gray-300" : "border-white/50"
+                      solid ? "border-gray-300 dark:border-gray-700" : "border-white/50"
                     }`}
                   />
                   <span className="hidden md:inline font-semibold max-w-[160px] truncate">

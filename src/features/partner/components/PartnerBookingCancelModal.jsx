@@ -14,15 +14,15 @@ export default function PartnerBookingCancelModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-3">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900">Xác nhận hủy đơn</h3>
-        <p className="text-sm text-gray-600 mt-1">
-          Mã: <span className="font-medium text-gray-900">{code}</span> • Dịch vụ:{" "}
-          <span className="font-medium text-gray-900">{serviceName || "--"}</span>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Xác nhận hủy đơn</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          Mã: <span className="font-medium text-gray-900 dark:text-gray-100">{code}</span> • Dịch vụ:{" "}
+          <span className="font-medium text-gray-900 dark:text-gray-100">{serviceName || "--"}</span>
         </p>
 
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Lý do hủy (ngắn gọn)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lý do hủy (ngắn gọn)</label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}

@@ -91,7 +91,7 @@ export default function PlaceDetailPage() {
   if (!place) {
     return (
       <AdminLayout>
-        <div className="flex flex-col items-center justify-center h-[60vh] text-gray-500">
+        <div className="flex flex-col items-center justify-center h-[60vh] text-gray-500 dark:text-gray-400">
           <p className="text-lg mb-4">{t("place_not_found")}</p>
           <button
             onClick={() => navigate(-1)}
@@ -116,9 +116,9 @@ export default function PlaceDetailPage() {
           className="p-2 rounded-full hover:bg-gray-100 transition"
           title={t("go_back")}
         >
-          <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
+          <ArrowLeftIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
         </button>
-        <h1 className="text-3xl font-bold text-gray-800">{place.name}</h1>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">{place.name}</h1>
       </div>
 
       {/* Carousel ảnh */}
@@ -154,7 +154,7 @@ export default function PlaceDetailPage() {
               key={i}
               onClick={() => setCurrentImage(i)}
               className={`w-3 h-3 rounded-full cursor-pointer ${
-                i === currentImage ? "bg-white" : "bg-gray-400"
+                i === currentImage ? "bg-white dark:bg-gray-800" : "bg-gray-400"
               }`}
             ></div>
           ))}
@@ -162,11 +162,11 @@ export default function PlaceDetailPage() {
       </div>
 
       {/* Điểm nổi bật */}
-      <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+      <section className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           {t("highlights")}
         </h2>
-        <ul className="list-disc list-inside grid md:grid-cols-2 gap-y-2 text-gray-700 leading-relaxed">
+        <ul className="list-disc list-inside grid md:grid-cols-2 gap-y-2 text-gray-700 dark:text-gray-300 leading-relaxed">
           {place.highlights.map((h, i) => (
             <li key={i}>{h}</li>
           ))}
@@ -174,8 +174,8 @@ export default function PlaceDetailPage() {
       </section>
 
       {/* Đánh giá */}
-      <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+      <section className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           {t("reviews")}
         </h2>
         <div className="flex items-center gap-3 mb-6">
@@ -183,10 +183,10 @@ export default function PlaceDetailPage() {
             {avgRating.toFixed(1)}
           </span>
           <div>
-            <p className="text-lg font-semibold text-gray-700">
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
               {t("excellent")}
             </p>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               {t("based_on_reviews", { count: place.reviews.length })}
             </p>
           </div>
@@ -195,7 +195,7 @@ export default function PlaceDetailPage() {
         {place.reviews.map((r, i) => (
           <div
             key={i}
-            className="border-t border-gray-100 pt-4 mt-4 flex flex-col md:flex-row gap-4"
+            className="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4 flex flex-col md:flex-row gap-4"
           >
             <div>
               <p className="font-semibold text-blue-700">{r.name}</p>
@@ -204,7 +204,7 @@ export default function PlaceDetailPage() {
                   <StarIcon key={i} className="w-4 h-4 text-yellow-400" />
                 ))}
               </div>
-              <p className="text-gray-700 mt-2 text-sm">{r.comment}</p>
+              <p className="text-gray-700 dark:text-gray-300 mt-2 text-sm">{r.comment}</p>
             </div>
             {r.image && (
               <img
@@ -218,12 +218,12 @@ export default function PlaceDetailPage() {
       </section>
 
       {/* Thông tin thêm */}
-      <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+      <section className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           {t("more_info")}
         </h2>
-        <p className="text-gray-700 leading-relaxed mb-4">{place.desc}</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+        <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{place.desc}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
           <p className="flex items-center gap-2">
             <ClockIcon className="w-5 h-5 text-blue-500" />
             {t("open_time")}: {place.openTime}
@@ -241,14 +241,14 @@ export default function PlaceDetailPage() {
 
       {/* Địa điểm khác */}
       <section>
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           {t("related_places")}
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
           {place.related.map((r) => (
             <div
               key={r.id}
-              className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition"
+              className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition"
             >
               <img
                 src={r.image}
@@ -256,8 +256,8 @@ export default function PlaceDetailPage() {
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
-                <h3 className="font-semibold text-gray-800 mb-2">{r.name}</h3>
-                <p className="text-gray-500 text-sm mb-1">⏰ {r.duration}</p>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">{r.name}</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">⏰ {r.duration}</p>
                 <p className="text-blue-600 font-semibold">{r.price}</p>
               </div>
             </div>

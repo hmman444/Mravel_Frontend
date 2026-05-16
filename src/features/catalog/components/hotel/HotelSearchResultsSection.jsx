@@ -1,10 +1,9 @@
 // src/features/hotels/components/hotel/HotelSearchResultsSection.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getHotels } from "../../../catalog/services/catalogService";
 import { addDaysLocal, formatLocalDate, parseLocalDate } from "../../utils/dateLocal";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
-import { FiHeart } from "react-icons/fi";
 
 export default function HotelSearchResultsSection() {
   const navigate = useNavigate();
@@ -19,6 +18,7 @@ export default function HotelSearchResultsSection() {
   const rooms = Math.max(1, parseInt(sp.get("rooms") || "1", 10) || 1);
   const page = Math.max(0, parseInt(sp.get("page") || "0", 10) || 0);
   const size = Math.max(1, Math.min(30, parseInt(sp.get("size") || "9", 10) || 9));
+  const destOnly = sp.get("destOnly") === "1";
 
   // Ẩn hoàn toàn nếu chưa có search
   const shouldShow = Boolean(location);
@@ -26,27 +26,22 @@ export default function HotelSearchResultsSection() {
   const computed = useMemo(() => {
     if (!shouldShow) return null;
 
-    const checkInDate =
-      parseLocalDate(checkInStr) ||
-      (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+    const base = { location, adults, children, rooms, page, size, ...(destOnly ? { destOnly: true } : {}) };
 
-    // ưu tiên checkOut trên URL, nếu thiếu thì tự tính từ nights
-    const checkOutDate = parseLocalDate(checkOutStrOnUrl) || addDaysLocal(checkInDate, nights);
+    if (checkInStr) {
+      const checkInDate =
+        parseLocalDate(checkInStr) ||
+        (() => {
+          const d = new Date();
+          d.setHours(0, 0, 0, 0);
+          return d;
+        })();
+      const checkOutDate = parseLocalDate(checkOutStrOnUrl) || addDaysLocal(checkInDate, nights);
+      base.checkIn = formatLocalDate(checkInDate);
+      base.checkOut = formatLocalDate(checkOutDate);
+    }
 
-    return {
-      location,
-      checkIn: formatLocalDate(checkInDate),
-      checkOut: formatLocalDate(checkOutDate),
-      adults,
-      children,
-      rooms,
-      page,
-      size,
-    };
+    return base;
   }, [
     shouldShow,
     location,
@@ -58,11 +53,13 @@ export default function HotelSearchResultsSection() {
     rooms,
     page,
     size,
+    destOnly,
   ]);
 
   const [data, setData] = useState({ items: [], totalPages: 0, totalElements: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     if (!computed) return;
@@ -80,6 +77,14 @@ export default function HotelSearchResultsSection() {
           return;
         }
         setData(res.data || { items: [], totalPages: 0, totalElements: 0 });
+
+        // Auto-scroll to results section
+        requestAnimationFrame(() => {
+          if (sectionRef.current) {
+            const top = sectionRef.current.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top, behavior: "smooth" });
+          }
+        });
       })
       .catch((e) => {
         if (!alive) return;
@@ -106,7 +111,7 @@ export default function HotelSearchResultsSection() {
   if (!shouldShow) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-6 pt-8 pb-6">
+    <section ref={sectionRef} className="max-w-7xl mx-auto px-6 pt-8 pb-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🔎</span>
@@ -116,7 +121,7 @@ export default function HotelSearchResultsSection() {
         <button
           type="button"
           onClick={clearSearch}
-          className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 hover:bg-gray-50"
+          className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50"
         >
           Xóa tìm kiếm
         </button>
@@ -128,14 +133,14 @@ export default function HotelSearchResultsSection() {
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
-              className="w-full max-w-[280px] rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden"
+              className="w-full max-w-[280px] rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
             >
-              <div className="relative h-40 bg-gray-200 animate-pulse" />
+              <div className="relative h-40 bg-gray-200 dark:bg-gray-700 animate-pulse" />
               <div className="p-3 space-y-2">
-                <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3" />
-                <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
-                <div className="h-5 bg-gray-200 rounded animate-pulse w-1/3 mt-2" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/2" />
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/3 mt-2" />
               </div>
             </div>
           ))}
@@ -147,7 +152,7 @@ export default function HotelSearchResultsSection() {
       )}
 
       {!loading && !error && (!data.items || data.items.length === 0) && (
-        <p className="mt-4 text-sm text-gray-600">Không có kết quả phù hợp.</p>
+        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Không có kết quả phù hợp.</p>
       )}
 
       {/* list */}
@@ -168,17 +173,17 @@ export default function HotelSearchResultsSection() {
           {data.totalPages > 1 && (
             <div className="mt-6 flex items-center justify-center gap-3">
               <button
-                className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 disabled:opacity-50"
+                className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 disabled:opacity-50"
                 onClick={() => setPageOnUrl(page - 1)}
                 disabled={page <= 0}
               >
                 Trước
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 Trang <b>{page + 1}</b> / {data.totalPages}
               </span>
               <button
-                className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 disabled:opacity-50"
+                className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 disabled:opacity-50"
                 onClick={() => setPageOnUrl(page + 1)}
                 disabled={page + 1 >= data.totalPages}
               >
@@ -245,7 +250,7 @@ function HotelMiniCard({ hotel, onClick }) {
 
   return (
     <div
-      className="w-full max-w-[280px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="w-full max-w-[280px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
     >
       <div className="relative h-40">
@@ -257,15 +262,6 @@ function HotelMiniCard({ hotel, onClick }) {
             <span className="line-clamp-1">{locationLabel}</span>
           </div>
         )}
-
-        <button
-          type="button"
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white"
-          onClick={(e) => e.stopPropagation()}
-          aria-label="Yêu thích"
-        >
-          <FiHeart className="w-4 h-4" />
-        </button>
 
         {promo && (
           <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-[#ff5a00] text-white text-xs font-bold">
@@ -281,19 +277,19 @@ function HotelMiniCard({ hotel, onClick }) {
           <div className="flex items-center gap-1">
             <FaStar className="w-3 h-3 text-[#fbbf24]" />
             <span className="font-semibold">{score}</span>
-            <span className="text-gray-500">/10</span>
+            <span className="text-gray-500 dark:text-gray-400">/10</span>
           </div>
 
           {ratingLabel && (
             <span className="ml-1 text-[11px] text-blue-600 font-semibold">{ratingLabel}</span>
           )}
 
-          <span className="ml-1 text-[11px] text-gray-500">({reviews})</span>
+          <span className="ml-1 text-[11px] text-gray-500 dark:text-gray-400">({reviews})</span>
         </div>
 
         {oldPriceText && <div className="mt-2 text-xs text-gray-400 line-through">{oldPriceText}</div>}
         <div className="text-[15px] font-bold text-[#ff5a00] mt-[2px]">{priceText}</div>
-        <div className="text-[11px] text-gray-500 mt-1">Chưa bao gồm thuế và phí</div>
+        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Chưa bao gồm thuế và phí</div>
       </div>
     </div>
   );

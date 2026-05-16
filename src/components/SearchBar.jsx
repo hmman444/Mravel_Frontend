@@ -167,7 +167,7 @@ function HotelSearchForm() {
   ];
 
   const handleDestUpdate = (payload) => {
-    const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null };
+    const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null, kind: payload?.kind || null };
     destRef.current = next;
     setDest(next);
   };
@@ -175,9 +175,15 @@ function HotelSearchForm() {
   const submit = (e) => {
     e.preventDefault();
 
-    const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
+    const { slug, text, kind } = destRef.current;
+    const locationVal = (slug || text || "").trim();
     if (!locationVal) {
       showError("Vui lòng nhập hoặc chọn Điểm đến.");
+      return;
+    }
+
+    if (kind === "HOTEL" && slug) {
+      navigate(`/hotels/${slug}`);
       return;
     }
 
@@ -189,10 +195,7 @@ function HotelSearchForm() {
       location: locationVal,
       checkIn: formatLocalDate(checkInDate),
       nights: String(nightsInt),
-
-      // NEW: đẩy luôn checkOut lên URL để trang hotel khỏi đoán
       checkOut: formatLocalDate(checkOutDate),
-
       adults: String(adults),
       children: String(children),
       rooms: String(rooms),
@@ -200,8 +203,11 @@ function HotelSearchForm() {
       size: "9",
     });
 
+    if (kind === "DESTINATION") {
+      qs.set("destOnly", "1");
+    }
+
     if (Array.isArray(childrenAges) && childrenAges.length) {
-      // bạn đang append nhiều key childrenAges -> ok, BE không dùng thì FE dùng cũng được
       childrenAges.forEach((age) => qs.append("childrenAges", String(age)));
     }
 
@@ -218,6 +224,7 @@ function HotelSearchForm() {
               placeholder="Thành phố, khách sạn, điểm đến"
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
+              mode="hotel"
               /* BẮT ĐỦ CÁC CASE: gõ, chọn suggestion, nhấn enter */
               onSubmit={handleDestUpdate}
               onPick={handleDestUpdate}
@@ -249,7 +256,7 @@ function HotelSearchForm() {
 
             {openNights && (
               <div
-                className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 bg-white shadow-xl max-h-72 overflow-auto"
+                className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-xl max-h-72 overflow-auto"
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {nightList.map((n) => {
@@ -277,7 +284,7 @@ function HotelSearchForm() {
                         />
                         <span className="font-medium">{n} đêm</span>
                       </div>
-                      <div className="text-xs text-gray-500">{VN_DATE(d)}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{VN_DATE(d)}</div>
                     </button>
                   );
                 })}
@@ -306,7 +313,7 @@ function HotelSearchForm() {
               <div
                 className="
                   absolute left-0 right-0 top-[calc(100%+6px)] z-50
-                  rounded-xl border border-slate-200 bg-white shadow-xl p-4
+                  rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-xl p-4
                   text-sm
                 "
                 onMouseDown={(e) => e.stopPropagation()}
@@ -314,15 +321,15 @@ function HotelSearchForm() {
                 {/* Người lớn */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
-                      <FaUsers className="text-gray-600 text-xs" />
+                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                      <FaUsers className="text-gray-600 dark:text-gray-400 text-xs" />
                     </span>
-                    <span className="font-medium text-gray-800">Người lớn</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Người lớn</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 dark:border-slate-700 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setAdults((v) => Math.max(1, v - 1));
@@ -333,7 +340,7 @@ function HotelSearchForm() {
                     <span className="w-6 text-center font-medium">{adults}</span>
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 dark:border-slate-700 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setAdults((v) => v + 1);
@@ -347,15 +354,15 @@ function HotelSearchForm() {
                 {/* Trẻ em */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
+                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100 dark:bg-gray-800">
                       👶
                     </span>
-                    <span className="font-medium text-gray-800">Trẻ em</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Trẻ em</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 dark:border-slate-700 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setChildren((v) => Math.max(0, v - 1));
@@ -366,7 +373,7 @@ function HotelSearchForm() {
                     <span className="w-6 text-center font-medium">{children}</span>
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 dark:border-slate-700 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setChildren((v) => Math.min(6, v + 1));
@@ -380,15 +387,15 @@ function HotelSearchForm() {
                 {/* Phòng */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100">
+                    <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100 dark:bg-gray-800">
                       🏠
                     </span>
-                    <span className="font-medium text-gray-800">Phòng</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Phòng</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 dark:border-slate-700 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setRooms((v) => Math.max(1, v - 1));
@@ -399,7 +406,7 @@ function HotelSearchForm() {
                     <span className="w-6 text-center font-medium">{rooms}</span>
                     <button
                       type="button"
-                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 hover:bg-gray-50"
+                      className="w-8 h-8 grid place-items-center rounded-full border border-slate-200 dark:border-slate-700 hover:bg-gray-50"
                       onClick={(e) => {
                         e.preventDefault();
                         setRooms((v) => v + 1);
@@ -413,17 +420,17 @@ function HotelSearchForm() {
                 {/* Độ tuổi trẻ em */}
                 {children > 0 && (
                   <>
-                    <div className="mt-3 text-xs text-gray-600">
+                    <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
                       Điền tuổi của trẻ để giúp chúng tôi gợi ý phòng phù hợp.
                     </div>
                     <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {childrenAges.map((age, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <span className="text-xs text-gray-600">
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
                             Trẻ em {idx + 1}
                           </span>
                           <select
-                            className="flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-xs"
+                            className="flex-1 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs"
                             value={age}
                             onMouseDown={(e) => e.stopPropagation()}
                             onChange={(e) => {
@@ -517,7 +524,7 @@ function RestaurantSearchForm() {
   }, []);
 
   const handleDestUpdate = (payload) => {
-    const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null };
+    const next = { text: (payload?.text || "").trim(), slug: payload?.slug || null, kind: payload?.kind || null };
     destRef.current = next;
     setDest(next);
   };
@@ -525,9 +532,15 @@ function RestaurantSearchForm() {
   const submit = (e) => {
     e.preventDefault();
 
-    const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
+    const { slug, text, kind } = destRef.current;
+    const locationVal = (slug || text || "").trim();
     if (!locationVal) {
       showError("Vui lòng nhập hoặc chọn Điểm đến.");
+      return;
+    }
+
+    if (kind === "RESTAURANT" && slug) {
+      navigate(`/restaurants/${slug}`);
       return;
     }
 
@@ -538,6 +551,10 @@ function RestaurantSearchForm() {
       page: "0",
       size: "9",
     });
+
+    if (kind === "DESTINATION") {
+      qs.set("destOnly", "1");
+    }
 
     navigate(`/restaurants/search?${qs.toString()}`);
   };
@@ -551,6 +568,7 @@ function RestaurantSearchForm() {
             placeholder="TP.HCM, Hà Nội, Đà Nẵng…"
             className="flex-1 min-w-0 w-full !max-w-none !mx-0"
             buttonSlot={null}
+            mode="restaurant"
             onSubmit={handleDestUpdate}
             onPick={handleDestUpdate}
             onChangeText={(text) => handleDestUpdate({ text, slug: null })}
@@ -576,14 +594,14 @@ function RestaurantSearchForm() {
           onClick={() => !openCuisine && setOpenCuisine(true)}
         >
           <FaUtensils className="text-gray-400 mr-2" />
-          <span className={`text-sm ${cuisineCode ? "text-gray-800" : "text-gray-400"}`}>
+          <span className={`text-sm ${cuisineCode ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
             {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || "Chọn loại ẩm thực"}
           </span>
           <span className="ml-auto text-gray-400 text-xs">▾</span>
 
           {openCuisine && (
             <div
-              className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 bg-white shadow-xl max-h-64 overflow-auto py-2"
+              className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-xl max-h-64 overflow-auto py-2"
               onMouseDown={(e) => e.stopPropagation()}
             >
               {CUISINE_OPTIONS.map((opt) => (
@@ -743,6 +761,7 @@ export default function SearchBar() {
                   label={null}
                   placeholder="Nhập địa điểm muốn tham quan (TP. Hồ Chí Minh, Phú Quốc, Hội An…)"
                   className="flex-1 min-w-0 w-full !max-w-none !mx-0"
+                  mode="place"
                   onSubmit={goLocations}
                   buttonSlot={({ submit }) => {
                     locationSubmitRef.current = submit;

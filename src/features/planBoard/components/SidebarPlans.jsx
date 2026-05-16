@@ -108,7 +108,7 @@ export default function SidebarPlans({
               {!collapsed && (
                 <FaChevronDown
                   size={11}
-                  className={`text-gray-500 transition-transform ${
+                  className={`text-gray-500 dark:text-gray-400 transition-transform ${
                     myOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -160,7 +160,7 @@ export default function SidebarPlans({
               {!collapsed && (
                 <FaChevronDown
                   size={11}
-                  className={`text-gray-500 transition-transform ${
+                  className={`text-gray-500 dark:text-gray-400 transition-transform ${
                     recentOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -273,7 +273,7 @@ function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan, onAsk
                         ? "bg-amber-100 text-amber-700"
                         : role === "EDITOR"
                         ? "bg-indigo-100 text-indigo-700"
-                        : "bg-slate-100 text-slate-700"
+                        : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300"
                     }
                     ${active ? "bg-white/20 text-white" : ""}
                   `}

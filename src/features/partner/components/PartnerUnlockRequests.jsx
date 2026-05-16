@@ -156,12 +156,12 @@ export default function PartnerUnlockRequests() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Yêu cầu mở khóa</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Yêu cầu mở khóa</h1>
         </div>
       </div>
 
       {/* Tabs + Toolbar */}
-      <div className="bg-white rounded-xl shadow p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
           {/* Tabs */}
           <div className="flex gap-2">
@@ -170,7 +170,7 @@ export default function PartnerUnlockRequests() {
               className={`px-3 py-1.5 rounded-md text-sm border ${
                 tab === "BLOCKED"
                   ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
               }`}
             >
               Dịch vụ bị khóa
@@ -180,7 +180,7 @@ export default function PartnerUnlockRequests() {
               className={`px-3 py-1.5 rounded-md text-sm border ${
                 tab === "HISTORY"
                   ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
               }`}
             >
               Lịch sử yêu cầu
@@ -222,7 +222,7 @@ export default function PartnerUnlockRequests() {
             filteredBlocked.map((s) => (
               <div
                 key={s.id}
-                className="bg-white rounded-xl shadow hover:shadow-md transition overflow-hidden flex flex-col"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-md transition overflow-hidden flex flex-col"
               >
                 <div className="relative">
                   <img src={s.thumbnail} alt={s.name} className="h-40 w-full object-cover" />
@@ -233,18 +233,18 @@ export default function PartnerUnlockRequests() {
 
                 <div className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-900 line-clamp-2">
+                    <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-2">
                       {s.name}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                       {s.id} • {s.type}
                     </p>
 
-                    <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
-                      <p className="text-xs text-gray-500 mb-1">Bị khóa lúc</p>
-                      <p className="text-sm text-gray-700">{s.blockedAt}</p>
-                      <p className="text-xs text-gray-500 mt-2 mb-1">Lý do (admin)</p>
-                      <p className="text-sm text-gray-700 line-clamp-2">{s.blockedReason}</p>
+                    <div className="mt-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Bị khóa lúc</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{s.blockedAt}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-1">Lý do (admin)</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{s.blockedReason}</p>
                     </div>
                   </div>
 
@@ -262,14 +262,14 @@ export default function PartnerUnlockRequests() {
                       className="p-2 rounded-lg border hover:bg-gray-50"
                       title="Thông tin"
                     >
-                      <InformationCircleIcon className="w-5 h-5 text-gray-600" />
+                      <InformationCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     </button>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="bg-white rounded-xl shadow p-10 text-center text-gray-500 col-span-full">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-10 text-center text-gray-500 dark:text-gray-400 col-span-full">
               Không có dịch vụ ADMIN_BLOCKED khớp bộ lọc.
             </div>
           )}
@@ -283,13 +283,13 @@ export default function PartnerUnlockRequests() {
               return (
                 <div
                   key={r.id}
-                  className="bg-white rounded-xl shadow p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
                 >
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-semibold text-gray-900">{r.serviceName}</h3>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{r.serviceName}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           {r.id} • {r.serviceId} • {r.serviceType}
                         </p>
                       </div>
@@ -301,23 +301,23 @@ export default function PartnerUnlockRequests() {
                     </div>
 
                     <div className="mt-3">
-                      <p className="text-xs text-gray-500 mb-1">Lý do gửi</p>
-                      <p className="text-sm text-gray-700 whitespace-pre-line">{r.reason}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Lý do gửi</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{r.reason}</p>
                     </div>
 
                     <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-                        <p className="text-xs text-gray-500">Gửi lúc</p>
-                        <p className="text-sm text-gray-700">{r.createdAt}</p>
+                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Gửi lúc</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{r.createdAt}</p>
                       </div>
-                      <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-                        <p className="text-xs text-gray-500">Phản hồi</p>
-                        <p className="text-sm text-gray-700">
+                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Phản hồi</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
                           {r.decidedAt ? r.decidedAt : "Chưa có"}
                         </p>
                         {r.note && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            Ghi chú: <span className="text-gray-700">{r.note}</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Ghi chú: <span className="text-gray-700 dark:text-gray-300">{r.note}</span>
                           </p>
                         )}
                       </div>
@@ -352,7 +352,7 @@ export default function PartnerUnlockRequests() {
               );
             })
           ) : (
-            <div className="bg-white rounded-xl shadow p-10 text-center text-gray-500">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-10 text-center text-gray-500 dark:text-gray-400">
               Chưa có yêu cầu mở khóa nào.
             </div>
           )}
@@ -362,12 +362,12 @@ export default function PartnerUnlockRequests() {
       {/* Modal gửi request */}
       {modal.open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-3">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-lg p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Gửi yêu cầu mở khóa</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Dịch vụ: <span className="font-medium text-gray-800">{modal.service?.name}</span>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Gửi yêu cầu mở khóa</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Dịch vụ: <span className="font-medium text-gray-800 dark:text-gray-200">{modal.service?.name}</span>
                 </p>
               </div>
               <span className="px-2.5 py-1 rounded-full text-xs bg-red-100 text-red-700">
@@ -376,7 +376,7 @@ export default function PartnerUnlockRequests() {
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Lý do yêu cầu mở khóa <span className="text-red-500">*</span>
               </label>
               <textarea

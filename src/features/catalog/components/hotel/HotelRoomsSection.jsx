@@ -52,26 +52,26 @@ export default function HotelRoomsSection({ hotel }) {
     <>
       <section
         id="hotel-rooms-section"
-        className="border-t border-gray-200 bg-white rounded-b-3xl"
+        className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-3xl"
       >
         {/* HEADER SECTION TITLE */}
         <div className="flex flex-col gap-3 px-6 pt-5 pb-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 md:text-xl">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 md:text-xl">
               Những phòng còn trống tại {hotel.name}
             </h2>
           </div>
 
           {/* “Hiển thị giá” */}
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600">Hiển thị giá</span>
+            <span className="text-gray-600 dark:text-gray-400">Hiển thị giá</span>
             <div className="relative">
               <select
                 value={priceMode}
                 onChange={(e) => setPriceMode(e.target.value)}
                 className={[
-                  "appearance-none rounded-lg border border-gray-300 bg-white",
-                  "px-3 pr-7 py-1.5 text-xs md:text-sm font-medium text-gray-800",
+                  "appearance-none rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800",
+                  "px-3 pr-7 py-1.5 text-xs md:text-sm font-medium text-gray-800 dark:text-gray-200",
                   "cursor-pointer outline-none",
                 ].join(" ")}
               >
@@ -82,14 +82,14 @@ export default function HotelRoomsSection({ hotel }) {
                   Mỗi phòng mỗi đêm (đã bao gồm thuế và phí)
                 </option>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
             </div>
           </div>
         </div>
 
         {/* QUICK FILTER CHIPS */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 bg-[#f8fafc] px-6 py-3 text-xs md:text-sm">
-          <span className="mr-2 text-gray-700">
+        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 dark:border-gray-700 bg-[#f8fafc] px-6 py-3 text-xs md:text-sm">
+          <span className="mr-2 text-gray-700 dark:text-gray-300">
             Tìm kiếm nhanh hơn bằng cách chọn những tiện nghi bạn cần
           </span>
 
@@ -215,15 +215,15 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
     : [];
 
   return (
-    <div className="border-t border-gray-100">
+    <div className="border-t border-gray-100 dark:border-gray-700">
       <div className="px-6 py-5">
         {/* Tên phòng + mô tả tóm tắt */}
         <div>
-          <h3 className="text-base font-semibold text-gray-900 md:text-lg">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg">
             {name}
           </h3>
           {summaryText && (
-            <p className="mt-1 text-xs text-gray-700 md:text-sm">
+            <p className="mt-1 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
               {summaryText}
             </p>
           )}
@@ -234,7 +234,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
           {/* LEFT: IMAGE SLIDER + META + AMENITIES */}
           <div className="flex flex-col gap-3">
             {/* Ảnh phòng + nút < > + dots */}
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
               <div className="relative aspect-[4/3] w-full">
                 <img
                   src={currentImage}
@@ -278,7 +278,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
             </div>
 
             {/* ROOM META: area, bed, guests */}
-            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-700 md:text-sm">
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
               {areaSqm != null && (
                 <div className="inline-flex items-center gap-1">
                   <FaRulerCombined className="h-4 w-4" />
@@ -304,7 +304,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
 
             {/* Tiện ích nổi bật từ data + icon */}
             {highlightAmenities.length > 0 ? (
-              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-gray-700 md:text-xs">
+              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-gray-700 dark:text-gray-300 md:text-xs">
                 {highlightAmenities.map((a) => (
                   <div
                     key={a.code || a.name}
@@ -317,7 +317,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
               </div>
             ) : (
               // Fallback nếu backend không gửi room amenities
-              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-gray-700 md:text-xs">
+              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-gray-700 dark:text-gray-300 md:text-xs">
                 <div className="flex items-center gap-1.5">
                   <FaShower className="h-3.5 w-3.5" />
                   <span>Vòi tắm đứng</span>
@@ -349,7 +349,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
           {/* RIGHT: HEADER + RATE PLANS LIST */}
           <div className="space-y-3">
             {/* Header riêng cho từng phòng (desktop) */}
-            <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.6fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] px-1 pb-1 text-[11px] font-semibold text-gray-500 md:grid">
+            <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.6fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] px-1 pb-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400 md:grid">
               <div>Lựa chọn phòng</div>
               <div className="text-center">Khách</div>
               <div className="text-right">Giá/phòng/đêm</div>
@@ -368,7 +368,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
                 />
               ))
             ) : (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 Hiện chưa có gói giá cho loại phòng này.
               </div>
             )}
@@ -491,24 +491,24 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3">
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-5 py-3">
           <div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {hotelName && `${hotelName} · `}
               Loại phòng
             </p>
-            <h3 className="text-base font-semibold text-gray-900 md:text-lg">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg">
               {name}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200"
           >
             <CloseIcon className="h-4 w-4" />
           </button>
@@ -572,25 +572,25 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
           </div>
 
           {/* RIGHT COLUMN: 80% info scrollable + 20% price fixed */}
-          <div className="flex w-full flex-col border-t border-gray-200 pt-3 lg:w-[40%] lg:border-t-0 lg:border-l lg:pl-4 lg:pt-0">
+          <div className="flex w-full flex-col border-t border-gray-200 dark:border-gray-700 pt-3 lg:w-[40%] lg:border-t-0 lg:border-l lg:pl-4 lg:pt-0">
             {/* Info scrollable */}
             <div className="flex-1 space-y-4 overflow-y-auto pr-1">
               {/* Thông tin phòng */}
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   Thông tin phòng
                 </h4>
-                <ul className="mt-1 space-y-1 text-xs text-gray-700 md:text-sm">
+                <ul className="mt-1 space-y-1 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
                   {metaItems.map((m, i) => (
                     <li key={i} className="flex items-center gap-2">
                       {i === 0 && (
-                        <FaRulerCombined className="h-3.5 w-3.5 text-gray-500" />
+                        <FaRulerCombined className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                       )}
                       {i === 1 && (
-                        <UsersIcon className="h-3.5 w-3.5 text-gray-500" />
+                        <UsersIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                       )}
                       {i === 2 && (
-                        <FaBed className="h-3.5 w-3.5 text-gray-500" />
+                        <FaBed className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                       )}
                       <span>{m}</span>
                     </li>
@@ -632,12 +632,12 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
             </div>
 
             {/* PRICE FOOTER – cố định, không scroll */}
-            <div className="mt-3 border-t border-gray-200 pt-3">
-              <p className="text-xs text-gray-600">Khởi điểm từ:</p>
+            <div className="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Khởi điểm từ:</p>
               <div className="mt-0.5 text-lg font-bold text-[#ff5a00] md:text-xl">
                 {priceText}
               </div>
-              <p className="text-[11px] text-gray-500">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
                 / phòng / đêm ·{" "}
                 {priceMode === "INCL_TAX"
                   ? "Đã bao gồm thuế và phí"
@@ -727,7 +727,6 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
   const showPromoPill = promoLabel && promoLabel !== "Chỉ còn 1 phòng";
 
   const isHotelActive = hotel?.active !== false;
-  console.log("hotel.active =", hotel?.active, typeof hotel?.active);
 
   const footerPriceText =
     priceMode === "INCL_TAX"
@@ -742,12 +741,12 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-xs md:text-sm">
+    <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 dark:border-gray-700 px-4 py-3 text-xs md:text-sm">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1.6fr)_minmax(0,0.6fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] md:items-center">
         {/* LEFT: name + conditions */}
         <div>
-          <div className="font-semibold text-gray-900">{name}</div>
-          <ul className="mt-1 space-y-1 text-gray-700">
+          <div className="font-semibold text-gray-900 dark:text-gray-100">{name}</div>
+          <ul className="mt-1 space-y-1 text-gray-700 dark:text-gray-300">
             {boardText && (
               <li className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm">
                 <BoardTypeIcon boardType={boardType} />
@@ -761,13 +760,13 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
               </li>
             )}
             {cancellationPolicy && (
-              <li className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs text-gray-600">
+              <li className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs text-gray-600 dark:text-gray-400">
                 <FaInfoCircle className="h-3.5 w-3.5" />
                 <span>{cancellationPolicy}</span>
               </li>
             )}
             {showRefundText && (
-              <li className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs text-gray-600">
+              <li className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs text-gray-600 dark:text-gray-400">
                 <RefundPolicyIcon refundable={refundable} />
                 <span>{refundText}</span>
               </li>
@@ -781,7 +780,7 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
         </div>
 
         {/* MIDDLE: guests icons */}
-        <div className="flex items-center gap-1 text-gray-700 md:justify-center">
+        <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300 md:justify-center">
           {Array.from({ length: Math.min(guests || 2, 4) }).map((_, i) => (
             <UsersIcon key={i} className="h-3.5 w-3.5" />
           ))}
@@ -796,7 +795,7 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
           )}
 
           {hasDiscount && (
-            <div className="text-[11px] text-gray-500">
+            <div className="text-[11px] text-gray-500 dark:text-gray-400">
               <span className="line-through opacity-60">
                 {displayRefPrice.toLocaleString("vi-VN")} VND
               </span>
@@ -806,7 +805,7 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
           <div className="text-base font-bold text-[#ff5a00] md:text-lg">
             {priceText}
           </div>
-          <div className="text-[11px] text-gray-500">
+          <div className="text-[11px] text-gray-500 dark:text-gray-400">
             {footerPriceText}
           </div>
         </div>
@@ -840,7 +839,7 @@ function FilterChip({ children, active, onClick }) {
     "inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm transition";
   const activeStyle = "border-[#0064d2] bg-[#e6f2ff] text-[#0064d2]";
   const inactiveStyle =
-    "border-gray-300 bg-white text-gray-800 hover:bg-gray-50";
+    "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-50";
 
   return (
     <button
@@ -1008,8 +1007,8 @@ function AmenityGroup({ title, items }) {
   if (!items || !items.length) return null;
   return (
     <div>
-      <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
-      <ul className="mt-1 grid grid-cols-1 gap-y-1 text-xs text-gray-700 md:grid-cols-2 md:text-sm">
+      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h4>
+      <ul className="mt-1 grid grid-cols-1 gap-y-1 text-xs text-gray-700 dark:text-gray-300 md:grid-cols-2 md:text-sm">
         {items.map((a) => (
           <li key={a.code || a.name} className="flex items-center gap-1.5">
             <span className="mt-0.5 h-1 w-1 rounded-full bg-gray-400" />

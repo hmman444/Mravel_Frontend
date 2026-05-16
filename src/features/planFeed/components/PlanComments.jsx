@@ -41,7 +41,7 @@ export default function PlanComments({
   // ❗ Từ đây trở xuống KHÔNG còn hook nào nữa
   if (!isReady || !me) {
     return (
-      <div className="mt-3 flex items-center gap-2 text-sm text-gray-500 animate-pulse">
+      <div className="mt-3 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 animate-pulse">
         <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-600" />
         <div className="flex-1 h-9 bg-gray-200 dark:bg-gray-600 rounded-full" />
       </div>

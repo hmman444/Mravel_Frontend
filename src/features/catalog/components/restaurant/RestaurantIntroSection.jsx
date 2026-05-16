@@ -67,16 +67,16 @@ ${shortHtml}
 `;
 
   return (
-    <section className="w-full bg-white">
+    <section className="w-full bg-white dark:bg-gray-800">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-12">
         {/* Tiêu đề */}
-        <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+        <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
           Đặt Bàn Nhà Hàng Trực Tuyến Tại Mravel Với Giá Tốt
         </h2>
 
         {/* CONTENT giống HotelIntroSection */}
         <div
-          className="prose prose-slate max-w-none text-gray-700 transition-all duration-300 text-[15px]"
+          className="prose prose-slate max-w-none text-gray-700 dark:text-gray-300 transition-all duration-300 text-[15px]"
           style={{
             maxHeight: expanded ? "9999px" : "320px",
             overflow: "hidden",

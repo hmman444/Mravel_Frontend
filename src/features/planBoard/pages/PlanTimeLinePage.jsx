@@ -238,7 +238,7 @@ export default function PlanTimeLinePage() {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Timeline lịch trình
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Cột kế hoạch cố định • phần lịch cuộn ngang • cuộn dọc theo trang
           </p>
         </div>
@@ -293,7 +293,7 @@ export default function PlanTimeLinePage() {
                   <div className="text-xs font-semibold text-gray-700 dark:text-gray-200">
                     Kế hoạch
                   </div>
-                  <div className="text-[11px] text-gray-500">
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400">
                     {(normalizedPlansAll?.length || 0)} plan
                     {statusFilter ? ` • lọc: ${statusLabels[statusFilter] || statusFilter}` : ""} •{" "}
                     {range.start ? fmtDay(range.start) : "--/--"} →{" "}
@@ -332,7 +332,7 @@ export default function PlanTimeLinePage() {
                         px-3 py-1 rounded-full text-xs font-semibold
                         border transition-all
                         ${active ? "ring-2 ring-blue-500/40 border-blue-300 dark:border-blue-400/40" : "border-transparent"}
-                        ${statusPillStyle[st] || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}
+                        ${statusPillStyle[st] || "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-gray-800 dark:text-gray-200"}
                         hover:brightness-[0.98] dark:hover:brightness-110
                       `}
                       title={active ? "Bấm để bỏ lọc" : "Bấm để lọc"}
@@ -405,11 +405,11 @@ export default function PlanTimeLinePage() {
                                         {p.title || "Không có tiêu đề"}
                                     </div>
 
-                                    <div className="text-[11px] text-gray-500 mt-1">
+                                    <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
                                         {fmtVN(p.startDate)} → {fmtVN(p.endDate)}
                                     </div>
 
-                                    <div className="text-[11px] text-gray-500 mt-1 truncate">
+                                    <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 truncate">
                                         {p.owner || "Chưa rõ chủ sở hữu"} • {p.members || 1} thành viên
                                     </div>
 

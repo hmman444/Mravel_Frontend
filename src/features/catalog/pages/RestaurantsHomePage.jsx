@@ -22,14 +22,19 @@ export default function RestaurantsHomePage() {
   }, []);
 
   const goSearch = (params = {}) => {
+    if (params.kind === "RESTAURANT" && params.slug) {
+      navigate(`/restaurants/${params.slug}`);
+      return;
+    }
+
     const qs = new URLSearchParams({
       location: params.location || "",
-      // tuỳ bạn dùng thêm date/time/people/mode/cuisine
       ...(params.date ? { date: params.date } : {}),
       ...(params.time ? { time: params.time } : {}),
       ...(params.people ? { people: String(params.people) } : {}),
       ...(params.cuisine ? { cuisine: params.cuisine } : {}),
       ...(params.mode ? { mode: params.mode } : {}),
+      ...(params.kind === "DESTINATION" ? { destOnly: "1" } : {}),
       page: "0",
       size: "9",
     });

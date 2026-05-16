@@ -101,11 +101,11 @@ export default function AmenityMultiSelect({
   const closeSuggest = () => setOpenSuggest(false);
 
   return (
-    <div className="rounded-2xl border bg-white p-4 space-y-3">
+    <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-gray-900">{title}</div>
-          {hint ? <div className="text-xs text-gray-500 mt-0.5">{hint}</div> : null}
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</div>
+          {hint ? <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{hint}</div> : null}
         </div>
 
         <div className="flex items-center gap-2">
@@ -158,15 +158,15 @@ export default function AmenityMultiSelect({
             className="absolute right-2 top-2 rounded-lg p-1 hover:bg-gray-100"
             title="Clear"
           >
-            <XMarkIcon className="h-5 w-5 text-gray-500" />
+            <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </button>
         )}
 
         {/* dropdown chỉ hiện khi đang gõ */}
         {openSuggest && q && (
-          <div className="absolute z-40 mt-2 w-full rounded-2xl border bg-white shadow-lg overflow-hidden">
+          <div className="absolute z-40 mt-2 w-full rounded-2xl border bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
             {suggestions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500">Không tìm thấy tiện ích.</div>
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Không tìm thấy tiện ích.</div>
             ) : (
               <div className="max-h-72 overflow-auto divide-y">
                 {suggestions.map((a) => {
@@ -183,17 +183,17 @@ export default function AmenityMultiSelect({
                       }`}
                     >
                       <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                           {labelOfAmenity(a)}
                         </div>
-                        <div className="text-xs text-gray-500 truncate">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {a?.code || k}
                           {a?.description ? ` • ${a.description}` : ""}
                         </div>
                       </div>
                       <span
                         className={`text-xs px-2 py-1 rounded-full border ${
-                          on ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700"
+                          on ? "bg-blue-600 text-white border-blue-600" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                         }`}
                       >
                         {on ? "Đã chọn" : "Chọn"}
@@ -205,15 +205,15 @@ export default function AmenityMultiSelect({
             )}
 
             {/* footer gợi ý */}
-            <div className="px-3 py-2 border-t bg-gray-50 flex items-center justify-between">
-              <div className="text-xs text-gray-500">
+            <div className="px-3 py-2 border-t bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {filtered.length > suggestions.length
                   ? `Còn ${filtered.length - suggestions.length} kết quả khác…`
                   : `Tổng ${filtered.length} kết quả`}
               </div>
               <button
                 type="button"
-                className="text-xs px-3 py-1.5 rounded-xl border bg-white hover:bg-gray-50"
+                className="text-xs px-3 py-1.5 rounded-xl border bg-white dark:bg-gray-800 hover:bg-gray-50"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   closeSuggest();
@@ -230,7 +230,7 @@ export default function AmenityMultiSelect({
       {/*  chips đã chọn (hiển thị VI theo code) */}
       <div className="flex flex-wrap gap-2">
         {selectedList.length === 0 ? (
-          <div className="text-xs text-gray-500">Chưa chọn tiện ích nào.</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Chưa chọn tiện ích nào.</div>
         ) : (
           selectedList.map((k) => (
             <span
@@ -252,11 +252,11 @@ export default function AmenityMultiSelect({
             if (e.target === e.currentTarget) setOpenAll(false);
           }}
         >
-          <div className="w-full max-w-4xl rounded-3xl bg-white border shadow-xl overflow-hidden">
+          <div className="w-full max-w-4xl rounded-3xl bg-white dark:bg-gray-800 border shadow-xl overflow-hidden">
             <div className="px-5 py-3 border-b flex items-center justify-between">
               <div>
-                <div className="text-base font-bold text-gray-900">Tất cả tiện ích</div>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-base font-bold text-gray-900 dark:text-gray-100">Tất cả tiện ích</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Click để chọn/bỏ chọn • Đã chọn: <b>{selectedKeys.size}</b>
                 </div>
               </div>
@@ -267,7 +267,7 @@ export default function AmenityMultiSelect({
                 className="rounded-xl p-2 hover:bg-gray-100"
                 title="Đóng"
               >
-                <XMarkIcon className="h-5 w-5 text-gray-600" />
+                <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
 
@@ -284,15 +284,15 @@ export default function AmenityMultiSelect({
                         type="button"
                         onClick={() => toggle(a)}
                         className={`group w-full text-left rounded-2xl border p-3 hover:bg-gray-50 transition ${
-                          on ? "border-blue-500 bg-blue-50/60" : "border-slate-200"
+                          on ? "border-blue-500 bg-blue-50/60" : "border-slate-200 dark:border-slate-700"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="text-sm font-semibold text-gray-900 truncate">
+                            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                               {labelOfAmenity(a)}
                             </div>
-                            <div className="text-xs text-gray-500 truncate mt-0.5">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                               {a?.code || k}
                               {a?.description ? ` • ${a.description}` : ""}
                             </div>
@@ -300,7 +300,7 @@ export default function AmenityMultiSelect({
 
                           <div
                             className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-bold ${
-                              on ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-500"
+                              on ? "bg-blue-600 text-white border-blue-600" : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                             }`}
                             aria-hidden="true"
                           >
@@ -314,11 +314,11 @@ export default function AmenityMultiSelect({
               </div>
             </div>
 
-            <div className="px-5 py-3 border-t bg-gray-50 flex items-center justify-between">
+            <div className="px-5 py-3 border-t bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
               <button
                 type="button"
                 onClick={clearAll}
-                className="px-4 py-2 text-sm rounded-xl border bg-white hover:bg-gray-50"
+                className="px-4 py-2 text-sm rounded-xl border bg-white dark:bg-gray-800 hover:bg-gray-50"
               >
                 Xóa hết
               </button>

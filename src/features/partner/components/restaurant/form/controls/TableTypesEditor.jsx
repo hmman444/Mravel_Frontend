@@ -64,11 +64,11 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
   };
 
   return (
-    <div className="rounded-2xl border bg-white p-4 space-y-3">
+    <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-gray-900">Loại bàn</div>
-          <div className="text-xs text-gray-500 mt-0.5">
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Loại bàn</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             Mỗi loại bàn tương ứng cấu hình số người / số bàn / tiền cọc / thời lượng.
           </div>
         </div>
@@ -85,17 +85,17 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500">Chưa có loại bàn.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa có loại bàn.</div>
       ) : (
         <div className="space-y-3">
           {list.map((t, idx) => (
             <div key={idx} className="rounded-2xl border p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">
                     Loại bàn #{idx + 1} — {t.name || "(chưa đặt tên)"}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     Mã loại bàn: {t.id || "để trống (tự tạo)"}
                   </div>
                 </div>

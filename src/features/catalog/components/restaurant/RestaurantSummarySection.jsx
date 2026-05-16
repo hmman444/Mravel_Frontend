@@ -3,7 +3,7 @@ import React from "react";
 
 /* ---------- UI bits ---------- */
 const SectionTitle = ({ children }) => (
-  <h3 className="mt-5 first:mt-0 font-semibold text-gray-900">{children}</h3>
+  <h3 className="mt-5 first:mt-0 font-semibold text-gray-900 dark:text-gray-100">{children}</h3>
 );
 const Bullet = ({ children }) => <li className="leading-relaxed">- {children}</li>;
 
@@ -99,11 +99,11 @@ export default function RestaurantSummarySection({ restaurant }) {
 
   return (
     <section className="px-5 md:px-6 pt-5 pb-6">
-      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900">
+      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">
         Tóm tắt {restaurant?.name || restaurant?.slug || "nhà hàng"}
       </h2>
 
-      <div className="mt-5 text-gray-800 text-[15px] md:text-base">
+      <div className="mt-5 text-gray-800 dark:text-gray-200 text-[15px] md:text-base">
         {/* Phù hợp */}
         <SectionTitle>Phù hợp:</SectionTitle>
         <ul className="mt-2 space-y-1">

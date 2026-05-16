@@ -23,9 +23,9 @@ export default function RestaurantParkingSection({ restaurant }) {
 
   return (
     <section className="px-4 md:px-5 pt-3 pb-4">
-      <h1 className="text-xl md:text-2xl font-extrabold text-gray-900">Để xe</h1>
+      <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-gray-100">Để xe</h1>
 
-      <div className="mt-3 rounded-xl bg-white shadow-sm p-4 md:p-4 leading-relaxed text-gray-900">
+      <div className="mt-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-4 md:p-4 leading-relaxed text-gray-900 dark:text-gray-100">
         <div className="space-y-1">
           <h3 className="font-bold text-base md:text-lg">1. Chỗ đỗ ô tô</h3>
           {p.hasCarParking ? (
@@ -64,7 +64,7 @@ export default function RestaurantParkingSection({ restaurant }) {
           )}
         </div>
 
-        {p.notes && <p className="mt-4 italic text-gray-700">* {p.notes}</p>}
+        {p.notes && <p className="mt-4 italic text-gray-700 dark:text-gray-300">* {p.notes}</p>}
       </div>
     </section>
   );

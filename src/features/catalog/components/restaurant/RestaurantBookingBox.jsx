@@ -88,26 +88,26 @@ export default function RestaurantBookingBox({
   };
 
   return (
-    <div className={["rounded-2xl border border-gray-200 bg-white shadow-sm", "p-4 md:p-5", className].join(" ")}>
+    <div className={["rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm", "p-4 md:p-5", className].join(" ")}>
       {/* Header */}
       <div className="text-center">
-        <h3 className="text-lg font-bold text-gray-900">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           Đặt chỗ{" "}
-          <span className="font-normal text-gray-600">(Để có chỗ trước khi đến)</span>
+          <span className="font-normal text-gray-600 dark:text-gray-400">(Để có chỗ trước khi đến)</span>
         </h3>
         <div className="mt-1 text-sm font-semibold text-rose-600">Giảm 10%</div>
       </div>
 
       {/* Guests Row */}
       <div className="mt-4">
-        <div className="text-sm font-semibold text-gray-700 mb-1">Số khách</div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Số khách</div>
         <div ref={guestsRef} className="relative">
           <button
             type="button"
             onClick={() => setOpenGuests((v) => !v)}
-            className="w-full h-11 px-3 rounded-lg border border-gray-300 text-left flex items-center gap-2"
+            className="w-full h-11 px-3 rounded-lg border border-gray-300 dark:border-gray-700 text-left flex items-center gap-2"
           >
-            <span className="text-gray-800">
+            <span className="text-gray-800 dark:text-gray-200">
               {adults} người lớn, {children} trẻ em
             </span>
             <span className="ml-auto text-gray-400">▾</span>
@@ -115,12 +115,12 @@ export default function RestaurantBookingBox({
 
           {openGuests && (
             <div
-              className="absolute z-50 left-0 right-0 top-[calc(100%+8px)] bg-white border border-gray-200 rounded-xl shadow-xl p-3"
+              className="absolute z-50 left-0 right-0 top-[calc(100%+8px)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-3"
               onMouseDown={(e) => e.stopPropagation()}
             >
               {/* Adults */}
               <div className="flex items-center justify-between py-2">
-                <span className="font-medium text-gray-800">Người lớn</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">Người lớn</span>
                 <div className="flex items-center gap-2">
                   <button
                     className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
@@ -148,7 +148,7 @@ export default function RestaurantBookingBox({
 
               {/* Children */}
               <div className="flex items-center justify-between py-2">
-                <span className="font-medium text-gray-800">Trẻ em</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">Trẻ em</span>
                 <div className="flex items-center gap-2">
                   <button
                     className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
@@ -193,15 +193,15 @@ export default function RestaurantBookingBox({
 
       {/* Date & Time */}
       <div className="mt-4">
-        <div className="text-sm font-semibold text-gray-700 mb-1">Thời gian đến</div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Thời gian đến</div>
 
-        <div className="text-[11px] text-gray-500 mb-2">
+        <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">
           {openingLabel}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           {/* Date */}
-          <div className="h-11 rounded-lg border border-gray-300 px-3 bg-white flex items-center relative">
+          <div className="h-11 rounded-lg border border-gray-300 dark:border-gray-700 px-3 bg-white dark:bg-gray-800 flex items-center relative">
             <FaCalendarAlt className="text-gray-400 mr-2" />
             <MravelDatePicker
               selected={date}
@@ -217,7 +217,7 @@ export default function RestaurantBookingBox({
                 { name: "preventOverflow", options: { padding: 8 } },
               ]}
               popperContainer={(props) => <div {...props} className="z-[9999]" />}
-              className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer"
+              className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
             />
           </div>
 
@@ -225,8 +225,8 @@ export default function RestaurantBookingBox({
           <div
             ref={timeRef}
             className={[
-              "relative h-11 rounded-lg border px-3 bg-white flex items-center",
-              timeOptions.length ? "border-gray-300 cursor-pointer" : "border-gray-200 cursor-not-allowed opacity-70",
+              "relative h-11 rounded-lg border px-3 bg-white dark:bg-gray-800 flex items-center",
+              timeOptions.length ? "border-gray-300 dark:border-gray-700 cursor-pointer" : "border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-70",
             ].join(" ")}
             onClick={() => {
               if (!timeOptions.length) return;
@@ -234,17 +234,17 @@ export default function RestaurantBookingBox({
             }}
           >
             <FaClock className="text-gray-400 mr-2" />
-            <span className={`text-sm ${time ? "text-gray-800" : "text-gray-400"}`}>
+            <span className={`text-sm ${time ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
               {timeOptions.length ? (time || "Chọn giờ") : "Nhà hàng đóng cửa"}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
             {openTime && (
               <div
-                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 bg-white shadow-xl max-h-64 overflow-y-auto py-2"
+                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl max-h-64 overflow-y-auto py-2"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="px-3 pb-1 text-xs font-semibold text-gray-500">
+                <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
                   Giờ (cách nhau 30 phút)
                 </div>
 
@@ -253,7 +253,7 @@ export default function RestaurantBookingBox({
                     key={t}
                     type="button"
                     className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition ${
-                      t === time ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-800 hover:bg-gray-50"
+                      t === time ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-800 dark:text-gray-200 hover:bg-gray-50"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();

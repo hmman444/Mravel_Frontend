@@ -55,7 +55,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
   };
 
   const iconMap = {
-    PRIVATE: <FaLock className="text-gray-500" />,
+    PRIVATE: <FaLock className="text-gray-500 dark:text-gray-400" />,
     FRIENDS: <FaUsers className="text-emerald-500" />,
     PUBLIC: <FaGlobe className="text-blue-500" />,
   };
@@ -94,13 +94,13 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
   };
 
   const inputBox =
-    "flex-1 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm " +
+    "flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm " +
     "shadow-sm focus-within:ring-2 focus-within:ring-sky-400 transition";
 
   const iconChip =
     "flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 text-sky-500";
 
-  const fieldLabel = "text-xs font-medium text-gray-600 px-1 mb-1 block";
+  const fieldLabel = "text-xs font-medium text-gray-600 dark:text-gray-400 px-1 mb-1 block";
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -132,8 +132,8 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
             <Dialog.Panel
               className="
                 w-full max-w-md rounded-2xl p-6
-                bg-white
-                border border-gray-100 
+                bg-white dark:bg-gray-800
+                border border-gray-100 dark:border-gray-700 
                 shadow-[0_18px_55px_rgba(0,0,0,0.14)]
               "
             >
@@ -143,10 +143,10 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                   <FaFlag />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Tạo lịch trình mới
                   </h2>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Lên kế hoạch chuyến đi và chia sẻ với mọi người
                   </p>
                 </div>
@@ -205,7 +205,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                 <div className="space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <span className="text-xs text-gray-500 px-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 px-1">
                         Từ ngày
                       </span>
                       <div className="flex items-center gap-3">
@@ -220,14 +220,14 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                             dateFormat="dd/MM/yyyy"
                             locale="vi"
                             className="w-full bg-transparent outline-none"
-                            calendarClassName="rounded-xl shadow-xl bg-white border border-gray-200"
+                            calendarClassName="rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                           />
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-xs text-gray-500 px-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 px-1">
                         Đến ngày
                       </span>
                       <div className="flex items-center gap-3">
@@ -243,7 +243,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                             dateFormat="dd/MM/yyyy"
                             locale="vi"
                             className="w-full bg-transparent outline-none"
-                            calendarClassName="rounded-xl shadow-xl bg-white border border-gray-200"
+                            calendarClassName="rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                           />
                         </div>
                       </div>
@@ -257,7 +257,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                   <div className="flex items-center gap-3">
                     <div className={iconChip}>{iconMap[form.visibility]}</div>
                     <div className={`${inputBox} flex items-center justify-between`}>
-                      <div className="text-sm text-gray-700">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         {visibilityLabel[form.visibility]}
                       </div>
                       <VisibilityDropdown
@@ -324,7 +324,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                     type="button"
                     onClick={onClose}
                     className="
-                      px-4 py-2 rounded-xl border border-gray-300 text-sm 
+                      px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 text-sm 
                       hover:bg-gray-100 transition
                     "
                   >

@@ -54,10 +54,10 @@ export default function HotelBookingSelectedRoomCard({
       <div className="space-y-4 px-4 pb-4 pt-3 md:px-5 md:pb-5">
         {/* Tiêu đề + room */}
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {hotelName || "Khách sạn của bạn"}
           </p>
-          <p className="text-sm font-semibold text-gray-900 md:text-base">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             ({roomsCount}x) {roomName || "Superior Double/Twin"}
           </p>
           <p className="text-xs font-semibold text-red-600 md:text-sm">
@@ -66,47 +66,47 @@ export default function HotelBookingSelectedRoomCard({
         </div>
 
         {/* Check-in / Check-out */}
-        <div className="grid grid-cols-2 gap-3 rounded-xl bg-white p-3 text-xs text-gray-800 md:text-sm">
-          <div className="flex flex-col gap-1 border-r border-dashed border-gray-200 pr-3">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+        <div className="grid grid-cols-2 gap-3 rounded-xl bg-white dark:bg-gray-800 p-3 text-xs text-gray-800 dark:text-gray-200 md:text-sm">
+          <div className="flex flex-col gap-1 border-r border-dashed border-gray-200 dark:border-gray-700 pr-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Nhận phòng
             </span>
             <div className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-gray-600" />
+              <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <span>{checkInLabel}</span>
             </div>
-            <span className="text-[11px] text-gray-500">Từ 14:00</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">Từ 14:00</span>
           </div>
           <div className="flex flex-col gap-1 pl-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Trả phòng
             </span>
             <div className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-gray-600" />
+              <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <span>{checkOutLabel}</span>
             </div>
-            <span className="text-[11px] text-gray-500">Trước 12:00</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">Trước 12:00</span>
           </div>
         </div>
 
         {/* Info hàng ngang */}
-        <div className="space-y-1 text-xs text-gray-700 md:text-sm">
+        <div className="space-y-1 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-gray-600" />
+            <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>
               {guests} khách · {roomsCount} phòng · {nights} đêm
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-gray-600" />
+            <ShieldCheck className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>{refundText}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Info className="h-4 w-4 text-gray-600" />
+            <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>Không thể thay đổi ngày lưu trú.</span>
           </div>
           <div className="flex items-center gap-2">
-            <Wifi className="h-4 w-4 text-gray-600" />
+            <Wifi className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>WiFi miễn phí, các tiện nghi cơ bản khác.</span>
           </div>
         </div>

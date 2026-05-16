@@ -1,8 +1,8 @@
 export default function PartnerSpotlight() {
   return (
     <section className="mt-10">
-      <div className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl p-8 shadow-sm">
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-8 shadow-sm">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
           Nổi bật ngay từ đầu
         </h2>
 
@@ -30,12 +30,12 @@ export default function PartnerSpotlight() {
 
 function SpotItem({ icon, title, desc }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm">
       <div className="h-28 flex items-center justify-center">{icon}</div>
-      <h3 className="mt-2 text-lg font-extrabold text-slate-900 text-center">
+      <h3 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-slate-100 text-center">
         {title}
       </h3>
-      <p className="mt-3 text-slate-600 leading-relaxed text-center">{desc}</p>
+      <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed text-center">{desc}</p>
     </div>
   );
 }

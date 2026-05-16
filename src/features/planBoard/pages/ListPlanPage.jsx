@@ -326,7 +326,7 @@ export default function ListPlanPage() {
                     </span>
 
                     {myRoleLabel && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/85 text-gray-800 dark:bg-gray-900/80 dark:text-gray-100 backdrop-blur">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/85 text-gray-800 dark:text-gray-200 dark:bg-gray-900/80 dark:text-gray-100 backdrop-blur">
                         {myRoleLabel}
                       </span>
                     )}

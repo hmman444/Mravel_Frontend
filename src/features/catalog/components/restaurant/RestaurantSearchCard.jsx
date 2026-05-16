@@ -34,7 +34,7 @@ const CUISINE_OPTIONS = [
 
 export default function RestaurantSearchCard({ onSubmit }) {
   // ---- Địa điểm
-  const [dest, setDest] = useState({ text: "", slug: null });
+  const [dest, setDest] = useState({ text: "", slug: null, kind: null });
 
   // ---- Ngày dùng bữa
   const [date, setDate] = useState(() => new Date());
@@ -79,20 +79,22 @@ export default function RestaurantSearchCard({ onSubmit }) {
     onSubmit?.({
       location: dest.slug || dest.text,
       date: formatDate(date),
-      time,                // "HH:mm"
+      time,
       people,
-      cuisine: cuisineCode // ⬅️ gửi code để RestaurantSearchResults lấy và map vào body
+      cuisine: cuisineCode,
+      kind: dest.kind,
+      slug: dest.slug,
     });
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto rounded-3xl bg-white shadow-[0_14px_40px_rgba(15,23,42,0.18)] border border-gray-100">
+    <div className="w-full max-w-5xl mx-auto rounded-3xl bg-white dark:bg-gray-800 shadow-[0_14px_40px_rgba(15,23,42,0.18)] border border-gray-100 dark:border-gray-700">
       {/* Header nhỏ */}
-      <div className="px-6 pt-5 pb-3 border-b border-gray-100">
-        <h2 className="text-base md:text-lg font-semibold text-gray-900">
+      <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-700">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">
           Đặt bàn nhà hàng cho chuyến đi
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Chọn khu vực, ngày và số người để tìm quán phù hợp.
         </p>
       </div>
@@ -104,51 +106,54 @@ export default function RestaurantSearchCard({ onSubmit }) {
       >
         {/* Khu vực */}
         <div className="col-span-1 md:col-span-6">
-          <div className="text-xs font-semibold text-gray-700 mb-1.5">Khu vực / Thành phố</div>
-          <div className="flex items-center h-11 border rounded-xl px-3 bg-white">
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Khu vực / Thành phố</div>
+          <div className="flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800">
             <DestinationTypeahead
               label={null}
               placeholder="Thành phố, nhà hàng, điểm đến"
-              onSubmit={({ text, slug }) => setDest({ text, slug })}
+              onSubmit={({ text, slug, kind }) => setDest({ text, slug, kind: kind || null })}
+              onPick={({ text, slug, kind }) => setDest({ text, slug, kind: kind || null })}
+              onChangeText={(text) => setDest(prev => ({ ...prev, text, slug: null, kind: null }))}
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
+              mode="restaurant"
             />
           </div>
         </div>
 
         {/* Ngày */}
         <div className="col-span-1 md:col-span-3">
-          <div className="text-xs font-semibold text-gray-700 mb-1.5">Ngày dùng bữa</div>
-          <div className="flex items-center h-11 border rounded-xl px-3 bg-white">
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Ngày dùng bữa</div>
+          <div className="flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800">
             <FaCalendarAlt className="text-gray-400 mr-2" />
             <MravelDatePicker
               selected={date}
               onChange={setDate}
-              className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer"
+              className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
             />
           </div>
         </div>
 
         {/* Giờ */}
         <div className="col-span-1 md:col-span-3">
-          <div className="text-xs font-semibold text-gray-700 mb-1.5">Giờ</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Giờ</div>
           <div
             ref={timeBoxRef}
-            className="relative flex items-center h-11 border rounded-xl px-3 bg-white cursor-pointer"
+            className="relative flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800 cursor-pointer"
             onClick={() => setOpenTime((v) => !v)}
           >
             <FaClock className="text-gray-400 mr-2" />
-            <span className={`text-sm ${time ? "text-gray-800" : "text-gray-400"}`}>
+            <span className={`text-sm ${time ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
               {time || "Chọn giờ"}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
             {openTime && (
               <div
-                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 bg-white shadow-xl max-h-64 overflow-y-auto py-2"
+                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl max-h-64 overflow-y-auto py-2"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="px-3 pb-1 text-xs font-semibold text-gray-500">
+                <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
                   Giờ (theo giờ địa phương)
                 </div>
                 {timeOptions.map((t) => (
@@ -156,7 +161,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
                     key={t}
                     type="button"
                     className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition ${
-                      t === time ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-800 hover:bg-gray-50"
+                      t === time ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-800 dark:text-gray-200 hover:bg-gray-50"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -174,8 +179,8 @@ export default function RestaurantSearchCard({ onSubmit }) {
 
         {/* Số người */}
         <div className="col-span-1 md:col-span-3">
-          <div className="text-xs font-semibold text-gray-700 mb-1.5">Số người</div>
-          <div className="flex items-center h-11 border rounded-xl px-3 bg-white">
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Số người</div>
+          <div className="flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800">
             <FaUsers className="text-gray-400 mr-2" />
             <input
               type="number"
@@ -183,31 +188,31 @@ export default function RestaurantSearchCard({ onSubmit }) {
               max={20}
               value={people}
               onChange={(e) => setPeople(Math.max(1, Number(e.target.value) || 1))}
-              className="w-full bg-transparent outline-none text-sm text-gray-800"
+              className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200"
             />
           </div>
         </div>
 
         {/* Loại ẩm thực – DROPDOWN */}
         <div className="col-span-1 md:col-span-5">
-          <div className="text-xs font-semibold text-gray-700 mb-1.5">Loại ẩm thực</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Loại ẩm thực</div>
           <div
             ref={cuisineBoxRef}
-            className="relative flex items-center h-11 border rounded-xl px-3 bg-white cursor-pointer"
+            className="relative flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800 cursor-pointer"
             onClick={() => setOpenCuisine((v) => !v)}
           >
             <FaUtensils className="text-gray-400 mr-2" />
-            <span className={`text-sm ${cuisineCode ? "text-gray-800" : "text-gray-400"}`}>
+            <span className={`text-sm ${cuisineCode ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
               {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || "Chọn loại ẩm thực"}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
             {openCuisine && (
               <div
-                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 bg-white shadow-xl max-h-64 overflow-y-auto py-2"
+                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl max-h-64 overflow-y-auto py-2"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="px-3 pb-1 text-xs font-semibold text-gray-500">Loại ẩm thực</div>
+                <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Loại ẩm thực</div>
                 {CUISINE_OPTIONS.map((opt) => (
                   <button
                     key={opt.value || "_all_"}
@@ -215,7 +220,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
                     className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition ${
                       opt.value === cuisineCode
                         ? "bg-sky-50 text-sky-700 font-semibold"
-                        : "text-gray-800 hover:bg-gray-50"
+                        : "text-gray-800 dark:text-gray-200 hover:bg-gray-50"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();

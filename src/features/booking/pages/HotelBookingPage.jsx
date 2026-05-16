@@ -41,7 +41,7 @@ export default function HotelBookingPage() {
   } = useHotelBookingPage();
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <div className="h-[50px] md:h-[60px]" aria-hidden />
 

@@ -35,7 +35,7 @@ const soft = {
   btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed",
   btnPrimary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
   btnGhost:
-    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+    "bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
   btnDanger:
     "bg-rose-600 text-white hover:bg-rose-700 shadow-sm",
   badge: "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
@@ -59,7 +59,7 @@ function KindBadge({ kind }) {
 function StatusPill({ active }) {
   const cls = active
     ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-200 dark:border-emerald-900"
-    : "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800";
+    : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800";
   return (
     <span className={`${soft.pill} ${cls}`}>
       {active ? "Đang hoạt động" : "Đã khóa"}
@@ -268,7 +268,7 @@ export default function ManagePlacesPage() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Tìm theo tên / slug / vị trí..."
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
               />
             </div>
 
@@ -309,16 +309,16 @@ export default function ManagePlacesPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+        <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Không có dữ liệu phù hợp.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 dark:border-slate-800 dark:bg-slate-950">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Tên</th>
                   <th className="px-4 py-3 text-left font-semibold">Loại</th>

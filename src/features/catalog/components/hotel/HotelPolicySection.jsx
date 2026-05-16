@@ -89,18 +89,18 @@ export default function HotelPolicySection({ hotel }) {
   ].filter(Boolean);
 
   return (
-    <section className="mt-0 border border-gray-200 bg-white">
+    <section className="mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <div className="grid gap-0 md:grid-cols-[270px,1fr]">
         {/* LEFT PANEL */}
         <div className="bg-gradient-to-b from-[#dbeeff] to-[#f4f9ff] px-6 py-6 md:py-8">
-          <h2 className="text-base font-semibold leading-relaxed text-gray-900 md:text-lg">
+          <h2 className="text-base font-semibold leading-relaxed text-gray-900 dark:text-gray-100 md:text-lg">
             Chính sách và những thông tin liên quan của{" "}
             <span className="block md:inline">{hotel.name}</span>
           </h2>
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="border-l border-gray-100 px-6 py-6 space-y-5">
+        <div className="border-l border-gray-100 dark:border-gray-700 px-6 py-6 space-y-5">
           {/* --- Chính sách lưu trú (thẻ trên cùng) --- */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -108,10 +108,10 @@ export default function HotelPolicySection({ hotel }) {
                 <Clock className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   Chính sách lưu trú
                 </p>
-                <p className="mt-0.5 text-xs text-gray-600">
+                <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                   Thời gian nhận phòng / trả phòng tiêu chuẩn tại cơ sở lưu trú.
                 </p>
               </div>
@@ -123,15 +123,15 @@ export default function HotelPolicySection({ hotel }) {
             icon={<Clock className="h-4 w-4" />}
             title={checkinItem?.title || "Thời gian nhận phòng/trả phòng"}
           >
-            <div className="grid gap-y-1 text-sm text-gray-700 md:grid-cols-2">
+            <div className="grid gap-y-1 text-sm text-gray-700 dark:text-gray-300 md:grid-cols-2">
               <div className="flex gap-1.5">
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
                   Giờ nhận phòng:
                 </span>
                 <span>{checkInTime ? `Từ ${checkInTime}` : "Theo quy định"}</span>
               </div>
               <div className="flex gap-1.5">
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
                   Giờ trả phòng:
                 </span>
                 <span>
@@ -147,7 +147,7 @@ export default function HotelPolicySection({ hotel }) {
               icon={<FileText className="h-4 w-4" />}
               title={requiredDocs.title}
             >
-              <p className="text-sm leading-relaxed text-gray-700">
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                 {requiredDocs.content}
               </p>
             </PolicyCard>
@@ -156,7 +156,7 @@ export default function HotelPolicySection({ hotel }) {
           {/* --- Hướng dẫn nhận phòng chung --- */}
           {guide && (
             <PolicyCard icon={<Info className="h-4 w-4" />} title={guide.title}>
-              <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-line">
                 {guide.content}
               </p>
             </PolicyCard>
@@ -179,7 +179,7 @@ export default function HotelPolicySection({ hotel }) {
             <div className="grid gap-4 md:grid-cols-2">
               {extraPolicies.map(({ key, icon, item }) => (
                 <PolicyCard key={key} icon={icon} title={item.title}>
-                  <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+                  <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-line">
                     {item.content}
                   </p>
                 </PolicyCard>
@@ -189,13 +189,13 @@ export default function HotelPolicySection({ hotel }) {
 
           {/* --- Thông tin chung (bảng như Traveloka) --- */}
           {generalInfo && (
-            <div className="mt-4 border border-gray-200">
-              <div className="border-b border-gray-200 bg-[#f4f7ff] px-4 py-3">
-                <h3 className="text-sm font-semibold text-gray-900">
+            <div className="mt-4 border border-gray-200 dark:border-gray-700">
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-[#f4f7ff] px-4 py-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   Thông tin chung
                 </h3>
               </div>
-              <dl className="divide-y divide-gray-100 text-sm bg-white">
+              <dl className="divide-y divide-gray-100 text-sm bg-white dark:bg-gray-800">
                 {generalInfo.mainFacilitiesSummary && (
                   <InfoRow
                     label="Tiện ích chung"
@@ -282,7 +282,7 @@ function PolicyCard({ icon, title, children }) {
         {icon}
       </div>
       <div className="flex-1">
-        <p className="text-sm font-semibold text-gray-900">{title}</p>
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</p>
         <div className="mt-1">{children}</div>
       </div>
     </div>
@@ -292,11 +292,11 @@ function PolicyCard({ icon, title, children }) {
 function InfoRow({ label, value }) {
   if (!value) return null;
   return (
-    <div className="grid grid-cols-[40%_60%] gap-x-3 bg-white odd:bg-[#f9fafb]">
-      <dt className="px-4 py-2.5 text-xs font-semibold text-gray-600">
+    <div className="grid grid-cols-[40%_60%] gap-x-3 bg-white dark:bg-gray-800 odd:bg-[#f9fafb]">
+      <dt className="px-4 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-400">
         {label}
       </dt>
-      <dd className="px-4 py-2.5 text-xs text-gray-800">{value}</dd>
+      <dd className="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200">{value}</dd>
     </div>
   );
 }

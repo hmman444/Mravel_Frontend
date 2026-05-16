@@ -73,11 +73,11 @@ export default function RestaurantPolicySection({ restaurant }) {
 
   return (
     <section className="px-5 md:px-6 pt-5 pb-6">
-      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900">
+      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">
         Quy định
       </h2>
 
-      <div className="mt-4 rounded-2xl bg-white shadow-sm p-5 md:p-6 leading-relaxed text-gray-900">
+      <div className="mt-4 rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-5 md:p-6 leading-relaxed text-gray-900 dark:text-gray-100">
         <div className="space-y-6">
           <div>
             <h3 className="font-bold text-lg">1. Quy định về đặt cọc:</h3>

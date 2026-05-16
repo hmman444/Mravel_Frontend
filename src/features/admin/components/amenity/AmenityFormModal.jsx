@@ -19,7 +19,7 @@ import {
 
 const ui = {
   panel:
-    "w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_20px_60px_rgba(2,6,23,0.18)] dark:border-slate-800/70 dark:bg-slate-900",
+    "w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200/70 bg-white dark:bg-gray-800 shadow-[0_20px_60px_rgba(2,6,23,0.18)] dark:border-slate-800/70 dark:bg-slate-900",
   header:
     "relative px-6 py-3 border-b border-slate-200/70 dark:border-slate-800/70",
   headerBg:
@@ -33,18 +33,18 @@ const ui = {
   hint: "mt-1 text-[12px] text-slate-500 dark:text-slate-400",
 
   input:
-    "w-full rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
+    "w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
   select:
-    "w-full rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
+    "w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
   textarea:
-    "w-full min-h-[92px] resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
+    "w-full min-h-[92px] resize-none rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
 
   btn:
     "inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold transition active:scale-[0.98]",
   btnPrimary:
     "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-[0_10px_28px_rgba(37,99,235,0.22)] hover:brightness-110 disabled:opacity-60",
   btnGhost:
-    "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900",
+    "border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900",
 
   errorBox:
     "mt-4 flex gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200",
@@ -132,7 +132,7 @@ export default function AmenityFormModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-2xl p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="rounded-2xl p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                   title={t("cancel")}
                 >
                   <XMarkIcon className="h-5 w-5" />

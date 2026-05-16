@@ -151,13 +151,13 @@ const MOCK = {
 const ui = {
   pageBg: "bg-slate-50 dark:bg-slate-950",
   card:
-    "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950",
+    "rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950",
   h1: "text-2xl font-bold text-slate-900 dark:text-white",
   sub: "text-sm text-slate-500 dark:text-slate-300",
   btn:
     "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed",
   btnGhost:
-    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+    "bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
   pill: "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold",
 };
 
@@ -180,7 +180,7 @@ function StatCard({ icon: Icon, label, value, sub, accent = "blue" }) {
       "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-200 dark:border-violet-900",
     rose: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-200 dark:border-rose-900",
     slate:
-      "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800",
+      "bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800",
   };
 
   return (
@@ -216,7 +216,7 @@ function SeverityPill({ severity }) {
     high: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-200 dark:border-rose-900",
     medium:
       "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:border-amber-900",
-    low: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800",
+    low: "bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800",
   };
   const label = severity === "high" ? "Ưu tiên cao" : severity === "medium" ? "Trung bình" : "Thấp";
   return <span className={`${ui.pill} ${map[severity] || map.low}`}>{label}</span>;
@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                 <select
                   value={range}
                   onChange={(e) => setRange(e.target.value)}
-                  className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                  className="w-full sm:w-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                 >
                   <option value="today">Hôm nay</option>
                   <option value="weekly">7 ngày</option>
@@ -375,7 +375,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className={`${ui.pill} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
+                    <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
                       Kỳ: {range === "today" ? "Hôm nay" : range === "weekly" ? "7 ngày" : range === "monthly" ? "Tháng" : "Năm"}
                     </span>
                     <span className={`${ui.pill} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-200`}>
@@ -402,19 +402,19 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">Tỷ lệ hủy (7 ngày)</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {ov.cancelRate7dPct}%
                     </div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">Tỷ lệ hoàn tiền (7 ngày)</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {ov.refundRate7dPct}%
                     </div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">Thanh toán thất bại (7 ngày)</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {ov.paymentFail7dPct}%
@@ -434,14 +434,14 @@ export default function AdminDashboard() {
                         Dịch vụ nổi bật
                       </h3>
                     </div>
-                    <span className={`${ui.pill} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
+                    <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
                       Top 4
                     </span>
                   </div>
 
                   <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
                     <table className="min-w-full text-sm">
-                      <thead className="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                      <thead className="bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                         <tr>
                           <th className="px-3 py-2 text-left font-semibold">Dịch vụ</th>
                           <th className="px-3 py-2 text-right font-semibold">Đơn</th>
@@ -479,14 +479,14 @@ export default function AdminDashboard() {
                         Đối tác đóng góp
                       </h3>
                     </div>
-                    <span className={`${ui.pill} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
+                    <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
                       Top 4
                     </span>
                   </div>
 
                   <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
                     <table className="min-w-full text-sm">
-                      <thead className="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                      <thead className="bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                         <tr>
                           <th className="px-3 py-2 text-left font-semibold">Đối tác</th>
                           <th className="px-3 py-2 text-right font-semibold">Dịch vụ</th>
@@ -536,7 +536,7 @@ export default function AdminDashboard() {
                   {MOCK.actionQueue.map((x) => (
                     <div
                       key={x.id}
-                      className="rounded-xl border border-slate-200 p-3 dark:border-slate-800"
+                      className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 dark:border-slate-800"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -581,7 +581,7 @@ export default function AdminDashboard() {
                       Trạng thái đơn
                     </h2>
                   </div>
-                  <span className={`${ui.pill} bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
+                  <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
                     Tổng: {formatInt(totalBookingStatus)}
                   </span>
                 </div>
@@ -618,25 +618,25 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">API p95</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {MOCK.systemHealth.apiP95ms}ms
                     </div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">Error rate</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {MOCK.systemHealth.errorRatePct}%
                     </div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">Kafka lag</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {MOCK.systemHealth.kafkaLag}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 dark:border-slate-800">
                     <div className="text-slate-500 dark:text-slate-300">Job lỗi</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {MOCK.systemHealth.failedJobs}
@@ -644,7 +644,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+                <div className="mt-4 rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                     <ExclamationTriangleIcon className="h-4 w-4" />
                     <div className="font-semibold">Sự cố gần nhất</div>

@@ -75,7 +75,7 @@ export default function AdminSidebar() {
     "group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition";
 
   const itemIdle =
-    "text-slate-700 hover:bg-slate-100/80 " +
+    "text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 " +
     "dark:text-slate-200 dark:hover:bg-slate-800/60";
 
   const itemActive =
@@ -83,7 +83,7 @@ export default function AdminSidebar() {
     "";
 
   const iconWrapIdle =
-    "bg-slate-100 group-hover:bg-slate-200 " +
+    "bg-slate-100 dark:bg-gray-800 group-hover:bg-slate-200 " +
     "dark:bg-slate-900 dark:group-hover:bg-slate-800";
 
   const iconColorIdle = "text-slate-700 dark:text-slate-200";
@@ -194,7 +194,7 @@ export default function AdminSidebar() {
         onClick={() => setMobileOpen(true)}
         className="
           lg:hidden fixed left-3 top-[4.5rem] z-50 rounded-xl px-3 py-2 text-sm
-          border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50
+          border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-50
           dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
           transition
         "

@@ -140,10 +140,10 @@ export default function CuisinesEditor({
   };
 
   return (
-    <div className="rounded-2xl border bg-white p-4 space-y-3">
+    <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div>
-        <div className="text-sm font-semibold text-gray-900">Ẩm thực</div>
-        <div className="text-xs text-gray-500 mt-0.5">
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ẩm thực</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           Gõ để tìm và chọn. Bấm <span className="font-medium">Enter</span> để chọn nhanh (hoặc thêm mới nếu không có trong danh sách).
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function CuisinesEditor({
 
         {/* Suggestions */}
         {open && !disabled && (
-          <div className="absolute z-20 mt-2 w-full rounded-xl border bg-white shadow-sm overflow-hidden">
+          <div className="absolute z-20 mt-2 w-full rounded-xl border bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
             {filtered.length === 0 ? (
               <button
                 type="button"
@@ -192,11 +192,11 @@ export default function CuisinesEditor({
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-gray-900 dark:text-gray-100">
                             {c?.name || "(Không tên)"}
-                            {c?.region ? <span className="text-gray-500"> • {c.region}</span> : null}
+                            {c?.region ? <span className="text-gray-500 dark:text-gray-400"> • {c.region}</span> : null}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
                             Mã: <span className="font-mono">{c?.code || "—"}</span>
                             {picked ? <span className="ml-2">(đã chọn)</span> : null}
                           </div>
@@ -215,7 +215,7 @@ export default function CuisinesEditor({
                     disabled={!q.trim()}
                   >
                     Thêm mới theo nội dung đang gõ: <span className="font-medium">“{q.trim() || "…"}”</span>{" "}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       (mã tự tạo: <span className="font-mono">{toCuisineCode(q.trim()) || "—"}</span>)
                     </span>
                   </button>
@@ -228,7 +228,7 @@ export default function CuisinesEditor({
 
       {/* Selected chips */}
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500">Chưa chọn ẩm thực nào.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa chọn ẩm thực nào.</div>
       ) : (
         <div className="flex flex-wrap gap-2">
           {list.map((x, i) => {
@@ -242,11 +242,11 @@ export default function CuisinesEditor({
                 {/* chip header */}
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-gray-900 truncate">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {name || <span className="text-gray-400">(Chưa nhập tên)</span>}
-                      {region ? <span className="text-gray-500 font-normal"> • {region}</span> : null}
+                      {region ? <span className="text-gray-500 dark:text-gray-400 font-normal"> • {region}</span> : null}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       Mã: <span className="font-mono">{code || "—"}</span>
                     </div>
                   </div>
@@ -279,7 +279,7 @@ export default function CuisinesEditor({
                 {isEdit && (
                   <div className="px-3 pb-3 grid grid-cols-1 md:grid-cols-12 gap-2">
                     <div className="md:col-span-5">
-                      <div className="text-xs font-medium text-gray-600 mb-1">Tên ẩm thực</div>
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Tên ẩm thực</div>
                       <input
                         value={x?.name || ""}
                         onChange={(e) => {
@@ -294,7 +294,7 @@ export default function CuisinesEditor({
                     </div>
 
                     <div className="md:col-span-4">
-                      <div className="text-xs font-medium text-gray-600 mb-1">Mã (code)</div>
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Mã (code)</div>
                       <input
                         value={x?.code || ""}
                         onChange={(e) => patch(i, { code: e.target.value })}
@@ -302,11 +302,11 @@ export default function CuisinesEditor({
                         placeholder="VIETNAMESE"
                         disabled={disabled}
                       />
-                      <div className="text-[11px] text-gray-500 mt-1">Có thể để trống để tự tạo từ tên.</div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Có thể để trống để tự tạo từ tên.</div>
                     </div>
 
                     <div className="md:col-span-3">
-                      <div className="text-xs font-medium text-gray-600 mb-1">Nhóm/Khu vực (tuỳ chọn)</div>
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nhóm/Khu vực (tuỳ chọn)</div>
                       <input
                         value={x?.region || ""}
                         onChange={(e) => patch(i, { region: e.target.value })}

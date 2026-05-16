@@ -42,7 +42,7 @@ export default function RestaurantMetaSection({ form, setField, disabled }) {
             placeholder="Ví dụ: BUFFET_VA_GOI_MON"
             disabled={disabled}
           />
-          <div className="text-[11px] text-gray-500 mt-1">Nhập đúng enum backend.</div>
+          <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Nhập đúng enum backend.</div>
         </label>
 
         <label className="text-sm">
@@ -76,7 +76,7 @@ export default function RestaurantMetaSection({ form, setField, disabled }) {
             placeholder="VND"
             disabled={disabled}
           />
-          <div className="text-[11px] text-gray-500 mt-1">Thường dùng: VND.</div>
+          <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Thường dùng: VND.</div>
         </label>
 
         {/* Mức giá: dropdown tiếng Việt, value là enum */}
@@ -85,7 +85,7 @@ export default function RestaurantMetaSection({ form, setField, disabled }) {
           <select
             value={form.priceLevel || ""}
             onChange={(e) => setField("priceLevel", e.target.value)}
-            className="w-full border rounded-xl px-3 py-2 bg-white"
+            className="w-full border rounded-xl px-3 py-2 bg-white dark:bg-gray-800"
             disabled={disabled}
           >
             {PRICE_LEVEL_OPTIONS.map((opt) => (
@@ -102,7 +102,7 @@ export default function RestaurantMetaSection({ form, setField, disabled }) {
           <select
             value={form.priceBucket || ""}
             onChange={(e) => setField("priceBucket", e.target.value)}
-            className="w-full border rounded-xl px-3 py-2 bg-white"
+            className="w-full border rounded-xl px-3 py-2 bg-white dark:bg-gray-800"
             disabled={disabled}
           >
             {PRICE_BUCKET_OPTIONS.map((opt) => (
@@ -111,7 +111,7 @@ export default function RestaurantMetaSection({ form, setField, disabled }) {
               </option>
             ))}
           </select>
-          <div className="text-[11px] text-gray-500 mt-1">{priceHint}</div>
+          <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{priceHint}</div>
         </label>
       </div>
     </details>

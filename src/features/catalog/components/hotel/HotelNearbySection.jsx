@@ -22,14 +22,14 @@ export default function HotelNearbySection({ hotel }) {
 
   return (
     // Không bo góc / không card riêng, chỉ border-top để liền card trên
-    <section id="hotel-nearby-section" className="border-t border-gray-100">
+    <section id="hotel-nearby-section" className="border-t border-gray-100 dark:border-gray-700">
       {/* HEADER */}
       <div className="px-6 pt-5 pb-3">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
           Xung quanh {hotel.name} có gì
         </h2>
         {address && (
-          <div className="mt-1 flex items-start gap-2 text-xs md:text-sm text-gray-600">
+          <div className="mt-1 flex items-start gap-2 text-xs md:text-sm text-gray-600 dark:text-gray-400">
             <MapPin className="mt-0.5 h-4 w-4 text-[#0064d2]" />
             <span>{address}</span>
           </div>
@@ -38,7 +38,7 @@ export default function HotelNearbySection({ hotel }) {
 
       {/* MAP */}
       <div className="px-6">
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-[#f3f4f6]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-[#f3f4f6]">
           {lat != null && lng != null ? (
             <iframe
               title={`Bản đồ ${hotel.name}`}
@@ -48,14 +48,14 @@ export default function HotelNearbySection({ hotel }) {
               referrerPolicy="no-referrer-when-downgrade"
             />
           ) : (
-            <div className="flex h-[260px] w-full items-center justify-center text-xs text-gray-500 md:h-[300px]">
+            <div className="flex h-[260px] w-full items-center justify-center text-xs text-gray-500 dark:text-gray-400 md:h-[300px]">
               Không tìm thấy vị trí bản đồ cho khách sạn này.
             </div>
           )}
 
           <button
             type="button"
-            className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs md:text-sm font-semibold text-[#0064d2] shadow-sm hover:bg-[#f3f4ff]"
+            className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white dark:bg-gray-800 px-4 py-1.5 text-xs md:text-sm font-semibold text-[#0064d2] shadow-sm hover:bg-[#f3f4ff]"
           >
             Khám phá nhiều địa điểm hơn
             <Navigation className="h-3.5 w-3.5" />
@@ -70,7 +70,7 @@ export default function HotelNearbySection({ hotel }) {
       </div>
 
       {/* 3 CỘT ĐỊA ĐIỂM */}
-      <div className="mt-4 border-t border-gray-100 px-6 py-4">
+      <div className="mt-4 border-t border-gray-100 dark:border-gray-700 px-6 py-4">
         <div className="grid grid-cols-1 gap-8 text-sm md:grid-cols-3">
           {/* Cột 1: Địa điểm lân cận */}
           <NearbyColumn
@@ -102,7 +102,7 @@ export default function HotelNearbySection({ hotel }) {
         </div>
 
         {/* Ghi chú khoảng cách + icon chấm than */}
-        <p className="mt-4 flex items-center gap-1.5 text-[11px] text-gray-500">
+        <p className="mt-4 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
           <AlertCircle className="h-3.5 w-3.5 text-gray-400" />
           <span>
             Khoảng cách hiển thị dựa trên đường chim bay. Khoảng cách di chuyển
@@ -126,7 +126,7 @@ function NearbyColumn({ icon, title, places }) {
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e6f2ff] text-[#0064d2]">
           {icon}
         </div>
-        <h3 className="text-[13px] font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
       </div>
 
       {/* List items */}
@@ -134,11 +134,11 @@ function NearbyColumn({ icon, title, places }) {
         {places.map((p) => (
           <li
             key={p.placeSlug || p.name}
-            className="flex items-baseline justify-between pl-6 text-[13px] text-gray-700"
+            className="flex items-baseline justify-between pl-6 text-[13px] text-gray-700 dark:text-gray-300"
           >
             <span className="truncate">{p.name}</span>
             {p.distanceMeters != null && (
-              <span className="ml-3 whitespace-nowrap text-[12px] text-gray-500">
+              <span className="ml-3 whitespace-nowrap text-[12px] text-gray-500 dark:text-gray-400">
                 {formatDistanceKm(p.distanceMeters)}
               </span>
             )}

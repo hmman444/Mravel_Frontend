@@ -29,7 +29,7 @@ export default function TopSpendTable({
           >
             <div className="col-span-7 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 border-t border-slate-200/70 dark:border-slate-800/70">
               <div className="flex items-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300 dark:bg-slate-800 dark:text-slate-200">
                   {typeEmoji(it.activityType)}
                 </span>
                 <div className="min-w-0">

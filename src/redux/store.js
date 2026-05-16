@@ -21,6 +21,7 @@ import partnerReducer from "../features/partner/slices/partnerSlice";
 import adminUserReducer from "../features/admin/slices/adminUserSlice";
 import adminPartnerReducer from "../features/admin/slices/adminPartnerSlice";
 import adminServiceReducer from "../features/admin/slices/adminServiceSlice";
+import reviewReducer from "../features/review/slices/reviewSlice";
 import { injectStore } from "./storeInjector";
 
 export const store = configureStore({
@@ -47,6 +48,7 @@ export const store = configureStore({
     adminUser: adminUserReducer,
     adminPartners: adminPartnerReducer,
     adminService: adminServiceReducer,
+    review: reviewReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

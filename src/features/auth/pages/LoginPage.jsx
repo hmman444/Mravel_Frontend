@@ -89,7 +89,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
               <input
                 type="checkbox"
                 className="rounded accent-blue-600"
@@ -123,7 +123,7 @@ export default function LoginPage() {
 
         <SocialLogin />
 
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           Chưa có tài khoản?{" "}
           <a href="/register" className="text-blue-500">
             Đăng ký ngay

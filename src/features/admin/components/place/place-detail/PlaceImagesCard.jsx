@@ -31,7 +31,7 @@ export default function PlaceImagesCard({
 
       <div className={ui.cardBody}>
         {!images || images.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+          <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-6 text-sm text-slate-600 dark:text-slate-400 dark:border-slate-700 dark:text-slate-300">
             Chưa có ảnh. Thêm ảnh để có cover cho trang chi tiết.
           </div>
         ) : (

@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCatalogPlaces } from "../../hooks/useCatalogPlaces";
+import FavoriteButton from "../../../../components/FavoriteButton";
 
 /**
  * Carousel ngang - trượt TỪNG MỤC (3/2/1 item per view)
@@ -67,7 +68,7 @@ export default function SuggestedDestinations({ currentSlug, size = 12 }) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-56 rounded-2xl bg-gray-100 animate-pulse" />
+          <div key={i} className="h-56 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
         ))}
       </div>
     );
@@ -134,9 +135,16 @@ export default function SuggestedDestinations({ currentSlug, size = 12 }) {
                         className="w-full h-56 object-cover transform group-hover:scale-[1.03] transition duration-500"
                       />
                     ) : (
-                      <div className="w-full h-56 bg-gray-100" />
+                      <div className="w-full h-56 bg-gray-100 dark:bg-gray-800" />
                     )}
                     <div className="absolute inset-0 bg-black/25 group-hover:bg-black/40 transition duration-300" />
+                    
+                    <FavoriteButton
+                      targetType="PLACE"
+                      targetId={p.id}
+                      className="absolute top-3 right-3 w-8 h-8 z-20"
+                    />
+
                     <div className="absolute inset-0 flex items-end">
                       <div className="w-full p-4">
                         <div className="backdrop-blur-[1px]">

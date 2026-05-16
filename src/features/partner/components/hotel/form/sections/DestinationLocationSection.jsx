@@ -62,7 +62,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
         <div className="md:col-span-12 rounded-2xl border p-3 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold flex items-center gap-2">
-              <MapPinIcon className="h-5 w-5 text-gray-500" />
+              <MapPinIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               {TEXT.DEST_LABEL} <span className="text-red-600">*</span>
             </div>
 
@@ -85,6 +85,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
             placeholder={TEXT.DEST_PLACEHOLDER}
             className="w-full !max-w-none !mx-0"
             buttonSlot={null}
+            mode="place"
             onSubmit={onDestUpdate}
              onChangeText={(text) => {
                 setField("destinationSlug", "");
@@ -93,7 +94,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
             disabled={disabled}
           />
 
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             {!!destSlug && (
               <span className="ml-2 text-green-700">
                 (Đã chọn: <b>{destSlug}</b>)

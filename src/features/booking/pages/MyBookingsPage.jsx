@@ -107,7 +107,7 @@ export default function MyBookingsPage() {
       </button>
 
       {!isLoggedIn ? (
-        <span className="text-[11px] text-gray-500">(Cần đăng nhập)</span>
+        <span className="text-[11px] text-gray-500 dark:text-gray-400">(Cần đăng nhập)</span>
       ) : null}
     </>
   );
@@ -153,11 +153,11 @@ export default function MyBookingsPage() {
   const renderAccount = () => {
     if (!isLoggedIn) {
       return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900 md:text-base">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             Vui lòng đăng nhập
           </h2>
-          <p className="mt-1 text-xs text-gray-600 md:text-sm">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
             Bạn cần đăng nhập để xem đơn trong tài khoản.
           </p>
 
@@ -212,17 +212,17 @@ export default function MyBookingsPage() {
   const smartResultCard = isRestaurantCode ? RestaurantBookingCard : BookingCard;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <div className="h-[50px] md:h-[60px]" aria-hidden />
 
       <main className="flex-1 w-full">
         <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 md:px-6 md:pt-8">
           <div className="mb-5">
-            <h1 className="text-xl font-semibold text-gray-900 md:text-2xl">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 md:text-2xl">
               Đơn đã đặt
             </h1>
-            <p className="mt-1 text-xs text-gray-600 md:text-sm">
+            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
               Bạn có thể xem theo <b>tài khoản</b>, theo <b>cookie thiết bị</b>, hoặc{" "}
               <b>tra cứu bằng mã</b>.
             </p>
@@ -230,7 +230,7 @@ export default function MyBookingsPage() {
 
           {/* ===== Tabs lớn: ACCOUNT / DEVICE / LOOKUP ===== */}
           <div className="mb-5 flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="inline-flex rounded-2xl border border-gray-200 bg-white p-1 shadow-sm">
+            <div className="inline-flex rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 shadow-sm">
               <button
                 type="button"
                 onClick={() => setTab("ACCOUNT")}
@@ -238,7 +238,7 @@ export default function MyBookingsPage() {
                   "rounded-xl px-4 py-2 text-xs font-semibold transition md:text-sm",
                   tab === "ACCOUNT"
                     ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-50",
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50",
                 ].join(" ")}
               >
                 Đơn trong tài khoản
@@ -251,7 +251,7 @@ export default function MyBookingsPage() {
                   "rounded-xl px-4 py-2 text-xs font-semibold transition md:text-sm",
                   tab === "DEVICE"
                     ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-50",
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50",
                 ].join(" ")}
               >
                 Đơn trên thiết bị này
@@ -264,14 +264,14 @@ export default function MyBookingsPage() {
                   "rounded-xl px-4 py-2 text-xs font-semibold transition md:text-sm",
                   tab === "LOOKUP"
                     ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-50",
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50",
                 ].join(" ")}
               >
                 Tra cứu
               </button>
             </div>
 
-            <div className="text-[11px] text-gray-500 md:text-xs">
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 md:text-xs">
               Tip: Sau khi đặt xong, bạn nên copy/chụp lại mã booking để tra cứu.
             </div>
           </div>
@@ -279,7 +279,7 @@ export default function MyBookingsPage() {
           {/*  Sub-tab nhỏ gạch chân: HOTEL / RESTAURANT */}
           <div className="mb-5">
             <BookingTypeTabs type={type} setType={setType} />
-            <p className="mt-2 text-[11px] text-gray-500">
+            <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
               Khách sạn: {tab === "ACCOUNT" ? accountHotelCount : deviceHotelCount}
               {" "}· Quán ăn: {tab === "ACCOUNT" ? accountRestCount : deviceRestCount}
             </p>

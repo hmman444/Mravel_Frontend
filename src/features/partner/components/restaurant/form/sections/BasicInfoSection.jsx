@@ -79,7 +79,7 @@ export default function BasicInfoSection({ form, setField, disabled }) {
             disabled={disabled}
           />
           <div className="mt-1 flex justify-end">
-            <span className="text-xs text-gray-500">{descLen}/{descMax}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{descLen}/{descMax}</span>
           </div>
         </label>
 

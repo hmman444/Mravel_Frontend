@@ -45,17 +45,17 @@ export default function RestaurantBookingSelectedTableCard({
 
       <div className="space-y-4 px-4 pb-4 pt-3 md:px-5 md:pb-5">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {restaurantName || "Nhà hàng của bạn"}
           </p>
 
-          <p className="text-sm font-semibold text-gray-900 md:text-base">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             ({tablesCount}x) {tableType?.name || "Loại bàn"}{" "}
-            {seats ? <span className="text-xs font-medium text-gray-600">• {seats} chỗ/bàn</span> : null}
+            {seats ? <span className="text-xs font-medium text-gray-600 dark:text-gray-400">• {seats} chỗ/bàn</span> : null}
           </p>
 
           {restaurantSlug ? (
-            <p className="text-[11px] text-gray-500 flex items-center gap-1">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
               <Hash className="h-3.5 w-3.5" />
               <span className="font-mono">{restaurantSlug}</span>
             </p>
@@ -67,23 +67,23 @@ export default function RestaurantBookingSelectedTableCard({
           ) : null}
         </div>
 
-        <div className="rounded-xl bg-white p-3 text-xs text-gray-800 md:text-sm space-y-2">
+        <div className="rounded-xl bg-white dark:bg-gray-800 p-3 text-xs text-gray-800 dark:text-gray-200 md:text-sm space-y-2">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-gray-600" />
+            <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>
               {dateLabel} • <span className="font-semibold">{time || "--:--"}</span>
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-gray-600" />
+            <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>
               {people} khách ({adults} NL, {children} TE) • {tablesCount} bàn
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <Info className="h-4 w-4 text-gray-600" />
+            <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>Đặt cọc để giữ bàn theo khung giờ đã chọn.</span>
           </div>
         </div>

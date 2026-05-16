@@ -18,7 +18,7 @@ export default function UserTable({
   onUnlock,           // (id) => ...
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:bg-slate-900 dark:border-slate-800">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-sm dark:bg-slate-900 dark:border-slate-800">
       <div className="max-h-[72vh] overflow-auto">
         <table className="w-full border-collapse text-sm">
           <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-950">
@@ -49,10 +49,10 @@ export default function UserTable({
                     animate="show"
                     exit="exit"
                     transition={{ duration: 0.16 }}
-                    className="border-t border-slate-100 hover:bg-slate-50/70 dark:border-slate-800 dark:hover:bg-slate-800/40"
+                    className="border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50/70 dark:border-slate-800 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-4 py-3 text-center">
-                      <span className="inline-flex min-w-[28px] justify-center rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      <span className="inline-flex min-w-[28px] justify-center rounded-lg bg-slate-100 dark:bg-gray-800 px-2 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 dark:bg-slate-800 dark:text-slate-200">
                         {idx + 1}
                       </span>
                     </td>
@@ -69,7 +69,7 @@ export default function UserTable({
                     </td>
 
                     <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+                      <span className="inline-flex rounded-full bg-slate-100 dark:bg-gray-800 px-3 py-1 text-xs text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
                         {ROLE_LABEL[u.role] || u.role}
                       </span>
                     </td>

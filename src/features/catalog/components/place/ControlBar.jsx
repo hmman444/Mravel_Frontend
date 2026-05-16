@@ -5,12 +5,12 @@ export default function ControlBar({ title, count, sortBy, setSortBy, view, setV
     <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div className="min-w-0">
         <div className="text-lg font-semibold truncate">{title}</div>
-        <div className="text-sm text-gray-500">{count} địa điểm được tìm thấy</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{count} địa điểm được tìm thấy</div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Xếp theo:</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Xếp theo:</span>
           <select className="rounded border px-2 py-1 bg-transparent" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
             <option value="popular">Độ phổ biến</option>
             <option value="name_asc">Tên A → Z</option>

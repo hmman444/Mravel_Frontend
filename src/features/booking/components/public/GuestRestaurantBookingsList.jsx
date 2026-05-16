@@ -21,11 +21,11 @@ export default function GuestRestaurantBookingsList({
 
   return (
     <section className="space-y-4">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-5">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900 md:text-base">{title}</h2>
-            {description ? <p className="mt-1 text-xs text-gray-600 md:text-sm">{description}</p> : null}
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">{title}</h2>
+            {description ? <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">{description}</p> : null}
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -35,7 +35,7 @@ export default function GuestRestaurantBookingsList({
               <button
                 type="button"
                 onClick={onRefresh}
-                className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-800 shadow-sm transition hover:border-blue-400 hover:text-blue-700 md:text-sm"
+                className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700 md:text-sm"
               >
                 Làm mới
               </button>
@@ -59,12 +59,12 @@ export default function GuestRestaurantBookingsList({
           </div>
         ) : null}
 
-        {loading ? <p className="mt-3 text-xs text-gray-500">Đang tải danh sách đơn...</p> : null}
+        {loading ? <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">Đang tải danh sách đơn...</p> : null}
 
         {!loading && !error && list.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-4">
-            <p className="text-sm font-semibold text-gray-900">{emptyTitle}</p>
-            {emptyDescription ? <p className="mt-1 text-xs text-gray-600">{emptyDescription}</p> : null}
+          <div className="mt-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{emptyTitle}</p>
+            {emptyDescription ? <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{emptyDescription}</p> : null}
           </div>
         ) : null}
       </div>

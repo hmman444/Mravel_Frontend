@@ -58,7 +58,7 @@ export default function ManageLocationsPage() {
         <AdminLayout>
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 tracking-tight">
             {t("featured_locations")}
             </h1>
             <button

@@ -9,14 +9,14 @@ const ILLUS_AFTER_2 =
 
 export default function RestaurantBookingGuide() {
   return (
-    <section className="w-full bg-white">
+    <section className="w-full bg-white dark:bg-gray-800">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-12">
         {/* ===== TIÊU ĐỀ + ĐOẠN MỞ ĐẦU ===== */}
-        <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Đặt Bàn Tại Mravel Giúp Bạn Thoải Mái Tận Hưởng Bữa Ăn
         </h2>
 
-        <p className="text-sm md:text-base text-gray-700 leading-relaxed text-justify">
+        <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed text-justify">
           Hãy sẵn sàng tận hưởng nhiều tiện ích hơn khi lên kế hoạch cho bữa ăn
           cùng gia đình, bạn bè với dịch vụ{" "}
           <strong>đặt nhà hàng trực tuyến tại Mravel</strong>. Chỉ với vài cú
@@ -41,11 +41,11 @@ export default function RestaurantBookingGuide() {
 
           {/* Nội dung */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Trước Khi Đặt Bàn
             </h3>
 
-            <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-3">
+            <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
               <strong>
                 Liệt kê các thông tin chính về bữa ăn của bạn
               </strong>
@@ -54,13 +54,13 @@ export default function RestaurantBookingGuide() {
               phù hợp trên Mravel.
             </p>
 
-            <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-3">
+            <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
               <strong>Chọn thời điểm đặt bàn hợp lý.</strong> Vào cuối tuần hoặc
               dịp lễ, các nhà hàng thường rất đông. Hãy đặt bàn trước để tránh
               phải chờ đợi lâu hoặc không còn chỗ trống.
             </p>
 
-            <p className="text-sm md:text-base text-gray-700 leading-relaxed">
+            <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
               <strong>Xem kỹ thông tin nhà hàng.</strong> Trên Mravel, bạn có
               thể xem menu tham khảo, vị trí trên bản đồ, khung giờ phục vụ,
               hình ảnh không gian và đánh giá của khách trước. Hãy đọc kỹ để
@@ -73,11 +73,11 @@ export default function RestaurantBookingGuide() {
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
           {/* Text trái */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Sau Khi Đặt Bàn
             </h3>
 
-            <ol className="list-decimal pl-5 space-y-3 text-sm md:text-base text-gray-700 leading-relaxed">
+            <ol className="list-decimal pl-5 space-y-3 text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
               <li>
                 <strong>Kiểm tra lại thông tin trong xác nhận đặt chỗ</strong>{" "}
                 được gửi qua email hoặc ứng dụng Mravel: tên nhà hàng, địa chỉ,
@@ -116,7 +116,7 @@ export default function RestaurantBookingGuide() {
           <div>
             <ol
               start={3}
-              className="list-decimal pl-5 space-y-3 text-sm md:text-base text-gray-700 leading-relaxed"
+              className="list-decimal pl-5 space-y-3 text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed"
             >
               <li>
                 <strong>Chuẩn bị những vật dụng cần mang theo</strong>{" "}

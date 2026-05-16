@@ -63,8 +63,8 @@ export default function LanguageDropdown() {
         <div
           className="
             absolute right-0 mt-2 w-44 z-50 overflow-hidden
-            rounded-2xl border border-slate-200
-            bg-white shadow-lg
+            rounded-2xl border border-slate-200 dark:border-slate-700
+            bg-white dark:bg-gray-800 shadow-lg
             dark:border-slate-800 dark:bg-slate-900
           "
           role="listbox"

@@ -31,9 +31,9 @@ const items = [
 
 export default function RestaurantWhyUs() {
   return (
-    <section className="w-full bg-white">
+    <section className="w-full bg-white dark:bg-gray-800">
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-10">
-        <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900">
+        <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
           Tại sao bạn nên đặt nhà hàng trực tuyến tại Mravel?
         </h2>
 
@@ -56,10 +56,10 @@ export default function RestaurantWhyUs() {
 
               {/* Text */}
               <div className="max-w-xl text-center md:text-left">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {item.title}
                 </h3>
-                <p className="mt-2 text-sm md:text-base text-gray-600 leading-relaxed">
+                <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
                   {item.desc}
                 </p>
               </div>

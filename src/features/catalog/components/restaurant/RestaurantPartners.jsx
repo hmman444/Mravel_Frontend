@@ -16,11 +16,11 @@ export default function RestaurantPartners() {
         {/* Left text */}
         <div>
           <h2 className="text-2xl font-bold">Đối tác nhà hàng</h2>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Chuỗi nhà hàng, quán ăn được khách hàng tin tưởng
           </p>
 
-          <p className="text-gray-600 mt-4 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
             Từ thương hiệu lớn đến quán ăn địa phương, chúng tôi hợp tác cùng các
             đối tác uy tín để mang đến cho bạn trải nghiệm ẩm thực đa dạng.
           </p>

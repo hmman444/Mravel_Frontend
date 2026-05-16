@@ -115,7 +115,7 @@ function makeRows(byDay) {
 /** Tính trạng thái hiện tại dựa trên todayRanges */
 function computeStatus(todayRanges, allByDay, today) {
   if (!todayRanges || todayRanges.length === 0) {
-    return { label: "Hiện tại đang đóng cửa", tone: "bg-gray-100 text-gray-700" };
+    return { label: "Hiện tại đang đóng cửa", tone: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" };
   }
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
@@ -147,7 +147,7 @@ function computeStatus(todayRanges, allByDay, today) {
       };
     }
   }
-  return { label: "Tạm ngưng phục vụ", tone: "bg-gray-100 text-gray-700" };
+  return { label: "Tạm ngưng phục vụ", tone: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" };
 }
 
 export default function RestaurantOpeningHoursSection({ restaurant }) {
@@ -169,14 +169,14 @@ export default function RestaurantOpeningHoursSection({ restaurant }) {
     <section className="px-4 md:px-5 pt-4 pb-5">
       {/* Title + status badge */}
       <div className="flex items-center gap-2 flex-wrap">
-        <h2 className="text-xl md:text-2xl font-extrabold text-gray-900">Giờ hoạt động</h2>
+        <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-gray-100">Giờ hoạt động</h2>
         <span className={`text-xs md:text-sm px-2.5 py-1 rounded-full font-semibold ${status.tone}`}>
           {status.label}
         </span>
       </div>
 
       {/* Card nhỏ gọn */}
-      <div className="mt-3 rounded-xl bg-white shadow-sm p-4 md:p-5 text-gray-900">
+      <div className="mt-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-4 md:p-5 text-gray-900 dark:text-gray-100">
         <div className="divide-y divide-gray-100">
           {rows.map((r) => {
             const isToday = r.dayIdx === today;
@@ -185,10 +185,10 @@ export default function RestaurantOpeningHoursSection({ restaurant }) {
                 key={r.dayIdx}
                 className="py-2 grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1 items-center"
               >
-                <div className={`text-[15px] font-semibold ${isToday ? "text-red-600" : "text-gray-900"}`}>
+                <div className={`text-[15px] font-semibold ${isToday ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}>
                   {r.label}
                 </div>
-                <div className={`col-span-1 sm:col-span-2 text-[15px] font-semibold ${isToday ? "text-red-600" : "text-gray-900"}`}>
+                <div className={`col-span-1 sm:col-span-2 text-[15px] font-semibold ${isToday ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}>
                   {r.text}
                 </div>
               </div>

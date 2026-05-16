@@ -4,6 +4,7 @@ import Footer from "../../../components/Footer";
 import { usePlaceDetail } from "../hooks/usePlaceDetail";
 import PlaceContentRenderer from "../components/place/PlaceContentRenderer";
 import DetailThumbStripPeek from "../components/place/DetailThumbStripPeek";
+import ReviewSection from "../../review/components/ReviewSection";
 
 export default function PlaceDetailPage() {
   const { slug } = useParams();
@@ -77,13 +78,19 @@ export default function PlaceDetailPage() {
         {!coverImg && (
           <header className="mb-6">
             <h1 className="text-3xl font-bold">{data.name}</h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-gray-400">
               {data.addressLine || data.provinceName}
             </p>
           </header>
         )}
 
         <PlaceContentRenderer content={data.content} />
+
+        {data.id && (
+          <div className="mt-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <ReviewSection targetType="PLACE" targetId={data.id} />
+          </div>
+        )}
       </main>
 
       <Footer />

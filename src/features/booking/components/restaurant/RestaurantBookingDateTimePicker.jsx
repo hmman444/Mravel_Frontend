@@ -65,13 +65,13 @@ export default function RestaurantBookingDateTimePicker({
 
   return (
     <div className="space-y-2">
-      <div className="text-[13px] font-semibold text-gray-700">Thời gian đến</div>
+      <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300">Thời gian đến</div>
 
-      <div className="text-[11px] text-gray-500">{openingLabel}</div>
+      <div className="text-[11px] text-gray-500 dark:text-gray-400">{openingLabel}</div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {/* Date */}
-        <div className="h-11 rounded-lg border border-gray-300 px-3 bg-white flex items-center relative">
+        <div className="h-11 rounded-lg border border-gray-300 dark:border-gray-700 px-3 bg-white dark:bg-gray-800 flex items-center relative">
           <FaCalendarAlt className="text-gray-400 mr-2" />
           <MravelDatePicker
             selected={date}
@@ -82,7 +82,7 @@ export default function RestaurantBookingDateTimePicker({
               { name: "preventOverflow", options: { padding: 8 } },
             ]}
             popperContainer={(props) => <div {...props} className="z-[9999]" />}
-            className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer"
+            className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
           />
         </div>
 
@@ -90,8 +90,8 @@ export default function RestaurantBookingDateTimePicker({
         <div
           ref={timeRef}
           className={[
-            "relative h-11 rounded-lg border px-3 bg-white flex items-center",
-            disabledTime ? "border-gray-200 cursor-not-allowed opacity-70" : "border-gray-300 cursor-pointer",
+            "relative h-11 rounded-lg border px-3 bg-white dark:bg-gray-800 flex items-center",
+            disabledTime ? "border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-70" : "border-gray-300 dark:border-gray-700 cursor-pointer",
           ].join(" ")}
           onClick={() => {
             if (disabledTime) return;
@@ -99,17 +99,17 @@ export default function RestaurantBookingDateTimePicker({
           }}
         >
           <FaClock className="text-gray-400 mr-2" />
-          <span className={`text-sm ${time ? "text-gray-800" : "text-gray-400"}`}>
+          <span className={`text-sm ${time ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
             {disabledTime ? "Nhà hàng đóng cửa" : (time || "Chọn giờ")}
           </span>
           <span className="ml-auto text-gray-400">▾</span>
 
           {openTime && (
             <div
-              className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 bg-white shadow-xl max-h-64 overflow-y-auto py-2"
+              className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl max-h-64 overflow-y-auto py-2"
               onMouseDown={(e) => e.stopPropagation()}
             >
-              <div className="px-3 pb-1 text-xs font-semibold text-gray-500">
+              <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Giờ (cách nhau {stepMinutes} phút)
               </div>
 
@@ -120,7 +120,7 @@ export default function RestaurantBookingDateTimePicker({
                   className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition ${
                     t === time
                       ? "bg-sky-50 text-sky-700 font-semibold"
-                      : "text-gray-800 hover:bg-gray-50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-50"
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -136,7 +136,7 @@ export default function RestaurantBookingDateTimePicker({
         </div>
       </div>
 
-      <div className="text-[11px] text-gray-500">
+      <div className="text-[11px] text-gray-500 dark:text-gray-400">
         Đã chọn: <span className="font-semibold">{summary}</span>
       </div>
     </div>

@@ -21,7 +21,7 @@ export default function PaymentPartners() {
         {/* Left text */}
         <div>
           <h2 className="text-2xl font-bold">Đối tác thanh toán</h2>
-          <p className="text-gray-600 mt-4 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
             Chúng tôi hợp tác với các nhà cung cấp dịch vụ thanh toán hàng đầu để
             đảm bảo mọi giao dịch đều suôn sẻ, an toàn và dễ dàng.
           </p>

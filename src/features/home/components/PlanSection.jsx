@@ -83,7 +83,7 @@ export default function PlanSection() {
                   </span>
                   <span className="
                     px-2.5 py-1 rounded-full text-[11px] font-semibold
-                    bg-white/85 text-gray-900 backdrop-blur
+                    bg-white/85 text-gray-900 dark:text-gray-100 backdrop-blur
                   ">
                     Gợi ý Mravel
                   </span>
