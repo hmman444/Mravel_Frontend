@@ -12,7 +12,11 @@ export default function TopSearchBar({ initialLabel, onSubmit }) {
   const ref = useRef(null);
   const { items, loading, fetchSuggest, resetSuggest } = usePlaceTypeahead();
 
-  useEffect(() => { setQ(initialLabel || ""); setPickedSlug(null); }, [initialLabel]);
+  useEffect(() => {
+    setQ(initialLabel || "");
+    setPickedSlug(null);
+    skipNextFetch.current = true;
+  }, [initialLabel]);
 
   useEffect(() => {
     // chặn 1 lần fetch ngay sau khi pick

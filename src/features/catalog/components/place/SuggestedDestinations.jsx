@@ -20,7 +20,7 @@ export default function SuggestedDestinations({ currentSlug, size = 12 }) {
   }, [size]);
 
   const list = useMemo(
-    () => (items || []).filter((d) => d.slug !== currentSlug),
+    () => (items || []).filter((d) => d.kind === "DESTINATION" && d.slug !== currentSlug),
     [items, currentSlug]
   );
 

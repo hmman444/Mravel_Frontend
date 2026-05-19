@@ -60,6 +60,12 @@ export default function LocationResultsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [spec, q, page]);
 
+  useEffect(() => {
+    setAppliedFilters(EMPTY_FILTERS);
+    setFacets(null);
+    setPage(0);
+  }, [spec]);
+
   /* fetch via ES faceted endpoint — scoped to parentSlug */
   useEffect(() => {
     if (!spec) return;
@@ -100,6 +106,7 @@ export default function LocationResultsPage() {
   const onApplyFilters = (filters) => {
     setAppliedFilters(filters || EMPTY_FILTERS);
     setPage(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   /* sort only — all filtering is server-side via ES */
@@ -117,7 +124,7 @@ export default function LocationResultsPage() {
       <Navbar />
       <div className="h-16 md:h-20" aria-hidden />
 
-      <FadeInSection>
+      <FadeInSection className="relative z-50">
         <TopSearchBar initialLabel={label} onSubmit={onSubmitSearch} />
       </FadeInSection>
 
@@ -136,7 +143,7 @@ export default function LocationResultsPage() {
             </div>
 
             <div className="grid grid-cols-12 gap-6">
-              <FilterSidebar onApply={onApplyFilters} facets={facets} />
+              <FilterSidebar key={spec} onApply={onApplyFilters} facets={facets} />
 
               <section className="col-span-12 lg:col-span-9">
                 {loading && (

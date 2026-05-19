@@ -163,6 +163,10 @@ export function mapHotelDocToForm(raw) {
   //  policy reverse-map
   const policyItems = asArray(raw?.policy?.items ?? []);
   const findByTitle = (t) => asString(policyItems.find((x) => x?.title === t)?.content ?? "");
+  // preserve any policy items whose titles the UI does not surface, so we can append them back on submit
+  const _policyItemsExtra = policyItems.filter(
+    (x) => x && x.title !== "Chính sách" && x.title !== "Thông tin thêm"
+  );
 
   return {
     ...f,
@@ -184,6 +188,7 @@ export function mapHotelDocToForm(raw) {
     defaultCheckOutTime: toHHmm(raw?.defaultCheckOutTime ?? raw?.policy?.checkOutUntil),
     policies: findByTitle("Chính sách"),
     extraInfo: findByTitle("Thông tin thêm"),
+    _policyItemsExtra,
 
     destinationSlug: asString(raw?.destinationSlug),
     cityName: asString(raw?.cityName),
@@ -200,10 +205,14 @@ export function mapHotelDocToForm(raw) {
       type: asString(b?.type ?? "PARAGRAPH"),
       sortOrder: toIntOrNull(b?.sortOrder) ?? 0,
       text: asString(b?.text ?? ""),
-      imageUrl: asString(b?.imageUrl ?? b?.image ?? ""),
-      imageCaption: asString(b?.imageCaption ?? ""),
-      mapLon: b?.mapLon ?? (Array.isArray(b?.map) ? b.map[0] : ""),
-      mapLat: b?.mapLat ?? (Array.isArray(b?.map) ? b.map[1] : ""),
+      // BE stores image as nested object { url, caption, ... }; legacy fallback to flat imageUrl
+      imageUrl: asString(b?.image?.url ?? b?.imageUrl ?? ""),
+      imageCaption: asString(b?.image?.caption ?? b?.imageCaption ?? ""),
+      // BE stores map coords as mapLocation: [lon, lat]; keep legacy fallbacks
+      mapLon: Array.isArray(b?.mapLocation) ? b.mapLocation[0]
+        : (b?.mapLon ?? (Array.isArray(b?.map) ? b.map[0] : "")),
+      mapLat: Array.isArray(b?.mapLocation) ? b.mapLocation[1]
+        : (b?.mapLat ?? (Array.isArray(b?.map) ? b.map[1] : "")),
     })),
 
     faqs: Array.isArray(raw?.faqs)
@@ -237,6 +246,7 @@ export function mapHotelDocToForm(raw) {
       code: asString(r?.code ?? ""),
       codeManual: true,
       description: asString(r?.description ?? ""),
+      bedLayoutDescription: asString(r?.bedLayoutDescription ?? ""),
       areaM2: r?.areaSqm == null ? "" : String(r.areaSqm),
       maxAdults: Number(r?.maxAdults ?? 2),
       maxChildren: Number(r?.maxChildren ?? 0),
@@ -307,6 +317,18 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
       title: "Thông tin thêm",
       content: asString(form.extraInfo).trim(),
     });
+  }
+  // preserve unknown policy items captured during reverse-map so they survive round-trip
+  if (Array.isArray(form?._policyItemsExtra)) {
+    for (const it of form._policyItemsExtra) {
+      if (it && typeof it === "object") {
+        policyItems.push({
+          section: asString(it.section ?? "OTHER"),
+          title: asString(it.title ?? ""),
+          content: asString(it.content ?? ""),
+        });
+      }
+    }
   }
 
   const payload = {
@@ -391,6 +413,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
         areaSqm: toDecOrNull(r?.areaM2),
         bedType,
         bedsCount: bCount,
+        bedLayoutDescription: asString(r?.bedLayoutDescription || "").trim() || null,
         bedOptions: beds.map((b) => ({
           type: upper(b?.type || "DOUBLE"),
           count: Math.max(1, toIntOrNull(b?.count) ?? 1),
@@ -426,6 +449,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
 
           lengthOfStayDiscounts: asArray(p?.lengthOfStayDiscounts ?? []).map((x) => ({
             minNights: Math.max(0, toIntOrNull(x?.minNights) ?? 0),
+            maxNights: toIntOrNull(x?.maxNights),
             discountPercent: toIntOrNull(x?.discountPercent ?? x?.percent),
           })),
         })),
