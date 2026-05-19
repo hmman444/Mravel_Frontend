@@ -60,7 +60,7 @@ export default function RoomImagesEditor({ images = [], onChange }) {
     <div className="rounded-2xl border p-3 space-y-3">
       <div>
         <div className="text-sm font-semibold">{TEXT.IMAGES_TITLE}</div>
-        <div className="text-xs text-gray-500 mt-0.5">{TEXT.IMAGES_HINT}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{TEXT.IMAGES_HINT}</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
@@ -79,7 +79,7 @@ export default function RoomImagesEditor({ images = [], onChange }) {
               className="absolute right-2 top-2 rounded-lg p-1 hover:bg-gray-100"
               title="Clear"
             >
-              <XMarkIcon className="h-5 w-5 text-gray-500" />
+              <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             </button>
           )}
         </div>
@@ -106,7 +106,7 @@ export default function RoomImagesEditor({ images = [], onChange }) {
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500 flex items-center gap-2">
+        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
           <PhotoIcon className="h-5 w-5" />
           {TEXT.NO_IMAGES}
         </div>
@@ -116,10 +116,10 @@ export default function RoomImagesEditor({ images = [], onChange }) {
             <div
               key={img.url + idx}
               className={`rounded-2xl border overflow-hidden relative ${
-                img.isCover ? "border-blue-500" : "border-slate-200"
+                img.isCover ? "border-blue-500" : "border-slate-200 dark:border-slate-700"
               }`}
             >
-              <div className="aspect-video bg-gray-100">
+              <div className="aspect-video bg-gray-100 dark:bg-gray-800">
                 <img src={img.url} alt="room" className="w-full h-full object-cover" />
               </div>
 
@@ -130,7 +130,7 @@ export default function RoomImagesEditor({ images = [], onChange }) {
                   className={`text-xs px-2 py-1 rounded-lg border ${
                     img.isCover
                       ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white hover:bg-gray-50"
+                      : "bg-white dark:bg-gray-800 hover:bg-gray-50"
                   }`}
                 >
                   {img.isCover ? TEXT.COVER : TEXT.SET_COVER}

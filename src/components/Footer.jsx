@@ -146,7 +146,7 @@ export default function Footer() {
                 {PAYMENT_PARTNERS.map((name) => (
                   <div
                     key={name}
-                    className="h-9 rounded-md bg-white flex items-center justify-center text-[10px] font-semibold text-slate-700 shadow-sm"
+                    className="h-9 rounded-md bg-white dark:bg-gray-800 flex items-center justify-center text-[10px] font-semibold text-slate-700 dark:text-slate-300 shadow-sm"
                     title={name}
                   >
                     {name}
@@ -241,18 +241,18 @@ export default function Footer() {
         </div>
 
         {/* bottom */}
-        <div className="border-t border-slate-800 pt-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="border-t border-slate-800 pt-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
           <p>© {new Date().getFullYear()} Mravel. All rights reserved.</p>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link to="/privacy" className="hover:text-slate-200 hover:underline">
               Privacy
             </Link>
-            <span className="text-slate-700">•</span>
+            <span className="text-slate-700 dark:text-slate-300">•</span>
             <Link to="/terms" className="hover:text-slate-200 hover:underline">
               Terms
             </Link>
-            <span className="text-slate-700">•</span>
+            <span className="text-slate-700 dark:text-slate-300">•</span>
             <Link to="/contact" className="hover:text-slate-200 hover:underline">
               Contact
             </Link>

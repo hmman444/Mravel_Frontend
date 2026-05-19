@@ -1,7 +1,7 @@
 // src/features/catalog/pages/RestaurantDetailPage.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation  } from "react-router-dom";
 import { useCatalogRestaurants } from "../hooks/useCatalogRestaurants";
 
 import Navbar from "../../../components/Navbar";
@@ -18,6 +18,7 @@ import RestaurantParkingSection from "../components/restaurant/RestaurantParking
 import RestaurantAmenitiesSection from "../components/restaurant/RestaurantAmenitiesSection";
 import RestaurantDirectionsSection from "../components/restaurant/RestaurantDirectionsSection";
 import RestaurantOpeningHoursSection from "../components/restaurant/RestaurantOpeningHoursSection";
+import ReviewSection from "../../review/components/ReviewSection";
 
 export default function RestaurantDetailPage() {
   const { handleBookingSubmit } = useCatalogRestaurants();
@@ -32,9 +33,14 @@ export default function RestaurantDetailPage() {
     window.scrollTo(0, 0);
   }, []);
 
+  const location = useLocation();
+
+  const fromBooking =
+    new URLSearchParams(location.search).get("fromBooking") === "1";
+
   useEffect(() => {
-    if (slug) dispatch(fetchRestaurantDetail(slug));
-  }, [slug, dispatch]);
+    if (slug) dispatch(fetchRestaurantDetail({ slug, includeInactive: fromBooking }));
+  }, [slug, fromBooking, dispatch]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7fb]">
@@ -46,7 +52,7 @@ export default function RestaurantDetailPage() {
       <main className="flex-1 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
           {loading && (
-            <p className="py-10 text-center text-gray-500">Đang tải thông tin quán ăn...</p>
+            <p className="py-10 text-center text-gray-500 dark:text-gray-400">Đang tải thông tin quán ăn...</p>
           )}
 
           {!loading && error && (
@@ -56,48 +62,52 @@ export default function RestaurantDetailPage() {
           {!loading && !error && restaurant && (
             <>
               <FadeInSection>
-                <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                   <RestaurantGallery restaurant={restaurant} />
                 </div>
               </FadeInSection>
               <div className="h-3" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantMainInfoPanel restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantSummarySection restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantMenuGallery restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantPolicySection restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantParkingSection restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantAmenitiesSection restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantDirectionsSection restaurant={restaurant} />
                   </div>
                   <div className="h-3" />
-                  <div className="bg-white rounded-3xl border border-gray-200 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <RestaurantOpeningHoursSection  restaurant={restaurant} />
+                  </div>
+                  <div className="h-3" />
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <ReviewSection targetType="RESTAURANT" targetId={restaurant.id} />
                   </div>
                 </div>
                 <aside className="hidden lg:block">
                   <div className="lg:sticky lg:top-[88px]">
-                    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm relative">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm relative">
                       <RestaurantBookingBox restaurant={restaurant}
                       onSubmit={handleBookingSubmit} />
                     </div>

@@ -71,11 +71,12 @@ export const getHotels = async (params = {}) => {
 };
 
 /** GET /api/catalog/hotels/{slug} */
-export const getHotelDetail = async (slug) => {
+export const getHotelDetail = async (slug, options = {}) => {
   try {
-    const res = await api.get(
-      `${HOTELS_PREFIX}/${encodeURIComponent(slug)}`
-    );
+    const { includeInactive = false } = options || {};
+    const res = await api.get(`${HOTELS_PREFIX}/${encodeURIComponent(slug)}`, {
+      params: includeInactive ? { includeInactive: true } : {},
+    });
     return { success: true, data: res.data?.data };
   } catch (error) {
     return toError(error, "Không tải được chi tiết khách sạn");
@@ -125,11 +126,12 @@ export const getRestaurants = async (params = {}) => {
 };
 
 /** GET /api/catalog/restaurants/{slug} */
-export const getRestaurantDetail = async (slug) => {
+export const getRestaurantDetail = async (slug, options = {}) => {
   try {
-    const res = await api.get(
-      `${RESTAURANTS_PREFIX}/${encodeURIComponent(slug)}`
-    );
+    const { includeInactive = false } = options || {};
+    const res = await api.get(`${RESTAURANTS_PREFIX}/${encodeURIComponent(slug)}`, {
+      params: includeInactive ? { includeInactive: true } : {},
+    });
     return { success: true, data: res.data?.data };
   } catch (error) {
     return toError(error, "Không tải được chi tiết quán ăn");
@@ -229,6 +231,116 @@ export const suggestGeoLocations = async (q, limit = 6) => {
     return { success: true, data: res.data ?? [] };
   } catch (error) {
     return toError(error, "Lỗi gợi ý vị trí ngoài hệ thống");
+  }
+};
+
+/** GET /catalog/hotels/autocomplete?q=&limit= */
+export const autocompleteHotels = async (q, limit = 5) => {
+  try {
+    const res = await api.get(`${HOTELS_PREFIX}/autocomplete`, { params: { q, limit } });
+    return Array.isArray(res.data) ? res.data : [];
+  } catch {
+    return [];
+  }
+};
+
+/** GET /catalog/restaurants/autocomplete?q=&limit= */
+export const autocompleteRestaurants = async (q, limit = 5) => {
+  try {
+    const res = await api.get(`${RESTAURANTS_PREFIX}/autocomplete`, { params: { q, limit } });
+    return Array.isArray(res.data) ? res.data : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * POST /api/catalog/hotels/search/faceted?page=&size=
+ * Returns FacetedSearchResponse<HotelSummaryDTO, HotelFacets>
+ */
+export const getHotelsFaceted = async (params = {}) => {
+  try {
+    const {
+      page = 0,
+      size = 10,
+      sort,
+      location,
+      destOnly,
+      starRatings,
+      hotelTypes,
+      amenities,
+      minPrice,
+      maxPrice,
+      minRating,
+    } = params || {};
+
+    const body = {
+      ...(location ? { location } : {}),
+      ...(destOnly ? { destOnly } : {}),
+      ...(starRatings?.length ? { starRatings } : {}),
+      ...(hotelTypes?.length ? { hotelTypes } : {}),
+      ...(amenities?.length ? { amenities } : {}),
+      ...(minPrice != null ? { minPrice } : {}),
+      ...(maxPrice != null ? { maxPrice } : {}),
+      ...(minRating != null ? { minRating } : {}),
+    };
+
+    const res = await api.post(
+      `${HOTELS_PREFIX}/search/faceted`,
+      body,
+      {
+        params: { page, size, ...(sort ? { sort } : {}) },
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    return { success: true, data: res.data?.data };
+  } catch (error) {
+    console.error("getHotelsFaceted error:", error?.response || error);
+    return toError(error, "Lỗi tìm kiếm khách sạn");
+  }
+};
+
+/**
+ * POST /api/catalog/places/search/faceted?page=&size=
+ * Returns FacetedSearchResponse<PlaceSummaryDTO, PlaceFacets>
+ */
+export const getPlacesFaceted = async (params = {}) => {
+  try {
+    const {
+      page = 0,
+      size = 10,
+      sort,
+      parentSlug,
+      q,
+      categorySlugs,
+      venueTypes,
+      priceLevel,
+      minRating,
+    } = params || {};
+
+    const body = {
+      ...(parentSlug ? { parentSlug } : {}),
+      ...(q ? { q } : {}),
+      ...(categorySlugs?.length ? { categorySlugs } : {}),
+      ...(venueTypes?.length ? { venueTypes } : {}),
+      ...(priceLevel ? { priceLevel } : {}),
+      ...(minRating != null ? { minRating } : {}),
+    };
+
+    const res = await api.post(
+      `${PLACES_PREFIX}/search/faceted`,
+      body,
+      {
+        params: { page, size, ...(sort ? { sort } : {}) },
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    return { success: true, data: res.data?.data };
+  } catch (error) {
+    console.error("getPlacesFaceted error:", error?.response || error);
+    return toError(error, "Lỗi tìm kiếm địa điểm");
   }
 };
 

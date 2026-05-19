@@ -38,7 +38,7 @@ export default function RatePlansEditor({ ratePlans = [], onChange }) {
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500">{TEXT.NO_RATE_PLANS}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{TEXT.NO_RATE_PLANS}</div>
       ) : (
         <div className="space-y-2">
           {list.map((rp, idx) => (

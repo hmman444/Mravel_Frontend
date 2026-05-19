@@ -478,7 +478,7 @@ export default function PlanDashboardPage() {
               {board?.planTitle}
             </h1>
           )}
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Sắp xếp & theo dõi hành trình của bạn trong một nơi.
           </p>
         </div>
@@ -528,7 +528,7 @@ export default function PlanDashboardPage() {
                 ${
                   ac
                     ? "bg-white dark:bg-gray-900 text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:bg-white/70 dark:hover:bg-gray-700/70"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-white/70 dark:hover:bg-gray-700/70"
                 }
               `}
             >

@@ -1,8 +1,10 @@
 // src/components/DestinationTypeahead.jsx
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { usePlaceTypeahead } from "../features/catalog/hooks/usePlaceTypeahead";
 import { makePlaceDisplay } from "../utils/makePlaceDisplay";
+import { autocompleteHotels, autocompleteRestaurants } from "../features/catalog/services/catalogService";
 
 const slugToQuery = (slug) =>
   String(slug || "")
@@ -18,13 +20,18 @@ export default function DestinationTypeahead({
   onChangeText,
   className = "",
   buttonSlot = null,
+  mode = "all",  // "hotel" | "restaurant" | "place" | "all"
 
   value,        // text hiển thị
   defaultSlug,  // slug đã lưu
 }) {
+  const navigate = useNavigate();
+
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
   const [pickedSlug, setPickedSlug] = useState(defaultSlug ?? null);
+  const [pickedKind, setPickedKind] = useState(null);
+  const [extraSuggestions, setExtraSuggestions] = useState([]);
 
   const boxRef = useRef(null);
   const skipNextFetch = useRef(false);
@@ -42,8 +49,10 @@ export default function DestinationTypeahead({
 
     if (!next.trim()) {
       setPickedSlug(null);
+      setPickedKind(null);
       setOpen(false);
       resetSuggest();
+      setExtraSuggestions([]);
     }
   }, [value, q, resetSuggest]);
 
@@ -80,6 +89,7 @@ export default function DestinationTypeahead({
     setPickedSlug(defaultSlug);
     setOpen(false);
     resetSuggest();
+    setExtraSuggestions([]);
 
     skipNextFetch.current = true;
     resolvedOnce.current = true;
@@ -99,17 +109,28 @@ export default function DestinationTypeahead({
       resetSuggest();
       setOpen(false);
       setPickedSlug(null);
+      setPickedKind(null);
+      setExtraSuggestions([]);
       return;
     }
 
+    let cancelled = false;
     const t = setTimeout(() => {
       if (!pickedSlug) {
-        fetchSuggest(q, 8);
+        fetchSuggest(q, 5);
         setOpen(true);
+        const hotelP = (mode === "hotel" || mode === "all") ? autocompleteHotels(q, 4) : Promise.resolve([]);
+        const restP  = (mode === "restaurant" || mode === "all") ? autocompleteRestaurants(q, 4) : Promise.resolve([]);
+        Promise.all([hotelP, restP]).then(([hotels, rests]) => {
+            if (!cancelled) setExtraSuggestions([...hotels, ...rests]);
+          });
       }
-    }, 250);
+    }, 350);
 
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      cancelled = true;
+    };
   }, [q, pickedSlug, fetchSuggest, resetSuggest]);
 
   useEffect(() => {
@@ -123,21 +144,36 @@ export default function DestinationTypeahead({
   const suggestions = (items || []).filter(
     (it) => it.kind === "DESTINATION" || it.kind === 0
   );
+  const allSuggestions = [...suggestions, ...extraSuggestions];
 
   const pick = (it) => {
+    const kind = it.kind ?? "DESTINATION";
+
+    if (kind === "HOTEL") {
+      navigate(`/hotels/${it.slug}`);
+      return;
+    }
+    if (kind === "RESTAURANT") {
+      navigate(`/restaurants/${it.slug}`);
+      return;
+    }
+
+    // DESTINATION: fill input, let parent handle Search button
     const text = makePlaceDisplay(it);
     setQ(text);
     setPickedSlug(it.slug);
+    setPickedKind(kind);
     setOpen(false);
     resetSuggest();
+    setExtraSuggestions([]);
     skipNextFetch.current = true;
 
-    if (typeof onPick === "function") onPick({ text, slug: it.slug });
+    if (typeof onPick === "function") onPick({ text, slug: it.slug, kind });
   };
 
   const submit = (e) => {
     e?.preventDefault?.();
-    if (typeof onSubmit === "function") onSubmit({ text: q, slug: pickedSlug });
+    if (typeof onSubmit === "function") onSubmit({ text: q, slug: pickedSlug, kind: pickedKind });
   };
 
   return (
@@ -152,6 +188,7 @@ export default function DestinationTypeahead({
             const val = e.target.value;
             setQ(val);
             setPickedSlug(null);
+            setPickedKind(null);
             if (typeof onChangeText === "function") onChangeText(val);
           }}
           onFocus={() => setOpen(Boolean(q) && !pickedSlug)}
@@ -166,13 +203,13 @@ export default function DestinationTypeahead({
 
       {open && (
         <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-20">
-          {loading && <div className="px-3 py-2 text-sm text-gray-500">Đang tìm...</div>}
-          {!loading && !suggestions.length && (
-            <div className="px-3 py-2 text-sm text-gray-500">Không có gợi ý</div>
+          {loading && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Đang tìm...</div>}
+          {!loading && !allSuggestions.length && (
+            <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Không có gợi ý</div>
           )}
-          {suggestions.map((it) => (
+          {allSuggestions.map((it) => (
             <button
-              key={it.slug}
+              key={`${it.kind ?? "place"}-${it.slug}`}
               type="button"
               onMouseDown={() => pick(it)}
               className="w-full text-left px-3 py-2 flex gap-3 items-center hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -180,12 +217,22 @@ export default function DestinationTypeahead({
               {it.coverImageUrl ? (
                 <img src={it.coverImageUrl} alt={it.name} className="w-10 h-10 object-cover rounded" />
               ) : (
-                <div className="w-10 h-10 bg-gray-200 rounded" />
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded" />
               )}
-              <div className="min-w-0">
-                <div className="text-sm font-medium truncate">{it.name}</div>
-                <div className="text-xs text-gray-500 truncate">
-                  {makePlaceDisplay(it).replace(`${it.name}, `, "")}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-medium truncate">{it.name}</span>
+                  {it.kind === "HOTEL" && (
+                    <span className="text-[10px] text-blue-600 font-semibold shrink-0 bg-blue-50 dark:bg-blue-900/30 px-1 rounded">KS</span>
+                  )}
+                  {it.kind === "RESTAURANT" && (
+                    <span className="text-[10px] text-orange-500 font-semibold shrink-0 bg-orange-50 dark:bg-orange-900/30 px-1 rounded">NH</span>
+                  )}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {(it.kind === "HOTEL" || it.kind === "RESTAURANT")
+                    ? (it.cityName || "")
+                    : makePlaceDisplay(it).replace(`${it.name}, `, "")}
                 </div>
               </div>
             </button>

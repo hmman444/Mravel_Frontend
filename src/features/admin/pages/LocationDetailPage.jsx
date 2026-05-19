@@ -97,11 +97,11 @@ export default function LocationDetailPage() {
                 className="p-2 rounded-full hover:bg-gray-100 transition"
                 title={t("go_back")}
             >
-                <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
+                <ArrowLeftIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
             </button>
             <div>
-                <h1 className="text-3xl font-bold text-gray-800">{cityData.city}</h1>
-                <p className="text-gray-500 mt-1">
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">{cityData.city}</h1>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
                 {t("places_in_city", { city: cityData.city })}
                 </p>
             </div>
@@ -111,7 +111,7 @@ export default function LocationDetailPage() {
         {/* Layout chính */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Bộ lọc */}
-            <div className="bg-white shadow-md rounded-xl p-5 border border-gray-100 lg:col-span-1 h-fit">
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-5 border border-gray-100 dark:border-gray-700 lg:col-span-1 h-fit">
             <h3 className="font-semibold text-blue-600 flex items-center gap-2 mb-4">
                 <FunnelIcon className="w-5 h-5" /> {t("filter")}
             </h3>
@@ -127,14 +127,14 @@ export default function LocationDetailPage() {
                 />
             </div>
 
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t("category")}
             </h4>
             {[t("all"), t("tourist_area"), t("sightseeing_spot"), t("beach"), t("historical_site")].map(
                 (c) => (
                 <label
                     key={c}
-                    className="flex items-center gap-2 text-gray-600 text-sm mb-2 cursor-pointer"
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm mb-2 cursor-pointer"
                 >
                     <input
                     type="radio"
@@ -154,10 +154,10 @@ export default function LocationDetailPage() {
             <div className="lg:col-span-3 flex flex-col gap-6">
             <div className="flex justify-between items-center mb-4">
                 <div>
-                <h2 className="font-semibold text-gray-800 text-lg">
+                <h2 className="font-semibold text-gray-800 dark:text-gray-200 text-lg">
                     {t("places_at_city", { city: cityData.city })}
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                     {filteredPlaces.length} {t("places_found")}
                 </p>
                 </div>
@@ -178,7 +178,7 @@ export default function LocationDetailPage() {
                 {filteredPlaces.map((p) => (
                     <div
                     key={p.id}
-                    className="flex flex-col md:flex-row bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition h-full"
+                    className="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition h-full"
                     >
                     <div className="w-full md:w-64 h-48 flex-shrink-0">
                         <img
@@ -190,14 +190,14 @@ export default function LocationDetailPage() {
 
                     <div className="p-5 flex flex-col justify-between flex-1">
                         <div>
-                        <h3 className="text-lg font-bold text-gray-800 mb-2 hover:text-blue-600 cursor-pointer">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 hover:text-blue-600 cursor-pointer">
                             {p.name}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-3">
                             {p.desc}
                         </p>
 
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
                             <p className="flex items-center gap-1">
                             <ClockIcon className="w-4 h-4 text-blue-500" />
                             {t("open_time")}: {p.openTime}
@@ -226,7 +226,7 @@ export default function LocationDetailPage() {
                 ))}
                 </div>
             ) : (
-                <p className="text-gray-500 text-center py-10">
+                <p className="text-gray-500 dark:text-gray-400 text-center py-10">
                 {t("no_places_found")}
                 </p>
             )}

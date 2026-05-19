@@ -42,7 +42,7 @@ export default function HotelWhyUs() {
             <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
 
             {/* Description */}
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
               {item.desc}
             </p>
           </div>

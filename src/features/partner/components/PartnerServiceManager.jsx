@@ -62,11 +62,11 @@ function StatusBadge({ status }) {
     ACTIVE: "bg-green-100 text-green-700",
     PENDING: "bg-yellow-100 text-yellow-700",
     REJECTED: "bg-red-100 text-red-700",
-    PARTNER_PAUSED: "bg-gray-200 text-gray-700",
-    ADMIN_BLOCKED: "bg-black/10 text-gray-900",
+    PARTNER_PAUSED: "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
+    ADMIN_BLOCKED: "bg-black/10 text-gray-900 dark:text-gray-100",
   };
   return (
-    <span className={`px-2 py-1 text-xs rounded-full ${map[status] || "bg-gray-100 text-gray-600"}`}>
+    <span className={`px-2 py-1 text-xs rounded-full ${map[status] || "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}>
       {status}
     </span>
   );
@@ -78,7 +78,7 @@ function Pagination({ page, totalPages, onPageChange, disabled }) {
 
   return (
     <div className="flex items-center justify-between gap-3 py-3">
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600 dark:text-gray-400">
         Trang <b>{(totalPages ?? 0) === 0 ? 0 : page + 1}</b> / <b>{totalPages ?? 0}</b>
       </div>
 
@@ -290,7 +290,7 @@ export default function PartnerServiceManager() {
 
   const ServiceGrid = ({ items }) => {
     if (!items || items.length === 0) {
-      return <div className="bg-white rounded-lg border p-6 text-sm text-gray-600">Không có dữ liệu.</div>;
+      return <div className="bg-white dark:bg-gray-800 rounded-lg border p-6 text-sm text-gray-600 dark:text-gray-400">Không có dữ liệu.</div>;
     }
 
     return (
@@ -298,13 +298,13 @@ export default function PartnerServiceManager() {
         {items.map((s) => (
           <div
             key={`${s.type}-${s.id}`}
-            className="bg-white rounded-lg shadow hover:shadow-md transition overflow-hidden flex flex-col"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition overflow-hidden flex flex-col"
           >
             <div className="relative">
               <img src={s.thumbnail} alt={s.name} className="h-44 w-full object-cover" />
               <div className="absolute top-3 left-3 flex items-center gap-2">
                 <StatusBadge status={s.status} />
-                <span className="px-2 py-1 text-xs rounded-full bg-white/80 text-gray-800 border">
+                <span className="px-2 py-1 text-xs rounded-full bg-white/80 text-gray-800 dark:text-gray-200 border">
                   {s.type}
                 </span>
               </div>
@@ -312,9 +312,9 @@ export default function PartnerServiceManager() {
 
             <div className="p-4 flex-1 flex flex-col justify-between">
               <div>
-                <h3 className="font-semibold text-lg text-gray-900">{s.name}</h3>
-                <p className="text-sm text-gray-500 mt-0.5">{s.id}</p>
-                <p className="text-sm text-gray-600 mt-2 line-clamp-2">{s.shortDesc}</p>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">{s.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{s.id}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">{s.shortDesc}</p>
 
                 {s.status === "PENDING" && (
                   <div className="mt-3 text-xs rounded-md bg-yellow-50 text-yellow-800 border border-yellow-100 p-2">
@@ -327,7 +327,7 @@ export default function PartnerServiceManager() {
                   </div>
                 )}
                 {s.status === "ADMIN_BLOCKED" && (
-                  <div className="mt-3 text-xs rounded-md bg-gray-100 text-gray-800 border border-gray-200 p-2">
+                  <div className="mt-3 text-xs rounded-md bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 p-2">
                     Bị admin khóa
                     {s.blockedReason ? (
                       <>
@@ -342,8 +342,8 @@ export default function PartnerServiceManager() {
               </div>
 
               <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  Owner: <span className="font-medium text-gray-800">{s.ownerId}</span>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Owner: <span className="font-medium text-gray-800 dark:text-gray-200">{s.ownerId}</span>
                 </div>
 
                 <div className="flex gap-2">
@@ -352,7 +352,7 @@ export default function PartnerServiceManager() {
                     className="p-2 rounded hover:bg-gray-100"
                     title="Chỉnh sửa"
                   >
-                    <PencilIcon className="w-5 h-5 text-gray-600" />
+                    <PencilIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                   </button>
 
                   {s.status === "ACTIVE" && (
@@ -390,7 +390,7 @@ export default function PartnerServiceManager() {
                     className="p-2 rounded hover:bg-gray-100"
                     title="Xóa dịch vụ"
                   >
-                    <TrashIcon className="w-5 h-5 text-gray-700" />
+                    <TrashIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
                 </div>
               </div>
@@ -480,7 +480,7 @@ export default function PartnerServiceManager() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-wrap gap-2">
             {STATUS_TABS.map((x) => (
@@ -490,7 +490,7 @@ export default function PartnerServiceManager() {
                 className={`px-3 py-1.5 rounded-md text-sm border ${
                   tab === x.key
                     ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
                 }`}
               >
                 {STATUS_LABELS_VI[x.key] ?? x.label}
@@ -528,7 +528,7 @@ export default function PartnerServiceManager() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <div className="text-lg font-semibold">Khách sạn</div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {hotels.loading ? "Đang tải..." : `Tổng trang: ${hotels.totalPages ?? 0}`}
               </div>
             </div>
@@ -544,7 +544,7 @@ export default function PartnerServiceManager() {
           <div className="mb-2">
             <div className="flex items-center justify-between mb-2">
               <div className="text-lg font-semibold">Quán ăn</div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {restaurants.loading ? "Đang tải..." : `Tổng trang: ${restaurants.totalPages ?? 0}`}
               </div>
             </div>
@@ -585,7 +585,7 @@ export default function PartnerServiceManager() {
 
       {modal.open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 className="text-lg font-semibold mb-2">
               {modal.kind === "DELETE" && "Xóa dịch vụ"}
               {modal.kind === "PAUSE" && "Tạm khóa dịch vụ"}
@@ -593,8 +593,8 @@ export default function PartnerServiceManager() {
               {modal.kind === "UNLOCK" && "Gửi yêu cầu mở khóa (admin)"}
             </h3>
 
-            <p className="text-sm text-gray-500 mb-4">
-              Dịch vụ: <span className="font-medium text-gray-900">{modal.service?.name}</span>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Dịch vụ: <span className="font-medium text-gray-900 dark:text-gray-100">{modal.service?.name}</span>
             </p>
 
             {(modal.kind === "DELETE" || modal.kind === "UNLOCK") && (

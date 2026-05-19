@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
-import { FiHeart } from "react-icons/fi";
 
 import { useCatalogRestaurants } from "../../../catalog/hooks/useCatalogRestaurants";
 
@@ -17,14 +16,14 @@ const formatCurrencyVND = (value) => {
 
 // Skeleton khi loading – layout ngang giống card thật
 const SkeletonCard = () => (
-  <div className="flex-none w-[360px] md:w-[400px] rounded-2xl bg-white border border-gray-200 shadow-sm">
+  <div className="flex-none w-[360px] md:w-[400px] rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
     <div className="flex h-[140px]">
-      <div className="w-[130px] md:w-[140px] h-full bg-gray-200 animate-pulse" />
+      <div className="w-[130px] md:w-[140px] h-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
       <div className="flex-1 p-3 space-y-2">
-        <div className="h-4 bg-gray-200 rounded animate-pulse" />
-        <div className="h-3 bg-gray-200 rounded animate-pulse" />
-        <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse" />
-        <div className="h-4 bg-gray-200 rounded w-1/2 mt-4 animate-pulse" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-4 animate-pulse" />
       </div>
     </div>
   </div>
@@ -110,7 +109,7 @@ export default function RestaurantPopularSection() {
                 "px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap border",
                 activeKey === g.key
                   ? "bg-[#0064d2] border-[#0064d2] text-white"
-                  : "bg-white border-gray-300 text-gray-800 hover:bg-gray-50",
+                  : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-50",
               ].join(" ")}
             >
               {g.label}
@@ -151,9 +150,9 @@ export default function RestaurantPopularSection() {
           <button
             type="button"
             onClick={handleScrollRight}
-            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg border border-gray-200 absolute top-1/2 -translate-y-1/2 right-2"
+            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 right-2"
           >
-            <ChevronRight className="w-6 h-6 text-gray-700" />
+            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
           </button>
         )}
       </div>
@@ -239,7 +238,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
 
   return (
     <div
-      className="flex-none w-[360px] md:w-[400px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="flex-none w-[360px] md:w-[400px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
     >
       <div className="flex h-[140px]">
@@ -252,7 +251,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
             loading="lazy"
           />
 
-          {/* badge khu vực: đưa lên ngang icon tim */}
+          {/* badge khu vực */}
           {locationLabel && (
             <div className="absolute top-1 left-1 flex items-center gap-1 px-2 py-[2px] rounded-full bg-black/70 text-white text-[11px] font-semibold">
               <FaMapMarkerAlt className="w-3 h-3" />
@@ -261,13 +260,6 @@ function RestaurantMiniCard({ restaurant, onClick }) {
               </span>
             </div>
           )}
-
-          <button
-            type="button"
-            className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white"
-          >
-            <FiHeart className="w-4 h-4" />
-          </button>
         </div>
 
         {/* BODY BÊN PHẢI – GIÁ TRÁI, RATING BÊN DƯỚI */}
@@ -279,13 +271,13 @@ function RestaurantMiniCard({ restaurant, onClick }) {
             </h3>
 
             {addressText && (
-              <p className="mt-1 text-xs text-gray-600 leading-snug">
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-snug">
                 {addressText}
               </p>
             )}
 
             {cuisinesText && (
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {cuisinesText}
               </p>
             )}
@@ -299,7 +291,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
             </div>
 
             {/* rating tách riêng, nằm dưới giá */}
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-700">
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-700 dark:text-gray-300">
               {score ? (
                 <>
                   <FaStar className="w-3 h-3 text-[#fbbf24]" />
@@ -310,17 +302,17 @@ function RestaurantMiniCard({ restaurant, onClick }) {
                     </span>
                   )}
                   {reviews > 0 && (
-                    <span className="text-[11px] text-gray-500">
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
                       ({reviews})
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-[11px] text-gray-500">Mới</span>
+                <span className="text-[11px] text-gray-500 dark:text-gray-400">Mới</span>
               )}
 
               {priceLevelText && (
-                <span className="ml-1 text-[11px] text-gray-500">
+                <span className="ml-1 text-[11px] text-gray-500 dark:text-gray-400">
                   {priceLevelText}
                 </span>
               )}

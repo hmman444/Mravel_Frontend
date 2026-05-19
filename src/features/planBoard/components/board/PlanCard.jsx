@@ -245,7 +245,7 @@ export default function PlanCard({
             ${
               card.done
                 ? "bg-emerald-500 text-white border-emerald-500  scale-105"
-                : "bg-white/95 border-gray-300 hover:border-emerald-400 hover:bg-emerald-50"
+                : "bg-white/95 border-gray-300 dark:border-gray-700 hover:border-emerald-400 hover:bg-emerald-50"
             }
           `}
         >
@@ -308,7 +308,7 @@ export default function PlanCard({
             }}
             className="
               ml-1 p-1 rounded-lg
-              text-gray-500 hover:text-gray-700 
+              text-gray-500 dark:text-gray-400 hover:text-gray-700 
               hover:bg-gray-200/50 
               dark:hover:bg-gray-700/50 
               transition-all duration-200 flex-shrink-0
@@ -358,7 +358,7 @@ export default function PlanCard({
                 rounded-t-xl transition-all
               "
             >
-              <FaCopy className="text-gray-500" /> Tạo bản sao
+              <FaCopy className="text-gray-500 dark:text-gray-400" /> Tạo bản sao
             </button>
 
             <button

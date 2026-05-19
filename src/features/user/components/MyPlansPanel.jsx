@@ -32,7 +32,7 @@ export default function MyPlansPanel() {
   }, [hasMore, loading]);
 
   if (!loading && items.length === 0)
-    return <p className="text-gray-500">Bạn chưa có lịch trình nào.</p>;
+    return <p className="text-gray-500 dark:text-gray-400">Bạn chưa có lịch trình nào.</p>;
 
   return (
     <div className="space-y-5">

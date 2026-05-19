@@ -33,7 +33,7 @@ function StarRating({ value, onChange }) {
           <StarIcon className={`w-6 h-6 ${n <= value ? "text-yellow-500" : "text-gray-300"}`} />
         </button>
       ))}
-      <span className="ml-2 text-sm text-gray-600">{value}/5</span>
+      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{value}/5</span>
     </div>
   );
 }

@@ -54,7 +54,7 @@ export default function RestaurantDirectionsSection({ restaurant }) {
     <section className="px-5 md:px-6 pt-5 pb-6">
       {/* TITLE + ACTIONS */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900">Chỉ đường</h2>
+        <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">Chỉ đường</h2>
 
         <div className="flex gap-2">
           {viewUrl && (
@@ -69,7 +69,7 @@ export default function RestaurantDirectionsSection({ restaurant }) {
           )}
           <button
             onClick={copyShare}
-            className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 text-gray-800 hover:bg-gray-200"
+            className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200"
             title="Sao chép địa chỉ & liên kết"
           >
             Chia sẻ
@@ -78,10 +78,10 @@ export default function RestaurantDirectionsSection({ restaurant }) {
       </div>
 
       {/* CARD */}
-      <div className="mt-4 rounded-2xl bg-white shadow-sm p-5 md:p-6 leading-relaxed text-gray-900">
-        <div className="flex flex-wrap items-start gap-3 text-gray-800">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-100">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-700">
+      <div className="mt-4 rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-5 md:p-6 leading-relaxed text-gray-900 dark:text-gray-100">
+        <div className="flex flex-wrap items-start gap-3 text-gray-800 dark:text-gray-200">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-700 dark:text-gray-300">
               <path
                 fill="currentColor"
                 d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
@@ -90,7 +90,7 @@ export default function RestaurantDirectionsSection({ restaurant }) {
           </span>
           <div className="min-w-0">
             <div className="font-medium">{addr}</div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               (Nhấn vào bản đồ để xem chỉ đường, hoặc dùng nút phía trên bên phải)
             </div>
           </div>

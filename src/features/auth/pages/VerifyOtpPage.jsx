@@ -55,7 +55,7 @@ export default function VerifyOtpPage() {
           {message && <p className="text-green-600 text-sm text-center mt-2">{message}</p>}
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           Chưa nhận được OTP?{" "}
           <Link to="/register" className="text-blue-500">
             Đăng ký lại

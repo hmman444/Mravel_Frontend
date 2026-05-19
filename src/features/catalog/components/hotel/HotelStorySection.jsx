@@ -52,12 +52,12 @@ export default function HotelStorySection({ hotel }) {
 
   return (
     // Dính liền card trên: chỉ border-top + padding
-    <section className="border-t border-gray-100 px-6 py-5">
-      <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+    <section className="border-t border-gray-100 dark:border-gray-700 px-6 py-5">
+      <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
         Giới thiệu về {hotel.name}
       </h2>
 
-      <div className="mt-3 space-y-3 md:space-y-4 text-sm md:text-[15px] leading-relaxed text-gray-800">
+      <div className="mt-3 space-y-3 md:space-y-4 text-sm md:text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
         {visibleBlocks.map((block, idx) => {
           const key = block.id || block._id || idx;
 
@@ -68,7 +68,7 @@ export default function HotelStorySection({ hotel }) {
             return (
               <h3
                 key={key}
-                className="pt-2 text-base md:text-lg font-semibold text-gray-900"
+                className="pt-2 text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100"
               >
                 {block.text}
               </h3>

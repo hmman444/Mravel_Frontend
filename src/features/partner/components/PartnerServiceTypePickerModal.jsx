@@ -33,14 +33,14 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
             animate="show"
             exit="exit"
             transition={{ duration: 0.18 }}
-            className="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(2,6,23,0.2)]"
+            className="w-full max-w-2xl overflow-hidden rounded-3xl bg-white dark:bg-gray-800 shadow-[0_20px_60px_rgba(2,6,23,0.2)]"
           >
             <div className="relative border-b p-6">
               <div className="absolute inset-0 bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-indigo-500/10" />
               <div className="relative flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xl font-extrabold text-gray-900">Chọn loại dịch vụ</div>
-                  <div className="mt-1 text-sm text-gray-600">
+                  <div className="text-xl font-extrabold text-gray-900 dark:text-gray-100">Chọn loại dịch vụ</div>
+                  <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Chọn loại bạn muốn tạo. (Restaurant bạn làm sau cũng được)
                   </div>
                 </div>
@@ -49,7 +49,7 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
                   className="rounded-2xl p-2 hover:bg-gray-100"
                   title="Đóng"
                 >
-                  <XMarkIcon className="h-5 w-5 text-gray-600" />
+                  <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 </button>
               </div>
             </div>
@@ -65,11 +65,11 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
                     <BuildingOffice2Icon className="h-6 w-6 text-blue-700" />
                   </span>
                   <div>
-                    <div className="text-lg font-bold text-gray-900">Khách sạn</div>
-                    <div className="text-sm text-gray-600">Tạo khách sạn mà bạn đang kinh doanh</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">Khách sạn</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Tạo khách sạn mà bạn đang kinh doanh</div>
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-gray-500">
+                <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
                   Đăng tải dịch vụ Khách sạn - <b>Bước đầu</b> đi đến thành công (theo rule BE).
                 </div>
               </button>
@@ -85,21 +85,21 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
                     <CakeIcon className="h-6 w-6 text-indigo-700" />
                   </span>
                   <div>
-                    <div className="text-lg font-bold text-gray-900">Nhà hàng</div>
-                    <div className="text-sm text-gray-600">Tạo nhà hàng mà bạn đang kinh doanh</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">Nhà hàng</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Tạo nhà hàng mà bạn đang kinh doanh</div>
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-gray-500">
+                <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
                   (Quá trình tạo nhà hàng đơn giản theo từng bước)
                 </div>
               </button>
             </div>
 
-            <div className="border-t bg-gray-50 px-6 py-4 flex justify-end">
+            <div className="border-t bg-gray-50 dark:bg-gray-900 px-6 py-4 flex justify-end">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50"
+                className="px-4 py-2 rounded-xl border bg-white dark:bg-gray-800 hover:bg-gray-50"
               >
                 Hủy
               </button>

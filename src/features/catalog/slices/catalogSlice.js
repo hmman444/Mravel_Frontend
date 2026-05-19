@@ -2,11 +2,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getHotels,
+  getHotelsFaceted,
+  getPlacesFaceted,
   getPlaces,
   getRestaurants,
   getPlaceDetail,
   getHotelDetail,
-   getRestaurantDetail,
+  getRestaurantDetail,
   suggestPlaces as apiSuggest,
   suggestGeoLocations,
 } from "../services/catalogService";
@@ -53,8 +55,11 @@ export const fetchPlaceDetail = createAsyncThunk(
 // Detail cho HOTEL (API mới)
 export const fetchHotelDetail = createAsyncThunk(
   "catalog/fetchHotelDetail",
-  async (slug, { rejectWithValue }) => {
-    const res = await getHotelDetail(slug);
+  async (arg, { rejectWithValue }) => {
+    const slug = typeof arg === "string" ? arg : arg?.slug;
+    const includeInactive = typeof arg === "object" ? !!arg?.includeInactive : false;
+
+    const res = await getHotelDetail(slug, { includeInactive });
     if (res.success) return res.data;
     return rejectWithValue(res.message || "Không tìm thấy khách sạn");
   }
@@ -62,10 +67,31 @@ export const fetchHotelDetail = createAsyncThunk(
 
 export const fetchRestaurantDetail = createAsyncThunk(
   "catalog/fetchRestaurantDetail",
-  async (slug, { rejectWithValue }) => {
-    const res = await getRestaurantDetail(slug);
+  async (arg, { rejectWithValue }) => {
+    const slug = typeof arg === "string" ? arg : arg?.slug;
+    const includeInactive = typeof arg === "object" ? !!arg?.includeInactive : false;
+
+    const res = await getRestaurantDetail(slug, { includeInactive });
     if (res.success) return res.data;
     return rejectWithValue(res.message || "Không tìm thấy quán ăn");
+  }
+);
+
+export const searchHotelsFaceted = createAsyncThunk(
+  "catalog/searchHotelsFaceted",
+  async (params, { rejectWithValue }) => {
+    const res = await getHotelsFaceted(params);
+    if (res.success) return { data: res.data, params };
+    return rejectWithValue(res.message || "Lỗi tìm kiếm khách sạn");
+  }
+);
+
+export const searchPlacesFaceted = createAsyncThunk(
+  "catalog/searchPlacesFaceted",
+  async (params, { rejectWithValue }) => {
+    const res = await getPlacesFaceted(params);
+    if (res.success) return { data: res.data, params };
+    return rejectWithValue(res.message || "Lỗi tìm kiếm địa điểm");
   }
 );
 
@@ -104,6 +130,28 @@ const initialListState = {
 
 const initialState = {
   hotels: { ...initialListState },
+  hotelFaceted: {
+    results: [],
+    totalHits: 0,
+    page: 0,
+    size: 10,
+    totalPages: 0,
+    facets: null,
+    loading: false,
+    error: null,
+    lastQuery: null,
+  },
+  placeFaceted: {
+    results: [],
+    totalHits: 0,
+    page: 0,
+    size: 10,
+    totalPages: 0,
+    facets: null,
+    loading: false,
+    error: null,
+    lastQuery: null,
+  },
   restaurants: { ...initialListState },
   poi: { ...initialListState },
   // detail cho POI / place
@@ -136,6 +184,7 @@ const catalogSlice = createSlice({
       state.detail.error = null;
       state.hotelDetail.error = null;
       state.suggest.error = null;
+      state.placeFaceted.error = null;
     },
     clearSuggest(state) {
       state.suggest = { items: [], loading: false, error: null, q: "" };
@@ -167,6 +216,53 @@ const catalogSlice = createSlice({
         state.hotels.items = state.hotels.items ?? [];
       });
 
+    /* ---------- Hotels faceted ---------- */
+    builder
+      .addCase(searchHotelsFaceted.pending, (state) => {
+        state.hotelFaceted.loading = true;
+        state.hotelFaceted.error = null;
+      })
+      .addCase(searchHotelsFaceted.fulfilled, (state, action) => {
+        const { data, params } = action.payload;
+        state.hotelFaceted.loading = false;
+        state.hotelFaceted.results = data?.results ?? [];
+        state.hotelFaceted.totalHits = data?.totalHits ?? 0;
+        state.hotelFaceted.page = data?.page ?? 0;
+        state.hotelFaceted.size = data?.size ?? 10;
+        state.hotelFaceted.totalPages = data?.totalPages ?? 0;
+        state.hotelFaceted.facets = data?.facets ?? null;
+        state.hotelFaceted.lastQuery = params ?? null;
+      })
+      .addCase(searchHotelsFaceted.rejected, (state, action) => {
+        state.hotelFaceted.loading = false;
+        state.hotelFaceted.error = action.payload || "Lỗi tải dữ liệu";
+      });
+
+    /* ---------- Places faceted ---------- */
+    builder
+      .addCase(searchPlacesFaceted.pending, (state) => {
+        state.placeFaceted.loading = true;
+        state.placeFaceted.error = null;
+      })
+      .addCase(searchPlacesFaceted.fulfilled, (state, action) => {
+        const { data } = action.payload;
+        state.placeFaceted.loading = false;
+        state.placeFaceted.results = data?.results ?? [];
+        state.placeFaceted.totalHits = data?.totalHits ?? 0;
+        state.placeFaceted.page = data?.page ?? 0;
+        state.placeFaceted.size = data?.size ?? 10;
+        state.placeFaceted.totalPages = data?.totalPages ?? 0;
+        state.placeFaceted.facets = data?.facets ?? null;
+        state.placeFaceted.lastQuery = action.payload.params ?? null;
+      })
+      .addCase(searchPlacesFaceted.rejected, (state, action) => {
+        state.placeFaceted.loading = false;
+        state.placeFaceted.error = action.payload || "Lỗi tải dữ liệu";
+        state.placeFaceted.results = [];
+        state.placeFaceted.facets = null;
+      });
+
+    /* ---------- Restaurants ---------- */
     /*  Restaurants  */
     builder
       .addCase(searchRestaurants.pending, (state) => {

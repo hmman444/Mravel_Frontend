@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
           )}
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           <a href="/login" className="text-blue-500">
             Quay lại đăng nhập
           </a>

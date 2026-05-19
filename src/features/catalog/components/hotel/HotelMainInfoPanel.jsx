@@ -1,5 +1,6 @@
 // src/features/hotels/components/hotel/HotelMainInfoPanel.jsx
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import {
   FaMapMarkerAlt,
@@ -8,7 +9,10 @@ import {
   FaUtensils,
   FaWifi,
 } from "react-icons/fa";
+import StarRating from "../../../review/components/StarRating";
+import { getRatingLabel } from "../../../review/utils/ratingUtils";
 import { FiCheckCircle, FiClock } from "react-icons/fi";
+import FavoriteButton from "../../../../components/FavoriteButton";
 
 export default function HotelMainInfoPanel({ hotel }) {
   const [showAllNearby, setShowAllNearby] = useState(false);
@@ -86,7 +90,14 @@ export default function HotelMainInfoPanel({ hotel }) {
   const keywords = hotel.reviewStats?.keywords ?? [];
   const topKeywords = keywords.slice(0, 4);
 
-  /* == TIỆN ÍCH CHÍNH == */
+  const allReviews = useSelector((s) => s.review.reviews);
+  const topReviews = [...allReviews]
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 2);
+
+  const computedRatingLabel = getRatingLabel(parseFloat(score));
+
+  /* ================= TIỆN ÍCH CHÍNH ================= */
   const amenityList = Array.isArray(amenities) ? amenities : [];
   const prioritizedCodes = [
     "ac",
@@ -267,7 +278,7 @@ export default function HotelMainInfoPanel({ hotel }) {
   return (
     <section>
       {/* GALLERY TRÊN CÙNG */}
-      <div className="rounded-t-3xl overflow-hidden bg-gray-200">
+      <div className="rounded-t-3xl overflow-hidden bg-gray-200 dark:bg-gray-700">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-[2px] bg-black/5">
           {/* Ảnh lớn bên trái */}
           <div className="lg:col-span-2 relative">
@@ -323,9 +334,11 @@ export default function HotelMainInfoPanel({ hotel }) {
       <div className="px-6 pt-5 pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         {/* Left: tên + sao + loại */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
-            {name}
-          </h1>
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100">
+              {name}
+            </h1>
+          </div>
 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
             {typeLabel && (
@@ -345,7 +358,7 @@ export default function HotelMainInfoPanel({ hotel }) {
 
           {/* Địa chỉ */}
           {locationText && (
-            <p className="mt-1 text-sm text-gray-600">{locationText}</p>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{locationText}</p>
           )}
 
           {/* Check-in online (dynamic) */}
@@ -358,15 +371,25 @@ export default function HotelMainInfoPanel({ hotel }) {
 
           {/* Rating tổng */}
           {ratingScore && (
-            <div className="mt-3 inline-flex items-center gap-2 text-sm">
-              <div className="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-600 text-white font-semibold">
+            <div className="mt-3 flex items-center gap-3 text-sm">
+              <FavoriteButton
+                targetType="HOTEL"
+                targetId={hotel.id}
+                showCount={true}
+                initialCount={hotel.favoriteCount || 0}
+                variant="detail"
+              />
+              <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600 text-white font-semibold">
+                <FaStar className="w-3 h-3 text-yellow-300" />
                 {ratingScore}
-                <span className="text-xs ml-0.5">/10</span>
               </div>
-              <span className="font-semibold text-gray-800">
-                {ratingLabel || "Rất tốt"}
-              </span>
-              <span className="text-gray-500">
+              {computedRatingLabel && (
+                <span className="font-semibold text-gray-800 dark:text-gray-200">
+                  {computedRatingLabel}
+                </span>
+              )}
+              <span className="text-gray-500 dark:text-gray-400">
                 ({reviews} đánh giá)
               </span>
             </div>
@@ -375,7 +398,7 @@ export default function HotelMainInfoPanel({ hotel }) {
 
         {/* Right: giá + nút chọn phòng */}
         <div className="text-right self-start md:self-center">
-          <div className="text-xs text-gray-500">Giá/phòng/đêm từ</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Giá/phòng/đêm từ</div>
           <div className="text-xl md:text-2xl font-bold text-[#ff5a00]">
             {price ? `${price} ${currency}` : "Liên hệ"}
           </div>
@@ -397,7 +420,7 @@ export default function HotelMainInfoPanel({ hotel }) {
       {/* DẢI THÔNG BÁO XANH DƯƠNG */}
       {hasLowAvailability && (
         <div className="border-t border-sky-100 bg-[#e6f5ff] px-6 py-3 flex items-center gap-3 text-sm text-[#00529b]">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm">
             <FiClock className="w-4 h-4" />
           </div>
           <p>
@@ -408,20 +431,23 @@ export default function HotelMainInfoPanel({ hotel }) {
       )}
 
       {/* GRID 3 CỘT */}
-      <div className="border-t border-gray-100 px-6 py-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,1fr)] gap-4 md:gap-6">
+      <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,1fr)] gap-4 md:gap-6">
         {/* Cột 1: đánh giá */}
         <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-[#00529b]">
-                {score}
-              </span>
-              <span className="text-sm text-gray-500">/10</span>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-[#00529b]">
+                  {score}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">/ 5</span>
+              </div>
+              <StarRating value={parseFloat(score) || 0} readonly size={13} />
             </div>
             <div className="text-right text-xs">
-              {ratingLabel && (
-                <div className="font-semibold text-gray-800">
-                  {ratingLabel}
+              {computedRatingLabel && (
+                <div className="font-semibold text-gray-800 dark:text-gray-200">
+                  {computedRatingLabel}
                 </div>
               )}
               <button className="text-[#0064d2] hover:underline">
@@ -430,62 +456,69 @@ export default function HotelMainInfoPanel({ hotel }) {
             </div>
           </div>
 
-          <div className="mt-1 text-sm font-semibold text-gray-800">
+          <div className="mt-1 text-sm font-semibold text-gray-800 dark:text-gray-200">
             Khách nói gì về kỳ nghỉ của họ
           </div>
 
-          {topKeywords.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-1">
-              {topKeywords.map((k) => (
-                <span
-                  key={k.code}
-                  className="inline-flex items-center rounded-full bg-[#e5f8ef] text-[#008f57] px-2.5 py-1 text-xs"
-                >
-                  {k.label}
-                  {k.count != null && ` (${k.count})`}
-                </span>
-              ))}
+          {topKeywords.length === 0 && topReviews.length === 0 ? (
+            <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+              Chưa có đánh giá nào.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {/* Aspects trước */}
+              {topKeywords.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {topKeywords.map((k) => (
+                    <span
+                      key={k.code}
+                      className="inline-flex items-center rounded-full bg-[#e5f8ef] text-[#008f57] px-2 py-0.5 text-xs"
+                    >
+                      {k.label}
+                      {k.count != null && (
+                        <span className="ml-1 text-[#00c87a]">·{k.count}</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Reviews sau */}
+              {topReviews.length > 0 && (
+                <div className="space-y-2 pt-1 border-t border-sky-100 dark:border-gray-700">
+                  {topReviews.map((r) => (
+                    <div key={r.id} className="flex items-start gap-2">
+                      <img
+                        src={
+                          r.userAvatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(r.userFullname || "U")}&background=dbeafe&color=1d4ed8&size=32&bold=true`
+                        }
+                        alt={r.userFullname || "Khách"}
+                        className="w-8 h-8 rounded-full object-cover shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate block">
+                          {r.userFullname || "Khách"}
+                        </span>
+                        <StarRating value={r.rating} readonly size={13} />
+                        {r.content && (
+                          <p className="text-[13px] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">
+                            {r.content}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-
-          {/* review demo */}
-          <div className="mt-3 space-y-2 text-xs text-gray-700">
-            <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-gray-800">
-                  Khách ẩn danh
-                </span>
-                <span className="text-[11px] font-semibold text-[#00529b]">
-                  {score} / 10
-                </span>
-              </div>
-              <p className="line-clamp-2">
-                Ấn tượng tốt về sự chu đáo, thân thiện của nhân viên, phòng
-                ốc sạch sẽ và không gian yên tĩnh.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-gray-800">
-                  Khách ẩn danh
-                </span>
-                <span className="text-[11px] font-semibold text-[#00529b]">
-                  {score} / 10
-                </span>
-              </div>
-              <p className="line-clamp-2">
-                Vị trí gần trung tâm, đi lại thuận tiện, giá cả hợp lý so
-                với chất lượng.
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Cột 2: trong khu vực */}
         <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <div className="font-semibold text-gray-800">
+            <div className="font-semibold text-gray-800 dark:text-gray-200">
               Trong khu vực
             </div>
             <button
@@ -501,12 +534,12 @@ export default function HotelMainInfoPanel({ hotel }) {
               Xem bản đồ
             </button>
           </div>
-          <div className="flex items-start gap-2 text-sm text-gray-800">
+          <div className="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
             <FaMapMarkerAlt className="w-4 h-4 mt-0.5 text-[#ff5a00]" />
             <div>
               <div>{locationText}</div>
               {distanceKm && (
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Cách trung tâm khoảng {distanceKm} km
                 </div>
               )}
@@ -519,7 +552,7 @@ export default function HotelMainInfoPanel({ hotel }) {
             </div>
           )}
 
-          <div className="mt-2 space-y-1.5 text-xs text-gray-700">
+          <div className="mt-2 space-y-1.5 text-xs text-gray-700 dark:text-gray-300">
             {visibleNearby.map((p) => (
               <div
                 key={p.placeSlug || p.name}
@@ -530,7 +563,7 @@ export default function HotelMainInfoPanel({ hotel }) {
                   <span className="line-clamp-1">{p.name}</span>
                 </div>
                 {p.distanceMeters != null && (
-                  <span className="shrink-0 text-gray-500">
+                  <span className="shrink-0 text-gray-500 dark:text-gray-400">
                     {formatDistance(p.distanceMeters)}
                   </span>
                 )}
@@ -552,7 +585,7 @@ export default function HotelMainInfoPanel({ hotel }) {
         {/* Cột 3: tiện ích chính */}
         <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <div className="font-semibold text-gray-800">
+            <div className="font-semibold text-gray-800 dark:text-gray-200">
               Tiện ích chính
             </div>
             <button
@@ -568,7 +601,7 @@ export default function HotelMainInfoPanel({ hotel }) {
               Xem thêm
             </button>
           </div>
-          <div className="space-y-2 text-sm text-gray-800">
+          <div className="space-y-2 text-sm text-gray-800 dark:text-gray-200">
             {mainAmenities.map((a) => (
               <div
                 key={a.code || a.name}
@@ -601,7 +634,7 @@ export default function HotelMainInfoPanel({ hotel }) {
 
       {/* OVERVIEW NGẮN / MỞ RỘNG INLINE */}
       {(overviewPreview || descriptionText) && (
-        <div className="border-t border-gray-100 px-6 py-4 text-sm text-gray-700 leading-relaxed">
+        <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
           {!showFullOverview ? (
             <>
               <p className="line-clamp-3 md:line-clamp-2">
@@ -619,7 +652,7 @@ export default function HotelMainInfoPanel({ hotel }) {
             </>
           ) : (
             <>
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                 {overviewTitle}
               </h3>
               <div className="mt-2 space-y-2">
@@ -641,7 +674,7 @@ export default function HotelMainInfoPanel({ hotel }) {
                         return (
                           <h4
                             key={idx}
-                            className="font-semibold text-gray-900"
+                            className="font-semibold text-gray-900 dark:text-gray-100"
                           >
                             {text}
                           </h4>

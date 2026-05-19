@@ -82,7 +82,7 @@ export default function ActivityTypePicker({
           {btn(
             "OTHER",
             "✏️ Khác",
-            "px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition col-span-2"
+            "px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition col-span-2"
           )}
         </div>
       </div>

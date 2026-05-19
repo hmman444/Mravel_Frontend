@@ -54,7 +54,7 @@ export default function ManageRequestPartnersPage() {
             onClick={() => navigate(-1)}
             className="mr-3 p-2 rounded-full hover:bg-gray-100"
             >
-            <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
+            <ArrowLeftIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
             </button>
             <h1 className="text-2xl font-bold">{t("partner_requests")}</h1>
         </div>
@@ -92,7 +92,7 @@ export default function ManageRequestPartnersPage() {
             filteredRequests.map((req) => (
                 <div
                 key={req.id}
-                className="bg-white rounded-lg shadow hover:shadow-md transition p-5 flex flex-col justify-between"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition p-5 flex flex-col justify-between"
                 >
                 <div className="flex items-center gap-4">
                     <img
@@ -102,7 +102,7 @@ export default function ManageRequestPartnersPage() {
                     />
                     <div>
                     <h3 className="font-semibold text-lg">{req.name}</h3>
-                    <p className="text-sm text-gray-500">{req.email}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{req.email}</p>
                     <p className="text-sm text-gray-400 italic">{req.serviceType}</p>
                     </div>
                 </div>
@@ -118,7 +118,7 @@ export default function ManageRequestPartnersPage() {
                 </div>
             ))
             ) : (
-            <p className="text-gray-500">{t("no_matching_requests")}</p>
+            <p className="text-gray-500 dark:text-gray-400">{t("no_matching_requests")}</p>
             )}
         </div>
         </AdminLayout>

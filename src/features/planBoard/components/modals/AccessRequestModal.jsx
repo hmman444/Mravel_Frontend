@@ -168,7 +168,7 @@ export default function AccessRequestModal({
                   }
                 `}
               >
-                <FaEye className="text-gray-500" />
+                <FaEye className="text-gray-500 dark:text-gray-400" />
                 {loadingType === "VIEW"
                   ? "Đang gửi..."
                   : sent.VIEW

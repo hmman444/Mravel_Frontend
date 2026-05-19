@@ -30,6 +30,8 @@ import LocationResultsPage from "./features/catalog/pages/LocationResultsPage";
 import HotelsHomePage from "./features/catalog/pages/HotelsHomePage";
 import RestaurantsHomePage from "./features/catalog/pages/RestaurantsHomePage";
 import HotelDetailPage from "./features/catalog/pages/HotelDetailPage";
+import HotelFacetedSearchPage from "./features/catalog/pages/HotelFacetedSearchPage";
+import PlaceFacetedSearchPage from "./features/catalog/pages/PlaceFacetedSearchPage";
 import RestaurantDetailPage from "./features/catalog/pages/RestaurantDetailPage";
 
 // User
@@ -134,8 +136,10 @@ function App() {
 
           {/* Catalog routes */}
           <Route path="/place/:slug" element={<PlaceDetailPage />} />
+          <Route path="/places/search" element={<PlaceFacetedSearchPage />} />
           <Route path="/locations/search" element={<LocationResultsPage />} />
           <Route path="/hotels" element={<HotelsHomePage />} />
+          <Route path="/hotels/search/faceted" element={<HotelFacetedSearchPage />} />
           <Route path="/hotels/search" element={<HotelsHomePage />} />
           <Route path="/hotels/:slug" element={<HotelDetailPage />} />
           <Route path="/restaurants" element={<RestaurantsHomePage />} />

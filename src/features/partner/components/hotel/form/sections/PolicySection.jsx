@@ -26,7 +26,7 @@ function TimeSelect({ label, value, onChange, step = 30 }) {
       <select
         value={inList ? safeValue : ""}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full border rounded-xl px-3 py-2 bg-white"
+        className="w-full border rounded-xl px-3 py-2 bg-white dark:bg-gray-800"
       >
         <option value="" disabled>
           Chọn giờ...

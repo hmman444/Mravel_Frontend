@@ -5,34 +5,34 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const ui = {
   card:
-    "rounded-2xl border border-slate-200/70 bg-white shadow-sm " +
+    "rounded-2xl border border-slate-200/70 bg-white dark:bg-gray-800 shadow-sm " +
     "dark:bg-slate-900 dark:border-slate-800",
   title: "text-xs font-semibold text-slate-700 dark:text-slate-200",
   help: "text-[11px] text-slate-500 dark:text-slate-400",
   input:
-    "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none " +
+    "w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm outline-none " +
     "focus:ring-2 focus:ring-blue-500/25 focus:border-blue-400 " +
     "dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
   select:
-    "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none " +
+    "w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm outline-none " +
     "focus:ring-2 focus:ring-blue-500/25 focus:border-blue-400 " +
     "dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100",
   btn:
     "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium " +
     "transition active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed",
   btnGhost:
-    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 " +
+    "bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 " +
     "dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
   chipWrap:
-    "inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 " +
+    "inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-gray-900 p-1 " +
     "dark:border-slate-800 dark:bg-slate-950",
   chip:
     "px-3 py-1.5 rounded-lg text-sm font-medium transition select-none",
   chipOn:
-    "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200 " +
+    "bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 shadow-sm ring-1 ring-slate-200 " +
     "dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700",
   chipOff:
-    "text-slate-600 hover:text-slate-900 hover:bg-white/70 " +
+    "text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-white/70 " +
     "dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-900/60",
 };
 

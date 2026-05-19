@@ -34,14 +34,14 @@ const soft = {
   btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60",
   btnPrimary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
   btnGhost:
-    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+    "bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
   btnDanger: "bg-rose-600 text-white hover:bg-rose-700 shadow-sm",
   btnWarn: "bg-amber-600 text-white hover:bg-amber-700 shadow-sm",
 };
 
 function Badge({ children, tone = "slate" }) {
   const map = {
-    slate: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
+    slate: "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300 dark:bg-slate-800 dark:text-slate-200",
     amber:
       "bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-800",
     rose: "bg-rose-50 text-rose-800 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-200 dark:ring-rose-800",
@@ -133,7 +133,7 @@ export default function AdminRestaurantReviewPage() {
   return (
     <AdminLayout>
       {/*  Moderation header  */}
-      <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="text-xs text-slate-500">Restaurant ID: {id}</div>
@@ -243,7 +243,7 @@ export default function AdminRestaurantReviewPage() {
           ))}
         </div>
       ) : !restaurant ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+        <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Không tìm thấy restaurant.
           </p>
@@ -264,7 +264,7 @@ export default function AdminRestaurantReviewPage() {
           />
 
           {/* Form body y như PartnerRestaurantFormPage */}
-          <div className="bg-white rounded-2xl border p-4 space-y-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4 dark:bg-slate-900 dark:border-slate-800">
             {/* Các section có prop disabled -> disable trực tiếp */}
             <BasicInfoSection
               form={form}

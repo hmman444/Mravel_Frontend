@@ -212,7 +212,7 @@ export default function SplitMoneySection({
             }`}
           >
             <span
-              className={`absolute w-4 h-4 top-[2px] bg-white rounded-full shadow transition-all ${
+              className={`absolute w-4 h-4 top-[2px] bg-white dark:bg-gray-800 rounded-full shadow transition-all ${
                 splitEnabled ? "right-[2px]" : "left-[2px]"
               }`}
             />

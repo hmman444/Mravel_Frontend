@@ -24,7 +24,7 @@ const visMeta = (v) => {
   return {
     icon: <LockClosedIcon className="w-3.5 h-3.5" />,
     label: "Riêng tư",
-    color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+    color: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-gray-800 dark:text-gray-300",
   };
 };
 

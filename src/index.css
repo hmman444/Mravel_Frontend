@@ -6,7 +6,11 @@
 
 /* một vài tùy chỉnh nhỏ */
 body {
-  @apply bg-gray-50 font-sans;
+  @apply bg-gray-50 text-gray-900 font-sans;
+}
+
+html.dark body {
+  @apply bg-gray-950 text-gray-100;
 }
 
 @keyframes pop {

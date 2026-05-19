@@ -15,7 +15,7 @@ export default function FeatureComingSoonPage() {
       <main className="flex-1 w-full">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           <FadeInSection>
-            <section className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+            <section className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               {/* Header có gradient nhẹ + icon */}
               <div className="relative px-6 sm:px-10 py-8 sm:py-10 bg-gradient-to-r from-indigo-500/90 via-indigo-500 to-sky-500 text-white">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -55,7 +55,7 @@ export default function FeatureComingSoonPage() {
 
               {/* Nội dung chính */}
               <div className="px-6 sm:px-10 py-8 sm:py-10 space-y-6">
-                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                   Tính năng này hiện chưa sẵn sàng sử dụng, nhưng chắc chắn sẽ xuất hiện trong những bản cập nhật tiếp theo.
                   Đội ngũ phát triển đang làm việc chăm chỉ để hoàn thiện giao diện, tối ưu hiệu năng và đảm bảo mọi thứ hoạt động ổn định.
                 </p>
@@ -65,7 +65,7 @@ export default function FeatureComingSoonPage() {
                     <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
                       Dự kiến
                     </p>
-                    <p className="mt-1 text-sm text-gray-800">
+                    <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
                       Ra mắt trong các bản cập nhật sắp tới.
                     </p>
                   </div>
@@ -74,7 +74,7 @@ export default function FeatureComingSoonPage() {
                     <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
                       Bạn sẽ nhận được
                     </p>
-                    <ul className="mt-1 space-y-1.5 text-sm text-gray-800 list-disc list-inside">
+                    <ul className="mt-1 space-y-1.5 text-sm text-gray-800 dark:text-gray-200 list-disc list-inside">
                       <li>Trải nghiệm mượt mà hơn</li>
                       <li>Thêm nhiều tiện ích hữu ích</li>
                       <li>Giao diện thân thiện & rõ ràng</li>
@@ -85,7 +85,7 @@ export default function FeatureComingSoonPage() {
                     <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600">
                       Góp ý của bạn
                     </p>
-                    <p className="mt-1 text-sm text-gray-800">
+                    <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
                       Nếu bạn có ý tưởng hoặc góp ý cho tính năng này, hãy gửi phản hồi để chúng tôi cải thiện tốt hơn.
                     </p>
                   </div>
@@ -97,7 +97,7 @@ export default function FeatureComingSoonPage() {
                     <button
                       type="button"
                       onClick={() => window.history.back()}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 transition-colors"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       Quay lại trang trước
@@ -112,7 +112,7 @@ export default function FeatureComingSoonPage() {
                     </Link>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                     Cảm ơn bạn đã trải nghiệm ứng dụng. Tính năng mới sẽ sớm ra mắt ✨
                   </p>
                 </div>

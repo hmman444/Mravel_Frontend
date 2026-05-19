@@ -15,14 +15,14 @@ export default function InfoModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-3xl bg-white shadow-2xl"
+        className="w-full max-w-md rounded-3xl bg-white dark:bg-gray-800 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <div className="text-sm font-semibold text-gray-900">{title}</div>
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-5 py-4">
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</div>
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
@@ -30,7 +30,7 @@ export default function InfoModal({
         </div>
 
         <div className="px-5 pb-5 pt-4">
-          <p className="text-sm text-gray-800">{message}</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200">{message}</p>
 
           <button
             type="button"

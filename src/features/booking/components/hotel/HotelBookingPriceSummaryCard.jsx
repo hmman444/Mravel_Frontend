@@ -64,12 +64,12 @@ export default function HotelBookingPriceSummaryCard({
   }, [isPayAtHotel, paymentOption]);
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <section className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 md:px-5">
+      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-4 py-3 md:px-5">
         <div className="flex items-center gap-2">
-          <Tag className="h-4 w-4 text-gray-700" />
-          <h2 className="text-sm font-semibold text-gray-900 md:text-base">
+          <Tag className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             Chi tiết giá
           </h2>
         </div>
@@ -80,7 +80,7 @@ export default function HotelBookingPriceSummaryCard({
             <select
               value={paymentOption}
               onChange={(e) => setPaymentOption(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-[11px] text-gray-700 outline-none hover:border-blue-500 focus:border-blue-500 md:text-xs"
+              className="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-[11px] text-gray-700 dark:text-gray-300 outline-none hover:border-blue-500 focus:border-blue-500 md:text-xs"
             >
               <option value="FULL">Thanh toán toàn bộ</option>
               <option value="DEPOSIT">
@@ -89,7 +89,7 @@ export default function HotelBookingPriceSummaryCard({
             </select>
           </div>
         ) : (
-          <span className="text-[11px] text-gray-500">
+          <span className="text-[11px] text-gray-500 dark:text-gray-400">
             Hình thức: Thanh toán toàn bộ
           </span>
         )}
@@ -97,12 +97,12 @@ export default function HotelBookingPriceSummaryCard({
 
       {/* Body */}
       <div className="space-y-3 px-4 pb-4 pt-3 md:px-5 md:pb-5">
-        <div className="space-y-2 text-xs text-gray-800 md:text-sm">
+        <div className="space-y-2 text-xs text-gray-800 dark:text-gray-200 md:text-sm">
           <div className="flex items-center justify-between">
             <span>Giá phòng</span>
             <span>{formattedRoom} VND</span>
           </div>
-          <div className="flex items-center justify-between text-gray-600">
+          <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
             <span>
               ({roomsCount}x) {roomName} ({displayNights} đêm)
             </span>
@@ -114,8 +114,8 @@ export default function HotelBookingPriceSummaryCard({
         </div>
 
         {/* Tổng cộng */}
-        <div className="mt-2 space-y-1 border-t border-dashed border-gray-200 pt-3">
-          <div className="flex items-center justify-between text-xs text-gray-500 md:text-sm">
+        <div className="mt-2 space-y-1 border-t border-dashed border-gray-200 dark:border-gray-700 pt-3">
+          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 md:text-sm">
             {hasSaving ? (
               <>
                 <span className="line-through">{formattedOriginal} VND</span>
@@ -129,11 +129,11 @@ export default function HotelBookingPriceSummaryCard({
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-xs text-gray-600 md:text-sm">Tổng cộng ({paymentLabel})</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 md:text-sm">Tổng cộng ({paymentLabel})</p>
               <p className="text-lg font-bold text-emerald-600 md:text-xl">
                 {formattedFinal} VND
               </p>
-              <p className="text-[11px] text-gray-500">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
                 {roomsCount} phòng, {displayNights} đêm · Đã bao gồm thuế và phí
               </p>
               {isPayAtHotel && paymentOption === "DEPOSIT" && (
@@ -159,7 +159,7 @@ export default function HotelBookingPriceSummaryCard({
           {loading ? "Đang chuyển đến MoMo..." : "Thanh toán"}
         </button>
 
-        <p className="mt-2 text-[11px] leading-snug text-gray-500">
+        <p className="mt-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
           Bằng cách tiếp tục thanh toán, bạn đồng ý với{" "}
           <span className="cursor-pointer text-blue-600 hover:underline">
             Điều khoản &amp; Điều kiện

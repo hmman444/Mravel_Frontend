@@ -209,7 +209,7 @@ export default function PlanMembers({ planId }) {
             <FaUsers className="text-blue-500 text-sm" />
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+            <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Số thành viên
             </p>
             <p className="font-semibold text-gray-900 dark:text-gray-100">
@@ -233,7 +233,7 @@ export default function PlanMembers({ planId }) {
             <FaMoneyBillWave className="text-emerald-500 text-sm" />
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+            <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Ngân sách & thực chi
             </p>
             <p className="text-[11px] text-gray-500 dark:text-gray-300">
@@ -268,7 +268,7 @@ export default function PlanMembers({ planId }) {
             <FaUser className="text-indigo-500 text-sm" />
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+            <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Chi trung bình / người
             </p>
             <p className="font-semibold text-gray-900 dark:text-gray-100">

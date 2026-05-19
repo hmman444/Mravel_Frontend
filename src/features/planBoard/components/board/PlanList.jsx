@@ -77,7 +77,7 @@ const ACTIVITY_TYPES = [
     label: "Khác",
     icon: "📝",
     description: "Hoạt động khác",
-    pillClass: "bg-slate-50 text-slate-700 border-slate-200",
+    pillClass: "bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
   },
 ];
 
@@ -167,7 +167,7 @@ export default function PlanList({
                   className="flex items-center w-full px-3 py-2 text-sm 
                     text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 gap-2"
                 >
-                  <FaCopy className="text-gray-500" /> Tạo bản sao
+                  <FaCopy className="text-gray-500 dark:text-gray-400" /> Tạo bản sao
                 </button>
                 <button
                   onPointerDown={(e) => {

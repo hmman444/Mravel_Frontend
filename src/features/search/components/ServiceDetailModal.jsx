@@ -6,7 +6,7 @@ export default function ServiceDetailModal({ data, onClose }) {
       <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full p-6 relative">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500"
+          className="absolute top-3 right-3 text-gray-500 dark:text-gray-400"
         >
           ✕
         </button>
@@ -32,7 +32,7 @@ export default function ServiceDetailModal({ data, onClose }) {
         <div className="mt-6 flex justify-end gap-3">
           <Button
             onClick={onClose}
-            className="bg-gray-300 text-gray-800 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-200"
+            className="bg-gray-300 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-200"
           >
             Đóng
           </Button>

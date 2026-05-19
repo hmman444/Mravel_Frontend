@@ -50,8 +50,8 @@ export default function RestaurantGallery({ restaurant }) {
   return (
     <>
       {/*  GALLERY CHÍNH (1 ảnh lớn + 6 ảnh nhỏ)  */}
-      <section className="rounded-3xl overflow-hidden bg-gray-200">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[4px] bg-white">
+      <section className="rounded-3xl overflow-hidden bg-gray-200 dark:bg-gray-700">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[4px] bg-white dark:bg-gray-800">
           {/* ẢNH LỚN BÊN TRÁI (≈ 2/3 width) */}
           <div className="lg:col-span-2 relative">
             <img

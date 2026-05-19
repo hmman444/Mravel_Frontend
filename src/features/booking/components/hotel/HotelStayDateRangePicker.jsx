@@ -90,7 +90,7 @@ export default function HotelStayDateRangePicker({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-12 w-full items-center rounded-lg border border-gray-300 bg-white px-3 text-left text-sm text-gray-800 hover:border-blue-500 focus:outline-none"
+        className="flex h-12 w-full items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-left text-sm text-gray-800 dark:text-gray-200 hover:border-blue-500 focus:outline-none"
       >
         <span className={hasRange ? "" : "text-gray-400"}>
           {summaryText}
@@ -194,7 +194,7 @@ export default function HotelStayDateRangePicker({
           />
 
           {/* Text mô tả dưới calendar */}
-          <div className="mt-2 text-xs text-gray-500 px-1">
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 px-1">
             {hasRange
               ? `Đã chọn ${days} ngày ${nights} đêm`
               : "Chọn ngày nhận phòng, sau đó chọn ngày trả phòng."}

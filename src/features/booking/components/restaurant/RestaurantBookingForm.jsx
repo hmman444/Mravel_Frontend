@@ -157,17 +157,17 @@ export default function RestaurantBookingForm({
   };
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-5 space-y-5">
+    <section className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm md:p-5 space-y-5">
       {/* HEADER */}
       <div className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
           <Mail className="h-4 w-4" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 md:text-base">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             Thông tin đặt chỗ
           </h2>
-          <p className="text-xs text-gray-500 md:text-sm">
+          <p className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
             Điền thông tin liên hệ + chọn thời gian & loại bàn.
           </p>
         </div>
@@ -176,7 +176,7 @@ export default function RestaurantBookingForm({
       <div className="space-y-4">
         {/* Họ tên */}
         <div>
-          <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+          <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
             Họ tên <span className="text-red-500">*</span>
           </label>
           <input
@@ -185,7 +185,7 @@ export default function RestaurantBookingForm({
             onChange={handleNameChange}
             className={[
               "w-full rounded-lg border px-3 py-2 text-sm md:text-base outline-none",
-              nameError ? "border-red-400 focus:border-red-500" : "border-gray-300 focus:border-blue-500",
+              nameError ? "border-red-400 focus:border-red-500" : "border-gray-300 dark:border-gray-700 focus:border-blue-500",
               "transition",
             ].join(" ")}
             placeholder="Ví dụ: Nguyễn Văn A"
@@ -197,13 +197,13 @@ export default function RestaurantBookingForm({
         {/* Phone + Email */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+            <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
               Số điện thoại <span className="text-red-500">*</span>
             </label>
             <div
               className={[
-                "flex items-center rounded-lg border bg-white px-3 focus-within:border-blue-500",
-                phoneError ? "border-red-400" : "border-gray-300",
+                "flex items-center rounded-lg border bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500",
+                phoneError ? "border-red-400" : "border-gray-300 dark:border-gray-700",
               ].join(" ")}
             >
               <Phone className="mr-2 h-3.5 w-3.5 text-gray-400" />
@@ -221,18 +221,18 @@ export default function RestaurantBookingForm({
             {phoneError ? (
               <p className="mt-1 text-xs text-red-500">{phoneError}</p>
             ) : (
-              <p className="mt-1 text-[11px] text-gray-500">Phải đúng 10 số.</p>
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Phải đúng 10 số.</p>
             )}
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+            <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
               Email
             </label>
             <div
               className={[
-                "flex items-center rounded-lg border bg-white px-3 focus-within:border-blue-500",
-                emailError ? "border-red-400" : "border-gray-300",
+                "flex items-center rounded-lg border bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500",
+                emailError ? "border-red-400" : "border-gray-300 dark:border-gray-700",
               ].join(" ")}
             >
               <Mail className="mr-2 h-3.5 w-3.5 text-gray-400" />
@@ -250,18 +250,18 @@ export default function RestaurantBookingForm({
         </div>
 
         {/* Guests */}
-        <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="h-4 w-4 text-gray-600" />
-            <div className="text-sm font-semibold text-gray-900">Số khách</div>
-            <div className="ml-auto text-[11px] text-gray-500">
+            <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Số khách</div>
+            <div className="ml-auto text-[11px] text-gray-500 dark:text-gray-400">
               Tổng: <span className="font-semibold">{people}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 mb-1">Người lớn</div>
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Người lớn</div>
               <input
                 type="number"
                 min={1}
@@ -272,12 +272,12 @@ export default function RestaurantBookingForm({
                   if (Number.isNaN(v)) return;
                   onAdultsChange?.(Math.min(50, Math.max(1, v)));
                 }}
-                className="w-full h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-blue-500"
+                className="w-full h-11 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 mb-1">Trẻ em</div>
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Trẻ em</div>
               <input
                 type="number"
                 min={0}
@@ -288,12 +288,12 @@ export default function RestaurantBookingForm({
                   if (Number.isNaN(v)) return;
                   onChildrenChange?.(Math.min(50, Math.max(0, v)));
                 }}
-                className="w-full h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-blue-500"
+                className="w-full h-11 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
-          <p className="mt-2 text-[11px] text-gray-500">
+          <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
             Gợi ý: BE có thể auto-đề xuất loại bàn theo tổng số khách.
           </p>
         </div>
@@ -311,14 +311,14 @@ export default function RestaurantBookingForm({
         <div className="space-y-2">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 mb-1">
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Loại bàn <span className="text-red-500">*</span>
               </div>
 
               <select
                 value={tableTypeId || ""}
                 onChange={(e) => onTableTypeChange?.(e.target.value)}
-                className="w-full h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-blue-500"
+                className="w-full h-11 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm outline-none focus:border-blue-500"
               >
                 <option value="" disabled>
                   Chọn loại bàn
@@ -333,7 +333,7 @@ export default function RestaurantBookingForm({
               {/* info sức chứa */}
               {tableTypeId && tableType?.seats ? (
                 <div className="mt-2 text-[12px]">
-                  <div className="text-gray-600">
+                  <div className="text-gray-600 dark:text-gray-400">
                     Gợi ý tối thiểu: <span className="font-semibold">{minTables}</span> bàn cho{" "}
                     <span className="font-semibold">{people}</span> khách.
                   </div>
@@ -352,25 +352,25 @@ export default function RestaurantBookingForm({
 
             {/* stepper số bàn */}
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 mb-1">Số bàn</div>
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Số bàn</div>
 
-              <div className="h-11 rounded-lg border border-gray-300 bg-white px-2 flex items-center justify-between">
+              <div className="h-11 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 flex items-center justify-between">
                 <button
                   type="button"
-                  className="w-9 h-9 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
+                  className="w-9 h-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-50 disabled:opacity-40"
                   onClick={() => onTablesCountChange?.(Math.max(1, Number(tablesCount || 1) - 1))}
                   disabled={!tableTypeId}
                 >
                   −
                 </button>
 
-                <div className="min-w-[48px] text-center font-semibold text-gray-900">
+                <div className="min-w-[48px] text-center font-semibold text-gray-900 dark:text-gray-100">
                   {tablesCount}
                 </div>
 
                 <button
                   type="button"
-                  className="w-9 h-9 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
+                  className="w-9 h-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-50 disabled:opacity-40"
                   onClick={() => onTablesCountChange?.(Math.min(10, Number(tablesCount || 1) + 1))}
                   disabled={!tableTypeId}
                 >
@@ -383,7 +383,7 @@ export default function RestaurantBookingForm({
 
         {/* Note */}
         <div>
-          <label className="mb-1 block text-xs font-semibold text-gray-800 md:text-sm">
+          <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
             Ghi chú (tối đa {NOTE_MAX} ký tự)
           </label>
 
@@ -393,7 +393,7 @@ export default function RestaurantBookingForm({
             onChange={(e) => onNoteChange?.(e.target.value)}
             rows={4}
             className={[
-              "w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2",
+              "w-full resize-none rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2",
               "text-sm md:text-base outline-none focus:border-blue-500",
               "transition",
               (note || "").length >= NOTE_MAX ? "border-orange-400 focus:border-orange-500" : "",
@@ -402,10 +402,10 @@ export default function RestaurantBookingForm({
           />
 
           <div className="mt-1 flex items-center justify-between">
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400">
               Ghi chú sẽ gửi kèm cho nhà hàng (không đảm bảo đáp ứng).
             </p>
-            <span className="text-[11px] text-gray-500">
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">
               {(note || "").length}/{NOTE_MAX}
             </span>
           </div>

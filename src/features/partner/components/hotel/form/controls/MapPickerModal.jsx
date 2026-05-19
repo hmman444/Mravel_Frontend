@@ -26,11 +26,11 @@ export default function MapPickerModal({ open, initial, onClose, onConfirm }) {
       {/* overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-xl border overflow-hidden">
+      <div className="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl border overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <div>
             <div className="font-semibold">Chọn vị trí trên bản đồ</div>
-            <div className="text-xs text-gray-500">Click vào bản đồ để chọn tọa độ.</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Click vào bản đồ để chọn tọa độ.</div>
           </div>
           <button className="px-3 py-2 rounded-xl border hover:bg-gray-50" onClick={onClose}>
             Đóng

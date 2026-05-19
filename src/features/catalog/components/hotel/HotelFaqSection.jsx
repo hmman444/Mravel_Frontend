@@ -36,11 +36,11 @@ export default function HotelFaqSection({ hotel }) {
   return (
     <>
       {/* SECTION CHÍNH */}
-      <section className="mt-0 border border-gray-200 bg-white">
+      <section className="mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="grid gap-0 md:grid-cols-[270px,1fr]">
           {/* LEFT PANEL */}
           <div className="flex flex-col gap-4 bg-gradient-to-b from-[#dbeeff] to-[#f4f9ff] px-6 py-6 md:py-8">
-            <h2 className="text-base font-semibold leading-relaxed text-gray-900 md:text-lg">
+            <h2 className="text-base font-semibold leading-relaxed text-gray-900 dark:text-gray-100 md:text-lg">
               {sectionTitle}
             </h2>
 
@@ -48,7 +48,7 @@ export default function HotelFaqSection({ hotel }) {
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/80 shadow-sm">
                 <HelpCircle className="h-9 w-9 text-[#0064d2]" />
               </div>
-              <p className="text-[11px] text-gray-600 text-center">
+              <p className="text-[11px] text-gray-600 dark:text-gray-400 text-center">
                 Các câu hỏi phổ biến về tiện ích, giá phòng,
                 thời gian nhận/trả phòng tại {hotel.name}.
               </p>
@@ -56,7 +56,7 @@ export default function HotelFaqSection({ hotel }) {
           </div>
 
           {/* RIGHT SIDE – LIST 4 FAQ ĐẦU */}
-          <div className="border-l border-gray-100 px-0 py-3 md:py-4">
+          <div className="border-l border-gray-100 dark:border-gray-700 px-0 py-3 md:py-4">
             <div className="divide-y divide-gray-100">
               {previewFaqs.map((faq, idx) => {
                 const isOpen = openIndex === idx;
@@ -64,13 +64,13 @@ export default function HotelFaqSection({ hotel }) {
                 const answer = faq.answer || faq.content;
 
                 return (
-                  <div key={question || idx} className="bg-white">
+                  <div key={question || idx} className="bg-white dark:bg-gray-800">
                     <button
                       type="button"
                       onClick={() => toggleMainItem(idx)}
                       className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-[#f5f7fb]"
                     >
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         {question}
                       </span>
                       <ChevronDown
@@ -82,7 +82,7 @@ export default function HotelFaqSection({ hotel }) {
 
                     {isOpen && answer && (
                       <div className="bg-[#f9fafb]">
-                        <div className="mx-4 mb-3 rounded-xl border border-[#e0e7ff] bg-white px-3.5 py-3 text-sm leading-relaxed text-gray-700 shadow-sm">
+                        <div className="mx-4 mb-3 rounded-xl border border-[#e0e7ff] bg-white dark:bg-gray-800 px-3.5 py-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300 shadow-sm">
                           <div className="mb-1 flex items-center gap-2">
                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#e2ebff] text-[#0064d2]">
                               <MessageCircle className="h-3.5 w-3.5" />
@@ -128,7 +128,7 @@ export default function HotelFaqSection({ hotel }) {
           />
 
           {/* PANEL PHẢI */}
-          <div className="relative flex h-screen w-full max-w-xl flex-col bg-white shadow-xl">
+          <div className="relative flex h-screen w-full max-w-xl flex-col bg-white dark:bg-gray-800 shadow-xl">
             {/* HERO */}
             <div className="relative h-44 w-full overflow-hidden bg-black">
               {heroImage && (
@@ -162,20 +162,20 @@ export default function HotelFaqSection({ hotel }) {
 
             {/* LIST FAQ – SCROLL TRONG PANEL, KHÔNG ẢNH HƯỞNG PAGE */}
             <div className="flex-1 overflow-y-auto bg-[#f5f7fb] px-0 py-3">
-              <div className="divide-y divide-gray-100 bg-white">
+              <div className="divide-y divide-gray-100 bg-white dark:bg-gray-800">
                 {faqs.map((faq, idx) => {
                   const isOpen = drawerOpenIndex === idx;
                   const question = faq.question || faq.title;
                   const answer = faq.answer || faq.content;
 
                   return (
-                    <div key={question || idx} className="bg-white">
+                    <div key={question || idx} className="bg-white dark:bg-gray-800">
                       <button
                         type="button"
                         onClick={() => toggleDrawerItem(idx)}
                         className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-[#f5f7fb]"
                       >
-                        <span className="text-sm text-gray-900">
+                        <span className="text-sm text-gray-900 dark:text-gray-100">
                           {question}
                         </span>
                         <ChevronDown
@@ -187,7 +187,7 @@ export default function HotelFaqSection({ hotel }) {
 
                       {isOpen && answer && (
                         <div className="bg-[#f9fafb]">
-                          <div className="mx-4 mb-3 rounded-xl border border-[#e0e7ff] bg-white px-3.5 py-3 text-sm leading-relaxed text-gray-700 shadow-sm">
+                          <div className="mx-4 mb-3 rounded-xl border border-[#e0e7ff] bg-white dark:bg-gray-800 px-3.5 py-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300 shadow-sm">
                             <div className="mb-1 flex items-center gap-2">
                               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#e2ebff] text-[#0064d2]">
                                 <MessageCircle className="h-3.5 w-3.5" />

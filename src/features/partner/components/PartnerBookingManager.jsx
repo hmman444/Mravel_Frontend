@@ -16,12 +16,12 @@ export default function PartnerBookingManager() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý đơn đặt</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quản lý đơn đặt</h1>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Tabs */}
           <div className="flex flex-wrap gap-2">
@@ -32,7 +32,7 @@ export default function PartnerBookingManager() {
                 className={`px-3 py-1.5 rounded-md text-sm border transition ${
                   vm.tab === it.key
                     ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border-gray-200"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 border-gray-200 dark:border-gray-700"
                 }`}
               >
                 {it.label}
@@ -77,7 +77,7 @@ export default function PartnerBookingManager() {
 
       {/* Loading */}
       {vm.loadingList ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-10 text-center text-gray-500 dark:text-gray-400">
           Đang tải danh sách đơn...
         </div>
       ) : (

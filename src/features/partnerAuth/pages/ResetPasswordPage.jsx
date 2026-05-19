@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           <Link to="/partner/login" className="text-blue-500">
             Quay lại đăng nhập
           </Link>

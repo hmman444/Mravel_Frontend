@@ -23,11 +23,11 @@ import { showError } from "../../../../utils/toastUtils";
 function RowField({ label, children, onClick, refBox, className = "" }) {
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <div className="text-[13px] font-semibold text-gray-700">{label}</div>
+      <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300">{label}</div>
       <div
         ref={refBox}
         onClick={onClick}
-        className="relative flex items-center h-12 rounded-lg border border-gray-300 px-3 bg-white cursor-text"
+        className="relative flex items-center h-12 rounded-lg border border-gray-300 dark:border-gray-700 px-3 bg-white dark:bg-gray-800 cursor-text"
       >
         {children}
       </div>
@@ -85,6 +85,7 @@ export default function HotelSearchCard() {
   const [adults, setAdults] = useState(1);
   const [rooms, setRooms] = useState(1);
   const [children, setChildren] = useState(0);
+  const [datesChanged, setDatesChanged] = useState(false);
   const [childrenAges, setChildrenAges] = useState([]); // numbers 0..8, where 0= "<1"
 
   useEffect(() => {
@@ -121,6 +122,7 @@ export default function HotelSearchCard() {
     const next = {
       text: (payload?.text || "").trim(),
       slug: payload?.slug || null,
+      kind: payload?.kind || null,
     };
     destRef.current = next;
     setDest(next);
@@ -128,9 +130,16 @@ export default function HotelSearchCard() {
 
   /*  Submit ( giống Home)  */
   const submit = () => {
-    const locationVal = (destRef.current.slug || destRef.current.text || "").trim();
+    const { slug, text, kind } = destRef.current;
+    const locationVal = (slug || text || "").trim();
     if (!locationVal) {
       showError("Vui lòng nhập hoặc chọn Điểm đến.");
+      return;
+    }
+
+    // Hotel được chọn từ autocomplete → đi thẳng trang chi tiết
+    if (kind === "HOTEL" && slug) {
+      navigate(`/hotels/${slug}`);
       return;
     }
 
@@ -140,15 +149,23 @@ export default function HotelSearchCard() {
 
     const qs = new URLSearchParams({
       location: locationVal,
-      checkIn: formatLocalDate(checkInDate),
-      nights: String(nightsInt),
-      checkOut: formatLocalDate(checkOutDate), //  y chang Home
       adults: String(adults),
       children: String(children),
       rooms: String(rooms),
       page: "0",
       size: "9",
     });
+
+    if (datesChanged) {
+      qs.set("checkIn", formatLocalDate(checkInDate));
+      qs.set("nights", String(nightsInt));
+      qs.set("checkOut", formatLocalDate(checkOutDate));
+    }
+
+    // Destination được chọn từ dropdown → dùng exact filter, không multi_match
+    if (kind === "DESTINATION") {
+      qs.set("destOnly", "1");
+    }
 
     if (Array.isArray(childrenAges) && childrenAges.length) {
       childrenAges.forEach((age) => qs.append("childrenAges", String(age)));
@@ -158,26 +175,27 @@ export default function HotelSearchCard() {
   };
 
   return (
-    <div className="rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-200 overflow-visible">
+    <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-200 dark:border-gray-700 overflow-visible">
       {/* Header */}
-      <div className="flex items-center gap-2 px-5 py-3 bg-white rounded-t-2xl">
+      <div className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-gray-800 rounded-t-2xl">
         <FaHistory className="text-primary" />
-        <span className="font-semibold text-gray-800">Khách sạn xem gần đây</span>
+        <span className="font-semibold text-gray-800 dark:text-gray-200">Khách sạn xem gần đây</span>
       </div>
 
       {/* Body */}
       <div className="px-5 pb-6 pt-4">
         {/* Địa điểm */}
         <div className="mb-4">
-          <div className="text-[13px] font-semibold text-gray-700 mb-1">
+          <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Thành phố, địa điểm hoặc tên khách sạn:
           </div>
-          <div className="h-12 rounded-lg px-3 bg-white flex items-center border border-gray-300 w-full">
+          <div className="h-12 rounded-lg px-3 bg-white dark:bg-gray-800 flex items-center border border-gray-300 dark:border-gray-700 w-full">
             <DestinationTypeahead
               label={null}
               placeholder="Thành phố, khách sạn, điểm đến"
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
+              mode="hotel"
               //  bắt đủ case giống Home
               onSubmit={handleDestUpdate}
               onPick={handleDestUpdate}
@@ -192,7 +210,7 @@ export default function HotelSearchCard() {
           <div className="col-span-12 md:col-span-4">
             <RowField label="Nhận phòng:">
               <FaCalendarAlt className="text-gray-400 mr-2" />
-              <MravelDatePicker selected={checkIn} onChange={setCheckIn} />
+              <MravelDatePicker selected={checkIn} onChange={(d) => { setCheckIn(d); setDatesChanged(true); }} />
             </RowField>
           </div>
 
@@ -213,7 +231,7 @@ export default function HotelSearchCard() {
 
               {openNights && (
                 <div
-                  className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-gray-200 bg-white shadow-lg max-h-72 overflow-auto"
+                  className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg max-h-72 overflow-auto"
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   {nightList.map((n) => {
@@ -228,6 +246,7 @@ export default function HotelSearchCard() {
                         onMouseDown={(e) => e.stopPropagation()}
                         onClick={() => {
                           setNights(n);
+                          setDatesChanged(true);
                           setOpenNights(false);
                         }}
                       >
@@ -239,7 +258,7 @@ export default function HotelSearchCard() {
                           />
                           <span className="font-medium">{n} đêm</span>
                         </div>
-                        <div className="text-xs text-gray-500">{VN_DATE(d)}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{VN_DATE(d)}</div>
                       </button>
                     );
                   })}
@@ -273,21 +292,21 @@ export default function HotelSearchCard() {
               refBox={guestsBoxRef}
             >
               <FaUsers className="text-gray-400 mr-2" />
-              <span className="text-gray-800 select-none">
+              <span className="text-gray-800 dark:text-gray-200 select-none">
                 {adults} người lớn, {children} Trẻ em, {rooms} phòng
               </span>
               <span className="ml-auto text-gray-400">▾</span>
 
               {openGuests && (
                 <div
-                  className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-gray-200 bg-white shadow-lg p-4"
+                  className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg p-4"
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   {/* Người lớn */}
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
-                      <span className="w-5 h-5 grid place-items-center rounded bg-gray-100">
-                        <FaUsers className="text-gray-600 text-xs" />
+                      <span className="w-5 h-5 grid place-items-center rounded bg-gray-100 dark:bg-gray-800">
+                        <FaUsers className="text-gray-600 dark:text-gray-400 text-xs" />
                       </span>
                       <span className="font-medium">Người lớn</span>
                     </div>
@@ -319,7 +338,7 @@ export default function HotelSearchCard() {
                   {/* Trẻ em */}
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
-                      <span className="w-5 h-5 grid place-items-center rounded bg-gray-100">
+                      <span className="w-5 h-5 grid place-items-center rounded bg-gray-100 dark:bg-gray-800">
                         👶
                       </span>
                       <span className="font-medium">Trẻ em</span>
@@ -352,7 +371,7 @@ export default function HotelSearchCard() {
                   {/* Phòng */}
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
-                      <span className="w-5 h-5 grid place-items-center rounded bg-gray-100">
+                      <span className="w-5 h-5 grid place-items-center rounded bg-gray-100 dark:bg-gray-800">
                         🏠
                       </span>
                       <span className="font-medium">Phòng</span>
@@ -385,13 +404,13 @@ export default function HotelSearchCard() {
                   {/* Độ tuổi trẻ em */}
                   {children > 0 && (
                     <>
-                      <div className="mt-3 text-sm text-gray-600">
+                      <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
                         Điền tuổi của trẻ để giúp chúng tôi tìm được phòng phù hợp
                       </div>
                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {childrenAges.map((age, idx) => (
                           <div key={idx} className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">Trẻ em {idx + 1}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">Trẻ em {idx + 1}</span>
                             <select
                               className="flex-1 border rounded px-2 py-2"
                               value={age}

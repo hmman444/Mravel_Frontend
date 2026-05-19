@@ -244,10 +244,10 @@ export default function PartnerServiceEditPage({
   return (
     <div className="space-y-4">
       {/* Top bar */}
-      <div className="bg-white rounded-lg border p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="text-xl font-bold">Chỉnh sửa dịch vụ</div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             {type} • ID: <span className="font-mono">{service?.id}</span>
             {dirty ? <span className="ml-2 text-orange-600">• Chưa lưu</span> : null}
           </div>
@@ -288,7 +288,7 @@ export default function PartnerServiceEditPage({
       </div>
 
       {/* Blocks */}
-      <div className="bg-white rounded-lg border p-4 space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 space-y-4">
         <details open className="group">
           <summary className="cursor-pointer select-none font-semibold">
             Thông tin cơ bản
@@ -427,7 +427,7 @@ export default function PartnerServiceEditPage({
           </summary>
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               {form.images.length} ảnh
             </div>
 
@@ -450,13 +450,13 @@ export default function PartnerServiceEditPage({
           </div>
 
           {form.images.length === 0 ? (
-            <div className="mt-3 text-sm text-gray-500">Chưa có ảnh.</div>
+            <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có ảnh.</div>
           ) : (
             <div className="mt-3 space-y-3">
               {form.images.map((img, idx) => (
                 <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start border rounded-lg p-3">
                   <div className="md:col-span-3">
-                    <div className="w-full aspect-[16/10] bg-gray-100 rounded overflow-hidden">
+                    <div className="w-full aspect-[16/10] bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
                       {img.url ? <img src={img.url} alt="" className="w-full h-full object-cover" /> : null}
                     </div>
                     <button
@@ -524,7 +524,7 @@ export default function PartnerServiceEditPage({
             </div>
           )}
 
-          <div className="mt-2 text-xs text-gray-500">
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             * Upload hiện tại dùng base64 để làm nhanh. Sau này muốn chuẩn thì thêm API upload trả URL.
           </div>
         </details>
@@ -535,7 +535,7 @@ export default function PartnerServiceEditPage({
           </summary>
 
           <div className="mt-3 flex items-center justify-between gap-3">
-            <div className="text-sm text-gray-600">{form.content.length} block</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">{form.content.length} block</div>
             <button
               type="button"
               onClick={addBlock}
@@ -547,7 +547,7 @@ export default function PartnerServiceEditPage({
           </div>
 
           {form.content.length === 0 ? (
-            <div className="mt-3 text-sm text-gray-500">Chưa có content.</div>
+            <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có content.</div>
           ) : (
             <div className="mt-3 space-y-3">
               {form.content.map((b, idx) => (
@@ -555,7 +555,7 @@ export default function PartnerServiceEditPage({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="text-sm font-medium">
                       Block #{idx + 1}
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                         ({b.section} • {b.type})
                       </span>
                     </div>
@@ -677,7 +677,7 @@ export default function PartnerServiceEditPage({
           )}
         </details>
 
-        <div className="text-xs text-gray-600 bg-yellow-50 border border-yellow-100 rounded-md p-3">
+        <div className="text-xs text-gray-600 dark:text-gray-400 bg-yellow-50 border border-yellow-100 rounded-md p-3">
           Lưu ý: theo rule của bạn, <b>update xong sẽ bị đưa về PENDING</b> (BE xử lý).
         </div>
       </div>

@@ -26,7 +26,7 @@ const soft = {
   btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60",
   btnPrimary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
   btnGhost:
-    "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
+    "bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900",
   btnDanger: "bg-rose-600 text-white hover:bg-rose-700 shadow-sm",
   btnWarn: "bg-amber-600 text-white hover:bg-amber-700 shadow-sm",
 };
@@ -111,7 +111,7 @@ export default function AdminHotelReviewPage() {
   return (
     <AdminLayout>
       {/*  Header + Moderation actions  */}
-      <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="text-xs text-slate-500">Hotel ID: {id}</div>
@@ -120,13 +120,13 @@ export default function AdminHotelReviewPage() {
             </h1>
 
             <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-200">
-              <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+              <span className="rounded-full bg-slate-100 dark:bg-gray-800 px-3 py-1 dark:bg-slate-800">
                 Status: {status || "—"}
               </span>
-              <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+              <span className="rounded-full bg-slate-100 dark:bg-gray-800 px-3 py-1 dark:bg-slate-800">
                 Active: {String(!!hotel?.active)}
               </span>
-              <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+              <span className="rounded-full bg-slate-100 dark:bg-gray-800 px-3 py-1 dark:bg-slate-800">
                 Partner: {partnerLabel}
               </span>
             </div>
@@ -200,11 +200,11 @@ export default function AdminHotelReviewPage() {
           ))}
         </div>
       ) : !hotel ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+        <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">Không tìm thấy hotel.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border p-4 space-y-4 dark:bg-slate-900 dark:border-slate-800">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4 dark:bg-slate-900 dark:border-slate-800">
           <BasicInfoSection form={form} setField={setField} disabled />
           <ContactLocationSection form={form} setField={setField} disabled />
           <DestinationLocationSection form={form} setField={setField} disabled />

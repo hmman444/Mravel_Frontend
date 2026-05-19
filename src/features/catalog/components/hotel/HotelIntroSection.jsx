@@ -230,7 +230,7 @@ Mravel không chỉ là một ứng dụng đặt phòng mà là người bạn 
 
       {/* CONTENT */}
       <div
-        className="prose prose-slate max-w-none text-gray-700 transition-all duration-300 text-[15px]"
+        className="prose prose-slate max-w-none text-gray-700 dark:text-gray-300 transition-all duration-300 text-[15px]"
         style={{
           maxHeight: expanded ? "9999px" : "320px",
           overflow: "hidden",

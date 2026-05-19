@@ -156,7 +156,7 @@ export default function PlanCalendarSidebar({
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>🎫 Sự kiện</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-700">
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
             <span>✏️ Hoạt động khác</span>
           </span>

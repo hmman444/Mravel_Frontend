@@ -32,29 +32,29 @@ function renderWhen(b) {
   if (type === "HOTEL") {
     return (
       <div className="text-sm">
-        <div className="text-gray-900 font-medium">
+        <div className="text-gray-900 dark:text-gray-100 font-medium">
           {fmtDate(usedStart)} → {fmtDate(usedEnd)}
         </div>
-        <div className="text-gray-500 text-xs mt-0.5">Check-in / Check-out</div>
+        <div className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">Check-in / Check-out</div>
       </div>
     );
   }
 
   return (
     <div className="text-sm">
-      <div className="text-gray-900 font-medium">{fmtDT(usedStart)}</div>
-      <div className="text-gray-500 text-xs mt-0.5">Thời gian đặt</div>
+      <div className="text-gray-900 dark:text-gray-100 font-medium">{fmtDT(usedStart)}</div>
+      <div className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">Thời gian đặt</div>
     </div>
   );
 }
 
 export default function PartnerBookingsTable({ items, canCancel, onDetail, onCancel }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr className="text-left text-xs font-semibold text-gray-600">
+          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
+            <tr className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400">
               <th className="px-4 py-3 whitespace-nowrap">Loại</th>
               <th className="px-4 py-3 whitespace-nowrap">Dịch vụ</th>
               <th className="px-4 py-3 whitespace-nowrap">Khách</th>
@@ -74,8 +74,8 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
               const paymentStatus = pickPaymentStatus(b);
               const amountPaid = pickAmount(b);
 
-              const st = BOOKING_STATUS[bookingStatus] || { label: bookingStatus || "--", cls: "bg-gray-100 text-gray-600" };
-              const ps = PAYMENT_STATUS[paymentStatus] || { label: paymentStatus || "--", cls: "bg-gray-100 text-gray-600" };
+              const st = BOOKING_STATUS[bookingStatus] || { label: bookingStatus || "--", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" };
+              const ps = PAYMENT_STATUS[paymentStatus] || { label: paymentStatus || "--", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" };
 
               const service = pickService(b) || {};
               const customer = pickCustomer(b) || {};
@@ -101,13 +101,13 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
 
                   {/* Service */}
                   <td className="px-4 py-3 w-[220px] max-w-[220px]">
-                    <div className="font-medium text-gray-900 truncate" title={service?.name || ""}>
+                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate" title={service?.name || ""}>
                       {service?.name || "--"}
                     </div>
 
                     {/* city + softDeleted: chỉ render khi có gì để show */}
                     {(service?.city || service?.softDeleted) ? (
-                      <div className="text-xs text-gray-500 mt-0.5 truncate" title={service?.city || ""}>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate" title={service?.city || ""}>
                         {service?.city || ""}
                         {service?.softDeleted ? (
                           <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">
@@ -122,7 +122,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                       <div className="flex flex-wrap gap-2 mt-1.5">
                         <Badge
                           text={(SERVICE_STATUS[service.serviceStatus]?.label) || service.serviceStatus}
-                          className={(SERVICE_STATUS[service.serviceStatus]?.cls) || "bg-gray-100 text-gray-600"}
+                          className={(SERVICE_STATUS[service.serviceStatus]?.cls) || "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}
                         />
                       </div>
                     ) : null}
@@ -130,8 +130,8 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
 
                   {/* Customer */}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="font-medium text-gray-900">{customer?.name || "--"}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{customer?.phone || "--"}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{customer?.name || "--"}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{customer?.phone || "--"}</div>
                   </td>
 
                   {/* When */}
@@ -155,9 +155,9 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                     <div className="inline-flex items-center gap-2">
                       <button
                         onClick={() => onDetail(b)}
-                        className="px-3 py-2 rounded-md border text-sm hover:bg-white bg-white flex items-center gap-2"
+                        className="px-3 py-2 rounded-md border text-sm hover:bg-white bg-white dark:bg-gray-800 flex items-center gap-2"
                       >
-                        <EyeIcon className="w-5 h-5 text-gray-700" />
+                        <EyeIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                         Chi tiết
                       </button>
 
@@ -181,7 +181,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
         </table>
       </div>
 
-      {items.length === 0 ? <div className="p-10 text-center text-gray-500">Không có đơn phù hợp.</div> : null}
+      {items.length === 0 ? <div className="p-10 text-center text-gray-500 dark:text-gray-400">Không có đơn phù hợp.</div> : null}
     </div>
   );
 }

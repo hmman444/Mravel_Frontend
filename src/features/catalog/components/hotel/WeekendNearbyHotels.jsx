@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
-import { FiHeart } from "react-icons/fi";
 
 import { useCatalogHotels } from "../../../catalog/hooks/useCatalogHotels";
 
@@ -81,7 +80,7 @@ export default function WeekendNearbyHotels() {
               "px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap border",
               activeKey === g.key
                 ? "bg-[#0064d2] border-[#0064d2] text-white"
-                : "bg-white border-gray-300 text-gray-800 hover:bg-gray-50",
+                : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-50",
             ].join(" ")}
           >
             {g.label}
@@ -101,13 +100,13 @@ export default function WeekendNearbyHotels() {
               {[...Array(4)].map((_, idx) => (
                 <div
                   key={idx}
-                  className="flex-none w-[280px] rounded-2xl bg-white border border-gray-200 shadow-sm"
+                  className="flex-none w-[280px] rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
                 >
-                  <div className="h-44 bg-gray-200 animate-pulse" />
+                  <div className="h-44 bg-gray-200 dark:bg-gray-700 animate-pulse" />
                   <div className="p-3 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
                   </div>
                 </div>
               ))}
@@ -129,9 +128,9 @@ export default function WeekendNearbyHotels() {
           <button
             type="button"
             onClick={handleScrollRight}
-            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg border border-gray-200 absolute top-1/2 -translate-y-1/2 right-2"
+            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 right-2"
           >
-            <ChevronRight className="w-6 h-6 text-gray-700" />
+            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
           </button>
         )}
       </div>
@@ -200,10 +199,10 @@ function HotelMiniCard({ hotel, onClick }) {
 
   return (
     <div
-      className="flex-none w-[280px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="flex-none w-[280px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
     >
-      {/* ẢNH + BADGE KHU VỰC + ICON YÊU THÍCH + PROMO */}
+      {/* ẢNH + BADGE KHU VỰC + PROMO */}
       <div className="relative h-44">
         <img
           src={imageUrl}
@@ -219,14 +218,6 @@ function HotelMiniCard({ hotel, onClick }) {
             <span>{locationLabel}</span>
           </div>
         )}
-
-        {/* icon yêu thích */}
-        <button
-          type="button"
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white"
-        >
-          <FiHeart className="w-4 h-4" />
-        </button>
 
         {/* promo chip */}
         {promo && (
@@ -248,14 +239,14 @@ function HotelMiniCard({ hotel, onClick }) {
           <div className="flex items-center gap-1">
             <FaStar className="w-3 h-3 text-[#fbbf24]" />
             <span className="font-semibold">{score}</span>
-            <span className="text-gray-500">/10</span>
+            <span className="text-gray-500 dark:text-gray-400">/10</span>
           </div>
           {ratingLabel && (
             <span className="ml-1 text-[11px] text-blue-600 font-semibold">
               {ratingLabel}
             </span>
           )}
-          <span className="ml-1 text-[11px] text-gray-500">
+          <span className="ml-1 text-[11px] text-gray-500 dark:text-gray-400">
             ({reviews})
           </span>
         </div>
@@ -269,7 +260,7 @@ function HotelMiniCard({ hotel, onClick }) {
         <div className="text-[15px] font-bold text-[#ff5a00] mt-[2px]">
           {priceText}
         </div>
-        <div className="text-[11px] text-gray-500 mt-1">
+        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
           Chưa bao gồm thuế và phí
         </div>
       </div>

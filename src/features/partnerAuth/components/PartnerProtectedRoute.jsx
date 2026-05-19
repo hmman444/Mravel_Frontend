@@ -30,7 +30,7 @@ export default function PartnerProtectedRoute() {
   if (!partner && loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Đang kiểm tra đăng nhập...</div>
+        <div className="text-gray-600 dark:text-gray-400">Đang kiểm tra đăng nhập...</div>
       </div>
     );
   }

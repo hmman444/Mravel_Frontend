@@ -115,7 +115,7 @@ export default function RestaurantMenuGallery({ restaurant }) {
 
   return (
     <section className="px-5 md:px-6 pt-5 pb-6">
-      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900">
+      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">
         Bảng giá {restaurant?.name}
       </h2>
 
@@ -128,7 +128,7 @@ export default function RestaurantMenuGallery({ restaurant }) {
               type="button"
               key={`${src}-${i}`}
               onClick={() => openAt(i)}
-              className="relative border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm group"
+              className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm group"
               title={`Xem ảnh ${i + 1}`}
             >
               <img

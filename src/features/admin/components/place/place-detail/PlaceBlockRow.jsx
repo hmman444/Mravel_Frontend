@@ -27,7 +27,7 @@ export default function PlaceBlockRow({
     <div className="rounded-2xl border border-slate-200/80 p-4 dark:border-slate-800/80">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          <span className="rounded-lg bg-slate-100 dark:bg-gray-800 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
             #{idx + 1}
           </span>
           <span className="text-sm font-bold text-slate-900 dark:text-white">{block.type}</span>

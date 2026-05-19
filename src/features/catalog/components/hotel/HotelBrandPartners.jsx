@@ -17,11 +17,11 @@ export default function HotelBrandPartners() {
         {/* Left text */}
         <div>
           <h2 className="text-2xl font-bold">Đối tác khách sạn</h2>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Đối tác khách sạn trong nước & quốc tế
           </p>
 
-          <p className="text-gray-600 mt-4 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
             Chúng tôi hợp tác với các chuỗi khách sạn uy tín toàn cầu để mang đến
             cho bạn chỗ ở thoải mái và đáng tin cậy, dù bạn đi bất cứ đâu.
           </p>

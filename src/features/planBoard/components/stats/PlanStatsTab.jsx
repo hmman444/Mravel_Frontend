@@ -43,7 +43,7 @@ export default function PlanStatsTab({ board, planMembers }) {
 
   if (!board) {
     return (
-      <div className="rounded-3xl border border-slate-200/70 bg-white p-5 dark:border-slate-800/70 dark:bg-slate-900">
+      <div className="rounded-3xl border border-slate-200/70 bg-white dark:bg-gray-800 p-5 dark:border-slate-800/70 dark:bg-slate-900">
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Không có dữ liệu để thống kê.
         </p>

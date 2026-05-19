@@ -51,7 +51,7 @@ export default function RestaurantBookingPolicyCard() {
         "Vào ngày lễ/Tết hoặc giờ cao điểm, nhà hàng có thể áp dụng:\n- Set menu bắt buộc\n- Thời lượng ngồi tối đa\n- Mức đặt cọc cao hơn\nThông tin sẽ hiển thị ở trang chi tiết (nếu có).",
     },
     {
-      icon: <FaParking className="h-4 w-4 text-gray-700" />,
+      icon: <FaParking className="h-4 w-4 text-gray-700 dark:text-gray-300" />,
       title: "Gửi xe",
       text:
         "Chỗ gửi xe tuỳ thuộc từng cơ sở.\n- Một số nhà hàng có bãi xe riêng hoặc hỗ trợ gửi xe gần đó.\n- Phí gửi xe (nếu có) do bãi xe thu, không bao gồm trong tiền cọc.",
@@ -67,12 +67,12 @@ export default function RestaurantBookingPolicyCard() {
   return (
     <>
       {/* CARD CHÍNH */}
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-5">
+      <section className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm md:p-5">
         {/* Header */}
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-gray-700" />
-            <h2 className="text-sm font-semibold text-gray-900 md:text-base">
+            <FileText className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
               Chính sách đặt bàn
             </h2>
           </div>
@@ -95,10 +95,10 @@ export default function RestaurantBookingPolicyCard() {
               <p className="text-xs font-semibold text-blue-700 md:text-sm">
                 {importantNote.title}
               </p>
-              <p className="mt-0.5 text-xs font-semibold text-gray-900 md:text-sm">
+              <p className="mt-0.5 text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
                 {importantNote.subtitle}
               </p>
-              <p className="mt-0.5 line-clamp-2 text-xs text-gray-700 md:text-sm">
+              <p className="mt-0.5 line-clamp-2 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
                 {importantNote.text}
               </p>
             </div>
@@ -110,10 +110,10 @@ export default function RestaurantBookingPolicyCard() {
           <div className="flex items-start gap-2">
             <Clock className="mt-0.5 h-4 w-4 text-blue-500" />
             <div>
-              <p className="text-xs font-semibold text-gray-900 md:text-sm">
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
                 Giữ bàn theo khung giờ
               </p>
-              <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 md:text-sm">
+              <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
                 Bàn sẽ được giữ trong một khoảng thời gian ngắn. Nếu đến muộn quá thời gian giữ,
                 nhà hàng có thể huỷ giữ bàn.
               </p>
@@ -123,10 +123,10 @@ export default function RestaurantBookingPolicyCard() {
           <div className="flex items-start gap-2">
             <CreditCard className="mt-0.5 h-4 w-4 text-emerald-600" />
             <div>
-              <p className="text-xs font-semibold text-gray-900 md:text-sm">
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
                 Đặt cọc theo loại bàn
               </p>
-              <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 md:text-sm">
+              <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
                 Tiền cọc tính theo số bàn và loại bàn. Một số nhà hàng có chính sách hoàn cọc tuỳ thời điểm.
               </p>
             </div>
@@ -142,18 +142,18 @@ export default function RestaurantBookingPolicyCard() {
             onClick={() => setOpen(false)}
           >
             <div
-              className="flex max-h-[75vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+              className="flex max-h-[75vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-800 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal header */}
-              <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-                <h3 className="text-base font-semibold text-gray-900 md:text-lg">
+              <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-5 py-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg">
                   {importantNote.title}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -166,10 +166,10 @@ export default function RestaurantBookingPolicyCard() {
                   <p className="text-xs font-semibold text-blue-700 md:text-sm">
                     {importantNote.title}
                   </p>
-                  <p className="mt-0.5 text-xs font-semibold text-gray-900 md:text-sm">
+                  <p className="mt-0.5 text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
                     {importantNote.subtitle}
                   </p>
-                  <p className="mt-0.5 text-xs text-gray-700 md:text-sm">
+                  <p className="mt-0.5 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
                     {importantNote.text}
                   </p>
                 </div>
@@ -178,16 +178,16 @@ export default function RestaurantBookingPolicyCard() {
                 {sections.map((sec, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-3 border-t border-gray-100 pt-4 first:border-t-0 first:pt-0"
+                    className="flex items-start gap-3 border-t border-gray-100 dark:border-gray-700 pt-4 first:border-t-0 first:pt-0"
                   >
-                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-50">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900">
                       {sec.icon}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {sec.title}
                       </p>
-                      <p className="mt-1 text-xs text-gray-700 whitespace-pre-line md:text-sm">
+                      <p className="mt-1 text-xs text-gray-700 dark:text-gray-300 whitespace-pre-line md:text-sm">
                         {sec.text}
                       </p>
                     </div>

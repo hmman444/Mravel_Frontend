@@ -13,7 +13,7 @@ export default function CollapsibleCard({
   children,
 }) {
   return (
-    <div className="rounded-3xl border border-slate-200/70 bg-white shadow-[0_12px_40px_rgba(2,6,23,0.08)] dark:border-slate-800/70 dark:bg-slate-900">
+    <div className="rounded-3xl border border-slate-200/70 bg-white dark:bg-gray-800 shadow-[0_12px_40px_rgba(2,6,23,0.08)] dark:border-slate-800/70 dark:bg-slate-900">
       <button
         type="button"
         onClick={onToggle}
@@ -33,7 +33,7 @@ export default function CollapsibleCard({
 
         <div className="flex items-center gap-2">
           {right}
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200/70 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60 transition">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200/70 bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60 transition">
             {open ? (
               <ChevronUp className="h-5 w-5" />
             ) : (

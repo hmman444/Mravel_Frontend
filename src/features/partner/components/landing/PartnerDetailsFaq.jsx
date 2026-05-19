@@ -70,8 +70,8 @@ export default function PartnerDetailsFaq() {
         </div>
 
         {/* RIGHT: FAQ accordion */}
-        <div id="faq" className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
-          <h3 className="text-lg font-extrabold text-slate-900">Câu hỏi thường gặp</h3>
+        <div id="faq" className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">Câu hỏi thường gặp</h3>
 
           <div className="mt-5 space-y-3">
             {faqs.map((f, idx) => (
@@ -87,25 +87,25 @@ export default function PartnerDetailsFaq() {
 function InfoBlock({ id, icon, title, subtitle, bullets, desc }) {
   return (
     <section id={id} className="scroll-mt-28">
-      <div className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 border border-sky-100 text-sky-700">
             {icon}
           </div>
           <div className="flex-1">
             <div className="text-sm font-semibold text-sky-700">{title}</div>
-            <h2 className="mt-1 text-xl font-extrabold text-slate-900">{subtitle}</h2>
+            <h2 className="mt-1 text-xl font-extrabold text-slate-900 dark:text-slate-100">{subtitle}</h2>
 
             <div className="mt-4 space-y-2">
               {bullets.map((b, i) => (
-                <div key={i} className="flex gap-3 text-slate-700">
-                  <div className="mt-1 text-slate-500">{b.icon}</div>
+                <div key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
+                  <div className="mt-1 text-slate-500 dark:text-slate-400">{b.icon}</div>
                   <div className="leading-relaxed">{b.text}</div>
                 </div>
               ))}
             </div>
 
-            <p className="mt-4 text-slate-600 leading-relaxed">{desc}</p>
+            <p className="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed">{desc}</p>
           </div>
         </div>
       </div>
@@ -118,18 +118,18 @@ function FaqItem({ q, a }) {
 
   return (
     <div
-      className="rounded-xl border border-slate-200 bg-white overflow-hidden cursor-pointer"
+      className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 overflow-hidden cursor-pointer"
       onClick={() => setOpen((v) => !v)}
     >
       <div className="flex items-center justify-between gap-3 p-4">
-        <div className="font-semibold text-slate-900">{q}</div>
+        <div className="font-semibold text-slate-900 dark:text-slate-100">{q}</div>
         <ChevronDown
-          className={`w-5 h-5 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-5 h-5 text-slate-500 dark:text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </div>
 
       {open && (
-        <div className="px-4 pb-4 text-sm text-slate-600 leading-relaxed">
+        <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           {a}
         </div>
       )}

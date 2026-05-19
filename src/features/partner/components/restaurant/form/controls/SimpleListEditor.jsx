@@ -24,11 +24,11 @@ export default function SimpleListEditor({
   const patch = (i, v) => emit(list.map((x, idx) => (idx === i ? v : x)));
 
   return (
-    <div className="rounded-2xl border bg-white p-4 space-y-3">
+    <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-gray-900">{title}</div>
-          {hint ? <div className="text-xs text-gray-500 mt-0.5">{hint}</div> : null}
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</div>
+          {hint ? <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{hint}</div> : null}
         </div>
         <button
           type="button"
@@ -42,7 +42,7 @@ export default function SimpleListEditor({
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500">Chưa có.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa có.</div>
       ) : (
         <div className="space-y-2">
           {list.map((x, i) => (

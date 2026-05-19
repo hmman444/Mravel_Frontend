@@ -1189,7 +1189,7 @@ export default function PlacePickerModal({
                                 {selectedItem.tags.map((tag) => (
                                   <span
                                     key={tag}
-                                    className="px-2 py-0.5 rounded-full bg-slate-100 text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                                    className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-gray-800 text-[11px] text-slate-600 dark:text-slate-400 dark:bg-slate-800 dark:text-slate-200"
                                   >
                                     {tag}
                                   </span>
@@ -1446,7 +1446,7 @@ function PlaceListItem({ place, active, onClick, dataId }) {
         </div>
         <div className="mt-1 flex flex-wrap gap-1 text-[10px]">
           {place.provinceName && (
-            <span className="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+            <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400 dark:bg-slate-800 dark:text-slate-200">
               {place.provinceName}
             </span>
           )}

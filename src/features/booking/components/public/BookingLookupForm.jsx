@@ -32,16 +32,16 @@ export default function BookingLookupForm({
 
   return (
     <section className="space-y-4">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-5">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm md:p-5">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600">
             <Search className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-gray-900 md:text-base">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
               Tra cứu đơn đặt
             </h2>
-            <p className="mt-1 text-xs text-gray-600 md:text-sm">
+            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
               Nhập <b>mã booking</b> + <b>4 số cuối SĐT</b>. Email là tuỳ chọn (nếu bạn đã nhập email lúc đặt).
             </p>
           </div>
@@ -64,10 +64,10 @@ export default function BookingLookupForm({
         >
           {/* bookingCode */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-700">
+            <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
               Mã booking <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3 focus-within:border-blue-500">
+            <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Hash className="mr-2 h-4 w-4 text-gray-400" />
               <input
                 value={bookingCode}
@@ -80,10 +80,10 @@ export default function BookingLookupForm({
 
           {/* last4 */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-700">
+            <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
               4 số cuối SĐT <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3 focus-within:border-blue-500">
+            <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Phone className="mr-2 h-4 w-4 text-gray-400" />
               <input
                 value={phoneLast4}
@@ -99,10 +99,10 @@ export default function BookingLookupForm({
 
           {/* email optional */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-700">
+            <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
               Email (tuỳ chọn)
             </label>
-            <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3 focus-within:border-blue-500">
+            <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Mail className="mr-2 h-4 w-4 text-gray-400" />
               <input
                 value={email}
@@ -129,7 +129,7 @@ export default function BookingLookupForm({
               <button
                 type="button"
                 onClick={onClearResult}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
+                className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
               >
                 Xoá kết quả
               </button>

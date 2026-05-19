@@ -53,7 +53,7 @@ export default function PartnerHotelFormPage({
         subtitle={mode === "edit" ? "Cập nhật thông tin và lưu lại." : "Sau khi tạo sẽ về PENDING chờ admin duyệt."}
       />
 
-      <div className="bg-white rounded-2xl border p-4 space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4">
         <BasicInfoSection form={fm.form} setField={fm.setField} />
         <ContactLocationSection form={fm.form} setField={fm.setField} />
         <DestinationLocationSection form={fm.form} setField={fm.setField} />

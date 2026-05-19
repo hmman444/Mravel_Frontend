@@ -23,11 +23,11 @@ function StatCard({
   badgeClass = "bg-blue-50 text-blue-700",
 }) {
   return (
-    <div className="bg-white rounded-lg shadow p-5 border border-gray-100">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-5 border border-gray-100 dark:border-gray-700">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-gray-500">{label}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1 truncate">
             {value}
           </p>
           {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
@@ -381,7 +381,7 @@ export default function PartnerDashboard() {
           </div>
 
           {/* Chart */}
-          <div className="bg-white p-6 rounded-lg shadow flex flex-col">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow flex flex-col">
             <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
               <h2 className="text-lg font-semibold">
                 Đơn & doanh thu theo {range.title}
@@ -432,7 +432,7 @@ export default function PartnerDashboard() {
             </ResponsiveContainer>
 
             {!revenue?.loading && revenueSeries.length === 0 ? (
-              <div className="text-sm text-gray-500 mt-3">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-3">
                 Không có dữ liệu doanh thu trong khoảng thời gian này.
               </div>
             ) : null}
@@ -440,7 +440,7 @@ export default function PartnerDashboard() {
         </div>
 
         {/* RIGHT: Tỷ lệ trạng thái đơn (thay cho panel cũ + bỏ “Xu hướng” + Pie) */}
-        <div className="bg-white p-6 rounded-lg shadow flex flex-col">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow flex flex-col">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-semibold">Tỷ lệ trạng thái đơn</h2>
@@ -448,15 +448,15 @@ export default function PartnerDashboard() {
                 Theo khoảng thời gian: {range.from} → {range.to}
               </div>
             </div>
-            <span className="text-xs rounded-full px-2 py-1 bg-gray-100 text-gray-700">
+            <span className="text-xs rounded-full px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
               {bookingLoading ? "Đang tải" : `Tổng: ${statusTotal}`}
             </span>
           </div>
 
           {bookingLoading ? (
-            <div className="text-sm text-gray-500">Đang tải thống kê...</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Đang tải thống kê...</div>
           ) : statusRatioList.length === 0 ? (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               Không có dữ liệu trạng thái đơn trong khoảng thời gian này.
             </div>
           ) : (
@@ -464,10 +464,10 @@ export default function PartnerDashboard() {
               {statusRatioList.map((it) => (
                 <div key={it.rawKey} className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm text-gray-800 truncate">{it.name}</div>
+                    <div className="text-sm text-gray-800 dark:text-gray-200 truncate">{it.name}</div>
                     <div className="text-xs text-gray-400">{it.value} đơn</div>
                   </div>
-                  <div className="shrink-0 text-sm font-semibold text-gray-900">
+                  <div className="shrink-0 text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {it.percent}%
                   </div>
                 </div>

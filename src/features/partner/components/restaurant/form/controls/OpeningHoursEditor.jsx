@@ -47,10 +47,10 @@ export default function OpeningHoursEditor({ value = [], onChange, disabled }) {
   };
 
   return (
-    <div className="rounded-2xl border bg-white p-4 space-y-3">
+    <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div>
-        <div className="text-sm font-semibold text-gray-900">Giờ mở cửa (openingHours)</div>
-        <div className="text-xs text-gray-500 mt-0.5">Nhập dạng HH:mm (vd: 11:00 - 22:00).</div>
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Giờ mở cửa (openingHours)</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Nhập dạng HH:mm (vd: 11:00 - 22:00).</div>
       </div>
 
       <div className="space-y-2">
