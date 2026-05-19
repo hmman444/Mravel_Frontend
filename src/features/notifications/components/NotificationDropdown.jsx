@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { CheckCheck, Loader2 } from "lucide-react";
-import { useNotifications } from "../hooks/useNotifications";
 import NotificationItem from "./NotificationItem";
 
 export default function NotificationDropdown({
@@ -14,8 +13,6 @@ export default function NotificationDropdown({
   markAllRead,
   markRead,
 }) {
-    useNotifications();
-
   const topItems = useMemo(() => items.slice(0, 8), [items]);
 
   return (

@@ -1,7 +1,4 @@
 import { Link } from "react-router-dom";
-import iataLogo from "../assets/iata-logo.png";
-import iso27001Logo from "../assets/iso27001.png";
-import boCongThuongLogo from "../assets/logo-da-dang-ky-bo-cong-thuong.png";
 import {
   FaFacebookF,
   FaInstagram,
@@ -13,11 +10,10 @@ import {
 } from "react-icons/fa";
 
 const TRUST_BADGES = [
-  { src: iataLogo, alt: "IATA" },
-  { src: iso27001Logo, alt: "ISO 27001" },
-  { src: boCongThuongLogo, alt: "Đã đăng ký Bộ Công Thương" },
+  { src: "/assets/iata-logo.png", alt: "IATA" },
+  { src: "/assets/iso27001.png", alt: "ISO 27001" },
+  { src: "/assets/logo-da-dang-ky-bo-cong-thuong.png", alt: "Đã đăng ký Bộ Công Thương" },
 ];
-
 const PAYMENT_PARTNERS = [
   "Mastercard",
   "Visa",

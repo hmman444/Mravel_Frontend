@@ -80,6 +80,8 @@ import PartnerProtectedRoute from "./features/partnerAuth/components/PartnerProt
 import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
 import RequireRole from "./routes/RequireRole";
 import { useNotificationRealtime } from "./realtime/useNotificationRealtime";
+import ChatPage from "./features/chat/pages/ChatPage";
+import FloatingChatWidget from "./features/chat/components/FloatingChatWidget";
 function App() {
   useLoadUser();
   useAuthSync();
@@ -89,6 +91,7 @@ function App() {
   return (
     <>
       <Router>
+        <FloatingChatWidget />
         <Routes>
           {/* Auth routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -125,6 +128,10 @@ function App() {
             {/* User routes */}
             <Route path="/account/profile" element={<AccountProfilePage />} />
             <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
+
+            {/* Chat routes */}
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:conversationId" element={<ChatPage />} />
           </Route>
 
           {/* Catalog routes */}
@@ -149,7 +156,7 @@ function App() {
           <Route path="/booking/restaurant" element={<RestaurantBookingPage />} />
           <Route path="/booking/payment-method" element={<PaymentMethodPage />} />
 
-          {/* ===================== PARTNER (PUBLIC) ===================== */}
+          {/* = PARTNER (PUBLIC) = */}
           <Route path="/partner" element={<PartnerLandingPage />} />
           <Route path="/partner/login" element={<PartnerLoginPage />} />
           <Route path="/partner/register" element={<PartnerRegisterPage />} />
@@ -157,7 +164,7 @@ function App() {
           <Route path="/partner/reset-password" element={<PartnerResetPasswordPage />} />
           <Route path="/partner/verify-otp" element={<PartnerVerifyOtpPage />} />
 
-          {/* ===================== PARTNER (PROTECTED) ===================== */}
+          {/* = PARTNER (PROTECTED) = */}
           <Route element={<PartnerProtectedRoute />}>
             <Route path="/partner/dashboard" element={<PartnerDashboardPage />} />
             <Route path="/partner/services" element={<PartnerServicesPage />} />

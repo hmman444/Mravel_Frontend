@@ -168,7 +168,7 @@ export default function RestaurantPopularSection() {
   );
 }
 
-/* ----------------------- CARD NHỎ KIỂU PASGO (KHÔNG KM, KHÔNG BUTTON ĐẶT, CHỈ "GIÁ CHỈ TỪ") ----------------------- */
+/*  CARD NHỎ KIỂU PASGO (KHÔNG KM, KHÔNG BUTTON ĐẶT, CHỈ "GIÁ CHỈ TỪ")  */
 
 function RestaurantMiniCard({ restaurant, onClick }) {
   const {

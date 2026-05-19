@@ -159,7 +159,7 @@ export default function ManageAmenitiesPage() {
     setShowModal(true);
   };
 
-  // ===== Delete flow (ConfirmModal) =====
+  //  Delete flow (ConfirmModal) 
   const requestDelete = (id) => {
     const found = (amenities || []).find((x) => x.id === id);
     setPendingDelete({ id, name: found?.name || id });
@@ -182,7 +182,7 @@ export default function ManageAmenitiesPage() {
     }
   };
 
-  // ===== Toggle active =====
+  //  Toggle active 
   const deactivateAmenity = async (id) => {
     if (!id) return;
     setRowToggling(id, true);
@@ -214,7 +214,7 @@ export default function ManageAmenitiesPage() {
     }
   };
 
-  // ===== Create / Edit submit =====
+  //  Create / Edit submit 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");

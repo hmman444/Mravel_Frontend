@@ -4,7 +4,7 @@ import { useState } from "react";
 export default function HotelIntroSection() {
   const [expanded, setExpanded] = useState(false);
 
-  /* ───────── SHORT CONTENT (2 đoạn đầu) ───────── */
+  /* ─ SHORT CONTENT (2 đoạn đầu) ─ */
   const shortHtml = `
 <p>
   Mravel là một trong những nền tảng du lịch trực tuyến hàng đầu Đông Nam Á, cung cấp đầy đủ tiện ích cho một chuyến đi trọn vẹn với các sản phẩm chính gồm: Vé máy bay, Khách sạn, Vé xe khách cùng Hoạt động du lịch như vé vui chơi, tour.
@@ -14,7 +14,7 @@ export default function HotelIntroSection() {
 </p>
 `;
 
-  /* ───────── FULL CONTENT (giữ nguyên nội dung, đổi Traveloka -> Mravel) ───────── */
+  /* ─ FULL CONTENT (giữ nguyên nội dung, đổi Traveloka -> Mravel) ─ */
   const fullHtml = `
 ${shortHtml}
 

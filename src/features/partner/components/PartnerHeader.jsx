@@ -27,12 +27,12 @@ export default function PartnerHeader() {
   const { accessToken, partner } = useSelector((state) => state.partnerAuth);
   const { handleLogout } = useLogout();
 
-  /* ================= FETCH ME ================= */
+  /* == FETCH ME == */
   useEffect(() => {
     if (accessToken && !partner) dispatch(fetchCurrentPartner());
   }, [accessToken, partner, dispatch]);
 
-  /* ================= SCROLL ================= */
+  /* == SCROLL == */
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -43,24 +43,24 @@ export default function PartnerHeader() {
 
   const solid = scrolled;
 
-  /* ================= NOTIFICATIONS (UI giống user/admin) ================= */
+  /* == NOTIFICATIONS (UI giống user/admin) == */
   // const { items, loading, saving, unreadCount, load, markAllRead, markRead } =
   //   useNotifications(); // sau này có thể đổi sang usePartnerNotifications()
 
   const [notiOpen, setNotiOpen] = useState(false);
   const notiWrapRef = useRef(null);
 
-  /* ================= USER MENU ================= */
+  /* == USER MENU == */
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const userMenuRef = useRef(null);
 
-  /* ================= CLOSE ON ROUTE CHANGE ================= */
+  /* == CLOSE ON ROUTE CHANGE == */
   useEffect(() => {
     setNotiOpen(false);
     setDropdownOpen(false);
   }, [location.pathname, location.search]);
 
-  /* ================= OUTSIDE CLICK (capture) ================= */
+  /* == OUTSIDE CLICK (capture) == */
   useEffect(() => {
     const onPointerDown = (e) => {
       const el = e.target;
@@ -94,7 +94,7 @@ export default function PartnerHeader() {
           className="flex items-center gap-2 text-2xl font-extrabold tracking-tight shrink-0"
         >
           <img
-            src="/src/assets/Mravel-logo.png"
+            src="/assets/Mravel-logo.png"
             alt="Mravel Logo"
             className="h-8 w-8 object-contain"
           />

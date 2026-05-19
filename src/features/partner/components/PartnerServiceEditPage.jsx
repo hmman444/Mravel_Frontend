@@ -94,7 +94,7 @@ export default function PartnerServiceEditPage({
     onBack?.();
   };
 
-  // ===== IMAGES =====
+  //  IMAGES 
   const addImageByUrl = () => {
     setForm((p) => ({
       ...p,
@@ -151,7 +151,7 @@ export default function PartnerServiceEditPage({
     }
   };
 
-  // ===== CONTENT BLOCKS =====
+  //  CONTENT BLOCKS 
   const addBlock = () => {
     setForm((p) => ({
       ...p,
@@ -183,7 +183,7 @@ export default function PartnerServiceEditPage({
     });
   };
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const latitude = form.latitude === "" ? null : Number(form.latitude);
     const longitude = form.longitude === "" ? null : Number(form.longitude);

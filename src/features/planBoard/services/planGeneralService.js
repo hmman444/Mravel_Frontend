@@ -38,7 +38,15 @@ export const apiRemoveImage = (planId, url) =>
   api.delete(`${BASE}/${planId}/images`, { data: { url } })
      .then(res => res.data.data);
 
+/** ADD VIDEO */
+export const apiAddVideo = (planId, url) =>
+  api.post(`${BASE}/${planId}/videos`, { url })
+     .then(res => res.data.data);
 
+/** REMOVE VIDEO BY URL */
+export const apiRemoveVideo = (planId, url) =>
+  api.delete(`${BASE}/${planId}/videos`, { data: { url } })
+     .then(res => res.data.data);
 
 export const apiUpdateBudget = (planId, payload) =>
   api

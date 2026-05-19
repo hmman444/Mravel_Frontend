@@ -5,7 +5,13 @@ const BASE = "/plans";
 // board
 export async function fetchBoard(planId) {
   const res = await api.get(`${BASE}/${planId}/board`);
-  return res.data.data; 
+  return res.data.data;
+}
+
+export async function fetchBoardSnapshot(planId, afterRevision) {
+  const params = afterRevision != null ? { afterRevision } : {};
+  const res = await api.get(`${BASE}/${planId}/board/snapshot`, { params });
+  return res.data;
 }
 
 // lists
@@ -152,5 +158,87 @@ export async function copyPlan(planId) {
 
 export async function deletePlan(planId) {
   const res = await api.delete(`${BASE}/${planId}`);
-  return res.data.data; 
+  return res.data.data;
+}
+
+function genIdempotencyKey() {
+  return crypto.randomUUID();
+}
+
+export async function createListCmd(planId, payload) {
+  const res = await api.post(`${BASE}/${planId}/board/cmd/lists`, payload, {
+    headers: { "Idempotency-Key": genIdempotencyKey() },
+  });
+  return res.data.data;
+}
+
+export async function renameListCmd(planId, listId, payload) {
+  const res = await api.patch(
+    `${BASE}/${planId}/board/cmd/lists/${listId}/rename`,
+    payload,
+    { headers: { "Idempotency-Key": genIdempotencyKey() } }
+  );
+  return res.data.data;
+}
+
+export async function deleteListCmd(planId, listId) {
+  const res = await api.delete(`${BASE}/${planId}/board/cmd/lists/${listId}`, {
+    headers: { "Idempotency-Key": genIdempotencyKey() },
+  });
+  return res.data.data;
+}
+
+export async function createCardCmd(planId, listId, payload) {
+  const res = await api.post(
+    `${BASE}/${planId}/board/cmd/lists/${listId}/cards`,
+    payload,
+    { headers: { "Idempotency-Key": genIdempotencyKey() } }
+  );
+  return res.data.data;
+}
+
+export async function updateCardCmd(planId, listId, cardId, payload, ifMatch) {
+  const headers = { "Idempotency-Key": genIdempotencyKey() };
+  if (ifMatch != null) headers["If-Match"] = ifMatch;
+  const res = await api.patch(
+    `${BASE}/${planId}/board/cmd/lists/${listId}/cards/${cardId}`,
+    payload,
+    { headers }
+  );
+  return res.data.data;
+}
+
+export async function deleteCardCmd(planId, listId, cardId) {
+  const res = await api.delete(
+    `${BASE}/${planId}/board/cmd/lists/${listId}/cards/${cardId}`,
+    { headers: { "Idempotency-Key": genIdempotencyKey() } }
+  );
+  return res.data.data;
+}
+
+export async function moveCardCmd(planId, cardId, payload) {
+  const res = await api.patch(
+    `${BASE}/${planId}/board/cmd/cards/${cardId}/move`,
+    payload,
+    { headers: { "Idempotency-Key": genIdempotencyKey() } }
+  );
+  return res.data.data;
+}
+
+export async function reorderListsCmd(planId, positions) {
+  const res = await api.patch(
+    `${BASE}/${planId}/board/cmd/lists/reorder`,
+    positions,
+    { headers: { "Idempotency-Key": genIdempotencyKey() } }
+  );
+  return res.data.data;
+}
+
+export async function reorderCardsInListCmd(planId, listId, positions) {
+  const res = await api.patch(
+    `${BASE}/${planId}/board/cmd/lists/${listId}/cards/reorder`,
+    positions,
+    { headers: { "Idempotency-Key": genIdempotencyKey() } }
+  );
+  return res.data.data;
 }

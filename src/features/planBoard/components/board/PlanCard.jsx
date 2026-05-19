@@ -9,13 +9,15 @@ import {
 } from "react-icons/fa";
 import { TYPE_STYLES } from "../../utils/activityStyles";
 import { formatTimeForDisplay } from "../../utils/timeUtils";
+
+let suppressCardMenuOpenUntil = 0;
+const CARD_MENU_SUPPRESS_MS = 700;
+
 export default function PlanCard({
   card,
   listId,
   toggleDone,
   duplicateCard,
-  activeMenu,
-  setActiveMenu,
   setConfirmDeleteCard,
   canEdit = true,
   onOpenActivityModal,
@@ -23,9 +25,10 @@ export default function PlanCard({
   const btnRef = useRef(null);
   const menuRef = useRef(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (activeMenu === card.id && btnRef.current && menuRef.current) {
+    if (isMenuOpen && btnRef.current && menuRef.current) {
       const btn = btnRef.current.getBoundingClientRect();
       const menu = menuRef.current.getBoundingClientRect();
 
@@ -34,10 +37,10 @@ export default function PlanCard({
         left: btn.right - menu.width,
       });
     }
-  }, [activeMenu, card.id]);
+  }, [isMenuOpen]);
 
   useEffect(() => {
-    if (activeMenu !== card.id) return;
+    if (!isMenuOpen) return;
 
     const handle = (e) => {
       if (
@@ -46,13 +49,13 @@ export default function PlanCard({
         btnRef.current &&
         !btnRef.current.contains(e.target)
       ) {
-        setActiveMenu(null);
+        setIsMenuOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
-  }, [activeMenu, setActiveMenu]);
+  }, [isMenuOpen]);
 
 
   const hasStart = !!card.startTime;
@@ -300,7 +303,8 @@ export default function PlanCard({
             ref={btnRef}
             onClick={(e) => {
               e.stopPropagation();
-              setActiveMenu(activeMenu === card.id ? null : card.id);
+              if (Date.now() < suppressCardMenuOpenUntil) return;
+              setIsMenuOpen((prev) => !prev);
             }}
             className="
               ml-1 p-1 rounded-lg
@@ -315,7 +319,7 @@ export default function PlanCard({
         )}
       </div>
 
-      {activeMenu === card.id &&
+      {isMenuOpen &&
         createPortal(
           <div
             ref={menuRef}
@@ -335,10 +339,16 @@ export default function PlanCard({
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={(e) => {
+              onPointerDown={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                duplicateCard(listId, card.id);
-                setActiveMenu(null);
+                suppressCardMenuOpenUntil =
+                  Date.now() + CARD_MENU_SUPPRESS_MS;
+              }}
+              onClick={async (e) => {
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                await duplicateCard(listId, card.id);
               }}
               className="
                 flex w-full items-center gap-2 
@@ -352,10 +362,14 @@ export default function PlanCard({
             </button>
 
             <button
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 setConfirmDeleteCard({ listId, cardId: card.id, card });
-                setActiveMenu(null);
+                setIsMenuOpen(false);
               }}
               className="
                 flex w-full items-center gap-2 

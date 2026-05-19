@@ -1,6 +1,16 @@
 import { useDispatch, useSelector } from "react-redux";
-import { loadPlans, reactPlan, commentPlan, 
-  searchAll, clearSearch, loadPlanFeedDetail } from "../slices/planSlice";
+import {
+  loadPlans,
+  reactPlan,
+  commentPlan,
+  reactComment,
+  searchAll,
+  clearSearch,
+  loadPlanFeedDetail,
+  setActiveFilters,
+  resetFilters,
+  setFilterSidebarOpen,
+} from "../slices/planSlice";
 
 export function usePlans() {
   const dispatch = useDispatch();
@@ -16,31 +26,76 @@ export function usePlans() {
     searchUsers,
     searchMeta,
 
-    current, currentLoading, currentError,
+    activeFilters,
+    filterSidebarOpen,
+
+    current,
+    currentLoading,
+    currentError,
   } = useSelector((s) => s.plan);
 
   const fetchNext = () => dispatch(loadPlans({ page: page + 1 }));
-  const reload = () => dispatch(loadPlans({ page: 1 }));
+  const reload    = () => dispatch(loadPlans({ page: 1 }));
 
-  const sendReact = (planId, type) => dispatch(reactPlan({ planId, type }));
-  const sendComment = (planId, comment) => dispatch(commentPlan({ planId, comment }));
+  const sendReact         = (planId, type)               => dispatch(reactPlan({ planId, type }));
+  const sendComment       = (planId, comment)            => dispatch(commentPlan({ planId, comment }));
+  const sendCommentReact  = (planId, commentId, type)    => dispatch(reactComment({ planId, commentId, type }));
 
-  const doSearch = (q) => dispatch(searchAll({ q, page: 1, size: 10 }));
+  //  Search 
+  /** Fresh search — always resets to first page (cursor: null). */
+  const doSearch = (q, filters) =>
+    dispatch(searchAll({ q, filters: filters ?? activeFilters, cursor: null, size: 10 }));
+
+  /** Load the next page of search results using the stored cursor. */
+  const loadMoreSearch = () => {
+    if (!searchMeta.hasMore || !searchMeta.nextCursor) return;
+    dispatch(searchAll({
+      q: searchQuery,
+      filters: activeFilters,
+      cursor: searchMeta.nextCursor,
+      size: 10,
+    }));
+  };
+
   const resetSearch = () => dispatch(clearSearch());
+
   const isSearching = !!searchQuery;
 
   const loadFeedDetail = (id) => dispatch(loadPlanFeedDetail({ id }));
 
+  //  Filters ─
+  const updateFilters = (newFilters) => dispatch(setActiveFilters(newFilters));
+  const clearFilters  = () => dispatch(resetFilters());
+
+  const openFilterSidebar  = () => dispatch(setFilterSidebarOpen(true));
+  const closeFilterSidebar = () => dispatch(setFilterSidebarOpen(false));
+
+  /** Count of active (non-default) filter fields */
+  const activeFilterCount = (() => {
+    let count = 0;
+    if (activeFilters.budgetMin || activeFilters.budgetMax) count++;
+    if (activeFilters.daysMin   || activeFilters.daysMax)   count++;
+    if (activeFilters.startDateFrom || activeFilters.startDateTo) count++;
+    if (activeFilters.destinations?.length > 0) count++;
+    if (activeFilters.sortBy && activeFilters.sortBy !== "RELEVANCE") count++;
+    return count;
+  })();
+
   return {
+    // Feed
     items,
     loading,
     hasMore,
     page,
     fetchNext,
     reload,
+
+    // Reactions / comments
     sendReact,
     sendComment,
+    sendCommentReact,
 
+    // Search
     isSearching,
     searchQuery,
     searchLoading,
@@ -48,8 +103,22 @@ export function usePlans() {
     searchUsers,
     searchMeta,
     doSearch,
+    loadMoreSearch,
     resetSearch,
-    loadFeedDetail, 
-    current, currentLoading, currentError,
+
+    // Detail
+    loadFeedDetail,
+    current,
+    currentLoading,
+    currentError,
+
+    // Filters
+    activeFilters,
+    activeFilterCount,
+    filterSidebarOpen,
+    updateFilters,
+    clearFilters,
+    openFilterSidebar,
+    closeFilterSidebar,
   };
 }

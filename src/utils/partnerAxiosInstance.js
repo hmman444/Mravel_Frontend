@@ -11,7 +11,7 @@ import {
   setPartnerUser,
 } from "../features/partnerAuth/slices/partnerAuthSlice";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 const partnerApi = axios.create({
   baseURL: BASE_URL,
@@ -81,7 +81,8 @@ partnerApi.interceptors.response.use(
 
       // Partner me endpoint
       const meRes = await partnerApi.get("/auth/partner/me");
-      store.dispatch(setPartnerUser(meRes.data.data || meRes.data));
+      const currentPartner = meRes?.data?.data ?? meRes?.data ?? null;
+      store.dispatch(setPartnerUser(currentPartner));
 
       onRefreshed(accessToken);
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;

@@ -23,7 +23,7 @@ export async function fetchAdminRestaurantById(id) {
   return ensureOk(res);
 }
 
-/* ===================== LIST ===================== */
+/* = LIST = */
 export async function fetchAdminHotels(params = {}) {
   const query = new URLSearchParams(params).toString();
   const res = await api.get(`${BASE}/hotels${query ? `?${query}` : ""}`);
@@ -36,7 +36,7 @@ export async function fetchAdminRestaurants(params = {}) {
   return ensureOk(res);
 }
 
-/* ===================== ACTIONS ===================== */
+/* = ACTIONS = */
 export async function approveHotel(id) {
   const res = await api.post(`${BASE}/hotels/${id}:approve`);
   return ensureOk(res);

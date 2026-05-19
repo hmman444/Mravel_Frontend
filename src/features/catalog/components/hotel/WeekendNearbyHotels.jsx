@@ -145,7 +145,7 @@ export default function WeekendNearbyHotels() {
   );
 }
 
-/* ----------------------- CARD NHỎ GIỐNG TRAVELOKA ----------------------- */
+/*  CARD NHỎ GIỐNG TRAVELOKA  */
 
 function HotelMiniCard({ hotel, onClick }) {
   // đoán các field từ HotelSummaryDTO – nếu tên khác bạn chỉ cần chỉnh lại ở đây

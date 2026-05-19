@@ -12,7 +12,7 @@ function slugifyVN(input) {
     .replace(/đ/g, "d")
     .replace(/[^a-z0-9\s-]/g, "") // bỏ ký tự lạ
     .replace(/\s+/g, "-") // space -> -
-    .replace(/-+/g, "-") // gộp ---
+    .replace(/-+/g, "-") // gộp 
     .replace(/^-+|-+$/g, ""); // bỏ - đầu/cuối
   return s;
 }
@@ -42,7 +42,7 @@ export default function BasicInfoSection({ form, setField, disabled = false }) {
   const [slugTouched, setSlugTouched] = useState(false);
 
   useEffect(() => {
-    if (disabled) return;          // ✅ readonly không auto-sync
+    if (disabled) return;          //  readonly không auto-sync
     if (slugTouched) return;
     const auto = slugifyVN(form.name);
     if ((form.slug || "") !== auto) setField("slug", auto);

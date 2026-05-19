@@ -15,8 +15,8 @@ import {
 } from "recharts";
 import {
   FaCloudUploadAlt,
-  FaTrashAlt,
   FaImage,
+  FaVideo,
   FaCircleNotch,
   FaUserFriends,
   FaMoneyBillWave,
@@ -26,6 +26,7 @@ import {
 } from "react-icons/fa";
 import ConfirmModal from "../../../../components/ConfirmModal";
 import PlanDateInputs from "./PlanDateInputs";
+import PlanMedia from "../../../planFeed/components/PlanMedia";
 import { usePlanGeneral } from "../../hooks/usePlanGeneral";
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 
@@ -85,7 +86,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     uploadThumbnail,
     addImage,
     removeImage,
-    updateBudget, 
+    addVideo,
+    removeVideo,
+    updateBudget,
   } = usePlanGeneral();
 
   const [description, setDescription] = useState(plan?.description || "");
@@ -96,12 +99,14 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     plan?.thumbnail || (plan?.images?.[0] ?? null)
   );
   const [images, setImages] = useState(plan?.images || []);
+  const [videos, setVideos] = useState(plan?.videos || []);
 
   const [descSaving, setDescSaving] = useState(false);
   const [datesSaving, setDatesSaving] = useState(false);
   const [statusSaving, setStatusSaving] = useState(false);
   const [thumbSaving, setThumbSaving] = useState(false);
   const [imagesSaving, setImagesSaving] = useState(false);
+  const [videosSaving, setVideosSaving] = useState(false);
 
   // trạng thái dropdown status
   const [statusOpen, setStatusOpen] = useState(false);
@@ -283,6 +288,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     setStatus(plan?.status || "DRAFT");
     setThumbnail(plan?.thumbnail || (plan?.images?.[0] ?? null));
     setImages(plan?.images || []);
+    setVideos(plan?.videos || []);
 
     const newBudgetTotal = plan?.budgetTotal ?? 0;
     const newBudgetPerPerson = plan?.budgetPerPerson ?? 0;
@@ -457,6 +463,41 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       showError("Không thể xoá ảnh");
     } finally {
       setImagesSaving(false);
+    }
+  };
+
+  const handleVideoUpload = async (e) => {
+    if (!canEdit || !planId) return;
+    if (videosSaving) { e.target.value = ""; return; }
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setVideosSaving(true);
+    try {
+      for (const f of files) {
+        const action = await addVideo(planId, f).unwrap();
+        const url = typeof action === "string" ? action : action?.url || action;
+        if (url) setVideos((prev) => (prev.includes(url) ? prev : [...prev, url]));
+      }
+      showSuccess("Đã thêm video");
+    } catch {
+      showError("Không thể upload video");
+    } finally {
+      setVideosSaving(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleRemoveVideo = async (url) => {
+    if (!canEdit || !planId) return;
+    setVideosSaving(true);
+    try {
+      await removeVideo(planId, url).unwrap();
+      setVideos((prev) => prev.filter((x) => x !== url));
+      showSuccess("Đã xoá video");
+    } catch {
+      showError("Không thể xoá video");
+    } finally {
+      setVideosSaving(false);
     }
   };
 
@@ -991,55 +1032,56 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               </p>
             </div>
 
-            {imagesSaving && (
+            {(imagesSaving || videosSaving) && (
               <span className="text-[10px] text-sky-600 flex items-center gap-1">
                 <FaCircleNotch className="animate-spin" /> Đang xử lý...
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-            {images?.length ? (
-              images.map((url, i) => (
-                <div
-                  key={i}
-                  className="relative group rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-sm hover:shadow-md transition-all duration-200"
-                >
-                  <img
-                    src={url}
-                    alt={`media-${i}`}
-                    className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(url)}
-                      className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-slate-900/70 text-white opacity-0 group-hover:opacity-100 transition-all text-[10px] flex items-center justify-center"
-                    >
-                      <FaTrashAlt />
-                    </button>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-500 italic">
-                Chưa có ảnh cho kế hoạch này.
-              </p>
-            )}
-          </div>
+          {images?.length || videos?.length ? (
+            <div className="mt-4">
+              <PlanMedia
+                images={images}
+                videos={videos}
+                full
+                canEdit={canEdit}
+                onRemove={(type, url) =>
+                  type === "image" ? handleRemoveImage(url) : handleRemoveVideo(url)
+                }
+              />
+            </div>
+          ) : (
+            <p className="mt-4 text-xs text-slate-500 italic">
+              Chưa có ảnh hoặc video cho kế hoạch này.
+            </p>
+          )}
 
           {canEdit && (
-            <label className="inline-flex items-center gap-2 px-4 py-2 mt-4 rounded-full border text-xs font-medium cursor-pointer bg-white/80 dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:text-sky-600 dark:hover:border-sky-500 dark:hover:text-sky-300 shadow-sm transition-all duration-200">
-              <FaCloudUploadAlt className="text-sm" />
-              <span>Thêm hình ảnh kỷ niệm</span>
-              <input
-                hidden
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-              />
-            </label>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium cursor-pointer bg-white/80 dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:text-sky-600 dark:hover:border-sky-500 dark:hover:text-sky-300 shadow-sm transition-all duration-200">
+                <FaCloudUploadAlt className="text-sm" />
+                <span>Thêm hình ảnh</span>
+                <input
+                  hidden
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                />
+              </label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium cursor-pointer bg-white/80 dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 hover:border-purple-400 hover:text-purple-600 dark:hover:border-purple-500 dark:hover:text-purple-300 shadow-sm transition-all duration-200">
+                <FaVideo className="text-sm" />
+                <span>Thêm video</span>
+                <input
+                  hidden
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={handleVideoUpload}
+                />
+              </label>
+            </div>
           )}
         </div>
       </div>

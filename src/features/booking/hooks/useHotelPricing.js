@@ -32,7 +32,7 @@ export function useHotelPricing(ratePlan, checkIn, checkOut, roomsCount) {
   const pricingPerRoom = useMemo(() => {
     if (!ratePlan?.pricePerNight) return null;
 
-    // ====== TÍNH SỐ ĐÊM ======
+    // = TÍNH SỐ ĐÊM =
     let nights = 1;
     if (checkIn && checkOut) {
       const s = new Date(checkIn);

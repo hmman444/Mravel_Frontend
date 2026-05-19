@@ -13,7 +13,7 @@ import {
   suggestGeoLocations,
 } from "../services/catalogService";
 
-/* ====================== THUNKS ====================== */
+/* == THUNKS == */
 
 export const searchHotels = createAsyncThunk(
   "catalog/searchHotels",
@@ -115,7 +115,7 @@ export const suggestGeoLocationsThunk = createAsyncThunk(
   }
 );
 
-/* ====================== STATE ====================== */
+/* == STATE == */
 
 const initialListState = {
   items: [],
@@ -171,7 +171,7 @@ const initialState = {
   geoSuggest: { items: [], loading: false, error: null, q: "" },
 };
 
-/* ====================== SLICE ====================== */
+/* == SLICE == */
 
 const catalogSlice = createSlice({
   name: "catalog",
@@ -194,7 +194,7 @@ const catalogSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    /* ---------- Hotels search ---------- */
+    /*  Hotels search  */
     builder
       .addCase(searchHotels.pending, (state) => {
         state.hotels.loading = true;
@@ -263,6 +263,7 @@ const catalogSlice = createSlice({
       });
 
     /* ---------- Restaurants ---------- */
+    /*  Restaurants  */
     builder
       .addCase(searchRestaurants.pending, (state) => {
         state.restaurants.loading = true;
@@ -284,7 +285,7 @@ const catalogSlice = createSlice({
         state.restaurants.items = state.restaurants.items ?? [];
       });
 
-    /* ---------- POI ---------- */
+    /*  POI  */
     builder
       .addCase(searchPlaces.pending, (state) => {
         state.poi.loading = true;
@@ -306,7 +307,7 @@ const catalogSlice = createSlice({
         state.poi.items = state.poi.items ?? [];
       });
 
-    /* ---------- Place detail ---------- */
+    /*  Place detail  */
     builder
       .addCase(fetchPlaceDetail.pending, (state) => {
         state.detail.loading = true;
@@ -322,7 +323,7 @@ const catalogSlice = createSlice({
         state.detail.error = action.payload || "Không tìm thấy địa điểm";
       });
 
-    /* ---------- Hotel detail ---------- */
+    /*  Hotel detail  */
     builder
       .addCase(fetchHotelDetail.pending, (state) => {
         state.hotelDetail.loading = true;
@@ -338,7 +339,7 @@ const catalogSlice = createSlice({
         state.hotelDetail.error = action.payload || "Không tìm thấy khách sạn";
       });
 
-    /* ---------- Suggest ---------- */
+    /*  Suggest  */
     builder
       .addCase(suggestPlaces.pending, (state) => {
         state.suggest.loading = true;
@@ -353,7 +354,7 @@ const catalogSlice = createSlice({
         state.suggest.loading = false;
         state.suggest.error = action.payload || "Lỗi gợi ý địa điểm";
       })
-          /* ---------- Geo Suggest (kiểu Google) ---------- */
+          /*  Geo Suggest (kiểu Google)  */
     builder
       .addCase(suggestGeoLocationsThunk.pending, (state) => {
         state.geoSuggest.loading = true;
@@ -370,7 +371,7 @@ const catalogSlice = createSlice({
           action.payload || "Lỗi gợi ý vị trí ngoài hệ thống";
       });
 
-      /* ---------- Restaurant detail ---------- */
+      /*  Restaurant detail  */
     builder
       .addCase(fetchRestaurantDetail.pending, (state) => {
         state.restaurantDetail.loading = true;

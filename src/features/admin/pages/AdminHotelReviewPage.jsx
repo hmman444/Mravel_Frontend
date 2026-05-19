@@ -7,7 +7,7 @@ import ReasonModal from "../components/services/ReasonModal";
 import { showError, showSuccess } from "../../../utils/toastUtils";
 import { useAdminServices } from "../hooks/useAdminServices";
 
-// ✅ reuse y hệt partner sections
+//  reuse y hệt partner sections
 import BasicInfoSection from "../../partner/components/hotel/form/sections/BasicInfoSection";
 import ContactLocationSection from "../../partner/components/hotel/form/sections/ContactLocationSection";
 import DestinationLocationSection from "../../partner/components/hotel/form/sections/DestinationLocationSection";
@@ -102,15 +102,15 @@ export default function AdminHotelReviewPage() {
     }
   };
 
-  // ✅ map đúng “form structure partner”
+  //  map đúng “form structure partner”
   const form = useMemo(() => mapHotelDocToForm(hotel || {}), [hotel]);
 
-  // ✅ readonly: setField NO-OP
+  //  readonly: setField NO-OP
   const setField = () => {};
 
   return (
     <AdminLayout>
-      {/* ===== Header + Moderation actions ===== */}
+      {/*  Header + Moderation actions  */}
       <div className="mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
@@ -192,7 +192,7 @@ export default function AdminHotelReviewPage() {
         </div>
       </div>
 
-      {/* ===== Partner-form structure (READONLY) ===== */}
+      {/*  Partner-form structure (READONLY)  */}
       {detailLoading && !hotel ? (
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (

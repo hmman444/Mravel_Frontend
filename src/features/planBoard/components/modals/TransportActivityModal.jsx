@@ -99,7 +99,7 @@ export default function TransportActivityModal({
   const effectiveFromLocation = internalFromLocation || null;
   const effectiveToLocation = internalToLocation || null;
 
-  // ===== LOAD WHEN OPEN =====
+  //  LOAD WHEN OPEN 
   useEffect(() => {
     if (!open) return;
 
@@ -196,7 +196,7 @@ export default function TransportActivityModal({
     }
   }, [open, editingCard]);
 
-  // ===== SYNC label from locations -> text =====
+  //  SYNC label from locations -> text 
   useEffect(() => {
     if (!effectiveFromLocation) return;
     const label = getLocDisplayLabel(effectiveFromLocation, "");
@@ -209,7 +209,7 @@ export default function TransportActivityModal({
     if (label) setToPlaceText(label);
   }, [effectiveToLocation]);
 
-  // ===== STOPS =====
+  //  STOPS 
   const addStop = () => setStops((prev) => [...prev, ""]);
 
   const changeStop = (v, idx) => {
@@ -222,7 +222,7 @@ export default function TransportActivityModal({
 
   const removeStop = (idx) => setStops((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== EXTRA COSTS =====
+  //  EXTRA COSTS 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -239,7 +239,7 @@ export default function TransportActivityModal({
 
   const removeExtraCost = (idx) => setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== COST CALC =====
+  //  COST CALC 
   const baseEstimated = useMemo(() => Number(estimatedCostInput || 0), [estimatedCostInput]);
   const extraTotal = useMemo(() => calcExtraTotal(extraCosts), [extraCosts]);
   const estimatedTotal = useMemo(() => baseEstimated + extraTotal, [baseEstimated, extraTotal]);
@@ -249,7 +249,7 @@ export default function TransportActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({ editingCard, planMembers, parsedActual });
 
   const {
@@ -277,7 +277,7 @@ export default function TransportActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== DISTANCE / MAPS =====
+  //  DISTANCE / MAPS 
   const distanceKm = useMemo(() => {
     if (effectiveFromLocation?.lat == null || effectiveFromLocation?.lng == null) return null;
     if (effectiveToLocation?.lat == null || effectiveToLocation?.lng == null) return null;
@@ -300,7 +300,7 @@ export default function TransportActivityModal({
         )}&travelmode=driving`
       : null;
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
     const normalizedParticipants = participants.map((p) => (typeof p === "number" ? p : p.memberId));
@@ -321,7 +321,7 @@ export default function TransportActivityModal({
     return { cost, split: splitPayload, participants: normalizedParticipants };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -369,7 +369,7 @@ export default function TransportActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

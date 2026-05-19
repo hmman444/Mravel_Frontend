@@ -31,7 +31,7 @@ export function usePartnerHotelCreateForm({
       reader.readAsDataURL(file);
     });
 
-  // ===== images =====
+  //  images 
   const addImageByUrl = () => {
     setForm((p) => ({
       ...p,
@@ -89,7 +89,7 @@ export function usePartnerHotelCreateForm({
     }
   };
 
-  // ===== content =====
+  //  content 
   const addBlock = (payload) => {
     setForm((p) => {
       const fallback = {
@@ -131,7 +131,7 @@ export function usePartnerHotelCreateForm({
     }
   };
 
-  // ===== upload helpers =====
+  //  upload helpers 
   const uploadIfNeeded = async (item) => {
     if (item?.file instanceof File) {
       const remoteUrl = await uploadToCloudinary(item.file);

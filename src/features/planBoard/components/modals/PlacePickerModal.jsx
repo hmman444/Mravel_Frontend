@@ -1274,7 +1274,7 @@ export default function PlacePickerModal({
   );
 }
 
-/* ----------------------- SUB COMPONENTS ----------------------- */
+/*  SUB COMPONENTS  */
 
 function HotelPreviewMeta({ hotel }) {
   const avg = hotel.avgRating ?? hotel.reviewScore ?? null;

@@ -1,10 +1,9 @@
-import bg from "../../../assets/mountain-bg.jpg";
 
 export default function HeroSection({ children }) {
   return (
     <section
       className="relative bg-cover bg-center"
-      style={{ backgroundImage: `url(${bg})` }}
+      style={{ backgroundImage: "url(/assets/mountain-bg.jpg)" }}
     >
       {/* Main dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-slate-950/90" />

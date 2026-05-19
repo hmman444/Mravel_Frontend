@@ -11,6 +11,7 @@ const initialState = {
   page: 1, // UI page (1-based)
   size: 8,
   hasMore: true,
+  initialized: false,
 
   unreadCount: 0,
 
@@ -32,6 +33,17 @@ const apiMessage = (err) => {
   return msg || "Có lỗi xảy ra";
 };
 
+const SOCIAL_TYPES = new Set([
+  "FRIEND_REQUEST", "FRIEND_ACCEPTED",
+  "PLAN_INVITE", "COMMENT", "REPLY_COMMENT", "REACT",
+]);
+
+const safeDataJson = (raw) => {
+  if (!raw) return {};
+  try { return typeof raw === "string" ? JSON.parse(raw) : raw; }
+  catch { return {}; }
+};
+
 const normalizeNotiItem = (n) => {
   if (!n) return null;
 
@@ -39,19 +51,27 @@ const normalizeNotiItem = (n) => {
     ? { id: n.actorId, fullname: n.actorFullname, avatar: n.actorAvatar }
     : null);
 
-  // deepLink ưu tiên BE trả, fallback theo type
-  const deepLink =
-    n.deepLink ||
-    (n.type === "FRIEND_REQUEST" || n.type === "FRIEND_ACCEPTED"
-      ? (actor?.id ? `/profile/${actor.id}` : null)
-      : null);
+  const data = safeDataJson(n.dataJson);
 
-  // image ưu tiên BE trả, fallback avatar actor
-  const image =
-    n.image ||
-    (n.type === "FRIEND_REQUEST" || n.type === "FRIEND_ACCEPTED"
-      ? actor?.avatar
-      : null);
+  // deepLink: prefer backend-computed value, then compute locally as fallback
+  const deepLink = n.deepLink || (() => {
+    if (data?.deepLink) return data.deepLink;
+    if (n.type === "FRIEND_REQUEST" || n.type === "FRIEND_ACCEPTED")
+      return actor?.id ? `/profile/${actor.id}` : null;
+    if (["BOOKING_CONFIRMED","BOOKING_CANCELLED","BOOKING_CANCELLED_BY_PARTNER",
+         "BOOKING_EXPIRED","PAYMENT_SUCCESS","REFUND_PROCESSED"].includes(n.type))
+      return "/my-bookings";
+    if (["BOOKING_NEW_FOR_PARTNER","BOOKING_CANCELLED_FOR_PARTNER"].includes(n.type))
+      return "/partner/bookings";
+    if (["ACCOUNT_LOCKED","ACCOUNT_UNLOCKED","PASSWORD_CHANGED","LOGIN_ALERT"].includes(n.type))
+      return "/account/profile";
+    if (["PARTNER_APPROVED","PARTNER_REJECTED"].includes(n.type))
+      return "/partner/dashboard";
+    return null;
+  })();
+
+  // image: social notifications use actor avatar; system notifications have no image
+  const image = n.image || (SOCIAL_TYPES.has(n.type) ? actor?.avatar : null);
 
   return {
     ...n,
@@ -144,9 +164,9 @@ const normalizeList = (payload) => {
 // - realtime event: eventId
 const getNotiKey = (n) => n?.id ?? n?.eventId ?? null;
 
-/** =========================
+/** 
  * Thunks
- * ========================= */
+ *  */
 
 export const loadNotifications = createAsyncThunk(
   "notifications/load",
@@ -194,9 +214,9 @@ export const markAllReadThunk = createAsyncThunk(
   }
 );
 
-/** =========================
+/** 
  * Slice
- * ========================= */
+ *  */
 
 const notificationsSlice = createSlice({
   name: "notifications",
@@ -247,6 +267,7 @@ const notificationsSlice = createSlice({
       })
       .addCase(loadNotifications.fulfilled, (state, action) => {
         state.loading = false;
+        state.initialized = true;
 
         const { items, hasMore, unreadCount } = normalizeList(action.payload);
 
@@ -258,6 +279,7 @@ const notificationsSlice = createSlice({
       })
       .addCase(loadNotifications.rejected, (state, action) => {
         state.loading = false;
+        state.initialized = true;
         state.error = action.payload || action.error.message;
       })
 

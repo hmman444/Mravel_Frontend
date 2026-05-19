@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-// ===== HOTEL (cũ) =====
+//  HOTEL (cũ) 
 import {
   fetchGuestMyBookings,
   lookupBookingPublic,
@@ -15,7 +15,7 @@ import {
   claimMyGuestBookings,
 } from "../slices/bookingPrivateSlice";
 
-// ===== RESTAURANT (mới) =====
+//  RESTAURANT (mới) 
 import {
   fetchGuestMyRestaurantBookings,
   lookupRestaurantBookingPublic,
@@ -101,7 +101,7 @@ export function useMyBookingsPage() {
     dispatch(fetchMyUserRestaurantBookings());
   }, [dispatch, tab, isLoggedIn, user?.id]);
 
-  // ===== Actions (DEVICE) =====
+  //  Actions (DEVICE) 
   const onRefreshDevice = useCallback(() => {
     if (type === "HOTEL") dispatch(fetchGuestMyBookings());
     else dispatch(fetchGuestMyRestaurantBookings());
@@ -117,7 +117,7 @@ export function useMyBookingsPage() {
     }
   }, [dispatch, type]);
 
-  // ===== Actions (ACCOUNT) =====
+  //  Actions (ACCOUNT) 
   const onRefreshAccount = useCallback(() => {
     if (!isLoggedIn) return;
 
@@ -125,7 +125,7 @@ export function useMyBookingsPage() {
     else dispatch(fetchMyUserRestaurantBookings());
   }, [dispatch, type, isLoggedIn, user?.id]);
 
-  // ===== Claim (gộp guest -> account) =====
+  //  Claim (gộp guest -> account) 
   const onClaimToAccount = useCallback(async () => {
     if (!isLoggedIn) {
       navigate(`/login?redirect=${encodeURIComponent("/my-bookings")}`);
@@ -143,7 +143,7 @@ export function useMyBookingsPage() {
     }
   }, [dispatch, type, isLoggedIn, user?.id, navigate]);
 
-  // ===== Lookup submit ( theo type, không dựa prefix nữa) =====
+  //  Lookup submit ( theo type, không dựa prefix nữa) 
   const onSubmitLookup = useCallback(async () => {
     const payload = {
       bookingCode: (form.bookingCode || "").trim().toUpperCase(),
@@ -165,13 +165,13 @@ export function useMyBookingsPage() {
     else dispatch(clearRestaurantLookup());
   }, [dispatch, type]);
 
-  // ===== Counts =====
+  //  Counts 
   const deviceHotelCount = useMemo(() => hotelMy?.items?.length || 0, [hotelMy?.items]);
   const deviceRestCount = useMemo(() => restMy?.items?.length || 0, [restMy?.items]);
   const accountHotelCount = useMemo(() => hotelAcc?.items?.length || 0, [hotelAcc?.items]);
   const accountRestCount = useMemo(() => restAcc?.items?.length || 0, [restAcc?.items]);
 
-  // ===== Active list theo type =====
+  //  Active list theo type 
   const deviceItems = type === "HOTEL" ? (hotelMy?.items || []) : (restMy?.items || []);
   const deviceLoading = type === "HOTEL" ? !!hotelMy?.loading : !!restMy?.loading;
   const deviceError = type === "HOTEL" ? hotelMy?.error : restMy?.error;

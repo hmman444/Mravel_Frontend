@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -19,6 +19,8 @@ import ProfileHeader from "../components/ProfileHeader";
 import ProfileSidebar from "../components/ProfileSidebar";
 import ProfileFriendsAboutSection from "../components/ProfileFriendsAboutSection";
 import LoadingOverlay from "../../../components/LoadingOverlay";
+import { createPrivateConversation } from "../../chat/services/chatService";
+import { upsertConversation, setActiveConversation } from "../../chat/slices/chatSlice";
 function buildUserView(profile, photoCount) {
   if (!profile) return null;
 
@@ -66,6 +68,7 @@ function buildUserView(profile, photoCount) {
 export default function UserPublicProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { user: me } = useSelector((s) => s.auth);
 
@@ -112,6 +115,18 @@ export default function UserPublicProfilePage() {
   const isFeedEmpty = !loading && (!plans || plans.length === 0);
 
   const friendActions = useFriendActions(userView?.id, relationship, reload);
+
+  const handleMessage = useCallback(async () => {
+    if (!userView?.id) return;
+    try {
+      const conv = await createPrivateConversation(userView.id);
+      dispatch(upsertConversation(conv));
+      dispatch(setActiveConversation(conv.id));
+      navigate(`/chat/${conv.id}`);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [userView?.id, dispatch, navigate]);
 
   const isInitialLoading = loading && !profile;
   if (isInitialLoading) {
@@ -175,6 +190,7 @@ export default function UserPublicProfilePage() {
             onChangeTab={setActiveTab}
             error={error}
             onOpenEdit={() => setOpenEdit(true)}
+            onMessage={handleMessage}
           />
 
           {/* MAIN AREA */}

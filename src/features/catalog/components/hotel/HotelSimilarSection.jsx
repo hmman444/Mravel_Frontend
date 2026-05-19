@@ -6,7 +6,7 @@ import { FiHeart } from "react-icons/fi";
 import FavoriteButton from "../../../../components/FavoriteButton";
 import { useCatalogHotels } from "../../../catalog/hooks/useCatalogHotels";
 
-/* ====== ảnh fallback: nên đổi về ảnh local của bạn (public/...) ====== */
+/* = ảnh fallback: nên đổi về ảnh local của bạn (public/...) = */
 const FALLBACK_IMG =
   "/images/placeholders/hotel.jpg"; // tạo file này trong public
 
@@ -146,7 +146,7 @@ export default function HotelSimilarSection({ hotel }) {
   );
 }
 
-/* ===== Card giống HotelMiniCard (grid) nhưng dùng cho slider ===== */
+/*  Card giống HotelMiniCard (grid) nhưng dùng cho slider  */
 function SimilarHotelCard({ hotel, onClick }) {
   const {
     name,

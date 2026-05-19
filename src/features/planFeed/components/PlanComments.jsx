@@ -15,20 +15,25 @@ export default function PlanComments({
 
   // đóng/mở toàn bộ khu bình luận
   const [showComments, setShowComments] = useState(false);
+  const [sortBy, setSortBy] = useState("OLDEST"); // OLDEST | NEWEST | MOST_REACTIONS
 
   const internalRef = useRef(null);
   const inputRef = externalRef || internalRef;
-  const { sendComment } = usePlans();
+  const { sendComment, sendCommentReact } = usePlans();
 
-  // ⬇️ luôn gọi useMemo TRƯỚC mọi return có điều kiện
+  const totalReactions = (c) =>
+    Object.values(c.reactions || {}).reduce((a, b) => a + b, 0);
+
   const sortedComments = useMemo(() => {
     if (!comments) return [];
-    return [...comments].sort((a, b) => {
-      const ta = new Date(a.createdAt || 0).getTime();
-      const tb = new Date(b.createdAt || 0).getTime();
-      return ta - tb; // cũ -> mới
-    });
-  }, [comments]);
+    const arr = [...comments];
+    if (sortBy === "NEWEST")
+      return arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    if (sortBy === "MOST_REACTIONS")
+      return arr.sort((a, b) => totalReactions(b) - totalReactions(a));
+    // OLDEST (default)
+    return arr.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+  }, [comments, sortBy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!me) {
@@ -38,7 +43,6 @@ export default function PlanComments({
     setIsReady(true);
   }, [me]);
 
-  // ❗ Từ đây trở xuống KHÔNG còn hook nào nữa
   if (!isReady || !me) {
     return (
       <div className="mt-3 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 animate-pulse">
@@ -70,6 +74,8 @@ export default function PlanComments({
       setLoading(false);
     }
   };
+
+  const handleCommentReact = (commentId, type) => sendCommentReact(planId, commentId, type);
 
   const handleReply = async (parentId, replyText) => {
     const reply = {
@@ -114,22 +120,32 @@ export default function PlanComments({
         />
       </form>
 
-      {/* Tổng số + nút xem/ẩn bình luận */}
+      {/* Header: count + sort controls + show/hide */}
       {sortedComments.length > 0 && (
-        <div className="mt-3 mb-1 flex items-center justify-between">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {sortedComments.length} bình luận
-          </p>
-
+        <div className="mt-3 mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+          {/* Count + toggle */}
           <button
             type="button"
             onClick={() => setShowComments((prev) => !prev)}
-            className="text-xs text-sky-600 dark:text-sky-400 hover:underline"
+            className="text-xs text-sky-600 dark:text-sky-400 hover:underline shrink-0"
           >
             {showComments
               ? "Ẩn bình luận"
               : `Xem bình luận (${sortedComments.length})`}
           </button>
+
+          {/* Sort combobox — only visible when expanded */}
+          {showComments && (
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="ml-auto text-[11px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 cursor-pointer outline-none focus:ring-1 focus:ring-sky-400"
+            >
+              <option value="OLDEST">Cũ nhất</option>
+              <option value="NEWEST">Mới nhất</option>
+              <option value="MOST_REACTIONS">Nhiều React nhất</option>
+            </select>
+          )}
         </div>
       )}
 
@@ -152,6 +168,7 @@ export default function PlanComments({
                 comment={c}
                 me={me}
                 onReply={handleReply}
+                onReact={handleCommentReact}
               />
             ))}
           </div>

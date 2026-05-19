@@ -50,7 +50,7 @@ export default function DetailThumbStripPeek({
   );
 }
 
-/* ---------------- core ---------------- */
+/*  core  */
 
 function AnimatedStrip({ items, interval, visible, gap, aspect, edgeFade, edgePadding, buttonOffset, minThumbWidth, containerClass }) {
   const [list, setList] = useState(items);
@@ -208,7 +208,7 @@ function AnimatedStrip({ items, interval, visible, gap, aspect, edgeFade, edgePa
   );
 }
 
-/* ---------------- layout helpers ---------------- */
+/*  layout helpers  */
 
 function Outer({ children, refObj, className }) {
   return (

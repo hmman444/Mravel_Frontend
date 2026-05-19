@@ -110,7 +110,7 @@ export default function RestaurantBookingForm({
   const [phoneError, setPhoneError] = useState("");
   const [emailError, setEmailError] = useState("");
 
-  // ===== realtime validate (khi value thay đổi) =====
+  //  realtime validate (khi value thay đổi) 
   useEffect(() => {
     const v = (contactName || "").trim();
     if (!v) setNameError("Vui lòng nhập họ tên.");
@@ -135,7 +135,7 @@ export default function RestaurantBookingForm({
     setEmailError(EMAIL_FULL_REGEX.test(v) ? "" : "Email chưa đúng định dạng (vd: name@gmail.com).");
   }, [contactEmail]);
 
-  // ===== handlers: chặn sai ngay lúc nhập =====
+  //  handlers: chặn sai ngay lúc nhập 
   const handleNameChange = (e) => {
     const next = sanitizeName(e.target.value);
     onContactNameChange?.(next);

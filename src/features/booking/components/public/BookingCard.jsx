@@ -593,7 +593,7 @@ export default function BookingCard({
 
   return (
     <>
-      {/* ====== CARD ====== */}
+      {/* = CARD = */}
       <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
@@ -730,7 +730,7 @@ export default function BookingCard({
         ) : null}
       </article>
 
-      {/* ====== MODAL (PORTAL) ====== */}
+      {/* = MODAL (PORTAL) = */}
       {modalNode}
 
       <CancelBookingModal

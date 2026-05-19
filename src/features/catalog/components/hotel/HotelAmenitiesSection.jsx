@@ -138,7 +138,7 @@ export default function HotelAmenitiesSection({ hotel }) {
   );
 }
 
-// -------- SUB COMPONENT --------
+//  SUB COMPONENT 
 
 function AmenityColumn({ title, icon, items }) {
   if (!items || !items.length) return null;
@@ -169,7 +169,7 @@ function AmenityColumn({ title, icon, items }) {
   );
 }
 
-// -------- CLASSIFY FUNCTION – GIỐNG TRAVELOKA STYLE --------
+//  CLASSIFY FUNCTION – GIỐNG TRAVELOKA STYLE 
 
 function classifyAmenity(a, isRoomLevel) {
   if (!a) return null;

@@ -28,13 +28,13 @@ export default function HotelBookingPriceSummaryCard({
   const displayNights =
     typeof nights === "number" && nights > 0 ? nights : 1;
 
-  // ====== BASE AMOUNTS (FULL) ======
+  // = BASE AMOUNTS (FULL) =
   const baseRoom = safeNumber(roomPrice);
   const baseTax = safeNumber(taxAndFee);
   const baseFinal = safeNumber(finalTotal ?? baseRoom + baseTax);
   const baseOriginal = safeNumber(originalTotal ?? baseFinal);
 
-  // ====== FACTOR THEO HÌNH THỨC THANH TOÁN ======
+  // = FACTOR THEO HÌNH THỨC THANH TOÁN =
   const factor =
     isPayAtHotel && paymentOption === "DEPOSIT"
       ? DEPOSIT_PERCENT / 100

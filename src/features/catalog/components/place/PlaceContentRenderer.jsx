@@ -1,7 +1,7 @@
 export default function PlaceContentRenderer({ content = [] }) {
   if (!content?.length) return null;
 
-  // --- helper: lấy lat/lon an toàn từ block ---
+  //  helper: lấy lat/lon an toàn từ block 
   const pickLatLon = (b) => {
     if (Array.isArray(b.mapLocation) && b.mapLocation.length >= 2) {
       const lon = Number(b.mapLocation[0]);
@@ -124,7 +124,7 @@ export default function PlaceContentRenderer({ content = [] }) {
   );
 }
 
-/** ----- Chỉ nâng cấp INFOBOX, các phần khác giữ nguyên ----- */
+/**  Chỉ nâng cấp INFOBOX, các phần khác giữ nguyên  */
 function Infobox({ text }) {
   // hỗ trợ **bold** đơn giản trong chuỗi text
   const html = (text || "").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");

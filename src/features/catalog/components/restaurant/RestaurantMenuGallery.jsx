@@ -1,12 +1,12 @@
 import React, { useMemo, useState, useEffect } from "react";
 
-/** ---- helpers ---- */
+/**  helpers  */
 function pickMenuImages(restaurant) {
   const arr = Array.isArray(restaurant?.menuImages) ? restaurant.menuImages : [];
   return arr.map((img) => img?.url || img?.imageUrl || img?.src).filter(Boolean);
 }
 
-/** ---- Lightbox modal ---- */
+/**  Lightbox modal  */
 function MenuLightbox({ images, startIndex = 0, onClose }) {
   const [index, setIndex] = useState(startIndex);
 
@@ -92,7 +92,7 @@ function MenuLightbox({ images, startIndex = 0, onClose }) {
   );
 }
 
-/** ---- Public component ---- */
+/**  Public component  */
 export default function RestaurantMenuGallery({ restaurant }) {
   const allImages = useMemo(() => pickMenuImages(restaurant), [restaurant]);
 

@@ -32,7 +32,7 @@
       },
     ];
 
-    /* ----------------------------- CALENDAR LOGIC ----------------------------- */
+    /*  CALENDAR LOGIC  */
     const today = new Date();
 
     const [currentMonth, setCurrentMonth] = useState(
@@ -60,7 +60,7 @@
       };
     });
 
-    /* ----------------------------- PLAN EVENTS ----------------------------- */
+    /*  PLAN EVENTS  */
     function getPlansForDate(date) {
       if (!date) return [];
 
@@ -75,7 +75,7 @@
       });
     }
 
-    /* ----------------------------- MONTH CONTROL ----------------------------- */
+    /*  MONTH CONTROL  */
     const changeMonth = (dir) => {
       let newMonth = currentMonth + dir;
       let newYear = currentYear;

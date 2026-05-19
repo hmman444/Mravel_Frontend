@@ -29,7 +29,7 @@ import { mapRestaurantDocToForm } from "../../partner/utils/restaurantFormUtils"
 /** === partner amenities hook (reuse) === */
 import { usePartnerAmenities } from "../../partner/hooks/usePartnerAmenities";
 
-/** ===== helpers ===== */
+/**  helpers  */
 const soft = {
   btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60",
   btnPrimary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
@@ -89,7 +89,7 @@ export default function AdminRestaurantReviewPage() {
     return p?.partnerEmail || p?.partnerName || p?.partnerId || "—";
   }, [restaurant]);
 
-  /** ✅ map doc -> form, đúng như PartnerRestaurantFormPage */
+  /**  map doc -> form, đúng như PartnerRestaurantFormPage */
   const form = useMemo(() => {
     return mapRestaurantDocToForm(restaurant || {});
   }, [restaurant]);
@@ -132,7 +132,7 @@ export default function AdminRestaurantReviewPage() {
 
   return (
     <AdminLayout>
-      {/* ===== Moderation header ===== */}
+      {/*  Moderation header  */}
       <div className="mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
@@ -232,7 +232,7 @@ export default function AdminRestaurantReviewPage() {
         </div>
       </div>
 
-      {/* ===== Form-like details (readonly) ===== */}
+      {/*  Form-like details (readonly)  */}
       {detailLoading && !restaurant ? (
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (

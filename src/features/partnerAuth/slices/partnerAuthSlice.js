@@ -232,7 +232,7 @@ const partnerAuthSlice = createSlice({
       })
       .addCase(fetchCurrentPartner.fulfilled, (s, a) => {
         s.loading = false;
-        s.partner = a.payload;
+        s.partner = a.payload?.data ?? a.payload;
       })
       .addCase(fetchCurrentPartner.rejected, (s, a) => {
         s.loading = false;

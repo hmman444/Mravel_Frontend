@@ -16,7 +16,7 @@ import {
   copyPlan as copyPlanApi,
 } from "../services/planBoardService";
 
-// ================== helpers ==================
+// === helpers ===
 const pad2 = (n) => String(n).padStart(2, "0");
 
 function parseDateSmart(input) {

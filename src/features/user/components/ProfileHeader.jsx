@@ -20,6 +20,7 @@ export default function ProfileHeader({
   onChangeTab,
   error,
   onOpenEdit,
+  onMessage,
 }) {
   const tabs = [
     { key: "feed", label: "Bài viết" },
@@ -192,6 +193,7 @@ export default function ProfileHeader({
 
                 <button
                   type="button"
+                  onClick={onMessage}
                   className="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                 >
                   <MessageCircle className="w-4 h-4" />

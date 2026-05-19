@@ -8,7 +8,7 @@ export default function ImagesSection({
   setCover,
   removeImageAt,
   updateImageField,
-  disabled = false, // ✅
+  disabled = false, // 
 }) {
   return (
     <details open className="group">

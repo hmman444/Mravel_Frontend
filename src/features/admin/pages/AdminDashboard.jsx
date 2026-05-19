@@ -26,7 +26,7 @@ import {
   Legend,
 } from "recharts";
 
-/* ===================== MOCK DATA (CỨNG) ===================== */
+/* = MOCK DATA (CỨNG) = */
 
 const MOCK = {
   overview: {
@@ -146,7 +146,7 @@ const MOCK = {
   ],
 };
 
-/* ===================== UI TOKENS ===================== */
+/* = UI TOKENS = */
 
 const ui = {
   pageBg: "bg-slate-50 dark:bg-slate-950",
@@ -245,7 +245,7 @@ function AlertBox({ level, title, desc }) {
   );
 }
 
-/* ===================== PAGE ===================== */
+/* = PAGE = */
 
 export default function AdminDashboard() {
   const [range, setRange] = useState("weekly"); // today | weekly | monthly | yearly

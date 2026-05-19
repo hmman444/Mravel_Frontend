@@ -35,7 +35,7 @@ export function useRestaurantBookingPage() {
   const [params] = useSearchParams();
   const dispatch = useDispatch();
 
-  // ===== query from RestaurantBookingBox =====
+  //  query from RestaurantBookingBox 
   const restaurantSlug = params.get("restaurantSlug") || "";
   const qpDate = params.get("date") || ""; // YYYY-MM-DD
   const qpTime = params.get("time") || ""; // HH:mm
@@ -44,12 +44,12 @@ export function useRestaurantBookingPage() {
   const qpTableTypeId = params.get("tableTypeId") || "";
   const qpTables = Number(params.get("tables") || 1);
 
-  // ===== state from store =====
+  //  state from store 
   const { data: restaurant, loading } = useSelector((s) => s.catalog.restaurantDetail || {});
   const { availability, payment } = useSelector((s) => s.bookingRestaurant);
   const openingHours = restaurant?.openingHours || restaurant?.opening_hours || [];
 
-  // ===== auth =====
+  //  auth 
   const { accessToken, user } = useSelector((s) => s.auth);
   const isLoggedIn = !!accessToken;
   const userId = isLoggedIn ? (user?.id ?? null) : null;
@@ -58,7 +58,7 @@ export function useRestaurantBookingPage() {
     if (isLoggedIn && !user) dispatch(fetchCurrentUser());
   }, [dispatch, isLoggedIn, user]);
 
-  // ===== contact (FIX: có setter đầy đủ) =====
+  //  contact (FIX: có setter đầy đủ) 
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -74,7 +74,7 @@ export function useRestaurantBookingPage() {
     setContactPhone((prev) => prev || user.phone || "");
   }, [user]);
 
-  // ===== booking inputs =====
+  //  booking inputs 
   const [adults, setAdults] = useState(Number.isFinite(qpAdults) ? qpAdults : 2);
   const [children, setChildren] = useState(Number.isFinite(qpChildren) ? qpChildren : 0);
 
@@ -97,7 +97,7 @@ export function useRestaurantBookingPage() {
     Number.isFinite(qpTables) ? Math.max(1, qpTables) : 1
   );
 
-  // ===== load restaurant detail =====
+  //  load restaurant detail 
   useEffect(() => {
     if (restaurantSlug) dispatch(fetchRestaurantDetail(restaurantSlug));
   }, [dispatch, restaurantSlug]);
@@ -144,7 +144,7 @@ export function useRestaurantBookingPage() {
     [setDate, setTime]
   );
 
-  // ===== availability check =====
+  //  availability check 
   useEffect(() => {
     if (!restaurant?.id || !tableTypeId || !date || !time) return;
 
@@ -172,7 +172,7 @@ export function useRestaurantBookingPage() {
   const isEnough = availability?.data?.isEnough ?? true;
   const DEFAULT_DURATION_MINUTES = 90;
 
-  // ===== pay =====
+  //  pay 
   const onPay = useCallback(async () => {
     if (!restaurant || !tableTypeId || !date || !time) return;
 

@@ -21,7 +21,7 @@ const apiMessage = (err) => {
   return msg || "Có lỗi xảy ra";
 };
 
-/* ====== THUNKS ====== */
+/* = THUNKS = */
 export const loadDestinations = createAsyncThunk(
   "adminPlace/loadDestinations",
   async (params, { rejectWithValue }) => {
@@ -114,7 +114,7 @@ export const createPlaceThunk = createAsyncThunk(
   }
 );
 
-/* ====== STATE ====== */
+/* = STATE = */
 const initialListState = {
   items: [],
   page: 0,

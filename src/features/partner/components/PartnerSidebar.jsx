@@ -56,7 +56,7 @@ export default function PartnerSidebar() {
     return location.pathname === to || location.pathname.startsWith(to + "/");
   };
 
-  // ====== Y CHANG ADMIN (classes giữ nguyên) ======
+  // = Y CHANG ADMIN (classes giữ nguyên) =
   const asideBase = [
     "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)]",
     "border-r border-slate-200/70 dark:border-slate-800",

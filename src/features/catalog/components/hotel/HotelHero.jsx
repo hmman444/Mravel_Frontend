@@ -87,7 +87,7 @@ export default function HotelHero() {
 
   return (
     <header className="relative overflow-hidden text-white pb-10 pt-8">
-      {/* ===== BACKGROUND (dịu, dễ nhìn) ===== */}
+      {/*  BACKGROUND (dịu, dễ nhìn)  */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0EA5E9] via-[#2563EB] to-[#1E3A8A]" />
       <div className="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-white/12 blur-3xl" />
       <div className="absolute -bottom-28 -right-28 w-[560px] h-[560px] rounded-full bg-cyan-300/20 blur-3xl" />
@@ -212,7 +212,7 @@ export default function HotelHero() {
   );
 }
 
-/* ---------------------- BANNER CARD ---------------------- */
+/*  BANNER CARD  */
 
 function BannerFull({ banner, className = "" }) {
   if (!banner) return null;

@@ -22,7 +22,7 @@ const toError = (error, fallback = "Lỗi kết nối đến server") => {
   return { success: false, message: fallback };
 };
 
-// ===== ME =====
+//  ME 
 export const getPartnerMe = async () => {
   try {
     const res = await api.get(`${PARTNER_PREFIX}/me`);
@@ -32,7 +32,7 @@ export const getPartnerMe = async () => {
   }
 };
 
-// ===== SERVICES: HOTELS =====
+//  SERVICES: HOTELS 
 export const listPartnerHotels = async ({ status, page = 0, size = 10 } = {}) => {
   try {
     const res = await api.get(`${PARTNER_PREFIX}/hotels`, {
@@ -110,7 +110,7 @@ export const requestUnlockPartnerHotel = async (id, reason) => {
   }
 };
 
-// ===== SERVICES: RESTAURANTS =====
+//  SERVICES: RESTAURANTS 
 export const listPartnerRestaurants = async ({ status, page = 0, size = 10 } = {}) => {
   try {
     const res = await api.get(`${PARTNER_PREFIX}/restaurants`, {
@@ -188,7 +188,7 @@ export const requestUnlockPartnerRestaurant = async (id, reason) => {
   }
 };
 
-// ===== BOOKINGS =====
+//  BOOKINGS 
 export const listPartnerHotelBookings = async ({ status, page = 0, size = 10 } = {}) => {
   try {
     const res = await api.get(`${PARTNER_PREFIX}/bookings/hotels`, {
@@ -255,7 +255,7 @@ export const cancelPartnerRestaurantBooking = async (bookingCode, reason) => {
   }
 };
 
-// ===== STATS =====
+//  STATS 
 export const getPartnerStatsByStatus = async ({ from, to } = {}) => {
   try {
     const res = await api.get(`${PARTNER_PREFIX}/stats/status`, {

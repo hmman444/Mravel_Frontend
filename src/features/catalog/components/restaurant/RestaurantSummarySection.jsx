@@ -1,13 +1,13 @@
 // src/features/catalog/components/restaurant/RestaurantSummarySection.jsx
 import React from "react";
 
-/* ---------- UI bits ---------- */
+/*  UI bits  */
 const SectionTitle = ({ children }) => (
   <h3 className="mt-5 first:mt-0 font-semibold text-gray-900 dark:text-gray-100">{children}</h3>
 );
 const Bullet = ({ children }) => <li className="leading-relaxed">- {children}</li>;
 
-/* ---------- Helpers: ép dữ liệu về text ---------- */
+/*  Helpers: ép dữ liệu về text  */
 const toText = (v) => {
   if (v == null) return "";
   if (typeof v === "string" || typeof v === "number") return String(v);
@@ -20,7 +20,7 @@ const toText = (v) => {
 const listToLine = (arr) =>
   Array.isArray(arr) ? arr.map(toText).filter(Boolean).join(", ") : "";
 
-/* ---------- Extractors từ RestaurantDoc ---------- */
+/*  Extractors từ RestaurantDoc  */
 const getSuitabilities = (r) => r?.suitableFor ?? [];
 const getSpecialties = (r) => r?.signatureDishes ?? [];
 const getAmbience = (r) => r?.ambience ?? [];

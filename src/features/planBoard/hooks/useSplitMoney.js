@@ -18,7 +18,7 @@ export function useSplitMoney({ editingCard, planMembers = [], parsedActual }) {
   const [payerExternalName, setPayerExternalName] = useState("");
   const [selectedMemberIds, setSelectedMemberIds] = useState([]);
 
-  // ===== LOAD TỪ editingCard (khi mở modal sửa) =====
+  //  LOAD TỪ editingCard (khi mở modal sửa) 
   useEffect(() => {
     // tạo mới → reset
     if (!editingCard) {

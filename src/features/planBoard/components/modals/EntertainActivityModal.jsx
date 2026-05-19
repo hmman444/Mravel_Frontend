@@ -71,7 +71,7 @@ export default function EntertainActivityModal({
   const [internalEntertainLocation, setInternalEntertainLocation] = useState(null);
   const effectiveEntertainLocation = internalEntertainLocation || null;
 
-  // ===== LOAD =====
+  //  LOAD 
   useEffect(() => {
     if (!open) return;
 
@@ -133,7 +133,7 @@ export default function EntertainActivityModal({
     }
   }, [open, editingCard]);
 
-  // ===== SYNC LOCATION -> NAME + ADDRESS =====
+  //  SYNC LOCATION -> NAME + ADDRESS 
   useEffect(() => {
     if (!effectiveEntertainLocation) return;
 
@@ -144,7 +144,7 @@ export default function EntertainActivityModal({
     if (full) setAddress(full);
   }, [effectiveEntertainLocation]);
 
-  // ===== EXTRA COSTS CRUD =====
+  //  EXTRA COSTS CRUD 
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
@@ -162,7 +162,7 @@ export default function EntertainActivityModal({
   const removeExtraCost = (idx) =>
     setExtraCosts((prev) => prev.filter((_, i) => i !== idx));
 
-  // ===== COST CALC =====
+  //  COST CALC 
   // baseEstimated = vé (không gồm extra) -> để lưu vào cost.estimatedCost (tránh double)
   const baseEstimated = useMemo(() => {
     const p = Number(ticketPrice || 0);
@@ -180,7 +180,7 @@ export default function EntertainActivityModal({
     return a > 0 ? a : estimatedTotal;
   }, [actualCost, estimatedTotal]);
 
-  // ===== SPLIT HOOK =====
+  //  SPLIT HOOK 
   const splitHook = useSplitMoney({
     editingCard,
     planMembers,
@@ -212,7 +212,7 @@ export default function EntertainActivityModal({
     totalExact,
   } = splitHook;
 
-  // ===== BUILD PAYLOAD =====
+  //  BUILD PAYLOAD 
   const buildPayload = () => {
     const normalizedExtraCosts = normalizeExtraCosts(extraCosts);
 
@@ -239,7 +239,7 @@ export default function EntertainActivityModal({
     };
   };
 
-  // ===== SUBMIT =====
+  //  SUBMIT 
   const handleSubmit = () => {
     const newErrors = {};
 
@@ -287,7 +287,7 @@ export default function EntertainActivityModal({
     onClose?.();
   };
 
-  // ===== HEADER / FOOTER =====
+  //  HEADER / FOOTER 
   const headerRight = (
     <ActivityHeaderCostSummary
       parsedActual={parsedActual}

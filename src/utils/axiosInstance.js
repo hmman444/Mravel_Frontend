@@ -1,11 +1,13 @@
 import axios from "axios";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
+import { decodeJwtPayload } from "./jwt";
 import { showError } from "./toastUtils";
 import { getStore } from "../redux/storeInjector";
+import { ErrorCodes } from "../constants/errorCodes";
 
 import { setTokensRedux, setUser } from "../features/auth/slices/authSlice";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -19,6 +21,19 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    const store = getStore();
+    const authState = store?.getState?.()?.auth;
+    const tokenPayload = accessToken ? decodeJwtPayload(accessToken) : null;
+    const userId =
+      authState?.user?.id ??
+      authState?.user?.userId ??
+      tokenPayload?.id ??
+      tokenPayload?.userId;
+    if (userId) {
+      config.headers["X-User-Id"] = userId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -40,6 +55,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
     const message = error.response?.data?.message || "";
+    const errorCode = error.response?.data?.data?.code;
 
     if (
       (status === 401 ||
@@ -76,6 +92,11 @@ api.interceptors.response.use(
 
         // Release the refresh lock BEFORE any further api calls to prevent deadlock.
         // Any request that arrived while isRefreshing=true will now proceed.
+        const me = await api.get("/auth/me");
+        const currentUser = me?.data?.data ?? me?.data ?? null;
+
+        store.dispatch(setUser(currentUser));
+
         onRefreshed(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         isRefreshing = false;
@@ -89,18 +110,28 @@ api.interceptors.response.use(
       } catch (err) {
         console.error("❌ Refresh token failed:", err);
         clearTokens();
+        const store = getStore();
+        store.dispatch(setTokensRedux({ accessToken: null, refreshToken: null }));
+        store.dispatch(setUser(null));
         window.location.href = "/login";
         return Promise.reject(err);
       }
     }
 
     // access requests
-    if (message.includes("Bạn đã gửi yêu cầu trước đó")) {
+    if (
+      errorCode === ErrorCodes.ACCESS_REQUEST_ALREADY_SUBMITTED ||
+      message.includes("Bạn đã gửi yêu cầu trước đó")
+    ) {
       showError("Bạn đã gửi yêu cầu trước đó.");
       return Promise.reject(error);
     }
 
-    if (message.includes("Bạn đã có quyền truy cập")) {
+    if (
+      errorCode === ErrorCodes.ACCESS_ALREADY_GRANTED ||
+      errorCode === ErrorCodes.ACCESS_VIEW_ALREADY_GRANTED ||
+      message.includes("Bạn đã có quyền truy cập")
+    ) {
       showError("Bạn đã có quyền truy cập.");
       return Promise.reject(error);
     }

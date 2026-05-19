@@ -228,7 +228,7 @@ export default function MyBookingsPage() {
             </p>
           </div>
 
-          {/* ===== Tabs lớn: ACCOUNT / DEVICE / LOOKUP ===== */}
+          {/*  Tabs lớn: ACCOUNT / DEVICE / LOOKUP  */}
           <div className="mb-5 flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="inline-flex rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 shadow-sm">
               <button
@@ -285,7 +285,7 @@ export default function MyBookingsPage() {
             </p>
           </div>
 
-          {/* ===== Content theo tab lớn ===== */}
+          {/*  Content theo tab lớn  */}
           {tab === "ACCOUNT" && renderAccount()}
           {tab === "DEVICE" && renderDevice()}
 

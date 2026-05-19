@@ -30,7 +30,7 @@ import {
   getPartnerRevenue,
 } from "../services/partnerService";
 
-/* ====================== THUNKS ====================== */
+/* == THUNKS == */
 
 // ME
 export const fetchPartnerMe = createAsyncThunk(
@@ -229,7 +229,7 @@ export const fetchPartnerRevenue = createAsyncThunk(
   }
 );
 
-/* ====================== STATE ====================== */
+/* == STATE == */
 
 const initialListState = {
   items: [],
@@ -260,7 +260,7 @@ const initialState = {
   action: { loading: false, error: null, lastAction: null },
 };
 
-/* ====================== SLICE ====================== */
+/* == SLICE == */
 
 const partnerSlice = createSlice({
   name: "partner",
