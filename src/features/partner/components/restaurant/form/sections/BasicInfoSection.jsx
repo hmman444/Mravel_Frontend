@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { slugifyVN } from "../../../../utils/restaurantFormUtils";
 
 export default function BasicInfoSection({ form, setField, disabled }) {
-  const [slugTouched, setSlugTouched] = useState(false);
+  // If form mounts with an existing slug (edit mode), treat it as already user-controlled
+  // so the auto-sync effect never silently rewrites a slug that public URLs depend on.
+  const [slugTouched, setSlugTouched] = useState(() => Boolean(form?.slug));
 
   useEffect(() => {
     if (slugTouched) return;
@@ -14,6 +16,14 @@ export default function BasicInfoSection({ form, setField, disabled }) {
 
   const descMax = 500;
   const descLen = useMemo(() => String(form.description || "").length, [form.description]);
+
+  const priceRangeInvalid = useMemo(() => {
+    const min = Number(form.minPrice);
+    const max = Number(form.maxPrice);
+    return (
+      Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > 0 && min > max
+    );
+  }, [form.minPrice, form.maxPrice]);
 
   return (
     <details open className="group">
@@ -106,6 +116,12 @@ export default function BasicInfoSection({ form, setField, disabled }) {
             disabled={disabled}
           />
         </label>
+
+        {priceRangeInvalid && (
+          <div className="md:col-span-2 text-xs text-red-600">
+            Giá tối thiểu đang lớn hơn giá tối đa. Vui lòng kiểm tra lại.
+          </div>
+        )}
       </div>
     </details>
   );

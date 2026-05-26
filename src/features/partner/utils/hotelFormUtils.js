@@ -93,6 +93,7 @@ export function createInitialHotelForm() {
     phone: "",
     email: "",
     website: "",
+    hasOnlineCheckin: false,
 
     //  policy (FE fields)
     defaultCheckInTime: "",   // "14:00"
@@ -182,6 +183,7 @@ export function mapHotelDocToForm(raw) {
     phone: asString(raw?.phone),
     email: asString(raw?.email),
     website: asString(raw?.website),
+    hasOnlineCheckin: !!raw?.hasOnlineCheckin,
 
     //  times: ưu tiên field root, fallback policy.*
     defaultCheckInTime: toHHmm(raw?.defaultCheckInTime ?? raw?.policy?.checkInFrom),
@@ -213,6 +215,13 @@ export function mapHotelDocToForm(raw) {
         : (b?.mapLon ?? (Array.isArray(b?.map) ? b.map[0] : "")),
       mapLat: Array.isArray(b?.mapLocation) ? b.mapLocation[1]
         : (b?.mapLat ?? (Array.isArray(b?.map) ? b.map[1] : "")),
+      // Preserve GALLERY block images so they survive round-trip (UI does not edit them yet)
+      gallery: asArray(b?.gallery).map((g) => ({
+        url: asString(g?.url ?? ""),
+        caption: asString(g?.caption ?? ""),
+        cover: !!g?.cover,
+        sortOrder: toIntOrNull(g?.sortOrder) ?? 0,
+      })).filter((g) => g.url),
     })),
 
     faqs: Array.isArray(raw?.faqs)
@@ -335,7 +344,8 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
     name: asString(form.name).trim(),
     slug: asString(form.slug).trim(),
     hotelType: asString(form.hotelType || "HOTEL"),
-    starRating: toIntOrNull(form.starRating) ?? 1,
+    // starRating: do hệ thống/admin gán theo đánh giá; partner không tự cập nhật.
+    // Bỏ khỏi payload để BE update() giữ nguyên giá trị hiện có (null-aware merge).
 
     shortDescription: asString(form.shortDescription),
     description: asString(form.description),
@@ -343,6 +353,7 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
     phone: asString(form.phone),
     email: asString(form.email),
     website: asString(form.website),
+    hasOnlineCheckin: !!form.hasOnlineCheckin,
 
     //  times root (DTO có)
     defaultCheckInTime: ci || null,
@@ -367,6 +378,15 @@ export function buildHotelPayload(form, { mode = "create" } = {}) {
       imageCaption: asString(b?.imageCaption ?? ""),
       mapLon: b?.mapLon ?? "",
       mapLat: b?.mapLat ?? "",
+      // Pass GALLERY images back through so BE keeps the original block intact
+      gallery: Array.isArray(b?.gallery) && b.gallery.length > 0
+        ? b.gallery.map((g) => ({
+            url: asString(g?.url ?? ""),
+            caption: asString(g?.caption ?? ""),
+            cover: !!g?.cover,
+            sortOrder: toIntOrNull(g?.sortOrder) ?? 0,
+          })).filter((g) => g.url)
+        : undefined,
     })),
 
     amenityCodes: asArray(form.amenities).map(pickAmenityCode).filter(Boolean),

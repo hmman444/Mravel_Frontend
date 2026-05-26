@@ -133,6 +133,8 @@ export const normalizeOpeningHour = (x) => {
     dayOfWeek: asString(o.dayOfWeek ?? "", "").trim(),
     openTime: asString(o.openTime ?? o.open ?? "", "").trim(),
     closeTime: asString(o.closeTime ?? o.close ?? "", "").trim(),
+    open24h: !!o.open24h,
+    closed: !!o.closed,
   };
 };
 
@@ -173,7 +175,8 @@ export const normalizeBlackoutRule = (x) => {
   return {
     month: sanitizeIntStr(o.month),
     day: sanitizeIntStr(o.day),
-    reason: asString(o.reason ?? o.note ?? "", ""),
+    // BE field is `description`; accept legacy `reason`/`note` for backward compat
+    description: asString(o.description ?? o.reason ?? o.note ?? "", ""),
   };
 };
 
@@ -433,9 +436,9 @@ export function buildRestaurantPayload(formDraft = {}) {
     shortDescription: asString(f.shortDescription, "").trim(),
     description: asString(f.description, "").trim(),
 
-    // pricing
-    minPricePerPerson: f.minPrice === "" ? null : Number(sanitizeNumberStr(f.minPrice)),
-    maxPricePerPerson: f.maxPrice === "" ? null : Number(sanitizeNumberStr(f.maxPrice)),
+    // pricing — BE DTO field names: minPrice / maxPrice (không phải minPricePerPerson)
+    minPrice: f.minPrice === "" ? null : Number(sanitizeNumberStr(f.minPrice)),
+    maxPrice: f.maxPrice === "" ? null : Number(sanitizeNumberStr(f.maxPrice)),
     currencyCode: asString(f.currencyCode ?? "VND", "VND").trim() || "VND",
     priceLevel: asString(f.priceLevel, "").trim() || null,
     priceBucket: asString(f.priceBucket, "").trim() || null,
@@ -444,11 +447,13 @@ export function buildRestaurantPayload(formDraft = {}) {
     cuisines: asArray(f.cuisines).map(normalizeCuisine).filter((x) => x.code || x.name),
     openingHours: asArray(f.openingHours)
       .map(normalizeOpeningHour)
-      .filter((x) => x.dayOfWeek && (x.openTime || x.closeTime))
+      .filter((x) => x.dayOfWeek && (x.openTime || x.closeTime || x.open24h || x.closed))
       .map((x) => ({
         dayOfWeek: x.dayOfWeek,
         openTime: x.openTime || null,
         closeTime: x.closeTime || null,
+        open24h: !!x.open24h,
+        closed: !!x.closed,
       })),
     suitableFor: asArray(f.suitableFor).map(normalizeCodeName).filter((x) => x.code || x.name),
     ambience: asArray(f.ambience).map(normalizeCodeName).filter((x) => x.code || x.name),
@@ -534,7 +539,7 @@ export function buildRestaurantPayload(formDraft = {}) {
           .map((r) => ({
             month: Number(r.month),
             day: Number(r.day),
-            reason: String(r.reason || "").trim() || null,
+            description: String(r.description || "").trim() || null,
           })),
 
         minBookingLeadTimeMinutes: p.minBookingLeadTimeMinutes === "" ? null : Number(p.minBookingLeadTimeMinutes),

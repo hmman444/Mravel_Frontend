@@ -96,7 +96,7 @@ export default function PartnerServiceTable({
                               {x.name}
                             </span>
                             <span className="inline-flex rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300">
-                              {x.type}
+                              {x.subtype || x.type}
                             </span>
                           </div>
                           <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">

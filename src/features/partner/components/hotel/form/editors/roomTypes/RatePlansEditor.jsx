@@ -156,6 +156,19 @@ export default function RatePlansEditor({ ratePlans = [], onChange }) {
               >
                 <TrashIcon className="h-5 w-5 text-red-600" />
               </button>
+
+              {(() => {
+                const p = Number(rp.pricePerNight);
+                const r = Number(rp.referencePricePerNight);
+                if (Number.isFinite(p) && Number.isFinite(r) && p > 0 && r > 0 && p > r) {
+                  return (
+                    <div className="md:col-span-12 text-xs text-red-600">
+                      Giá thực tế đang lớn hơn giá tham chiếu — sẽ ra phần trăm giảm âm.
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           ))}
         </div>

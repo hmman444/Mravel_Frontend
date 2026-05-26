@@ -126,6 +126,7 @@ export default function PartnerServiceManager() {
       id: doc?.id ?? doc?._id ?? doc?.code ?? doc?.slug ?? "(no-id)",
       name: doc?.name ?? doc?.title ?? "(no-name)",
       type: mode,
+      subtype: mode === "HOTEL" ? doc?.hotelType : doc?.restaurantType,
       status: mapServiceStatus(doc),
       rejectReason: doc?.moderation?.rejectionReason || null,
       blockedReason: doc?.moderation?.blockedReason || null,
