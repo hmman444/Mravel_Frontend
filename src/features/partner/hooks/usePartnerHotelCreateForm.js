@@ -177,18 +177,28 @@ export function usePartnerHotelCreateForm({
     }
 
     //  geocode -> draft.location = [lng, lat]
-    try {
-      const geo = await geocodeByAddress(draft);
-      if (geo?.lng != null && geo?.lat != null) {
-        // BE: new double[]{ 108.3270, 15.8790 } => [lon, lat]
-        draft.location = [geo.lng, geo.lat];
-        // optional: để debug/hiển thị
-        draft.geoDisplayName = geo.displayName;
+    // Only run geocode when the user actually changed the address.
+    // Avoids silently overwriting curated coordinates on every save.
+    const addressUnchanged =
+      String(form.addressLine || "") === String(initialForm?.addressLine || "") &&
+      String(form.cityName || "") === String(initialForm?.cityName || "") &&
+      String(form.districtName || "") === String(initialForm?.districtName || "") &&
+      String(form.wardName || "") === String(initialForm?.wardName || "");
+
+    if (!addressUnchanged) {
+      try {
+        const geo = await geocodeByAddress(draft);
+        if (geo?.lng != null && geo?.lat != null) {
+          // BE: new double[]{ 108.3270, 15.8790 } => [lon, lat]
+          draft.location = [geo.lng, geo.lat];
+          // optional: để debug/hiển thị
+          draft.geoDisplayName = geo.displayName;
+        }
+      } catch (err) {
+        console.warn("Geocode failed:", err);
+        // Nếu backend bắt buộc location thì đổi thành:
+        // throw err;
       }
-    } catch (err) {
-      console.warn("Geocode failed:", err);
-      // Nếu backend bắt buộc location thì đổi thành:
-      // throw err;
     }
 
     const payload = buildPayload(draft);

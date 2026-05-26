@@ -205,6 +205,27 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 </label>
               </div>
 
+              {(() => {
+                const seats = Number(t.seats);
+                const min = Number(t.minPeople);
+                const max = Number(t.maxPeople);
+                const issues = [];
+                if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > 0 && min > max) {
+                  issues.push("Số người tối thiểu đang lớn hơn số người tối đa.");
+                }
+                if (Number.isFinite(max) && Number.isFinite(seats) && max > 0 && seats > 0 && max > seats) {
+                  issues.push("Số người tối đa đang lớn hơn số chỗ ngồi.");
+                }
+                if (!issues.length) return null;
+                return (
+                  <div className="text-xs text-red-600 space-y-0.5">
+                    {issues.map((m, i) => (
+                      <div key={i}>{m}</div>
+                    ))}
+                  </div>
+                );
+              })()}
+
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <label className="text-sm md:col-span-4">
                   <div className="font-medium mb-1">Tiền cọc (nếu có)</div>

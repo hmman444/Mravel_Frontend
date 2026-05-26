@@ -18,6 +18,9 @@ import ContactLocationSection from "../../partner/components/restaurant/form/sec
 import BookingConfigSection from "../../partner/components/restaurant/form/sections/BookingConfigSection";
 import TableTypesEditor from "../../partner/components/restaurant/form/controls/TableTypesEditor";
 import RestaurantMetaSection from "../../partner/components/restaurant/form/sections/RestaurantMetaSection";
+import CapacitySection from "../../partner/components/restaurant/form/sections/CapacitySection";
+import ParkingSection from "../../partner/components/restaurant/form/sections/ParkingSection";
+import PolicySection from "../../partner/components/restaurant/form/sections/PolicySection";
 import CuisinesEditor from "../../partner/components/restaurant/form/controls/CuisinesEditor";
 import OpeningHoursEditor from "../../partner/components/restaurant/form/controls/OpeningHoursEditor";
 import CodeNameListEditor from "../../partner/components/restaurant/form/controls/CodeNameListEditor";
@@ -290,6 +293,18 @@ export default function AdminRestaurantReviewPage() {
               disabled
             />
 
+            <CapacitySection
+              form={form}
+              setField={() => {}}
+              disabled
+            />
+
+            <ParkingSection
+              form={form}
+              setField={() => {}}
+              disabled
+            />
+
             {/* Các editor: nếu có disabled prop thì truyền,
                 nếu component của bạn chưa hỗ trợ disabled -> bọc pointer-events-none */}
             <div className="pointer-events-none">
@@ -342,6 +357,12 @@ export default function AdminRestaurantReviewPage() {
             </div>
 
             <BookingConfigSection
+              form={form}
+              setField={() => {}}
+              disabled
+            />
+
+            <PolicySection
               form={form}
               setField={() => {}}
               disabled

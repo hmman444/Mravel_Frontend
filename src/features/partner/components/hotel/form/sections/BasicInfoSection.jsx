@@ -39,7 +39,9 @@ function StarRating({ value, onChange }) {
 }
 
 export default function BasicInfoSection({ form, setField, disabled = false }) {
-  const [slugTouched, setSlugTouched] = useState(false);
+  // If form mounts with an existing slug (edit mode), treat it as already user-controlled
+  // so the auto-sync effect never silently rewrites a slug that public URLs depend on.
+  const [slugTouched, setSlugTouched] = useState(() => Boolean(form?.slug));
 
   useEffect(() => {
     if (disabled) return;          //  readonly không auto-sync
@@ -106,11 +108,14 @@ export default function BasicInfoSection({ form, setField, disabled = false }) {
 
         <label className="text-sm">
           <div className="font-medium mb-1">Hạng sao</div>
-          <div className={disabled ? "pointer-events-none opacity-90" : ""}>
+          <div className="pointer-events-none opacity-90">
             <StarRating
-              value={Number(form.starRating ?? 1)}
-              onChange={(n) => !disabled && setField("starRating", n)}
+              value={Number(form.starRating ?? 0)}
+              onChange={() => {}}
             />
+          </div>
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Hạng sao do hệ thống tự cập nhật dựa trên đánh giá thực tế, không sửa thủ công.
           </div>
         </label>
 
@@ -125,8 +130,10 @@ export default function BasicInfoSection({ form, setField, disabled = false }) {
             <option value="HOTEL">HOTEL</option>
             <option value="RESORT">RESORT</option>
             <option value="HOMESTAY">HOMESTAY</option>
+            <option value="HOSTEL">HOSTEL</option>
             <option value="APARTMENT">APARTMENT</option>
             <option value="VILLA">VILLA</option>
+            <option value="GUEST_HOUSE">GUEST_HOUSE</option>
             <option value="OTHER">OTHER</option>
           </select>
         </label>
@@ -147,10 +154,30 @@ export default function BasicInfoSection({ form, setField, disabled = false }) {
             value={form.description}
             onChange={(e) => !disabled && setField("description", e.target.value)}
             className="w-full border rounded-xl px-3 py-2 min-h-[140px]"
-            maxLength={200}
-            placeholder="Tối đa 200 ký tự..."
             disabled={disabled}
           />
+        </label>
+
+        <label className="text-sm">
+          <div className="font-medium mb-1">Website</div>
+          <input
+            type="url"
+            value={form.website || ""}
+            onChange={(e) => !disabled && setField("website", e.target.value)}
+            className="w-full border rounded-xl px-3 py-2"
+            placeholder="https://..."
+            disabled={disabled}
+          />
+        </label>
+
+        <label className="text-sm flex items-center gap-2 mt-6">
+          <input
+            type="checkbox"
+            checked={!!form.hasOnlineCheckin}
+            onChange={(e) => !disabled && setField("hasOnlineCheckin", e.target.checked)}
+            disabled={disabled}
+          />
+          <span className="font-medium">Hỗ trợ check-in trực tuyến</span>
         </label>
       </div>
     </details>

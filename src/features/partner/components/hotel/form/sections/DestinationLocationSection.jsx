@@ -35,8 +35,6 @@ export default function DestinationLocationSection({ form, setField, disabled })
     const nextText = asString(pickText(payload)).trim();
     const nextSlug = asString(pickSlug(payload)).trim();
 
-    console.log("Destination picked payload =", payload, { nextText, nextSlug });
-
     setDestText(nextText);
     setDestSlug(nextSlug);
 

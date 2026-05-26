@@ -14,6 +14,9 @@ import ContactLocationSection from "./sections/ContactLocationSection";
 import BookingConfigSection from "./sections/BookingConfigSection";
 import TableTypesEditor from "./controls/TableTypesEditor";
 import RestaurantMetaSection from "./sections/RestaurantMetaSection";
+import CapacitySection from "./sections/CapacitySection";
+import ParkingSection from "./sections/ParkingSection";
+import PolicySection from "./sections/PolicySection";
 import CuisinesEditor from "./controls/CuisinesEditor";
 import OpeningHoursEditor from "./controls/OpeningHoursEditor";
 import CodeNameListEditor from "./controls/CodeNameListEditor";
@@ -69,6 +72,10 @@ export default function PartnerRestaurantFormPage({
 
         <ContactLocationSection form={fm.form} setField={fm.setField} disabled={loading} />
 
+        <CapacitySection form={fm.form} setField={fm.setField} disabled={loading} />
+
+        <ParkingSection form={fm.form} setField={fm.setField} disabled={loading} />
+
         <CuisinesEditor
           value={fm.form.cuisines || []}
           onChange={(next) => fm.setField("cuisines", next)}
@@ -107,6 +114,8 @@ export default function PartnerRestaurantFormPage({
         />
 
         <BookingConfigSection form={fm.form} setField={fm.setField} disabled={loading} />
+
+        <PolicySection form={fm.form} setField={fm.setField} disabled={loading} />
 
         <AmenityMultiSelect
           title="Tiện ích quán ăn"

@@ -153,56 +153,76 @@ export default function ContactLocationSection({ form, setField, disabled }) {
           <FieldError msg={showError("addressLine")} />
         </label>
 
+        {/* Khi disabled (admin readonly): render text từ *Name vì reverse-map effect bị skip,
+            cityCode/districtCode/wardCode sẽ trống và dropdown không hiển thị giá trị thực. */}
+
         {/* Province */}
         <label className="text-sm">
           <div className="font-medium mb-1">Tỉnh/Thành phố</div>
-          <select
-            value={form.cityCode || ""}
-            onChange={(e) => onPickProvince(e.target.value)}
-            className="w-full border rounded-xl px-3 py-2"
-            disabled={disabled}
-          >
-            <option value="">{loading.p ? "Đang tải..." : "-- Chọn tỉnh/thành --"}</option>
-            {provinces.map((p) => (
-              <option key={p.code} value={p.code}>{p.name}</option>
-            ))}
-          </select>
+          {disabled ? (
+            <div className="w-full border rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
+              {form.cityName || "—"}
+            </div>
+          ) : (
+            <select
+              value={form.cityCode || ""}
+              onChange={(e) => onPickProvince(e.target.value)}
+              className="w-full border rounded-xl px-3 py-2"
+            >
+              <option value="">{loading.p ? "Đang tải..." : "-- Chọn tỉnh/thành --"}</option>
+              {provinces.map((p) => (
+                <option key={p.code} value={p.code}>{p.name}</option>
+              ))}
+            </select>
+          )}
         </label>
 
         {/* District */}
         <label className="text-sm">
           <div className="font-medium mb-1">Quận/Huyện</div>
-          <select
-            value={form.districtCode || ""}
-            onChange={(e) => onPickDistrict(e.target.value)}
-            className="w-full border rounded-xl px-3 py-2"
-            disabled={disabled || !form.cityCode}
-          >
-            <option value="">
-              {!form.cityCode ? "-- Chọn tỉnh trước --" : loading.d ? "Đang tải..." : "-- Chọn quận/huyện --"}
-            </option>
-            {districts.map((d) => (
-              <option key={d.code} value={d.code}>{d.name}</option>
-            ))}
-          </select>
+          {disabled ? (
+            <div className="w-full border rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
+              {form.districtName || "—"}
+            </div>
+          ) : (
+            <select
+              value={form.districtCode || ""}
+              onChange={(e) => onPickDistrict(e.target.value)}
+              className="w-full border rounded-xl px-3 py-2"
+              disabled={!form.cityCode}
+            >
+              <option value="">
+                {!form.cityCode ? "-- Chọn tỉnh trước --" : loading.d ? "Đang tải..." : "-- Chọn quận/huyện --"}
+              </option>
+              {districts.map((d) => (
+                <option key={d.code} value={d.code}>{d.name}</option>
+              ))}
+            </select>
+          )}
         </label>
 
         {/* Ward */}
         <label className="text-sm">
           <div className="font-medium mb-1">Phường/Xã</div>
-          <select
-            value={form.wardCode || ""}
-            onChange={(e) => onPickWard(e.target.value)}
-            className="w-full border rounded-xl px-3 py-2"
-            disabled={disabled || !form.districtCode}
-          >
-            <option value="">
-              {!form.districtCode ? "-- Chọn quận/huyện trước --" : loading.w ? "Đang tải..." : "-- Chọn phường/xã --"}
-            </option>
-            {wards.map((w) => (
-              <option key={w.code} value={w.code}>{w.name}</option>
-            ))}
-          </select>
+          {disabled ? (
+            <div className="w-full border rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
+              {form.wardName || "—"}
+            </div>
+          ) : (
+            <select
+              value={form.wardCode || ""}
+              onChange={(e) => onPickWard(e.target.value)}
+              className="w-full border rounded-xl px-3 py-2"
+              disabled={!form.districtCode}
+            >
+              <option value="">
+                {!form.districtCode ? "-- Chọn quận/huyện trước --" : loading.w ? "Đang tải..." : "-- Chọn phường/xã --"}
+              </option>
+              {wards.map((w) => (
+                <option key={w.code} value={w.code}>{w.name}</option>
+              ))}
+            </select>
+          )}
         </label>
       </div>
     </details>
