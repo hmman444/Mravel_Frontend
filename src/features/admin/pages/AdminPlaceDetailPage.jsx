@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import AdminLayout from "../components/AdminLayout";
 import ConfirmModal from "../../../components/ConfirmModal";
 
@@ -13,6 +15,7 @@ import PlaceContentCard from "../components/place/place-detail/PlaceContentCard"
 import { useAdminPlaceDetail } from "../hooks/useAdminPlaceDetail";
 
 export default function AdminPlaceDetailPage() {
+  const { t } = useTranslation();
   const d = useAdminPlaceDetail();
 
   return (
@@ -89,20 +92,22 @@ export default function AdminPlaceDetailPage() {
 
           <ConfirmModal
             open={d.leaveOpen}
-            title="Chưa lưu thay đổi"
-            message="Bạn có thay đổi chưa được lưu. Rời trang sẽ mất dữ liệu. Bạn chắc chắn muốn thoát?"
-            confirmText="Thoát"
-            cancelText="Ở lại"
+            title={t("admin.unsaved_changes_title")}
+            message={t("admin.unsaved_changes_message")}
+            confirmText={t("admin.leave_page")}
+            cancelText={t("admin.stay_on_page")}
             onClose={() => d.setLeaveOpen(false)}
             onConfirm={d.onConfirmLeave}
           />
 
           <ConfirmModal
             open={d.deleteOpen}
-            title="Xóa địa điểm"
-            message={`Xóa sẽ không thể khôi phục. Bạn có chắc muốn xóa "${d.form.name || d.form.slug || ""}" không?`}
-            confirmText="Xóa"
-            cancelText="Hủy"
+            title={t("admin.delete_place_title")}
+            message={t("admin.delete_place_message", {
+              name: d.form.name || d.form.slug || "",
+            })}
+            confirmText={t("common.delete")}
+            cancelText={t("common.cancel")}
             onClose={() => d.setDeleteOpen(false)}
             onConfirm={d.confirmDelete}
           />

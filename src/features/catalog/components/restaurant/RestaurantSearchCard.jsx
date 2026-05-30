@@ -2,9 +2,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt, FaClock, FaSearch, FaUsers, FaUtensils } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import Button from "../../../../components/Button";
 import DestinationTypeahead from "../../../../components/DestinationTypeahead";
 import MravelDatePicker from "../../../../components/MravelDatePicker";
+import i18n from "../../../../i18n";
 
 const formatDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
 
@@ -23,16 +25,17 @@ const buildTimeOptions = () => {
 
 /** Danh sách ẩm thực – dùng code từ seed để backend dễ map */
 const CUISINE_OPTIONS = [
-  { value: "", label: "Tất cả ẩm thực" },
-  { value: "VIETNAMESE", label: "Việt Nam" },
-  { value: "ASIAN", label: "Châu Á" },
-  { value: "BUFFET_VIET_ASIAN", label: "Buffet & Việt - Á" },
-  { value: "EUROPEAN", label: "Âu" },
-  { value: "FRENCH", label: "Pháp" },
-  { value: "ITALIAN", label: "Ý" },
+  { value: "", label: i18n.t("restaurant.cuisine_all") },
+  { value: "VIETNAMESE", label: i18n.t("restaurant.cuisine_vietnamese") },
+  { value: "ASIAN", label: i18n.t("restaurant.cuisine_asian") },
+  { value: "BUFFET_VIET_ASIAN", label: i18n.t("restaurant.cuisine_buffet_viet_asian") },
+  { value: "EUROPEAN", label: i18n.t("restaurant.cuisine_european") },
+  { value: "FRENCH", label: i18n.t("restaurant.cuisine_french") },
+  { value: "ITALIAN", label: i18n.t("restaurant.cuisine_italian") },
 ];
 
 export default function RestaurantSearchCard({ onSubmit }) {
+  const { t } = useTranslation();
   //  Địa điểm
   const [dest, setDest] = useState({ text: "", slug: null, kind: null });
 
@@ -92,10 +95,10 @@ export default function RestaurantSearchCard({ onSubmit }) {
       {/* Header nhỏ */}
       <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-700">
         <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Đặt bàn nhà hàng cho chuyến đi
+          {t("restaurant.search_title")}
         </h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Chọn khu vực, ngày và số người để tìm quán phù hợp.
+          {t("restaurant.search_subtitle")}
         </p>
       </div>
 
@@ -106,11 +109,11 @@ export default function RestaurantSearchCard({ onSubmit }) {
       >
         {/* Khu vực */}
         <div className="col-span-1 md:col-span-6">
-          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Khu vực / Thành phố</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("restaurant.area_city_label")}</div>
           <div className="flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800">
             <DestinationTypeahead
               label={null}
-              placeholder="Thành phố, nhà hàng, điểm đến"
+              placeholder={t("restaurant.area_city_placeholder")}
               onSubmit={({ text, slug, kind }) => setDest({ text, slug, kind: kind || null })}
               onPick={({ text, slug, kind }) => setDest({ text, slug, kind: kind || null })}
               onChangeText={(text) => setDest(prev => ({ ...prev, text, slug: null, kind: null }))}
@@ -123,7 +126,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
 
         {/* Ngày */}
         <div className="col-span-1 md:col-span-3">
-          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Ngày dùng bữa</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("restaurant.dining_date_label")}</div>
           <div className="flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800">
             <FaCalendarAlt className="text-gray-400 mr-2" />
             <MravelDatePicker
@@ -136,7 +139,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
 
         {/* Giờ */}
         <div className="col-span-1 md:col-span-3">
-          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Giờ</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("restaurant.time_label")}</div>
           <div
             ref={timeBoxRef}
             className="relative flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800 cursor-pointer"
@@ -144,7 +147,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
           >
             <FaClock className="text-gray-400 mr-2" />
             <span className={`text-sm ${time ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
-              {time || "Chọn giờ"}
+              {time || t("restaurant.time_placeholder")}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
@@ -154,7 +157,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  Giờ (theo giờ địa phương)
+                  {t("restaurant.time_local_hint")}
                 </div>
                 {timeOptions.map((t) => (
                   <button
@@ -179,7 +182,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
 
         {/* Số người */}
         <div className="col-span-1 md:col-span-3">
-          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Số người</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("restaurant.people_count_label")}</div>
           <div className="flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800">
             <FaUsers className="text-gray-400 mr-2" />
             <input
@@ -195,7 +198,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
 
         {/* Loại ẩm thực – DROPDOWN */}
         <div className="col-span-1 md:col-span-5">
-          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Loại ẩm thực</div>
+          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("restaurant.cuisine_type_label")}</div>
           <div
             ref={cuisineBoxRef}
             className="relative flex items-center h-11 border rounded-xl px-3 bg-white dark:bg-gray-800 cursor-pointer"
@@ -203,7 +206,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
           >
             <FaUtensils className="text-gray-400 mr-2" />
             <span className={`text-sm ${cuisineCode ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
-              {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || "Chọn loại ẩm thực"}
+              {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || t("restaurant.cuisine_type_placeholder")}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
@@ -212,7 +215,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
                 className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl max-h-64 overflow-y-auto py-2"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Loại ẩm thực</div>
+                <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{t("restaurant.cuisine_type_label")}</div>
                 {CUISINE_OPTIONS.map((opt) => (
                   <button
                     key={opt.value || "_all_"}
@@ -243,7 +246,7 @@ export default function RestaurantSearchCard({ onSubmit }) {
             className="w-full h-11 rounded-xl bg-[#ff6a00] hover:bg-[#ff5a00] text-white font-semibold text-sm md:text-base inline-flex items-center justify-center gap-2"
           >
             <FaSearch />
-            Tìm quán ăn
+            {t("restaurant.search_button")}
           </Button>
         </div>
       </form>

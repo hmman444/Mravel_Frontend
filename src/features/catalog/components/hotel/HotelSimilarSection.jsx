@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
@@ -25,6 +26,7 @@ function pickHotelImageUrl(hotel) {
 }
 
 export default function HotelSimilarSection({ hotel }) {
+  const { t } = useTranslation();
   const scrollRef = useRef(null);
   const navigate = useNavigate();
   const { items, loading, error, fetchHotels } = useCatalogHotels();
@@ -80,10 +82,10 @@ export default function HotelSimilarSection({ hotel }) {
       <div className="flex items-baseline justify-between px-6 pt-5 pb-3">
         <div>
           <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Các lựa chọn phổ biến khác
+            {t('hotel.similar_section_title')}
           </h2>
           <p className="mt-1 max-w-2xl text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-            Dưới đây là một số khách sạn tương tự với khoảng giá và khu vực giống như khách sạn bạn đang xem.
+            {t('hotel.similar_section_subtitle')}
           </p>
         </div>
       </div>
@@ -91,7 +93,7 @@ export default function HotelSimilarSection({ hotel }) {
       {/* BODY */}
       <div className="relative px-6 pb-5">
         {loading && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">Đang tải các gợi ý khác...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('hotel.loading_suggestions')}</p>
         )}
 
         {error && !loading && (
@@ -100,8 +102,9 @@ export default function HotelSimilarSection({ hotel }) {
 
         {noOtherHotels && (
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Hiện tại Mravel chưa có thêm khách sạn tương tự tại{" "}
-            {hotel.cityName || "điểm đến này"}.
+            {t('hotel.no_similar_hotels', {
+              location: hotel.cityName || t('hotel.this_destination'),
+            })}
           </p>
         )}
 
@@ -148,6 +151,7 @@ export default function HotelSimilarSection({ hotel }) {
 
 /*  Card giống HotelMiniCard (grid) nhưng dùng cho slider  */
 function SimilarHotelCard({ hotel, onClick }) {
+  const { t } = useTranslation();
   const {
     name,
     slug,
@@ -173,12 +177,12 @@ function SimilarHotelCard({ hotel, onClick }) {
   else if (oldPrice && price && oldPrice > price) {
     promoPercent = Math.round(((oldPrice - price) / oldPrice) * 100);
   }
-  const promo = promoLabel || (promoPercent ? `Tiết kiệm ${promoPercent}%` : null);
+  const promo = promoLabel || (promoPercent ? t('hotel.save_percent', { percent: promoPercent }) : null);
 
   const priceText =
     price && price > 0
       ? price.toLocaleString("vi-VN") + ` ${currencyCode || "VND"}`
-      : "Giá đang cập nhật";
+      : t('hotel.price_updating');
 
   const oldPriceText =
     oldPrice && oldPrice > 0
@@ -261,7 +265,7 @@ function SimilarHotelCard({ hotel, onClick }) {
           {priceText}
         </div>
         <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-          Chưa bao gồm thuế và phí
+          {t('hotel.price_excludes_taxes_fees')}
         </div>
       </div>
     </div>

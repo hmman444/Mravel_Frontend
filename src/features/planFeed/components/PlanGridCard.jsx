@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { MapPin, Calendar, Wallet, Star, Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { truncate } from "../utils/utils";
 
 const DEFAULT_COVER =
@@ -47,6 +48,7 @@ function formatBudget(amount) {
  *   searchQuery — current search keyword (for highlight)
  */
 export default function PlanGridCard({ plan, searchQuery = "" }) {
+  const { t } = useTranslation();
   const desc = truncate(plan.description || "", 90);
 
   const coverImage = useMemo(() => {
@@ -112,7 +114,7 @@ export default function PlanGridCard({ plan, searchQuery = "" }) {
         {/* Duration badge — bottom left */}
         {plan.days != null && (
           <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-sky-500/90 backdrop-blur-sm text-white text-xs font-semibold shadow">
-            {plan.days} ngày
+            {t("feed.card.days", { count: plan.days })}
           </div>
         )}
       </div>
@@ -174,7 +176,7 @@ export default function PlanGridCard({ plan, searchQuery = "" }) {
               className="w-6 h-6 rounded-full object-cover ring-1 ring-white dark:ring-gray-900"
             />
             <span className="text-xs text-gray-600 dark:text-gray-400 font-medium truncate max-w-[80px]">
-              {plan.author?.name || "Ẩn danh"}
+              {plan.author?.name || t("feed.card.anonymous")}
             </span>
           </div>
         </div>

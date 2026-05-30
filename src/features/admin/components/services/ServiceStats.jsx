@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 function MiniStat({ label, value }) {
   return (
     <div className="rounded-2xl border border-slate-200/70 bg-white dark:bg-gray-800 px-4 py-3 shadow-sm dark:bg-slate-900 dark:border-slate-800">
@@ -10,11 +12,12 @@ function MiniStat({ label, value }) {
 }
 
 export default function ServiceStats({ totalCount, pendingCount, visibleCount }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <MiniStat label="Tổng dịch vụ" value={totalCount} />
-      <MiniStat label="Chờ duyệt (PENDING_REVIEW)" value={pendingCount} />
-      <MiniStat label="Đang hiển thị (theo lọc)" value={visibleCount} />
+      <MiniStat label={t("admin.service_stats_total")} value={totalCount} />
+      <MiniStat label={t("admin.service_stats_pending_review")} value={pendingCount} />
+      <MiniStat label={t("admin.service_stats_visible_filtered")} value={visibleCount} />
     </div>
   );
 }

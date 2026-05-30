@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { buildCalendarEventsFromBoard } from "../utils/calendarUtils";
 import {
   HOURS,
@@ -19,6 +20,7 @@ export function usePlanCalendarLogic({
   createActivityCard,
   updateActivityCard,
 }) {
+  const { t } = useTranslation();
   const [anchorDate, setAnchorDate] = useState(() =>
     board?.startDate ? new Date(board.startDate) : new Date()
   );
@@ -229,10 +231,14 @@ export function usePlanCalendarLogic({
       first.getMonth() === last.getMonth() &&
       first.getFullYear() === last.getFullYear()
     ) {
-      return `Tuần ${fmt(first)} - ${fmt(last)} / ${first.getFullYear()}`;
+      return t("plan.calendar.week_range_with_year", {
+        from: fmt(first),
+        to: fmt(last),
+        year: first.getFullYear(),
+      });
     }
-    return `Tuần ${fmt(first)} - ${fmt(last)}`;
-  }, [weekDays]);
+    return t("plan.calendar.week_range", { from: fmt(first), to: fmt(last) });
+  }, [weekDays, t]);
 
   return {
     // state

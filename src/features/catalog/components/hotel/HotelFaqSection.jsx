@@ -1,8 +1,10 @@
 // src/features/hotels/components/hotel/HotelFaqSection.jsx
 import { useState } from "react";
 import { ChevronDown, ChevronRight, X, HelpCircle, MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function HotelFaqSection({ hotel }) {
+  const { t } = useTranslation();
   // state cho accordion ở section chính
   const [openIndex, setOpenIndex] = useState(null);
 
@@ -25,8 +27,8 @@ export default function HotelFaqSection({ hotel }) {
     setDrawerOpenIndex((prev) => (prev === idx ? null : idx));
   };
 
-  const drawerTitle = `Câu hỏi thường gặp tại ${hotel.name}`;
-  const sectionTitle = `Câu hỏi thường gặp về ${hotel.name}`;
+  const drawerTitle = t("hotel.faq_drawer_title", { name: hotel.name });
+  const sectionTitle = t("hotel.faq_section_title", { name: hotel.name });
 
   const heroImage =
     Array.isArray(hotel.images) && hotel.images.length > 0
@@ -49,8 +51,7 @@ export default function HotelFaqSection({ hotel }) {
                 <HelpCircle className="h-9 w-9 text-[#0064d2]" />
               </div>
               <p className="text-[11px] text-gray-600 dark:text-gray-400 text-center">
-                Các câu hỏi phổ biến về tiện ích, giá phòng,
-                thời gian nhận/trả phòng tại {hotel.name}.
+                {t("hotel.faq_intro", { name: hotel.name })}
               </p>
             </div>
           </div>
@@ -88,7 +89,7 @@ export default function HotelFaqSection({ hotel }) {
                               <MessageCircle className="h-3.5 w-3.5" />
                             </div>
                             <span className="text-[11px] font-semibold uppercase tracking-wide text-[#1d4ed8]">
-                              Trả lời
+                              {t("hotel.faq_answer")}
                             </span>
                           </div>
                           <p className="text-[13px]">{answer}</p>
@@ -108,7 +109,7 @@ export default function HotelFaqSection({ hotel }) {
                   onClick={() => setIsDrawerOpen(true)}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#0064d2] hover:underline"
                 >
-                  Xem tất cả
+                  {t("common.see_more")}
                   <ChevronRight className="h-3 w-3" />
                 </button>
               </div>
@@ -193,7 +194,7 @@ export default function HotelFaqSection({ hotel }) {
                                 <MessageCircle className="h-3.5 w-3.5" />
                               </div>
                               <span className="text-[11px] font-semibold uppercase tracking-wide text-[#1d4ed8]">
-                                Trả lời
+                                {t("hotel.faq_answer")}
                               </span>
                             </div>
                             <p className="text-[13px]">{answer}</p>

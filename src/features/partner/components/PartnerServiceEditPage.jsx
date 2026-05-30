@@ -1,5 +1,6 @@
 // src/features/partner/components/PartnerServiceEditPage.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -41,6 +42,7 @@ export default function PartnerServiceEditPage({
   onBack,
   onSave, // async ({ type, id, payload }) => void
 }) {
+  const { t } = useTranslation();
   const raw = service?.raw || {};
   const type = service?.type; // HOTEL | RESTAURANT
 
@@ -88,7 +90,7 @@ export default function PartnerServiceEditPage({
 
   const tryBack = () => {
     if (dirty) {
-      const ok = window.confirm("Bạn có thay đổi chưa lưu. Trở về sẽ mất thay đổi. Vẫn trở về?");
+      const ok = window.confirm(t("partner.edit.unsaved_confirm"));
       if (!ok) return;
     }
     onBack?.();
@@ -246,10 +248,10 @@ export default function PartnerServiceEditPage({
       {/* Top bar */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-xl font-bold">Chỉnh sửa dịch vụ</div>
+          <div className="text-xl font-bold">{t("partner.edit.title")}</div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
             {type} • ID: <span className="font-mono">{service?.id}</span>
-            {dirty ? <span className="ml-2 text-orange-600">• Chưa lưu</span> : null}
+            {dirty ? <span className="ml-2 text-orange-600">• {t("partner.edit.unsaved")}</span> : null}
           </div>
         </div>
 
@@ -261,7 +263,7 @@ export default function PartnerServiceEditPage({
             className="px-3 py-2 rounded-md border hover:bg-gray-50 disabled:opacity-50 flex items-center gap-2"
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            Trở về
+            {t("common.back")}
           </button>
 
           <button
@@ -269,10 +271,10 @@ export default function PartnerServiceEditPage({
             onClick={() => setForm(initial)}
             disabled={loading || !dirty}
             className="px-3 py-2 rounded-md border hover:bg-gray-50 disabled:opacity-50 flex items-center gap-2"
-            title="Quay lại trạng thái trước khi chỉnh"
+            title={t("partner.edit.undo_tooltip")}
           >
             <ArrowPathIcon className="w-5 h-5" />
-            Hoàn tác
+            {t("partner.edit.undo")}
           </button>
 
           <button
@@ -282,7 +284,7 @@ export default function PartnerServiceEditPage({
             className="px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
           >
             <CheckIcon className="w-5 h-5" />
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+            {loading ? t("partner.edit.saving") : t("partner.edit.save_changes")}
           </button>
         </div>
       </div>
@@ -291,11 +293,11 @@ export default function PartnerServiceEditPage({
       <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 space-y-4">
         <details open className="group">
           <summary className="cursor-pointer select-none font-semibold">
-            Thông tin cơ bản
+            {t("partner.edit.section_basic")}
           </summary>
           <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="text-sm">
-              <div className="font-medium mb-1">Tên *</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_name")}</div>
               <input
                 value={form.name}
                 onChange={(e) => setField("name", e.target.value)}
@@ -304,7 +306,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm">
-              <div className="font-medium mb-1">Slug *</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_slug")}</div>
               <input
                 value={form.slug}
                 onChange={(e) => setField("slug", e.target.value)}
@@ -313,7 +315,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm md:col-span-2">
-              <div className="font-medium mb-1">Mô tả ngắn</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_short_description")}</div>
               <input
                 value={form.shortDescription}
                 onChange={(e) => setField("shortDescription", e.target.value)}
@@ -322,7 +324,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm md:col-span-2">
-              <div className="font-medium mb-1">Mô tả</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_description")}</div>
               <textarea
                 value={form.description}
                 onChange={(e) => setField("description", e.target.value)}
@@ -334,11 +336,11 @@ export default function PartnerServiceEditPage({
 
         <details className="group">
           <summary className="cursor-pointer select-none font-semibold">
-            Liên hệ & Vị trí
+            {t("partner.edit.section_contact_location")}
           </summary>
           <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
             <label className="text-sm">
-              <div className="font-medium mb-1">SĐT</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_phone")}</div>
               <input
                 value={form.phone}
                 onChange={(e) => setField("phone", e.target.value)}
@@ -346,7 +348,7 @@ export default function PartnerServiceEditPage({
               />
             </label>
             <label className="text-sm">
-              <div className="font-medium mb-1">Email</div>
+              <div className="font-medium mb-1">{t("common.email")}</div>
               <input
                 value={form.email}
                 onChange={(e) => setField("email", e.target.value)}
@@ -363,7 +365,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm md:col-span-2">
-              <div className="font-medium mb-1">Địa chỉ</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_address")}</div>
               <input
                 value={form.addressLine}
                 onChange={(e) => setField("addressLine", e.target.value)}
@@ -372,7 +374,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm">
-              <div className="font-medium mb-1">Thành phố</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_city")}</div>
               <input
                 value={form.cityName}
                 onChange={(e) => setField("cityName", e.target.value)}
@@ -381,7 +383,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm">
-              <div className="font-medium mb-1">Quận/Huyện</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_district")}</div>
               <input
                 value={form.districtName}
                 onChange={(opt) => {
@@ -393,7 +395,7 @@ export default function PartnerServiceEditPage({
             </label>
 
             <label className="text-sm">
-              <div className="font-medium mb-1">Phường/Xã</div>
+              <div className="font-medium mb-1">{t("partner.edit.field_ward")}</div>
               <input
                 value={form.wardName}
                 onChange={(e) => setField("wardName", e.target.value)}
@@ -423,12 +425,12 @@ export default function PartnerServiceEditPage({
 
         <details open className="group">
           <summary className="cursor-pointer select-none font-semibold">
-            Ảnh (Gallery)
+            {t("partner.edit.section_gallery")}
           </summary>
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {form.images.length} ảnh
+              {t("partner.edit.image_count", { count: form.images.length })}
             </div>
 
             <div className="flex items-center gap-2">
@@ -438,19 +440,19 @@ export default function PartnerServiceEditPage({
                 className="px-3 py-2 border rounded-md text-sm hover:bg-gray-50 flex items-center gap-2"
               >
                 <PlusIcon className="w-4 h-4" />
-                Thêm link ảnh
+                {t("partner.edit.add_image_link")}
               </button>
 
               <label className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 cursor-pointer flex items-center gap-2">
                 <ArrowUpTrayIcon className="w-4 h-4" />
-                Tải ảnh lên
+                {t("partner.edit.upload_image")}
                 <input type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} />
               </label>
             </div>
           </div>
 
           {form.images.length === 0 ? (
-            <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có ảnh.</div>
+            <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">{t("partner.edit.no_images")}</div>
           ) : (
             <div className="mt-3 space-y-3">
               {form.images.map((img, idx) => (
@@ -466,7 +468,7 @@ export default function PartnerServiceEditPage({
                         img.cover ? "bg-green-50 border-green-200 text-green-700" : "hover:bg-gray-50"
                       }`}
                     >
-                      {img.cover ? "Ảnh bìa" : "Đặt làm bìa"}
+                      {img.cover ? t("partner.edit.cover_image") : t("partner.edit.set_as_cover")}
                     </button>
                   </div>
 
@@ -493,7 +495,7 @@ export default function PartnerServiceEditPage({
                           }))
                         }
                         className="md:col-span-9 border rounded-md px-3 py-2 text-sm"
-                        placeholder="Caption (tuỳ chọn)"
+                        placeholder={t("partner.edit.caption_optional")}
                       />
                       <input
                         value={img.sortOrder}
@@ -514,7 +516,7 @@ export default function PartnerServiceEditPage({
                       type="button"
                       onClick={() => removeImageAt(idx)}
                       className="p-2 rounded hover:bg-red-50"
-                      title="Xóa ảnh"
+                      title={t("partner.edit.delete_image")}
                     >
                       <TrashIcon className="w-5 h-5 text-red-600" />
                     </button>
@@ -525,36 +527,36 @@ export default function PartnerServiceEditPage({
           )}
 
           <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            * Upload hiện tại dùng base64 để làm nhanh. Sau này muốn chuẩn thì thêm API upload trả URL.
+            {t("partner.edit.upload_base64_note")}
           </div>
         </details>
 
         <details className="group">
           <summary className="cursor-pointer select-none font-semibold">
-            Content blocks (tối giản)
+            {t("partner.edit.section_content_blocks")}
           </summary>
 
           <div className="mt-3 flex items-center justify-between gap-3">
-            <div className="text-sm text-gray-600 dark:text-gray-400">{form.content.length} block</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">{t("partner.edit.block_count", { count: form.content.length })}</div>
             <button
               type="button"
               onClick={addBlock}
               className="px-3 py-2 border rounded-md text-sm hover:bg-gray-50 flex items-center gap-2"
             >
               <PlusIcon className="w-4 h-4" />
-              Thêm block
+              {t("partner.edit.add_block")}
             </button>
           </div>
 
           {form.content.length === 0 ? (
-            <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có content.</div>
+            <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">{t("partner.edit.no_content")}</div>
           ) : (
             <div className="mt-3 space-y-3">
               {form.content.map((b, idx) => (
                 <div key={idx} className="border rounded-lg p-3 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="text-sm font-medium">
-                      Block #{idx + 1}
+                      {t("partner.edit.block_label", { n: idx + 1 })}
                       <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                         ({b.section} • {b.type})
                       </span>
@@ -565,7 +567,7 @@ export default function PartnerServiceEditPage({
                         type="button"
                         onClick={() => moveBlock(idx, -1)}
                         className="p-2 rounded hover:bg-gray-100"
-                        title="Lên"
+                        title={t("partner.edit.move_up")}
                       >
                         <ChevronUpIcon className="w-5 h-5" />
                       </button>
@@ -573,7 +575,7 @@ export default function PartnerServiceEditPage({
                         type="button"
                         onClick={() => moveBlock(idx, 1)}
                         className="p-2 rounded hover:bg-gray-100"
-                        title="Xuống"
+                        title={t("partner.edit.move_down")}
                       >
                         <ChevronDownIcon className="w-5 h-5" />
                       </button>
@@ -581,7 +583,7 @@ export default function PartnerServiceEditPage({
                         type="button"
                         onClick={() => removeBlockAt(idx)}
                         className="p-2 rounded hover:bg-red-50"
-                        title="Xóa block"
+                        title={t("partner.edit.delete_block")}
                       >
                         <TrashIcon className="w-5 h-5 text-red-600" />
                       </button>
@@ -644,7 +646,7 @@ export default function PartnerServiceEditPage({
                       }))
                     }
                     className="w-full border rounded-md px-3 py-2 text-sm min-h-[90px]"
-                    placeholder="Nội dung..."
+                    placeholder={t("partner.edit.content_placeholder")}
                   />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -657,7 +659,7 @@ export default function PartnerServiceEditPage({
                         }))
                       }
                       className="border rounded-md px-3 py-2 text-sm"
-                      placeholder="Image URL (nếu block có ảnh)"
+                      placeholder={t("partner.edit.image_url_placeholder")}
                     />
                     <input
                       value={b.imageCaption}
@@ -678,7 +680,7 @@ export default function PartnerServiceEditPage({
         </details>
 
         <div className="text-xs text-gray-600 dark:text-gray-400 bg-yellow-50 border border-yellow-100 rounded-md p-3">
-          Lưu ý: theo rule của bạn, <b>update xong sẽ bị đưa về PENDING</b> (BE xử lý).
+          {t("partner.edit.note_pending_prefix")} <b>{t("partner.edit.note_pending_bold")}</b> {t("partner.edit.note_pending_suffix")}
         </div>
       </div>
     </div>

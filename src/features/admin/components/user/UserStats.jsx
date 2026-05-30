@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 // src/features/admin/components/user/UserStats.jsx
 function MiniStat({ label, value }) {
   return (
@@ -11,12 +13,13 @@ function MiniStat({ label, value }) {
 }
 
 export default function UserStats({ totalCount, activeCount, lockedCount, visibleCount }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-4">
-      <MiniStat label="Tổng tài khoản" value={totalCount} />
-      <MiniStat label="Hoạt động" value={activeCount} />
-      <MiniStat label="Bị khóa" value={lockedCount} />
-      <MiniStat label="Đang hiển thị (theo lọc)" value={visibleCount} />
+      <MiniStat label={t("admin.user_stats_total_accounts")} value={totalCount} />
+      <MiniStat label={t("admin.user_stats_active")} value={activeCount} />
+      <MiniStat label={t("admin.user_stats_locked")} value={lockedCount} />
+      <MiniStat label={t("admin.user_stats_visible_filtered")} value={visibleCount} />
     </div>
   );
 }

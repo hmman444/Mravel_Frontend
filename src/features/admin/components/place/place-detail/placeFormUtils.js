@@ -1,3 +1,12 @@
+import i18n from "../../../../../i18n";
+
+// Bọc chuỗi 1 ngôn ngữ (theo ngôn ngữ admin đang chọn) thành Map { [locale]: value } để BE nhận.
+// BE sẽ tự dịch sang locale còn lại (chỉ dịch field thay đổi). Rỗng -> null.
+const loc = (v) => {
+  const s = (v || "").trim();
+  return s ? { [i18n.language || "vi"]: s } : null;
+};
+
 export function normalizePlaceToForm(place) {
   // Ưu tiên location nếu có, fallback qua longitude/latitude
   let lon = "";
@@ -125,7 +134,7 @@ export function buildPayloadFromForm(form) {
     .filter((im) => (im?.url || "").trim() !== "")
     .map((im, idx) => ({
       url: im.url.trim(),
-      caption: (im.caption || "").trim(),
+      caption: loc(im.caption),
       cover: !!im.cover,
       sortOrder: typeof im.sortOrder === "number" ? im.sortOrder : idx,
     }));
@@ -134,10 +143,10 @@ export function buildPayloadFromForm(form) {
 
   const content = (form.content || []).map((b) => {
     const t = (b?.type || "").toUpperCase();
-    if (t === "HEADING") return { type: "HEADING", text: b.text || "" };
-    if (t === "PARAGRAPH") return { type: "PARAGRAPH", text: b.text || "" };
-    if (t === "QUOTE") return { type: "QUOTE", text: b.text || "" };
-    if (t === "INFO") return { type: "INFO", text: b.text || "" };
+    if (t === "HEADING") return { type: "HEADING", text: loc(b.text) };
+    if (t === "PARAGRAPH") return { type: "PARAGRAPH", text: loc(b.text) };
+    if (t === "QUOTE") return { type: "QUOTE", text: loc(b.text) };
+    if (t === "INFO") return { type: "INFO", text: loc(b.text) };
     if (t === "DIVIDER") return { type: "DIVIDER" };
 
     if (t === "MAP") {
@@ -154,8 +163,7 @@ export function buildPayloadFromForm(form) {
 
     if (t === "IMAGE") {
       const url = (b?.image?.url || "").trim();
-      const caption = (b?.image?.caption || "").trim();
-      return { type: "IMAGE", image: { url, caption } };
+      return { type: "IMAGE", image: { url, caption: loc(b?.image?.caption) } };
     }
 
     if (t === "GALLERY") {
@@ -163,13 +171,13 @@ export function buildPayloadFromForm(form) {
         .filter((x) => (x?.url || "").trim() !== "")
         .map((x, idx) => ({
           url: x.url.trim(),
-          caption: (x.caption || "").trim(),
+          caption: loc(x.caption),
           sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : idx,
         }));
       return { type: "GALLERY", gallery: g };
     }
 
-    return { type: "PARAGRAPH", text: b?.text || "" };
+    return { type: "PARAGRAPH", text: loc(b?.text) };
   });
 
   return {
@@ -178,21 +186,21 @@ export function buildPayloadFromForm(form) {
     venueType: form.venueType ?? null,
     parentSlug: form.kind === "DESTINATION" ? null : (form.parentSlug || null),
 
-    name: (form.name || "").trim(),
+    name: loc(form.name),
     slug: (form.slug || "").trim(),
 
-    shortDescription: (form.shortDescription || "").trim(),
-    description: (form.description || "").trim(),
+    shortDescription: loc(form.shortDescription),
+    description: loc(form.description),
 
     phone: (form.phone || "").trim() || null,
     email: (form.email || "").trim() || null,
     website: (form.website || "").trim() || null,
 
-    addressLine: (form.addressLine || "").trim() || null,
+    addressLine: loc(form.addressLine),
     countryCode: (form.countryCode || "VN").trim(),
-    provinceName: (form.provinceName || "").trim() || null,
-    districtName: (form.districtName || "").trim() || null,
-    wardName: (form.wardName || "").trim() || null,
+    provinceName: loc(form.provinceName),
+    districtName: loc(form.districtName),
+    wardName: loc(form.wardName),
 
     location,
     images,

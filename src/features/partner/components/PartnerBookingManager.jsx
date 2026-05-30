@@ -1,4 +1,5 @@
 // src/features/partner/components/PartnerBookingManager.jsx
+import { useTranslation } from "react-i18next";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 import { usePartnerBookingManager } from "../hooks/usePartnerBookingManager";
@@ -9,6 +10,7 @@ import PartnerBookingCancelModal from "./PartnerBookingCancelModal";
 import { pickService } from "../utils/partnerBookingUtils";
 
 export default function PartnerBookingManager() {
+  const { t } = useTranslation();
   const vm = usePartnerBookingManager();
 
   return (
@@ -16,7 +18,7 @@ export default function PartnerBookingManager() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quản lý đơn đặt</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('partner.booking.manager_title')}</h1>
         </div>
       </div>
 
@@ -48,7 +50,7 @@ export default function PartnerBookingManager() {
             <input
               value={vm.search}
               onChange={(e) => vm.setSearch(e.target.value)}
-              placeholder="Tìm theo mã đơn / khách / dịch vụ..."
+              placeholder={t('partner.booking.search_placeholder')}
               className="w-full pl-10 pr-3 py-2 border rounded-md outline-none focus:ring focus:border-blue-500"
             />
           </div>
@@ -78,7 +80,7 @@ export default function PartnerBookingManager() {
       {/* Loading */}
       {vm.loadingList ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-10 text-center text-gray-500 dark:text-gray-400">
-          Đang tải danh sách đơn...
+          {t('partner.booking.loading_list')}
         </div>
       ) : (
         <PartnerBookingsTable

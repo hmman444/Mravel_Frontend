@@ -4,6 +4,7 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { showError } from "../../../../utils/toastUtils";
 
 export default function PlanDateInputs({
@@ -13,6 +14,7 @@ export default function PlanDateInputs({
   setEndDate,
   disabled = false, // NEW
 }) {
+  const { t } = useTranslation();
   const handleStartChange = (date) => {
     // StartDate bây giờ không bắt lỗi > endDate nữa
     setStartDate(date);
@@ -20,7 +22,7 @@ export default function PlanDateInputs({
 
   const handleEndChange = (date) => {
     if (startDate && date < startDate) {
-      showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+      showError(t("plan.date.end_before_start"));
       return;
     }
     setEndDate(date);
@@ -31,7 +33,7 @@ export default function PlanDateInputs({
       {/* TỪ NGÀY */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-medium text-gray-600 dark:text-gray-400 px-1">
-          Từ ngày
+          {t("plan.date.from")}
         </label>
 
         <div
@@ -59,7 +61,7 @@ export default function PlanDateInputs({
             selected={startDate}
             onChange={handleStartChange}
             dateFormat="dd/MM/yyyy"
-            placeholderText="Chọn ngày..."
+            placeholderText={t("plan.date.placeholder")}
             locale="vi"
             disabled={disabled}
             className="
@@ -91,7 +93,7 @@ export default function PlanDateInputs({
       {/* ĐẾN NGÀY */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-medium text-gray-600 dark:text-gray-400 px-1">
-          Đến ngày
+          {t("plan.date.to")}
         </label>
 
         <div
@@ -120,7 +122,7 @@ export default function PlanDateInputs({
             onChange={handleEndChange}
             minDate={startDate}
             dateFormat="dd/MM/yyyy"
-            placeholderText="Chọn ngày..."
+            placeholderText={t("plan.date.placeholder")}
             locale="vi"
             disabled={disabled}
             className="

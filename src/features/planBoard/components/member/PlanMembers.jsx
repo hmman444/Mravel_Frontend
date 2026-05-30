@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FaUser,
   FaUsers,
@@ -16,12 +17,6 @@ import LoadingOverlay from "../../../../components/LoadingOverlay";
 import ConfirmModal from "../../../../components/ConfirmModal";
 import MemberRow from "./MemberRow";
 import { showSuccess } from "../../../../utils/toastUtils";
-
-const ROLE_LABELS = {
-  OWNER: "Chủ sở hữu",
-  EDITOR: "Chỉnh sửa",
-  VIEWER: "Xem",
-};
 
 function formatCurrency(amount) {
   if (amount == null) return "—";
@@ -38,6 +33,14 @@ function formatPercent(value) {
 }
 
 export default function PlanMembers({ planId }) {
+  const { t } = useTranslation();
+
+  const ROLE_LABELS = {
+    OWNER: t("plan.member.role_owner"),
+    EDITOR: t("plan.member.role_editor"),
+    VIEWER: t("plan.member.role_viewer"),
+  };
+
   const {
     board,
     memberCostSummary,
@@ -154,7 +157,7 @@ export default function PlanMembers({ planId }) {
     if (member.role === "OWNER") return; 
 
     await updateMemberRole(member.userId, newRole);
-    showSuccess("Đã cập nhật vai trò thành viên");
+    showSuccess(t("plan.member.toast_role_updated"));
   };
 
   const handleAskRemove = (member) => {
@@ -166,7 +169,7 @@ export default function PlanMembers({ planId }) {
   const handleConfirmRemove = async () => {
     if (!confirmMember) return;
     await removeMember(confirmMember.userId);
-    showSuccess("Đã xoá thành viên khỏi kế hoạch");
+    showSuccess(t("plan.member.toast_removed"));
     setConfirmMember(null);
   };
 
@@ -178,10 +181,10 @@ export default function PlanMembers({ planId }) {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Thành viên & chi phí
+            {t("plan.member.header_title")}
           </h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Thống kê phần chi phí được gán cho từng thành viên trong kế hoạch.
+            {t("plan.member.header_subtitle")}
           </p>
           {error && (
             <p className="text-xs text-rose-500 mt-1">{error}</p>
@@ -190,7 +193,7 @@ export default function PlanMembers({ planId }) {
 
         {canManageMembers && (
           <div className="text-[11px] text-gray-500 dark:text-gray-400">
-            Chỉ chủ sở hữu có thể đổi quyền / xoá thành viên.
+            {t("plan.member.owner_only_note")}
           </div>
         )}
       </div>
@@ -210,13 +213,17 @@ export default function PlanMembers({ planId }) {
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Số thành viên
+              {t("plan.member.stat_total_members")}
             </p>
             <p className="font-semibold text-gray-900 dark:text-gray-100">
               {totalMembers}
             </p>
             <p className="text-[11px] text-gray-400">
-              {ownerCount} chủ • {editorCount} editor • {viewerCount} viewer
+              {t("plan.member.stat_role_breakdown", {
+                owner: ownerCount,
+                editor: editorCount,
+                viewer: viewerCount,
+              })}
             </p>
           </div>
         </div>
@@ -234,22 +241,24 @@ export default function PlanMembers({ planId }) {
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Ngân sách & thực chi
+              {t("plan.member.stat_budget_actual")}
             </p>
             <p className="text-[11px] text-gray-500 dark:text-gray-300">
-              Ngân sách:{" "}
+              {t("plan.member.label_budget")}{" "}
               <span className="font-semibold text-gray-900 dark:text-gray-100">
                 {formatCurrency(planBudgetTotal)}
               </span>
             </p>
             <p className="text-[11px] text-gray-500 dark:text-gray-300">
-              Thực chi:{" "}
+              {t("plan.member.label_actual")}{" "}
               <span className="font-semibold text-sky-600 dark:text-sky-300">
                 {formatCurrency(planActualTotal)}
               </span>{" "}
               {usedBudgetPercent != null && (
                 <span className="text-[10px] text-gray-400">
-                  ({formatPercent(usedBudgetPercent)} ngân sách)
+                  ({t("plan.member.percent_of_budget", {
+                    percent: formatPercent(usedBudgetPercent),
+                  })})
                 </span>
               )}
             </p>
@@ -269,13 +278,14 @@ export default function PlanMembers({ planId }) {
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Chi trung bình / người
+              {t("plan.member.stat_avg_per_person")}
             </p>
             <p className="font-semibold text-gray-900 dark:text-gray-100">
               {formatCurrency(avgSharePerMember)}
             </p>
             <p className="text-[11px] text-gray-400">
-              Ngân sách / người: {formatCurrency(planBudgetPerPerson)}
+              {t("plan.member.label_budget_per_person")}{" "}
+              {formatCurrency(planBudgetPerPerson)}
             </p>
           </div>
         </div>
@@ -292,14 +302,16 @@ export default function PlanMembers({ planId }) {
           </div>
           <div className="space-y-0.5">
             <p className="text-[11px] uppercase tracking-wide text-white/80">
-              Chi phí gán cho thành viên
+              {t("plan.member.stat_assigned_cost")}
             </p>
             <p className="text-sm font-semibold truncate">
               {formatCurrency(totalShareActual)}
             </p>
             {shareVsPlanPercent != null && (
               <p className="text-[11px] text-white/80">
-                ~ {formatPercent(shareVsPlanPercent)} chi phí của cả plan
+                {t("plan.member.percent_of_plan", {
+                  percent: formatPercent(shareVsPlanPercent),
+                })}
               </p>
             )}
           </div>
@@ -316,7 +328,7 @@ export default function PlanMembers({ planId }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên hoặc email..."
+              placeholder={t("plan.member.search_placeholder")}
               className="
                 w-full pl-9 pr-3 py-2 text-xs rounded-full
                 bg-white/80 dark:bg-gray-900/80
@@ -333,11 +345,11 @@ export default function PlanMembers({ planId }) {
         <div className="flex items-center gap-2 text-[11px]">
           <span className="hidden sm:inline-flex items-center text-gray-500 dark:text-gray-400">
             <FaFilter className="mr-1 text-xs" />
-            Lọc theo quyền:
+            {t("plan.member.filter_by_role")}
           </span>
           <div className="inline-flex rounded-full bg-gray-100/80 dark:bg-gray-800/80 p-1">
             {[
-              { key: "ALL", label: "Tất cả" },
+              { key: "ALL", label: t("plan.member.filter_all") },
               { key: "OWNER", label: "Owner" },
               { key: "EDITOR", label: "Editor" },
               { key: "VIEWER", label: "Viewer" },
@@ -368,7 +380,7 @@ export default function PlanMembers({ planId }) {
       <div className="mt-2 space-y-3">
         {filteredMembers.length === 0 ? (
           <div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300/70 dark:border-gray-700/70 rounded-2xl">
-            Không tìm thấy thành viên phù hợp.
+            {t("plan.member.empty_state")}
           </div>
         ) : (
           filteredMembers.map((m) => (
@@ -390,9 +402,11 @@ export default function PlanMembers({ planId }) {
       {confirmMember && (
         <ConfirmModal
           open
-          title="Xoá thành viên"
-          message={`Xoá ${confirmMember.fullname || confirmMember.email} khỏi kế hoạch?`}
-          confirmText="Xoá"
+          title={t("plan.member.remove_title")}
+          message={t("plan.member.remove_confirm", {
+            name: confirmMember.fullname || confirmMember.email,
+          })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmMember(null)}
           onConfirm={handleConfirmRemove}
         />

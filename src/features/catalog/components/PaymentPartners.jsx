@@ -1,4 +1,6 @@
 // src/components/PaymentPartners.jsx
+import { useTranslation } from "react-i18next";
+
 const paymentPartners = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1200px-Mastercard-logo.svg.png",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/JCB_logo.svg/993px-JCB_logo.svg.png",
@@ -15,15 +17,15 @@ const paymentPartners = [
 ];
 
 export default function PaymentPartners() {
+  const { t } = useTranslation();
   return (
     <section className="max-w-7xl mx-auto w-full px-6 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left text */}
         <div>
-          <h2 className="text-2xl font-bold">Đối tác thanh toán</h2>
+          <h2 className="text-2xl font-bold">{t('catalog.payment_partners_title')}</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-            Chúng tôi hợp tác với các nhà cung cấp dịch vụ thanh toán hàng đầu để
-            đảm bảo mọi giao dịch đều suôn sẻ, an toàn và dễ dàng.
+            {t('catalog.payment_partners_desc')}
           </p>
         </div>
 

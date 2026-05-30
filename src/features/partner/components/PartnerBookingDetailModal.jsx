@@ -1,5 +1,6 @@
 // src/features/partner/components/PartnerBookingDetailModal.jsx
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Badge from "./Badge";
 import {
   BOOKING_STATUS,
@@ -51,6 +52,7 @@ export default function PartnerBookingDetailModal({
   onClose,
   onOpenCancelFromDetail,
 }) {
+  const { t } = useTranslation();
   //  Hooks luôn gọi ở top-level (không đặt sau early return)
   useEffect(() => {
     if (!open) return;
@@ -150,30 +152,30 @@ export default function PartnerBookingDetailModal({
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-gray-100 dark:border-gray-700 px-4 py-3 md:px-5 shrink-0">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">Chi tiết đơn</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">{t("partner.booking.detail.title")}</h3>
             <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              Mã: <span className="font-mono text-gray-800 dark:text-gray-200">{code}</span>
+              {t("partner.booking.detail.code_label")} <span className="font-mono text-gray-800 dark:text-gray-200">{code}</span>
               {" • "}
-              Tạo lúc: {fmtDT(createdAt)}
+              {t("partner.booking.detail.created_at_label")} {fmtDT(createdAt)}
             </p>
 
             <div className="mt-2 flex flex-wrap gap-2">
               <Badge
-                text={type === "HOTEL" ? "Khách sạn" : "Quán ăn"}
+                text={type === "HOTEL" ? t("partner.booking.type.hotel") : t("partner.booking.type.restaurant")}
                 className={type === "HOTEL" ? "bg-blue-50 text-blue-700" : "bg-emerald-50 text-emerald-700"}
               />
               <Badge text={st.label} className={st.cls} />
               <Badge text={ps.label} className={ps.cls} />
               {sv ? <Badge text={sv.label} className={sv.cls} /> : null}
-              {service?.softDeleted ? <Badge text="Dịch vụ đã ẩn" className="bg-orange-50 text-orange-700" /> : null}
+              {service?.softDeleted ? <Badge text={t("partner.booking.detail.service_hidden")} className="bg-orange-50 text-orange-700" /> : null}
             </div>
           </div>
 
           <button
             onClick={onClose}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
-            aria-label="Đóng"
-            title="Đóng"
+            aria-label={t("common.close")}
+            title={t("common.close")}
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
@@ -183,7 +185,7 @@ export default function PartnerBookingDetailModal({
         <div className="px-4 py-3 md:px-5 md:py-4 overflow-y-auto">
           {loading ? (
             <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-6 text-center text-sm text-gray-500 dark:text-gray-400">
-              Đang tải chi tiết...
+              {t("partner.booking.detail.loading")}
             </div>
           ) : error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -195,35 +197,35 @@ export default function PartnerBookingDetailModal({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-[0.9fr_1.1fr]">
                 {/* Cột trái */}
                 <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                  <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thông tin đơn</div>
+                  <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.booking.detail.order_info")}</div>
                   <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
-                  <DetailRow label="Mã booking" value={code} mono />
+                  <DetailRow label={t("partner.booking.detail.booking_code")} value={code} mono />
                   <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
-                  <DetailRow label="Tạo lúc" value={fmtDT(createdAt)} />
+                  <DetailRow label={t("partner.booking.detail.created_at")} value={fmtDT(createdAt)} />
                   <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
-                  <DetailRow label="Cập nhật" value={updatedAt ? fmtDT(updatedAt) : null} />
+                  <DetailRow label={t("partner.booking.detail.updated_at")} value={updatedAt ? fmtDT(updatedAt) : null} />
                   <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
                   {type === "HOTEL" ? (
                     <>
-                      <DetailRow label="Check-in" value={fmtDate(usedStart)} />
+                      <DetailRow label={t("partner.booking.detail.check_in")} value={fmtDate(usedStart)} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Check-out" value={fmtDate(usedEnd)} />
+                      <DetailRow label={t("partner.booking.detail.check_out")} value={fmtDate(usedEnd)} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Số phòng" value={roomsCount} />
+                      <DetailRow label={t("partner.booking.detail.rooms_count")} value={roomsCount} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Số khách" value={guestsCount} />
+                      <DetailRow label={t("partner.booking.detail.guests_count")} value={guestsCount} />
                     </>
                   ) : (
                     <>
-                      <DetailRow label="Ngày/Giờ" value={fmtDT(usedStart)} />
+                      <DetailRow label={t("partner.booking.detail.datetime")} value={fmtDT(usedStart)} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Số người" value={snapshot?.people ?? data?.people ?? null} />
+                      <DetailRow label={t("partner.booking.detail.people_count")} value={snapshot?.people ?? data?.people ?? null} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Số bàn" value={snapshot?.tables ?? data?.tables ?? null} />
+                      <DetailRow label={t("partner.booking.detail.tables_count")} value={snapshot?.tables ?? data?.tables ?? null} />
                     </>
                   )}
                 </div>
@@ -232,60 +234,60 @@ export default function PartnerBookingDetailModal({
                 <div className="space-y-3">
                   {/* Dịch vụ */}
                   <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                    <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Dịch vụ</div>
+                    <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.booking.detail.service")}</div>
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Tên" value={service?.name} />
+                    <DetailRow label={t("partner.booking.detail.name")} value={service?.name} />
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Thành phố" value={service?.city} />
-                    <DetailRow label="Địa chỉ" value={service?.address ?? service?.fullAddress ?? null} />
+                    <DetailRow label={t("partner.booking.detail.city")} value={service?.city} />
+                    <DetailRow label={t("partner.booking.detail.address")} value={service?.address ?? service?.fullAddress ?? null} />
                     <DetailRow label="Slug" value={service?.slug ?? null} mono />
                     {/*  bỏ Service ID theo yêu cầu */}
                   </div>
 
                   {/* Khách hàng */}
                   <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                    <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Khách hàng</div>
+                    <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.booking.detail.customer")}</div>
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Tên" value={customer?.name} />
+                    <DetailRow label={t("partner.booking.detail.name")} value={customer?.name} />
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="SĐT" value={customer?.phone} mono />
+                    <DetailRow label={t("partner.booking.detail.phone")} value={customer?.phone} mono />
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Email" value={customer?.email} />
+                    <DetailRow label={t("common.email")} value={customer?.email} />
                   </div>
 
                   {/* Thanh toán */}
                   <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                    <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thanh toán</div>
+                    <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.booking.detail.payment")}</div>
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Pay option" value={payOption} />
+                    <DetailRow label={t("partner.booking.detail.pay_option")} value={payOption} />
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Tổng tiền" value={totalAmount != null ? fmtMoney(totalAmount) : null} />
+                    <DetailRow label={t("partner.booking.detail.total_amount")} value={totalAmount != null ? fmtMoney(totalAmount) : null} />
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
                     <DetailRow
-                      label="Đã trả"
+                      label={t("partner.booking.detail.amount_paid")}
                       value={amountPaid != null ? fmtMoney(amountPaid) : null}
                     />
                     <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                    <DetailRow label="Thanh toán lúc" value={paidAt ? fmtDT(paidAt) : null} />
+                    <DetailRow label={t("partner.booking.detail.paid_at")} value={paidAt ? fmtDT(paidAt) : null} />
 
                     {cancelReason ? (
                       <>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="Lý do huỷ" value={cancelReason} />
+                        <DetailRow label={t("partner.booking.detail.cancel_reason")} value={cancelReason} />
                       </>
                     ) : null}
 
                     {cancelledAt ? (
                       <>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="Huỷ lúc" value={fmtDT(cancelledAt)} />
+                        <DetailRow label={t("partner.booking.detail.cancelled_at")} value={fmtDT(cancelledAt)} />
                       </>
                     ) : null}
 
                     {snapshot?.note ? (
                       <>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="Ghi chú" value={snapshot.note} />
+                        <DetailRow label={t("partner.booking.detail.note")} value={snapshot.note} />
                       </>
                     ) : null}
                   </div>
@@ -295,33 +297,33 @@ export default function PartnerBookingDetailModal({
               {/* Chi tiết rooms */}
               {type === "HOTEL" && Array.isArray(roomLines) && roomLines.length > 0 ? (
                 <div className="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Chi tiết phòng</div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.booking.detail.room_detail")}</div>
 
                   <div className="mt-2 space-y-2 max-h-[260px] overflow-y-auto pr-1">
                     {roomLines.map((r, idx) => (
                       <div key={r?.id || `${idx}`} className="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3">
                         <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                          {r?.roomTypeName || r?.name || "Phòng"}
+                          {r?.roomTypeName || r?.name || t("partner.booking.detail.room")}
                           {r?.quantity != null ? (
                             <span className="ml-2 text-xs font-medium text-gray-600 dark:text-gray-400">× {r.quantity}</span>
                           ) : null}
                         </div>
 
                         <div className="mt-1 text-xs text-gray-700 dark:text-gray-300">
-                          Rate: <span className="font-semibold">{r?.ratePlanName || r?.rateName || "--"}</span>
+                          {t("partner.booking.detail.rate")} <span className="font-semibold">{r?.ratePlanName || r?.rateName || "--"}</span>
                         </div>
 
                         {(r?.pricePerNight != null || r?.totalAmount != null) ? (
                           <div className="mt-1 text-xs text-gray-700 dark:text-gray-300">
                             {r?.pricePerNight != null ? (
                               <>
-                                Giá/đêm: <span className="font-semibold">{fmtMoney(r.pricePerNight)}</span>
+                                {t("partner.booking.detail.price_per_night")} <span className="font-semibold">{fmtMoney(r.pricePerNight)}</span>
                               </>
                             ) : null}
                             {r?.pricePerNight != null && r?.totalAmount != null ? " • " : null}
                             {r?.totalAmount != null ? (
                               <>
-                                Tổng: <span className="font-semibold">{fmtMoney(r.totalAmount)}</span>
+                                {t("partner.booking.detail.total")} <span className="font-semibold">{fmtMoney(r.totalAmount)}</span>
                               </>
                             ) : null}
                           </div>
@@ -342,7 +344,7 @@ export default function PartnerBookingDetailModal({
             onClick={() => code && navigator.clipboard?.writeText(code)}
             className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
           >
-            Copy mã booking
+            {t("partner.booking.detail.copy_code")}
           </button>
 
           {canCancel ? (
@@ -353,9 +355,9 @@ export default function PartnerBookingDetailModal({
                 "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition",
                 actionLoading ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700",
               ].join(" ")}
-              title="Hủy đơn (Partner)"
+              title={t("partner.booking.detail.cancel_order")}
             >
-              {actionLoading ? "Đang xử lý..." : "Hủy đơn (Partner)"}
+              {actionLoading ? t("common.processing") : t("partner.booking.detail.cancel_order")}
             </button>
           ) : null}
         </div>

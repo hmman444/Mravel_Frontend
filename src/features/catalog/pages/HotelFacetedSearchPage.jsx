@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
@@ -18,6 +19,7 @@ const PRICE_RANGE_TO_FILTER = {
 const EMPTY_FILTERS = { starRatings: [], hotelTypes: [], amenities: [], priceRange: null };
 
 export default function HotelFacetedSearchPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [sp, setSearchParams] = useSearchParams();
@@ -78,11 +80,11 @@ export default function HotelFacetedSearchPage() {
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {location ? `Khách sạn tại "${location}"` : "Tìm kiếm khách sạn"}
+              {location ? t("hotel.hotels_in_location", { location }) : t("hotel.search_hotels")}
             </h1>
             {totalHits > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {totalHits.toLocaleString("vi-VN")} kết quả
+                {t("hotel.results_count", { count: totalHits.toLocaleString("vi-VN") })}
               </p>
             )}
           </div>
@@ -91,7 +93,7 @@ export default function HotelFacetedSearchPage() {
             className="text-sm text-blue-600 hover:underline"
             onClick={() => navigate("/hotels")}
           >
-            Tìm kiếm mới
+            {t("hotel.new_search")}
           </button>
         </div>
 
@@ -121,7 +123,7 @@ export default function HotelFacetedSearchPage() {
 
             {!loading && !error && results.length === 0 && (
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Không có kết quả phù hợp. Thử điều chỉnh bộ lọc.
+                {t("hotel.no_results_adjust_filters")}
               </p>
             )}
 
@@ -144,17 +146,17 @@ export default function HotelFacetedSearchPage() {
                       onClick={() => setPage(page - 1)}
                       disabled={page <= 0}
                     >
-                      Trước
+                      {t("common.prev_page")}
                     </button>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Trang <b>{page + 1}</b> / {totalPages}
+                      {t("hotel.page_label")} <b>{page + 1}</b> / {totalPages}
                     </span>
                     <button
                       className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={() => setPage(page + 1)}
                       disabled={page + 1 >= totalPages}
                     >
-                      Sau
+                      {t("common.next_page")}
                     </button>
                   </div>
                 )}
@@ -170,6 +172,7 @@ export default function HotelFacetedSearchPage() {
 }
 
 function HotelCard({ hotel, onClick }) {
+  const { t } = useTranslation();
   const {
     name, slug, cityName, districtName,
     avgRating, reviewsCount, ratingLabel,
@@ -188,7 +191,7 @@ function HotelCard({ hotel, onClick }) {
 
   const priceText = price > 0
     ? price.toLocaleString("vi-VN") + ` ${currencyCode || "VND"}`
-    : "Giá đang cập nhật";
+    : t("hotel.price_updating");
 
   const oldPriceText = oldPrice && oldPrice > 0
     ? oldPrice.toLocaleString("vi-VN") + ` ${currencyCode || "VND"}`
@@ -253,7 +256,7 @@ function HotelCard({ hotel, onClick }) {
           <div className="mt-2 text-xs text-gray-400 line-through">{oldPriceText}</div>
         )}
         <div className="text-[15px] font-bold text-[#ff5a00] mt-[2px]">{priceText}</div>
-        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Chưa bao gồm thuế và phí</div>
+        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{t("hotel.taxes_fees_excluded")}</div>
       </div>
     </div>
   );

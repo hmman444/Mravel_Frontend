@@ -1,4 +1,5 @@
 import { useRef, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MapPinIcon, CalendarDaysIcon, BanknotesIcon } from "@heroicons/react/24/outline";
 
 import PlanHeader from "./PlanHeader";
@@ -11,6 +12,7 @@ import { truncate } from "../utils/utils";
 import { showSuccess } from "../../../utils/toastUtils";
 
 export default function PlanPostCard({ plan, me, onOpenDetail }) {
+  const { t } = useTranslation();
   const { sendReact } = usePlans();
   const commentRef = useRef(null);
   const [showDestPopup, setShowDestPopup] = useState(false);
@@ -42,7 +44,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
     navigator.clipboard.writeText(
       `${window.location.origin}/plans/${plan.id}`
     );
-    showSuccess("Đã sao chép liên kết!");
+    showSuccess(t("feed.share_copied"));
   };
 
   // === Destinations ===
@@ -98,7 +100,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         <span className="flex items-center gap-1.5 font-medium">
           <CalendarDaysIcon className="w-4 h-4 text-sky-500" />
           <span className="text-gray-700 dark:text-gray-300">{plan.startDate} – {plan.endDate}</span>
-          <span className="text-gray-500 dark:text-gray-400">({plan.days} ngày)</span>
+          <span className="text-gray-500 dark:text-gray-400">({t("feed.daysCount", { n: plan.days })})</span>
         </span>
 
         {/* Ngân sách */}
@@ -127,7 +129,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
           >
             <MapPinIcon className="w-4 h-4 text-sky-500" />
             <span className="truncate max-w-[180px] sm:max-w-[220px]">
-              {plan.destinations?.length || 0} điểm đến
+              {t("feed.destinationsCount", { n: plan.destinations?.length || 0 })}
             </span>
           </button>
 
@@ -145,7 +147,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
               onMouseLeave={() => setShowDestPopup(false)}
             >
               <div className="px-1 pb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                📍 Các điểm đến
+                📍 {t("feed.destinations.title")}
               </div>
               <ul className="max-h-56 overflow-y-auto text-xs text-gray-700 dark:text-gray-200 space-y-1">
                 {destinationNames.map((name, idx) => (
@@ -172,7 +174,7 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
               onClick={onOpenDetail}
               className="ml-1.5 text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 underline text-xs font-semibold transition-colors"
             >
-              Xem thêm
+              {t("feed.readMore")}
             </button>
           )}
         </p>

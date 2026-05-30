@@ -1,4 +1,5 @@
 import api from "../../../utils/partnerAxiosInstance";
+import i18n from "../../../i18n";
 
 const PARTNER_PREFIX = "/partner";
 
@@ -11,7 +12,7 @@ const normalizePage = (page) => ({
   sort: page?.sort ?? null,
 });
 
-const toError = (error, fallback = "Lỗi kết nối đến server") => {
+const toError = (error, fallback = i18n.t("partner.error.connection")) => {
   if (error?.response?.data) {
     const msg =
       error.response.data.message ||
@@ -28,7 +29,7 @@ export const getPartnerMe = async () => {
     const res = await api.get(`${PARTNER_PREFIX}/me`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không lấy được thông tin đối tác");
+    return toError(error, i18n.t("partner.error.fetch_me"));
   }
 };
 
@@ -44,7 +45,7 @@ export const listPartnerHotels = async ({ status, page = 0, size = 10 } = {}) =>
     });
     return { success: true, data: normalizePage(res.data?.data) };
   } catch (error) {
-    return toError(error, "Không tải được danh sách khách sạn");
+    return toError(error, i18n.t("partner.error.list_hotels"));
   }
 };
 
@@ -55,7 +56,7 @@ export const createPartnerHotel = async (payload) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Tạo khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.create_hotel"));
   }
 };
 
@@ -66,7 +67,7 @@ export const updatePartnerHotel = async (id, payload) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Cập nhật khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.update_hotel"));
   }
 };
 
@@ -75,7 +76,7 @@ export const softDeletePartnerHotel = async (id) => {
     const res = await api.delete(`${PARTNER_PREFIX}/hotels/${encodeURIComponent(id)}`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Xóa khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.delete_hotel"));
   }
 };
 
@@ -84,7 +85,7 @@ export const pausePartnerHotel = async (id) => {
     const res = await api.post(`${PARTNER_PREFIX}/hotels/${encodeURIComponent(id)}/pause`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Tạm khóa khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.pause_hotel"));
   }
 };
 
@@ -93,7 +94,7 @@ export const resumePartnerHotel = async (id) => {
     const res = await api.post(`${PARTNER_PREFIX}/hotels/${encodeURIComponent(id)}/resume`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Mở lại khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.resume_hotel"));
   }
 };
 
@@ -106,7 +107,7 @@ export const requestUnlockPartnerHotel = async (id, reason) => {
     );
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Gửi yêu cầu mở khóa khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.unlock_request_hotel"));
   }
 };
 
@@ -122,7 +123,7 @@ export const listPartnerRestaurants = async ({ status, page = 0, size = 10 } = {
     });
     return { success: true, data: normalizePage(res.data?.data) };
   } catch (error) {
-    return toError(error, "Không tải được danh sách quán ăn");
+    return toError(error, i18n.t("partner.error.list_restaurants"));
   }
 };
 
@@ -133,7 +134,7 @@ export const createPartnerRestaurant = async (payload) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Tạo quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.create_restaurant"));
   }
 };
 
@@ -144,7 +145,7 @@ export const updatePartnerRestaurant = async (id, payload) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Cập nhật quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.update_restaurant"));
   }
 };
 
@@ -153,7 +154,7 @@ export const softDeletePartnerRestaurant = async (id) => {
     const res = await api.delete(`${PARTNER_PREFIX}/restaurants/${encodeURIComponent(id)}`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Xóa quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.delete_restaurant"));
   }
 };
 
@@ -162,7 +163,7 @@ export const pausePartnerRestaurant = async (id) => {
     const res = await api.post(`${PARTNER_PREFIX}/restaurants/${encodeURIComponent(id)}/pause`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Tạm khóa quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.pause_restaurant"));
   }
 };
 
@@ -171,7 +172,7 @@ export const resumePartnerRestaurant = async (id) => {
     const res = await api.post(`${PARTNER_PREFIX}/restaurants/${encodeURIComponent(id)}/resume`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Mở lại quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.resume_restaurant"));
   }
 };
 
@@ -184,7 +185,7 @@ export const requestUnlockPartnerRestaurant = async (id, reason) => {
     );
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Gửi yêu cầu mở khóa quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.unlock_request_restaurant"));
   }
 };
 
@@ -196,7 +197,7 @@ export const listPartnerHotelBookings = async ({ status, page = 0, size = 10 } =
     });
     return { success: true, data: normalizePage(res.data?.data) };
   } catch (error) {
-    return toError(error, "Không tải được booking khách sạn");
+    return toError(error, i18n.t("partner.error.list_hotel_bookings"));
   }
 };
 
@@ -205,7 +206,7 @@ export const getPartnerHotelBookingDetail = async (bookingCode) => {
     const res = await api.get(`${PARTNER_PREFIX}/bookings/hotels/${encodeURIComponent(bookingCode)}`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được chi tiết booking khách sạn");
+    return toError(error, i18n.t("partner.error.hotel_booking_detail"));
   }
 };
 
@@ -218,7 +219,7 @@ export const cancelPartnerHotelBooking = async (bookingCode, reason) => {
     );
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Hủy booking khách sạn thất bại");
+    return toError(error, i18n.t("partner.error.cancel_hotel_booking"));
   }
 };
 
@@ -229,7 +230,7 @@ export const listPartnerRestaurantBookings = async ({ status, page = 0, size = 1
     });
     return { success: true, data: normalizePage(res.data?.data) };
   } catch (error) {
-    return toError(error, "Không tải được booking quán ăn");
+    return toError(error, i18n.t("partner.error.list_restaurant_bookings"));
   }
 };
 
@@ -238,7 +239,7 @@ export const getPartnerRestaurantBookingDetail = async (bookingCode) => {
     const res = await api.get(`${PARTNER_PREFIX}/bookings/restaurants/${encodeURIComponent(bookingCode)}`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được chi tiết booking quán ăn");
+    return toError(error, i18n.t("partner.error.restaurant_booking_detail"));
   }
 };
 
@@ -251,7 +252,7 @@ export const cancelPartnerRestaurantBooking = async (bookingCode, reason) => {
     );
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Hủy booking quán ăn thất bại");
+    return toError(error, i18n.t("partner.error.cancel_restaurant_booking"));
   }
 };
 
@@ -263,7 +264,7 @@ export const getPartnerStatsByStatus = async ({ from, to } = {}) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được thống kê theo trạng thái");
+    return toError(error, i18n.t("partner.error.stats_by_status"));
   }
 };
 
@@ -278,6 +279,6 @@ export const getPartnerRevenue = async ({ from, to, group } = {}) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được thống kê doanh thu");
+    return toError(error, i18n.t("partner.error.stats_revenue"));
   }
 };

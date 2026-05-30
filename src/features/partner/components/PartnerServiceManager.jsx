@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { usePartnerServices } from "../hooks/usePartnerServices";
 import PartnerServiceTypePickerModal from "./PartnerServiceTypePickerModal";
 import PartnerHotelFormPage from "./hotel/form/PartnerHotelFormPage";
@@ -11,6 +12,24 @@ import PartnerRestaurantFormPage from "./restaurant/form/PartnerRestaurantFormPa
 import PartnerServiceStats from "./services/PartnerServiceStats";
 import PartnerServiceFilters from "./services/PartnerServiceFilters";
 import PartnerServiceTable from "./services/PartnerServiceTable";
+import i18n from "../../../i18n";
+
+// BE trả nội dung động dạng Map<string,string> ({ vi, en }) cho endpoint partner (chưa flatten).
+// Helper lấy chuỗi theo ngôn ngữ hiện tại, fallback vi -> giá trị đầu tiên.
+const pickLocalized = (val) => {
+  if (val == null) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "object") {
+    const lang = i18n.language || "vi";
+    return (
+      val[lang] ||
+      val.vi ||
+      Object.values(val).find((v) => typeof v === "string") ||
+      ""
+    );
+  }
+  return String(val);
+};
 
 const soft = {
   btn: "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition active:scale-[0.98]",
@@ -35,15 +54,17 @@ const pickThumbnail = (doc) => {
   return cover?.url || imgs[0]?.url || "https://picsum.photos/seed/placeholder/800/480";
 };
 
-const pickShortDesc = (doc) => doc?.shortDescription || doc?.description || "—";
+const pickShortDesc = (doc) =>
+  pickLocalized(doc?.shortDescription) || pickLocalized(doc?.description) || "—";
 
 function Pagination({ page, totalPages, onPageChange, disabled }) {
+  const { t } = useTranslation();
   const canPrev = page > 0;
   const canNext = page + 1 < (totalPages || 0);
   return (
     <div className="flex items-center justify-between gap-3 py-3">
       <div className="text-sm text-slate-600 dark:text-slate-400">
-        Trang <b>{(totalPages ?? 0) === 0 ? 0 : page + 1}</b> / <b>{totalPages ?? 0}</b>
+        {t("partner.pagination.page")} <b>{(totalPages ?? 0) === 0 ? 0 : page + 1}</b> / <b>{totalPages ?? 0}</b>
       </div>
       <div className="flex items-center gap-2">
         <button
@@ -51,14 +72,14 @@ function Pagination({ page, totalPages, onPageChange, disabled }) {
           onClick={() => onPageChange(page - 1)}
           className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800"
         >
-          Trước
+          {t("partner.pagination.prev")}
         </button>
         <button
           disabled={disabled || !canNext}
           onClick={() => onPageChange(page + 1)}
           className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800"
         >
-          Sau
+          {t("partner.pagination.next")}
         </button>
       </div>
     </div>
@@ -81,6 +102,8 @@ export default function PartnerServiceManager() {
     updateRestaurant,
     createRestaurant,
   } = usePartnerServices();
+
+  const { t } = useTranslation();
 
   const me = useSelector((s) => s.partner?.me?.data);
 
@@ -124,7 +147,7 @@ export default function PartnerServiceManager() {
   const uiItems = useMemo(() => {
     return (sourceList.items || []).map((doc) => ({
       id: doc?.id ?? doc?._id ?? doc?.code ?? doc?.slug ?? "(no-id)",
-      name: doc?.name ?? doc?.title ?? "(no-name)",
+      name: pickLocalized(doc?.name) || pickLocalized(doc?.title) || "(no-name)",
       type: mode,
       subtype: mode === "HOTEL" ? doc?.hotelType : doc?.restaurantType,
       status: mapServiceStatus(doc),
@@ -263,10 +286,10 @@ export default function PartnerServiceManager() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Dịch vụ của tôi
+              {t("partner.services.title")}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Quản lý dịch vụ bạn đã đăng ký với hệ thống.
+              {t("partner.services.subtitle")}
             </p>
             {action.error && <div className="mt-1 text-sm text-rose-600">{action.error}</div>}
           </div>
@@ -282,7 +305,7 @@ export default function PartnerServiceManager() {
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
                 }`}
               >
-                Khách sạn
+                {t("partner.services.tab_hotel")}
               </button>
               <button
                 type="button"
@@ -293,7 +316,7 @@ export default function PartnerServiceManager() {
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
                 }`}
               >
-                Quán ăn
+                {t("partner.services.tab_restaurant")}
               </button>
             </div>
 
@@ -303,7 +326,7 @@ export default function PartnerServiceManager() {
               type="button"
             >
               <FunnelIcon className="h-5 w-5" />
-              Bộ lọc
+              {t("partner.services.filters")}
             </button>
 
             <button
@@ -312,7 +335,7 @@ export default function PartnerServiceManager() {
               type="button"
             >
               <PlusIcon className="h-5 w-5" />
-              Thêm dịch vụ
+              {t("partner.services.add")}
             </button>
           </div>
         </div>
@@ -347,7 +370,7 @@ export default function PartnerServiceManager() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không có dịch vụ phù hợp với bộ lọc hiện tại.
+            {t("partner.services.empty")}
           </p>
         </div>
       ) : (
@@ -375,14 +398,14 @@ export default function PartnerServiceManager() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-md p-6">
             <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">
-              {modal.kind === "DELETE" && "Xóa dịch vụ"}
-              {modal.kind === "PAUSE" && "Tạm khóa dịch vụ"}
-              {modal.kind === "RESUME" && "Mở lại dịch vụ"}
-              {modal.kind === "UNLOCK" && "Gửi yêu cầu mở khóa (admin)"}
+              {modal.kind === "DELETE" && t("partner.modal.delete_title")}
+              {modal.kind === "PAUSE" && t("partner.modal.pause_title")}
+              {modal.kind === "RESUME" && t("partner.modal.resume_title")}
+              {modal.kind === "UNLOCK" && t("partner.modal.unlock_title")}
             </h3>
 
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-              Dịch vụ:{" "}
+              {t("partner.modal.service_label")}{" "}
               <span className="font-medium text-slate-900 dark:text-slate-100">
                 {modal.service?.name}
               </span>
@@ -391,7 +414,9 @@ export default function PartnerServiceManager() {
             {(modal.kind === "DELETE" || modal.kind === "UNLOCK") && (
               <>
                 <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">
-                  {modal.kind === "DELETE" ? "Ghi chú (tuỳ chọn)" : "Lý do mở khóa (bắt buộc)"}
+                  {modal.kind === "DELETE"
+                    ? t("partner.modal.note_label")
+                    : t("partner.modal.unlock_reason_label")}
                 </label>
                 <textarea
                   value={modal.note}
@@ -399,8 +424,8 @@ export default function PartnerServiceManager() {
                   className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 h-24 text-sm outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-400"
                   placeholder={
                     modal.kind === "DELETE"
-                      ? "Ví dụ: ngừng kinh doanh..."
-                      : "Ví dụ: đã bổ sung giấy tờ / cập nhật thông tin..."
+                      ? t("partner.modal.note_placeholder")
+                      : t("partner.modal.unlock_reason_placeholder")
                   }
                 />
               </>
@@ -412,7 +437,7 @@ export default function PartnerServiceManager() {
                 className={`${soft.btn} ${soft.btnGhost}`}
                 disabled={action.loading}
               >
-                Hủy
+                {t("common.cancel")}
               </button>
 
               <button
@@ -428,7 +453,7 @@ export default function PartnerServiceManager() {
                     : "bg-blue-600 hover:bg-blue-700"
                 }`}
               >
-                {action.loading ? "Đang xử lý..." : "Xác nhận"}
+                {action.loading ? t("common.processing") : t("common.confirm")}
               </button>
             </div>
           </div>

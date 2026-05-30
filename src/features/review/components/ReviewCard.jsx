@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import i18n from "../../../i18n";
 import StarRating from "./StarRating";
 
 const defaultAvatar =
@@ -9,14 +11,17 @@ function timeAgo(dateStr) {
   const date = new Date(dateStr);
   const diff = Math.floor((now - date) / 1000);
 
-  if (diff < 60) return "Vừa xong";
-  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} ngày trước`;
-  return date.toLocaleDateString("vi-VN");
+  if (diff < 60) return i18n.t("review.just_now");
+  if (diff < 3600) return i18n.t("review.minutes_ago", { n: Math.floor(diff / 60) });
+  if (diff < 86400) return i18n.t("review.hours_ago", { n: Math.floor(diff / 3600) });
+  if (diff < 2592000) return i18n.t("review.days_ago", { n: Math.floor(diff / 86400) });
+  return date.toLocaleDateString(i18n.language === "en" ? "en-US" : "vi-VN");
 }
 
 export default function ReviewCard({ review, isOwner, onDelete }) {
+  const { t, i18n } = useTranslation();
+  const aspectLabel = (a) =>
+    i18n.language === "en" ? a?.labelEn || a?.labelVi : a?.labelVi;
   return (
     <div className="flex gap-3 py-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
       {/* Avatar */}
@@ -31,11 +36,11 @@ export default function ReviewCard({ review, isOwner, onDelete }) {
         <div className="flex items-center justify-between gap-2">
           <div>
             <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {review.userFullname || "Người dùng"}
+              {review.userFullname || t("review.anonymous")}
             </span>
             <span className="ml-2 text-xs text-gray-400">
               {timeAgo(review.createdAt)}
-              {review.updatedAt && " (đã chỉnh sửa)"}
+              {review.updatedAt && ` ${t("review.edited")}`}
             </span>
           </div>
           {isOwner && onDelete && (
@@ -43,7 +48,7 @@ export default function ReviewCard({ review, isOwner, onDelete }) {
               onClick={() => onDelete(review.id)}
               className="text-xs text-red-500 hover:text-red-700 transition-colors"
             >
-              Xóa
+              {t("review.delete_btn")}
             </button>
           )}
         </div>
@@ -66,7 +71,7 @@ export default function ReviewCard({ review, isOwner, onDelete }) {
             {review.aspects.map((a) => (
               <div key={a.code} className="flex items-start gap-2 text-xs">
                 <span className="shrink-0 font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 px-2 py-0.5 rounded-full">
-                  {a.labelVi}
+                  {aspectLabel(a)}
                 </span>
                 <span className="text-gray-600 dark:text-gray-400 pt-0.5">{a.comment}</span>
               </div>

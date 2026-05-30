@@ -1,6 +1,8 @@
 // src/features/planBoard/components/stats/components/DayBar.jsx
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 function clampInt(x, a, b) {
   const n = Math.round(Number(x));
   if (!Number.isFinite(n)) return a;
@@ -8,6 +10,7 @@ function clampInt(x, a, b) {
 }
 
 export default function DayBar({ date, estimated, actual, fmtMoney, max }) {
+  const { t } = useTranslation();
   const pct = max > 0 ? Math.round((actual / max) * 100) : 0;
   const barColor = actual > estimated ? "bg-rose-500/80" : "bg-emerald-500/80";
 
@@ -18,7 +21,8 @@ export default function DayBar({ date, estimated, actual, fmtMoney, max }) {
           {date}
         </p>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          Dự toán: {fmtMoney(estimated)} • Thực chi:{" "}
+          {t("plan.stats.estimated")}: {fmtMoney(estimated)} •{" "}
+          {t("plan.stats.actual")}:{" "}
           <span className="font-semibold text-slate-700 dark:text-slate-200">
             {fmtMoney(actual)}
           </span>

@@ -1,12 +1,15 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { LockClosedIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
-export default function PasswordInput({ label = "Mật khẩu", icon: Icon = LockClosedIcon, ...props }) {
+export default function PasswordInput({ label, icon: Icon = LockClosedIcon, ...props }) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
+  const resolvedLabel = label ?? t("common.password");
 
   return (
     <label className="block">
-      <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
+      <span className="text-sm text-gray-600 dark:text-gray-400">{resolvedLabel}</span>
       <div className="relative mt-1">
         <Icon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
 

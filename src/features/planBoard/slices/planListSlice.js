@@ -1,5 +1,6 @@
 // src/features/planBoard/slices/planListSlice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import { fetchMyPlans } from "../services/planListService";
 
 const initialState = {
@@ -32,7 +33,7 @@ const planListSlice = createSlice({
       .addCase(loadMyPlans.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.error?.message || "Không thể tải danh sách kế hoạch";
+          action.error?.message || i18n.t("plan.list.load_error");
       });
   },
 });

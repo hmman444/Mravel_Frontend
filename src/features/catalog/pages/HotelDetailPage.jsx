@@ -1,5 +1,6 @@
 // src/features/hotels/pages/HotelDetailPage.jsx
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useLocation  } from "react-router-dom";
 
@@ -18,6 +19,7 @@ import HotelSimilarSection from "../components/hotel/HotelSimilarSection";
 import ReviewSection from "../../review/components/ReviewSection";
 
 export default function HotelDetailPage() {
+  const { t } = useTranslation();
   const { slug } = useParams();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -48,7 +50,7 @@ export default function HotelDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
           {loading && (
             <p className="py-10 text-center text-gray-500 dark:text-gray-400">
-              Đang tải thông tin khách sạn...
+              {t("hotel.loading_detail")}
             </p>
           )}
 

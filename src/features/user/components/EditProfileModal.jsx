@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, Camera, Image as ImageIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useEditProfile } from "../hooks/useEditProfile";
 
 // Helpers format input
@@ -15,6 +16,7 @@ export default function EditProfileModal({
   initialData,
   onUpdated,
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     fullname: "",
     username: "",
@@ -76,7 +78,7 @@ export default function EditProfileModal({
 
     if (["phone1", "phone2", "phone3"].includes(field)) {
       if (value && value.length < 9) {
-        msg = "Số điện thoại phải có ít nhất 9 số";
+        msg = t("user.error_phone_min");
       }
     }
 
@@ -85,13 +87,13 @@ export default function EditProfileModal({
         value &&
         !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)
       ) {
-        msg = "Email không hợp lệ";
+        msg = t("user.error_email_invalid");
       }
     }
 
     if (field === "username") {
       if (value && value.length < 4) {
-        msg = "Username phải có ít nhất 4 ký tự";
+        msg = t("user.error_username_min");
       }
     }
 
@@ -170,7 +172,7 @@ export default function EditProfileModal({
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-xs text-slate-500 dark:text-slate-400 gap-1">
               <ImageIcon className="w-6 h-6" />
-              <span>Thêm ảnh cover để hồ sơ nổi bật hơn</span>
+              <span>{t("user.cover_hint")}</span>
             </div>
           )}
 
@@ -192,7 +194,7 @@ export default function EditProfileModal({
             className="absolute right-3 top-3 px-2.5 py-1.5 rounded-full bg-black/60 text-xs text-white hover:bg-black/70 transition flex items-center gap-1.5"
             onClick={() => document.getElementById("coverUpload")?.click()}
           >
-            <ImageIcon className="w-3.5 h-3.5" /> Đổi ảnh bìa
+            <ImageIcon className="w-3.5 h-3.5" /> {t("user.change_cover")}
           </button>
 
           {/* AVATAR */}
@@ -243,10 +245,10 @@ export default function EditProfileModal({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                Chỉnh sửa hồ sơ
+                {t("user.edit_profile_title")}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Tất cả thông tin này sẽ hiển thị trên trang cá nhân của bạn.
+                {t("user.edit_profile_subtitle")}
               </p>
             </div>
             <button
@@ -261,11 +263,11 @@ export default function EditProfileModal({
           {/* HỌ TÊN + USERNAME */}
           <div className="grid md:grid-cols-2 gap-4">
             <Input
-              label="Họ và tên"
+              label={t("user.fullname_label")}
               value={form.fullname}
               onChange={handleChange("fullname")}
               error={errors.fullname}
-              placeholder="Nhập họ tên đầy đủ"
+              placeholder={t("user.fullname_placeholder")}
             />
             <Input
               label="Username"
@@ -279,22 +281,22 @@ export default function EditProfileModal({
 
           {/* BIO */}
           <TextArea
-            label="Giới thiệu ngắn"
+            label={t("user.bio_label")}
             value={form.bio}
             onChange={handleChange("bio")}
-            placeholder="Ví dụ: Yêu thích du lịch tự phát, cà phê ngon và những cung đường vắng."
+            placeholder={t("user.bio_placeholder")}
           />
 
           {/* LOCATION */}
           <div className="grid md:grid-cols-2 gap-4">
             <Input
-              label="Thành phố đang sống"
+              label={t("user.city_label")}
               value={form.city}
               onChange={handleChange("city")}
               placeholder="TP. Hồ Chí Minh"
             />
             <Input
-              label="Quốc gia"
+              label={t("user.country")}
               value={form.country}
               onChange={handleChange("country")}
               placeholder="Việt Nam"
@@ -303,16 +305,16 @@ export default function EditProfileModal({
 
           <div className="grid md:grid-cols-2 gap-4">
             <Input
-              label="Quê quán"
+              label={t("user.hometown_label")}
               value={form.hometown}
               onChange={handleChange("hometown")}
-              placeholder="Quê quán"
+              placeholder={t("user.hometown_placeholder")}
             />
             <Input
-              label="Nghề nghiệp"
+              label={t("user.occupation_label")}
               value={form.occupation}
               onChange={handleChange("occupation")}
-              placeholder="Ví dụ: Kỹ sư phần mềm..."
+              placeholder={t("user.occupation_placeholder")}
             />
           </div>
 
@@ -321,7 +323,7 @@ export default function EditProfileModal({
             {/* Select giới tính */}
             <div className="space-y-1">
               <label className="block text-xs font-medium text-slate-600 dark:text-slate-300">
-                Giới tính
+                {t("user.gender")}
               </label>
               <select
                 value={form.gender || ""}
@@ -330,15 +332,15 @@ export default function EditProfileModal({
                 }
                 className="w-full rounded-xl border px-3 py-2 bg-white dark:bg-slate-900 text-sm border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-sky-400 outline-none"
               >
-                <option value="">Không chọn</option>
-                <option value="MALE">Nam</option>
-                <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
+                <option value="">{t("user.gender_none")}</option>
+                <option value="MALE">{t("user.gender_male")}</option>
+                <option value="FEMALE">{t("user.gender_female")}</option>
+                <option value="OTHER">{t("user.gender_other")}</option>
               </select>
             </div>
 
             <Input
-              label="Ngày sinh"
+              label={t("user.dob_label")}
               type="date"
               value={form.dateOfBirth || ""}
               onChange={handleChange("dateOfBirth")}
@@ -348,54 +350,54 @@ export default function EditProfileModal({
           {/* PHONES */}
           <div className="grid md:grid-cols-3 gap-4">
             <Input
-              label="Số điện thoại 1"
+              label={t("user.phone1_label")}
               value={form.phone1}
               onChange={handleChange("phone1")}
               error={errors.phone1}
-              placeholder="Chỉ nhập số"
+              placeholder={t("user.phone_only_number_placeholder")}
             />
             <Input
-              label="Số điện thoại 2"
+              label={t("user.phone2_label")}
               value={form.phone2}
               onChange={handleChange("phone2")}
               error={errors.phone2}
-              placeholder="Tuỳ chọn"
+              placeholder={t("user.optional_placeholder")}
             />
             <Input
-              label="Số điện thoại 3"
+              label={t("user.phone3_label")}
               value={form.phone3}
               onChange={handleChange("phone3")}
               error={errors.phone3}
-              placeholder="Tuỳ chọn"
+              placeholder={t("user.optional_placeholder")}
             />
           </div>
 
           {/* EMAILS */}
           <div className="grid md:grid-cols-2 gap-4">
             <Input
-              label="Email phụ"
+              label={t("user.secondary_email_label")}
               type="email"
               value={form.secondaryEmail}
               onChange={handleChange("secondaryEmail")}
               error={errors.secondaryEmail}
-              placeholder="Ví dụ: email 2"
+              placeholder={t("user.secondary_email_placeholder")}
             />
             <Input
-              label="Email khác"
+              label={t("user.tertiary_email_label")}
               type="email"
               value={form.tertiaryEmail}
               onChange={handleChange("tertiaryEmail")}
               error={errors.tertiaryEmail}
-              placeholder="Ví dụ: email 3"
+              placeholder={t("user.tertiary_email_placeholder")}
             />
           </div>
 
           {/* ADDRESS */}
           <Input
-            label="Địa chỉ chi tiết"
+            label={t("user.detailed_address")}
             value={form.addressLine}
             onChange={handleChange("addressLine")}
-            placeholder="Số nhà, đường, phường/xã..."
+            placeholder={t("user.address_placeholder")}
           />
 
           {/* ACTIONS */}
@@ -406,14 +408,14 @@ export default function EditProfileModal({
               className="px-4 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
               disabled={saving}
             >
-              Hủy
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="px-5 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-white shadow-sm hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
-              {saving ? "Đang lưu..." : "Lưu thay đổi"}
+              {saving ? t("common.processing") : t("user.save_changes")}
             </button>
           </div>
         </form>

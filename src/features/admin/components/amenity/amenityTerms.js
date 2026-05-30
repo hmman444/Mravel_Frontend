@@ -1,4 +1,5 @@
 // src/features/admin/components/amenity/amenityTerms.js
+import i18n from "../../../../i18n";
 
 export const SCOPE_OPTIONS = ["ALL", "HOTEL", "ROOM", "RESTAURANT"];
 export const GROUP_OPTIONS = ["ALL", "ROOM", "HOTEL_SERVICE", "PUBLIC_AREA", "NEARBY", "INTERNET", "OTHER"];
@@ -16,41 +17,41 @@ export const SECTION_OPTIONS = [
 ];
 
 export const SORT_OPTIONS = [
-  { value: "NAME_ASC", label: "Tên A→Z" },
-  { value: "NAME_DESC", label: "Tên Z→A" },
-  { value: "CODE_ASC", label: "Code A→Z" },
-  { value: "CODE_DESC", label: "Code Z→A" },
+  { value: "NAME_ASC", label: i18n.t("admin.amenity_sort_name_asc") },
+  { value: "NAME_DESC", label: i18n.t("admin.amenity_sort_name_desc") },
+  { value: "CODE_ASC", label: i18n.t("admin.amenity_sort_code_asc") },
+  { value: "CODE_DESC", label: i18n.t("admin.amenity_sort_code_desc") },
 ];
 
 // nhãn dễ hiểu (VN). Bạn có thể đưa qua i18n sau.
 export const SCOPE_LABEL = {
-  ALL: "Tất cả",
-  HOTEL: "Khách sạn",
-  ROOM: "Phòng",
-  RESTAURANT: "Nhà hàng",
+  ALL: i18n.t("common.all"),
+  HOTEL: i18n.t("admin.amenity_scope_hotel"),
+  ROOM: i18n.t("admin.amenity_scope_room"),
+  RESTAURANT: i18n.t("admin.amenity_scope_restaurant"),
 };
 
 export const GROUP_LABEL = {
-  ALL: "Tất cả",
-  ROOM: "Thuộc phòng",
-  HOTEL_SERVICE: "Dịch vụ khách sạn",
-  PUBLIC_AREA: "Khu vực chung",
-  NEARBY: "Gần kề",
-  INTERNET: "Internet",
-  OTHER: "Khác",
+  ALL: i18n.t("common.all"),
+  ROOM: i18n.t("admin.amenity_group_room"),
+  HOTEL_SERVICE: i18n.t("admin.amenity_group_hotel_service"),
+  PUBLIC_AREA: i18n.t("admin.amenity_group_public_area"),
+  NEARBY: i18n.t("admin.amenity_group_nearby"),
+  INTERNET: i18n.t("admin.amenity_group_internet"),
+  OTHER: i18n.t("admin.amenity_group_other"),
 };
 
 export const SECTION_LABEL = {
-  ALL: "Tất cả",
-  HIGHLIGHT_FEATURES: "Nổi bật",
-  BASIC_FACILITIES: "Tiện ích cơ bản",
-  ROOM_FACILITIES: "Tiện nghi phòng",
-  BATHROOM: "Phòng tắm",
-  FOOD_AND_DRINK: "Ăn uống",
-  TRANSPORT: "Di chuyển",
-  INTERNET: "Internet",
-  ENTERTAINMENT: "Giải trí",
-  OTHER: "Khác",
+  ALL: i18n.t("common.all"),
+  HIGHLIGHT_FEATURES: i18n.t("admin.amenity_section_highlight_features"),
+  BASIC_FACILITIES: i18n.t("admin.amenity_section_basic_facilities"),
+  ROOM_FACILITIES: i18n.t("admin.amenity_section_room_facilities"),
+  BATHROOM: i18n.t("admin.amenity_section_bathroom"),
+  FOOD_AND_DRINK: i18n.t("admin.amenity_section_food_and_drink"),
+  TRANSPORT: i18n.t("admin.amenity_section_transport"),
+  INTERNET: i18n.t("admin.amenity_section_internet"),
+  ENTERTAINMENT: i18n.t("admin.amenity_section_entertainment"),
+  OTHER: i18n.t("admin.amenity_section_other"),
 };
 
 // helper: hiển thị label fallback

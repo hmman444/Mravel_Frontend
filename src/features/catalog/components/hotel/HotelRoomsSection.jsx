@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 import {
   ChevronDown,
   ChevronRight,
@@ -27,12 +29,13 @@ import {
 
 /** Các filter quick trên đầu */
 const QUICK_FILTERS = [
-  { key: "FREE_CANCELLATION", label: "Miễn phí huỷ phòng" },
-  { key: "PAY_AT_HOTEL", label: "Thanh Toán Tại Khách Sạn" },
-  { key: "FREE_BREAKFAST", label: "Miễn phí bữa sáng" },
+  { key: "FREE_CANCELLATION", label: i18n.t("hotel.filter_free_cancellation") },
+  { key: "PAY_AT_HOTEL", label: i18n.t("hotel.filter_pay_at_hotel") },
+  { key: "FREE_BREAKFAST", label: i18n.t("hotel.filter_free_breakfast") },
 ];
 
 export default function HotelRoomsSection({ hotel }) {
+  const { t } = useTranslation();
   const [priceMode, setPriceMode] = useState("EXCL_TAX");
   const [activeFilters, setActiveFilters] = useState([]);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
@@ -58,13 +61,13 @@ export default function HotelRoomsSection({ hotel }) {
         <div className="flex flex-col gap-3 px-6 pt-5 pb-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 md:text-xl">
-              Những phòng còn trống tại {hotel.name}
+              {t("hotel.available_rooms_at", { name: hotel.name })}
             </h2>
           </div>
 
           {/* “Hiển thị giá” */}
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Hiển thị giá</span>
+            <span className="text-gray-600 dark:text-gray-400">{t("hotel.show_price")}</span>
             <div className="relative">
               <select
                 value={priceMode}
@@ -76,10 +79,10 @@ export default function HotelRoomsSection({ hotel }) {
                 ].join(" ")}
               >
                 <option value="EXCL_TAX">
-                  Mỗi phòng mỗi đêm (chưa bao gồm thuế và phí)
+                  {t("hotel.price_mode_excl_tax")}
                 </option>
                 <option value="INCL_TAX">
-                  Mỗi phòng mỗi đêm (đã bao gồm thuế và phí)
+                  {t("hotel.price_mode_incl_tax")}
                 </option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
@@ -90,7 +93,7 @@ export default function HotelRoomsSection({ hotel }) {
         {/* QUICK FILTER CHIPS */}
         <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 dark:border-gray-700 bg-[#f8fafc] px-6 py-3 text-xs md:text-sm">
           <span className="mr-2 text-gray-700 dark:text-gray-300">
-            Tìm kiếm nhanh hơn bằng cách chọn những tiện nghi bạn cần
+            {t("hotel.quick_filter_hint")}
           </span>
 
           {QUICK_FILTERS.map((f) => (
@@ -135,6 +138,7 @@ export default function HotelRoomsSection({ hotel }) {
 /* === SUB COMPONENTS === */
 
 function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }) {
+  const { t } = useTranslation();
   const {
     name,
     shortDescription,
@@ -170,15 +174,15 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
     if (areaSqm != null) parts.push(`${areaSqm.toFixed(0)} m²`);
 
     if (bedsCount || bedType) {
-      const bedLabel = bedsCount ? `${bedsCount} giường` : "Giường";
+      const bedLabel = bedsCount ? t("hotel.beds_count", { count: bedsCount }) : t("hotel.bed");
       const typeLabel = bedType ? ` (${mapBedType(bedType)})` : "";
       parts.push(`${bedLabel}${typeLabel}`);
     }
 
-    if (guests) parts.push(`phù hợp ${guests} khách`);
+    if (guests) parts.push(t("hotel.suitable_for_guests", { count: guests }));
 
     if (!parts.length) return shortDescription || "";
-    return `Phòng ${name} ${parts.join(", ")}`;
+    return t("hotel.room_meta_summary", { name, details: parts.join(", ") });
   })();
 
   const summaryText = shortDescription || metaSummary;
@@ -289,7 +293,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
                 <div className="inline-flex items-center gap-1">
                   <FaBed className="h-4 w-4" />
                   <span>
-                    {bedsCount ? `${bedsCount} giường` : "Giường"}
+                    {bedsCount ? t("hotel.beds_count", { count: bedsCount }) : t("hotel.bed")}
                     {bedType ? ` (${mapBedType(bedType)})` : ""}
                   </span>
                 </div>
@@ -297,7 +301,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
               {guests && (
                 <div className="inline-flex items-center gap-1">
                   <UsersIcon className="h-4 w-4" />
-                  <span>Tối đa {guests} khách</span>
+                  <span>{t("hotel.max_guests", { count: guests })}</span>
                 </div>
               )}
             </div>
@@ -320,19 +324,19 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
               <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-gray-700 dark:text-gray-300 md:text-xs">
                 <div className="flex items-center gap-1.5">
                   <FaShower className="h-3.5 w-3.5" />
-                  <span>Vòi tắm đứng</span>
+                  <span>{t("hotel.amenity_standing_shower")}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <FaCouch className="h-3.5 w-3.5" />
-                  <span>Khu vực chờ</span>
+                  <span>{t("hotel.amenity_seating_area")}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <FaTint className="h-3.5 w-3.5" />
-                  <span>Nước nóng</span>
+                  <span>{t("hotel.amenity_hot_water")}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <FaSnowflake className="h-3.5 w-3.5" />
-                  <span>Máy lạnh</span>
+                  <span>{t("hotel.amenity_air_conditioner")}</span>
                 </div>
               </div>
             )}
@@ -342,7 +346,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
               onClick={onViewDetail}
               className="mt-2 self-start text-xs font-semibold text-[#0064d2] hover:underline md:text-sm"
             >
-              Xem chi tiết phòng
+              {t("hotel.view_room_detail")}
             </button>
           </div>
 
@@ -350,9 +354,9 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
           <div className="space-y-3">
             {/* Header riêng cho từng phòng (desktop) */}
             <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.6fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] px-1 pb-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400 md:grid">
-              <div>Lựa chọn phòng</div>
-              <div className="text-center">Khách</div>
-              <div className="text-right">Giá/phòng/đêm</div>
+              <div>{t("hotel.room_choice")}</div>
+              <div className="text-center">{t("hotel.guest")}</div>
+              <div className="text-right">{t("hotel.price_per_room_per_night")}</div>
               <div />
             </div>
 
@@ -369,7 +373,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
               ))
             ) : (
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                Hiện chưa có gói giá cho loại phòng này.
+                {t("hotel.no_rate_plans")}
               </div>
             )}
           </div>
@@ -382,6 +386,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
 /*  MODAL CHI TIẾT PHÒNG  */
 
 function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
+  const { t } = useTranslation();
   const {
     name,
     areaSqm,
@@ -464,14 +469,14 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
   const priceText =
     bestDisplayPrice != null
       ? `${bestDisplayPrice.toLocaleString("vi-VN")} VND`
-      : "Liên hệ";
+      : t("hotel.contact");
 
   const metaItems = [];
   if (areaSqm != null) metaItems.push(`${areaSqm.toFixed(1)} m²`);
-  if (guests) metaItems.push(`${guests} khách`);
+  if (guests) metaItems.push(t("hotel.guests_count", { count: guests }));
   if (bedsCount || bedType) {
     metaItems.push(
-      `${bedsCount ? `${bedsCount} giường` : "Giường"}${
+      `${bedsCount ? t("hotel.beds_count", { count: bedsCount }) : t("hotel.bed")}${
         bedType ? ` (${mapBedType(bedType)})` : ""
       }`
     );
@@ -499,7 +504,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {hotelName && `${hotelName} · `}
-              Loại phòng
+              {t("hotel.room_type")}
             </p>
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg">
               {name}
@@ -578,7 +583,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
               {/* Thông tin phòng */}
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Thông tin phòng
+                  {t("hotel.room_info")}
                 </h4>
                 <ul className="mt-1 space-y-1 text-xs text-gray-700 dark:text-gray-300 md:text-sm">
                   {metaItems.map((m, i) => (
@@ -601,7 +606,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
               {/* Tính năng phòng bạn thích */}
               {groupedAmenities.favorite.length > 0 && (
                 <AmenityGroup
-                  title="Tính năng phòng bạn thích"
+                  title={t("hotel.amenity_group_favorite")}
                   items={groupedAmenities.favorite}
                 />
               )}
@@ -609,7 +614,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
               {/* Tiện nghi cơ bản */}
               {groupedAmenities.basic.length > 0 && (
                 <AmenityGroup
-                  title="Tiện nghi cơ bản"
+                  title={t("hotel.amenity_group_basic")}
                   items={groupedAmenities.basic}
                 />
               )}
@@ -617,7 +622,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
               {/* Tiện nghi phòng */}
               {groupedAmenities.room.length > 0 && (
                 <AmenityGroup
-                  title="Tiện nghi phòng"
+                  title={t("hotel.amenity_group_room")}
                   items={groupedAmenities.room}
                 />
               )}
@@ -625,7 +630,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
               {/* Tiện nghi phòng tắm */}
               {groupedAmenities.bathroom.length > 0 && (
                 <AmenityGroup
-                  title="Tiện nghi phòng tắm"
+                  title={t("hotel.amenity_group_bathroom")}
                   items={groupedAmenities.bathroom}
                 />
               )}
@@ -633,15 +638,15 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
 
             {/* PRICE FOOTER – cố định, không scroll */}
             <div className="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-              <p className="text-xs text-gray-600 dark:text-gray-400">Khởi điểm từ:</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{t("hotel.starting_from")}</p>
               <div className="mt-0.5 text-lg font-bold text-[#ff5a00] md:text-xl">
                 {priceText}
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                / phòng / đêm ·{" "}
+                {t("hotel.per_room_per_night")} ·{" "}
                 {priceMode === "INCL_TAX"
-                  ? "Đã bao gồm thuế và phí"
-                  : "Chưa bao gồm thuế và phí"}
+                  ? t("hotel.tax_included")
+                  : t("hotel.tax_excluded")}
               </p>
             </div>
           </div>
@@ -652,6 +657,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
 }
 
 function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     name,
@@ -711,15 +717,15 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
 
   const priceText = displayPrice
     ? `${displayPrice.toLocaleString("vi-VN")} VND`
-    : "Liên hệ";
+    : t("hotel.contact");
 
   const boardText = mapBoardType(boardType);
   const paymentText = mapPaymentType(paymentType);
   const refundText =
     refundable === false
-      ? "Không được hoàn tiền"
+      ? t("hotel.non_refundable")
       : refundable === true
-      ? "Có thể hoàn tiền / miễn phí huỷ theo chính sách"
+      ? t("hotel.refundable_policy")
       : null;
 
   const showRefundText = refundText && !cancellationPolicy;
@@ -730,8 +736,8 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
 
   const footerPriceText =
     priceMode === "INCL_TAX"
-      ? "Đã bao gồm thuế và phí"
-      : "Chưa bao gồm thuế và phí";
+      ? t("hotel.tax_included")
+      : t("hotel.tax_excluded");
 
   const goBooking = () => {
     if (!isHotelActive) return;
@@ -790,7 +796,7 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
         <div className="flex flex-col items-end gap-0.5">
           {hasDiscount && (
             <div className="text-[11px] font-semibold text-[#ff5a00]">
-              Tiết kiệm {savingAmount.toLocaleString("vi-VN")} VND
+              {t("hotel.save_amount", { amount: savingAmount.toLocaleString("vi-VN") })}
             </div>
           )}
 
@@ -823,7 +829,7 @@ function RatePlanRow({ ratePlan, guests, priceMode, hotel, roomType }) {
             ].join(" ")}
             onClick={goBooking}
           >
-            Chọn
+            {t("hotel.select")}
             <ChevronRight className="ml-1 h-3 w-3" />
           </button>
         </div>
@@ -953,53 +959,20 @@ function computeDisplayPrice(
   }
 }
 
+// Module-level: dùng i18n.t() global (reload khi đổi ngôn ngữ đảm bảo đúng locale)
 function mapBoardType(boardType) {
-  switch (boardType) {
-    case "ROOM_ONLY":
-      return "Không gồm bữa sáng";
-    case "BREAKFAST_INCLUDED":
-      return "Bao gồm bữa sáng";
-    case "HALF_BOARD":
-      return "Bao gồm bữa sáng và 1 bữa chính";
-    case "FULL_BOARD":
-      return "Bao gồm 3 bữa mỗi ngày";
-    case "ALL_INCLUSIVE":
-      return "Gói trọn gói tất cả bữa ăn";
-    default:
-      return null;
-  }
+  if (!boardType) return null;
+  return i18n.t(`enum.boardType.${boardType}`, boardType);
 }
 
 function mapPaymentType(paymentType) {
-  switch (paymentType) {
-    case "PAY_AT_HOTEL":
-      return "Thanh toán tại Khách Sạn";
-    case "PREPAID":
-      return "Thanh toán trước";
-    default:
-      return null;
-  }
+  if (!paymentType) return null;
+  return i18n.t(`enum.paymentType.${paymentType}`, paymentType);
 }
 
 function mapBedType(bedType) {
-  switch (bedType) {
-    case "SINGLE":
-      return "Single";
-    case "DOUBLE":
-      return "Double";
-    case "TWIN":
-      return "Twin";
-    case "QUEEN":
-      return "Queen";
-    case "KING":
-      return "King";
-    case "BUNK":
-      return "Tầng";
-    case "MULTIPLE":
-      return "Nhiều loại giường";
-    default:
-      return bedType;
-  }
+  if (!bedType) return bedType;
+  return i18n.t(`enum.bedType.${bedType}`, bedType);
 }
 
 /* Nhóm tiện nghi trong modal theo title */

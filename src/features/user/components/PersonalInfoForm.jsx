@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateUserProfile } from "../slices/userProfileSlice";
 import { toast } from "react-toastify";
 import { showError } from "../../../utils/toastUtils";
@@ -46,6 +47,7 @@ const VIETNAM_PROVINCES = [
 ];
 
 export default function PersonalInfoForm() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { user, loading } = useSelector((state) => state.auth);
 
@@ -124,15 +126,15 @@ export default function PersonalInfoForm() {
       const action = await dispatch(updateUserProfile(payload));
 
       if (updateUserProfile.fulfilled.match(action)) {
-        toast.success("Cập nhật hồ sơ thành công!");
+        toast.success(t("user.update_profile_success"));
         setHasChanges(false);
         // Redux.user đã được update, useEffect phía trên sẽ sync lại form
       } else {
-        showError(action.payload || "Cập nhật hồ sơ thất bại!");
+        showError(action.payload || t("user.update_profile_failed"));
       }
     } catch (err) {
       console.error(err);
-      showError("Đã xảy ra lỗi khi cập nhật hồ sơ!");
+      showError(t("user.update_profile_error"));
     } finally {
       setSaving(false);
     }
@@ -168,7 +170,7 @@ export default function PersonalInfoForm() {
   return (
     <div className="space-y-5">
       <h3 className="font-semibold text-base md:text-lg text-slate-900 dark:text-slate-50">
-        Dữ liệu cá nhân
+        {t("user.personal_data")}
       </h3>
 
       {/* Giới tính + Ngày sinh */}
@@ -176,7 +178,7 @@ export default function PersonalInfoForm() {
         {/* Giới tính */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            Giới tính
+            {t("user.gender")}
           </label>
           <select
             value={gender}
@@ -186,18 +188,18 @@ export default function PersonalInfoForm() {
             }}
             className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
-            <option value="">Chọn giới tính</option>
-            <option value="MALE">Nam</option>
-            <option value="FEMALE">Nữ</option>
-            <option value="OTHER">Khác</option>
-            <option value="UNKNOWN">Không khai báo</option>
+            <option value="">{t("user.select_gender")}</option>
+            <option value="MALE">{t("user.gender_male")}</option>
+            <option value="FEMALE">{t("user.gender_female")}</option>
+            <option value="OTHER">{t("user.gender_other")}</option>
+            <option value="UNKNOWN">{t("user.gender_unknown")}</option>
           </select>
         </div>
 
         {/* Ngày sinh */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            Ngày sinh
+            {t("user.date_of_birth")}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {/* Ngày */}
@@ -209,7 +211,7 @@ export default function PersonalInfoForm() {
               }}
               className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
-              <option value="">Ngày</option>
+              <option value="">{t("user.day")}</option>
               {[...Array(31)].map((_, i) => {
                 const d = String(i + 1).padStart(2, "0");
                 return (
@@ -229,7 +231,7 @@ export default function PersonalInfoForm() {
               }}
               className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
-              <option value="">Tháng</option>
+              <option value="">{t("user.month")}</option>
               {Array.from({ length: 12 }).map((_, i) => {
                 const m = String(i + 1).padStart(2, "0");
                 return (
@@ -249,7 +251,7 @@ export default function PersonalInfoForm() {
               }}
               className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
-              <option value="">Năm</option>
+              <option value="">{t("user.year")}</option>
               {Array.from({ length: 70 }).map((_, idx) => {
                 const year = new Date().getFullYear() - idx - 10; // khoảng 10-80 tuổi
                 return (
@@ -268,7 +270,7 @@ export default function PersonalInfoForm() {
         {/* Thành phố cư trú */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            Thành phố cư trú
+            {t("user.residence_city")}
           </label>
           <select
             value={city}
@@ -278,7 +280,7 @@ export default function PersonalInfoForm() {
             }}
             className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
           >
-            <option value="">Chọn tỉnh / thành</option>
+            <option value="">{t("user.select_province")}</option>
             {VIETNAM_PROVINCES.map((p) => (
               <option key={p} value={p}>
                 {p}
@@ -290,7 +292,7 @@ export default function PersonalInfoForm() {
         {/* Quốc gia */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            Quốc gia
+            {t("user.country")}
           </label>
           <select
             value={country}
@@ -312,7 +314,7 @@ export default function PersonalInfoForm() {
       {/* Địa chỉ chi tiết */}
       <div className="space-y-1">
         <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-          Địa chỉ chi tiết
+          {t("user.detailed_address")}
         </label>
         <input
           type="text"
@@ -321,15 +323,15 @@ export default function PersonalInfoForm() {
             setAddressLine(e.target.value);
             markChanged();
           }}
-          placeholder="Số nhà, đường, phường/xã..."
+          placeholder={t("user.detailed_address_placeholder")}
           className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
         />
       </div>
 
       {/* Ngôn ngữ / Múi giờ (read-only) */}
       <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-dashed border-slate-200 dark:border-slate-700 pt-3">
-        <p>Ngôn ngữ: {locale || "vi-VN"}</p>
-        <p>Múi giờ: {timeZone || "Asia/Ho_Chi_Minh"}</p>
+        <p>{t("user.language_label", { value: locale || "vi-VN" })}</p>
+        <p>{t("user.timezone_label", { value: timeZone || "Asia/Ho_Chi_Minh" })}</p>
       </div>
 
       {/* Nút action */}
@@ -344,7 +346,7 @@ export default function PersonalInfoForm() {
               : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
           }`}
         >
-          Có lẽ để sau
+          {t("user.maybe_later")}
         </button>
         <button
           type="button"
@@ -356,7 +358,7 @@ export default function PersonalInfoForm() {
               : "bg-sky-600 hover:bg-sky-700"
           }`}
         >
-          {saving ? "Đang lưu..." : "Lưu thay đổi"}
+          {saving ? t("common.processing") : t("user.save_changes")}
         </button>
       </div>
     </div>

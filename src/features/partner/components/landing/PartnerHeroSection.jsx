@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { CheckCircle2, ArrowRight, ShieldCheck, Sparkles, BarChart3, Headphones } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function PartnerHeroSection() {
+  const { t } = useTranslation();
   return (
     <section className="relative pt-10 pb-8">
       <div className="max-w-7xl mx-auto px-6">
@@ -10,33 +12,30 @@ export default function PartnerHeroSection() {
             {/* LEFT */}
             <div className="text-slate-900 dark:text-slate-100">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold leading-tight">
-                Trở thành{" "}
+                {t("partner.hero.title_prefix")}{" "}
                 <span className="bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">
-                  Đối tác Mravel
+                  {t("partner.hero.title_highlight")}
                 </span>
                 <br />
-                và đăng dịch vụ của bạn
+                {t("partner.hero.title_suffix")}
               </h1>
 
               <p className="mt-4 text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed max-w-xl">
-                Dành cho chủ <b>khách sạn/nhà nghỉ</b> và <b>quán ăn</b>. Bạn có thể
-                tạo hồ sơ đối tác, đăng dịch vụ, cập nhật thông tin, và theo dõi hiệu quả
-                — mọi thứ gói gọn trong một khu vực quản trị rõ ràng, dễ demo luồng nghiệp vụ
-                cho báo cáo.
+                {t("partner.hero.description")}
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2.5">
                 <Pill icon={<Sparkles className="w-4 h-4" />}>
-                  Tăng khả năng tiếp cận khách du lịch
+                  {t("partner.hero.benefit_reach")}
                 </Pill>
                 <Pill icon={<ShieldCheck className="w-4 h-4" />}>
-                  Quy trình duyệt minh bạch, an toàn
+                  {t("partner.hero.benefit_transparent")}
                 </Pill>
                 <Pill icon={<BarChart3 className="w-4 h-4" />}>
-                  Theo dõi đơn đặt & trạng thái dịch vụ
+                  {t("partner.hero.benefit_tracking")}
                 </Pill>
                 <Pill icon={<Headphones className="w-4 h-4" />}>
-                  Hỗ trợ vận hành nhanh – gọn – rõ
+                  {t("partner.hero.benefit_support")}
                 </Pill>
               </div>
             </div>
@@ -44,29 +43,23 @@ export default function PartnerHeroSection() {
             {/* RIGHT CARD */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden">
               <div className="px-7 py-6">
-                <p className="text-slate-900 dark:text-slate-100 font-semibold text-lg">Đăng ký miễn phí</p>
+                <p className="text-slate-900 dark:text-slate-100 font-semibold text-lg">{t("partner.hero.signup_title")}</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Tạo tài khoản đối tác để bắt đầu đăng dịch vụ trên Mravel.
+                  {t("partner.hero.signup_subtitle")}
                 </p>
 
                 <ul className="mt-5 space-y-4 text-slate-700 dark:text-slate-300">
                   <li className="flex gap-3">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
-                    <span>
-                      Tạo hồ sơ đối tác và đăng dịch vụ <b>Khách sạn</b> / <b>Quán ăn</b>.
-                    </span>
+                    <span>{t("partner.hero.feature_create_profile")}</span>
                   </li>
                   <li className="flex gap-3">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
-                    <span>
-                      Dịch vụ mới hoặc chỉnh sửa sẽ ở trạng thái <b>pending</b> chờ Admin duyệt.
-                    </span>
+                    <span>{t("partner.hero.feature_pending_review")}</span>
                   </li>
                   <li className="flex gap-3">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
-                    <span>
-                      Chủ động <b>tạm khóa</b> khi hết phòng/hết bàn, tránh nhận đơn ngoài ý muốn.
-                    </span>
+                    <span>{t("partner.hero.feature_pause")}</span>
                   </li>
                 </ul>
 
@@ -77,14 +70,14 @@ export default function PartnerHeroSection() {
                                rounded-xl py-4 font-semibold
                                bg-sky-600 text-white hover:bg-sky-700 transition"
                   >
-                    Bắt đầu ngay
+                    {t("partner.hero.start_now")}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
 
                   <div className="text-center mt-4 text-sm text-slate-600 dark:text-slate-400">
-                    Bạn đã có tài khoản?{" "}
+                    {t("partner.hero.already_have_account")}{" "}
                     <Link to="/partner/login" className="text-sky-700 font-semibold hover:underline">
-                      Đăng nhập
+                      {t("common.login")}
                     </Link>
                   </div>
                 </div>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { addMembers } from "../services/chatService";
@@ -6,6 +7,7 @@ import { loadFriends } from "../slices/chatSlice";
 import SafeAvatar from "./SafeAvatar";
 
 export default function AddMembersModal({ conversationId, members, onClose, onAdded }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +58,7 @@ export default function AddMembersModal({ conversationId, members, onClose, onAd
       <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:w-96 max-h-[90vh] flex flex-col shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 flex-shrink-0">
-          <h2 className="font-semibold text-gray-900">Thêm thành viên</h2>
+          <h2 className="font-semibold text-gray-900">{t("chat.add_member")}</h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -69,7 +71,7 @@ export default function AddMembersModal({ conversationId, members, onClose, onAd
         <div className="flex-1 overflow-y-auto">
           {available.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
-              Tất cả bạn bè đã là thành viên nhóm
+              {t("chat.all_friends_already_members")}
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -111,14 +113,14 @@ export default function AddMembersModal({ conversationId, members, onClose, onAd
             onClick={onClose}
             className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm"
           >
-            Hủy
+            {t("common.cancel")}
           </button>
           <button
             onClick={handleAdd}
             disabled={selected.length === 0 || loading}
             className="flex-1 px-4 py-2.5 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
           >
-            {loading ? "Đang thêm..." : `Thêm (${selected.length})`}
+            {loading ? t("chat.adding") : t("chat.add_count", { n: selected.length })}
           </button>
         </div>
       </div>

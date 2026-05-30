@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Compass,
   Search,
@@ -65,6 +66,7 @@ function HighlightText({ text, query }) {
 
 //  Main component 
 export default function PlanListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -400,17 +402,17 @@ export default function PlanListPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">
-                  Bảng tin lịch trình
+                  {t('feed.title')}
                 </h1>
                 <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400 max-w-lg">
-                  Khám phá và chia sẻ những lịch trình thú vị từ cộng đồng Mravel.
+                  {t('feed.subtitle')}
                 </p>
               </div>
 
               {/* Desktop action buttons */}
               <div className="hidden sm:flex items-center gap-2 shrink-0 pt-1">
                 <span className="px-3 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {displayPlans.length} lịch trình
+                  {t('feed.planCount', { count: displayPlans.length })}
                 </span>
                 {user && (
                   <>
@@ -419,14 +421,14 @@ export default function PlanListPage() {
                       className="inline-flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150"
                     >
                       <Plus className="w-4 h-4" />
-                      Tạo mới
+                      {t('feed.createNew')}
                     </button>
                     <Link
                       to="/plans/my-plans"
                       className="inline-flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-xl border-2 border-sky-400 text-sky-600 dark:text-sky-400 bg-white dark:bg-gray-900 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all duration-150 font-semibold"
                     >
                       <Settings className="w-4 h-4" />
-                      Quản lý
+                      {t('feed.manage')}
                     </Link>
                   </>
                 )}
@@ -470,7 +472,7 @@ export default function PlanListPage() {
                         if (isSearching) clear();
                       }
                     }}
-                    placeholder="Tìm lịch trình, điểm đến, người dùng..."
+                    placeholder={t('feed.searchPlaceholder')}
                     autoComplete="off"
                     className="flex-1 h-full bg-transparent text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none"
                   />
@@ -532,7 +534,7 @@ export default function PlanListPage() {
                     ) : (
                       <Search className="w-4 h-4" />
                     )}
-                    <span className="hidden sm:inline">Tìm kiếm</span>
+                    <span className="hidden sm:inline">{t('common.search')}</span>
                   </button>
                 </div>
 
@@ -544,14 +546,14 @@ export default function PlanListPage() {
                       <div>
                         <div className="flex items-center justify-between px-4 pt-3 pb-1">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-                            <Clock className="w-3 h-3" /> Gần đây
+                            <Clock className="w-3 h-3" /> {t('feed.search.recent')}
                           </span>
                           <button
                             type="button"
                             onClick={clearSearchHistory}
                             className="text-[11px] text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors flex items-center gap-1"
                           >
-                            <Trash2 className="w-3 h-3" /> Xoá
+                            <Trash2 className="w-3 h-3" /> {t('common.delete')}
                           </button>
                         </div>
                         {suggestions.recent.map((s) => (
@@ -579,7 +581,7 @@ export default function PlanListPage() {
                       >
                         <div className="px-4 pt-3 pb-1">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-                            <TrendingUp className="w-3 h-3" /> Xu hướng
+                            <TrendingUp className="w-3 h-3" /> {t('feed.search.trending')}
                           </span>
                         </div>
                         {suggestions.trending.map((s) => (
@@ -616,7 +618,7 @@ export default function PlanListPage() {
                 `}
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Bộ lọc
+                {t('feed.filter.title')}
                 {activeFilterCount > 0 && (
                   <span className="w-5 h-5 rounded-full bg-sky-500 text-white text-[10px] font-bold flex items-center justify-center">
                     {activeFilterCount}
@@ -627,7 +629,7 @@ export default function PlanListPage() {
               {isSearching && (
                 <>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Kết quả:{" "}
+                    {t('feed.search.resultsLabel')}{" "}
                     <strong className="text-gray-800 dark:text-gray-200">
                       &ldquo;{searchQuery}&rdquo;
                     </strong>
@@ -656,7 +658,7 @@ export default function PlanListPage() {
                 <FadeInSection delay={80}>
                   <div className="mb-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/70 p-5">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                      Người dùng
+                      {t('feed.search.users')}
                       <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">
                         ({searchUsers.length})
                       </span>
@@ -679,7 +681,7 @@ export default function PlanListPage() {
                           />
                           <div className="min-w-0">
                             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                              {u.fullname || "Chưa đặt tên"}
+                              {u.fullname || t('feed.search.unnamedUser')}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                               @{u.username || u.email || `user-${u.id}`}
@@ -705,10 +707,10 @@ export default function PlanListPage() {
                     </div>
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    Chưa có lịch trình nào
+                    {t('feed.empty.title')}
                   </h2>
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                    Hãy là người đầu tiên chia sẻ một lịch trình thật thú vị!
+                    {t('feed.empty.subtitle')}
                   </p>
                   {user && (
                     <button
@@ -716,7 +718,7 @@ export default function PlanListPage() {
                       className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150"
                     >
                       <Plus className="w-4 h-4" />
-                      Tạo lịch trình đầu tiên
+                      {t('feed.empty.createFirst')}
                     </button>
                   )}
                 </div>
@@ -729,14 +731,14 @@ export default function PlanListPage() {
                     <Search className="w-9 h-9 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    Không tìm thấy kết quả phù hợp
+                    {t('feed.searchEmpty.title')}
                   </h3>
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
-                    Thử từ khoá khác, bỏ bớt bộ lọc, hoặc tìm theo{" "}
+                    {t('feed.searchEmpty.hintBefore')}{" "}
                     <span className="font-semibold text-sky-600 dark:text-sky-400">
                       @username
                     </span>
-                    .
+                    {t('feed.searchEmpty.hintAfter')}
                   </p>
 
                   {/* Trending suggestions */}
@@ -763,7 +765,7 @@ export default function PlanListPage() {
                       className="mt-4 inline-flex items-center gap-2 text-sm text-rose-600 dark:text-rose-400 font-semibold hover:underline transition-colors"
                     >
                       <X className="w-4 h-4" />
-                      Xoá tất cả bộ lọc
+                      {t('feed.filter.clearAll')}
                     </button>
                   )}
                 </div>
@@ -797,7 +799,7 @@ export default function PlanListPage() {
                 {!isSearching && !hasMore && items.length > 0 && (
                   <FadeInSection delay={200}>
                     <p className="py-8 text-center text-sm text-gray-400 dark:text-gray-500 font-medium">
-                      Bạn đã xem hết các lịch trình hiện có.
+                      {t('feed.endOfFeed')}
                     </p>
                   </FadeInSection>
                 )}
@@ -810,7 +812,7 @@ export default function PlanListPage() {
                 {isSearching && !searchMeta?.hasMore && searchPlans.length > 0 && (
                   <FadeInSection delay={200}>
                     <p className="py-8 text-center text-sm text-gray-400 dark:text-gray-500 font-medium">
-                      Đã hiển thị tất cả kết quả tìm kiếm.
+                      {t('feed.endOfSearchResults')}
                     </p>
                   </FadeInSection>
                 )}

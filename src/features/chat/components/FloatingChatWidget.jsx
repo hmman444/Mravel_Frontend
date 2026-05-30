@@ -19,6 +19,8 @@ export default function FloatingChatWidget() {
   const conversations = useSelector((s) => s.chat.conversations);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const panelRef = useRef(null);
+  const launcherRef = useRef(null);
 
   // MAI (Mravel AI) is a pinned virtual assistant: its sentinel conversation renders
   // the full planner panel right inside the widget. `chatActiveId` strips the sentinel
@@ -53,6 +55,23 @@ export default function FloatingChatWidget() {
   // subscription point regardless of whether the user is on /chat or elsewhere.
   useChatRealtime(chatActiveId);
 
+  // Click ra ngoài vùng chat (và ngoài nút launcher) -> đóng popup, khỏi phải bấm đúng nút X.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointerDown = (e) => {
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(e.target) &&
+        launcherRef.current &&
+        !launcherRef.current.contains(e.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [isOpen]);
+
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
   // Render nothing for non-USER or unauthenticated visitors
@@ -67,6 +86,7 @@ export default function FloatingChatWidget() {
       {/* Popup panel — appears above the launcher button */}
       {isOpen && (
         <div
+          ref={panelRef}
           className={
             "fixed right-6 bottom-[5.5rem] z-[9000] " +
             "w-[calc(100vw-3rem)] sm:w-[360px] " +
@@ -91,6 +111,7 @@ export default function FloatingChatWidget() {
 
       {/* Circular launcher button */}
       <button
+        ref={launcherRef}
         onClick={() => setIsOpen((v) => !v)}
         className={
           "fixed right-6 bottom-6 z-[9000] " +

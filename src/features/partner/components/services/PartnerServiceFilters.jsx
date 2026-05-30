@@ -2,6 +2,7 @@
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const ui = {
   card:
@@ -31,15 +32,6 @@ const fadeUp = {
   exit: { opacity: 0, y: 8 },
 };
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "Tất cả" },
-  { value: "PENDING", label: "Chờ duyệt" },
-  { value: "ACTIVE", label: "Đang hoạt động" },
-  { value: "REJECTED", label: "Bị từ chối" },
-  { value: "PARTNER_PAUSED", label: "Tạm khóa (đối tác)" },
-  { value: "ADMIN_BLOCKED", label: "Bị khóa (admin)" },
-];
-
 export default function PartnerServiceFilters({
   open,
   search,
@@ -49,6 +41,17 @@ export default function PartnerServiceFilters({
   hasAnyFilter,
   onReset,
 }) {
+  const { t } = useTranslation();
+
+  const STATUS_OPTIONS = [
+    { value: "all", label: t("common.all") },
+    { value: "PENDING", label: t("partner.service.status.pending") },
+    { value: "ACTIVE", label: t("partner.service.status.active") },
+    { value: "REJECTED", label: t("partner.service.status.rejected") },
+    { value: "PARTNER_PAUSED", label: t("partner.service.status.partner_paused") },
+    { value: "ADMIN_BLOCKED", label: t("partner.service.status.admin_blocked") },
+  ];
+
   return (
     <AnimatePresence initial={false}>
       {open && (
@@ -64,8 +67,8 @@ export default function PartnerServiceFilters({
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="w-full lg:max-w-md">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Tìm kiếm</label>
-                  <span className={ui.help}>Tên / mã dịch vụ</span>
+                  <label className={ui.title}>{t("common.search")}</label>
+                  <span className={ui.help}>{t("partner.service.search_hint")}</span>
                 </div>
 
                 <div className="relative mt-1">
@@ -73,7 +76,7 @@ export default function PartnerServiceFilters({
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Ví dụ: reverie / hoian..."
+                    placeholder={t("partner.service.search_placeholder")}
                     className={`${ui.input} pl-10`}
                   />
                   {search && (
@@ -91,7 +94,7 @@ export default function PartnerServiceFilters({
 
               <div className="w-full lg:max-w-xs">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Trạng thái</label>
+                  <label className={ui.title}>{t("partner.service.status_label")}</label>
                   <span className={ui.help}>moderation + active</span>
                 </div>
                 <select
@@ -114,7 +117,7 @@ export default function PartnerServiceFilters({
                   className={`${ui.btn} ${ui.btnGhost}`}
                   disabled={!hasAnyFilter}
                 >
-                  Reset
+                  {t("partner.service.reset")}
                 </button>
               </div>
             </div>

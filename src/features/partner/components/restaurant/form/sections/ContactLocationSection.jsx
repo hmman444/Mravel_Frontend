@@ -1,5 +1,6 @@
 // src/features/partner/components/restaurant/form/sections/ContactLocationSection.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useVnAdminDivisions } from "../../../../hooks/useVnAdminDivisions";
 
 const digitsOnly = (s) => String(s || "").replace(/\D/g, "");
@@ -23,6 +24,7 @@ function FieldError({ msg }) {
 }
 
 export default function ContactLocationSection({ form, setField, disabled }) {
+  const { t } = useTranslation();
   const [touched, setTouched] = useState({});
 
   const provinceCode = form.cityCode || "";
@@ -32,11 +34,11 @@ export default function ContactLocationSection({ form, setField, disabled }) {
   const errors = useMemo(() => {
     const e = {};
     const phone = String(form.phone || "");
-    if (phone && (phone.length < 8 || phone.length > 15)) e.phone = "SĐT nên dài 8–15 chữ số.";
-    if (!isValidEmail(form.email)) e.email = "Email không đúng định dạng.";
-    if (String(form.addressLine || "").length > 160) e.addressLine = "Địa chỉ tối đa 160 ký tự.";
+    if (phone && (phone.length < 8 || phone.length > 15)) e.phone = t("partner.contact.phone_length");
+    if (!isValidEmail(form.email)) e.email = t("partner.contact.email_invalid");
+    if (String(form.addressLine || "").length > 160) e.addressLine = t("partner.contact.address_max");
     return e;
-  }, [form]);
+  }, [form, t]);
 
   const showError = (k) => touched[k] && errors[k];
 
@@ -99,12 +101,12 @@ export default function ContactLocationSection({ form, setField, disabled }) {
 
   return (
     <details className="group">
-      <summary className="cursor-pointer select-none font-semibold">Liên hệ & vị trí</summary>
+      <summary className="cursor-pointer select-none font-semibold">{t("partner.contact.section_title")}</summary>
 
       <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Row 1: phone / email / addressLine */}
         <label className="text-sm">
-          <div className="font-medium mb-1">Số điện thoại</div>
+          <div className="font-medium mb-1">{t("partner.contact.phone_label")}</div>
           <input
             value={form.phone}
             onChange={(e) => setField("phone", digitsOnly(e.target.value).slice(0, 15))}
@@ -118,7 +120,7 @@ export default function ContactLocationSection({ form, setField, disabled }) {
         </label>
 
         <label className="text-sm">
-          <div className="font-medium mb-1">Email</div>
+          <div className="font-medium mb-1">{t("common.email")}</div>
           <input
             type="email"
             value={form.email}
@@ -132,13 +134,13 @@ export default function ContactLocationSection({ form, setField, disabled }) {
         </label>
 
         <label className="text-sm">
-          <div className="font-medium mb-1">Địa chỉ</div>
+          <div className="font-medium mb-1">{t("partner.contact.address_label")}</div>
           <input
             value={form.addressLine}
             onChange={(e) => setField("addressLine", e.target.value.slice(0, 160))}
             onBlur={() => setTouched((p) => ({ ...p, addressLine: true }))}
             className="w-full border rounded-xl px-3 py-2"
-            placeholder="Số nhà, đường..."
+            placeholder={t("partner.contact.address_placeholder")}
             disabled={disabled}
           />
           <FieldError msg={showError("addressLine")} />
@@ -148,7 +150,7 @@ export default function ContactLocationSection({ form, setField, disabled }) {
             Khi disabled (admin readonly): render text từ *Name vì reverse-map effect bị skip,
             cityCode/districtCode/wardCode sẽ trống và dropdown không hiển thị giá trị thực. */}
         <label className="text-sm">
-          <div className="font-medium mb-1">Tỉnh/Thành phố</div>
+          <div className="font-medium mb-1">{t("partner.contact.province_label")}</div>
           {disabled ? (
             <div className="w-full border rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
               {form.cityName || "—"}
@@ -159,7 +161,7 @@ export default function ContactLocationSection({ form, setField, disabled }) {
               onChange={(e) => onPickProvince(e.target.value)}
               className="w-full border rounded-xl px-3 py-2"
             >
-              <option value="">{loading.p ? "Đang tải..." : "-- Chọn tỉnh/thành --"}</option>
+              <option value="">{loading.p ? t("common.loading") : t("partner.contact.province_select")}</option>
               {provinces.map((p) => (
                 <option key={p.code} value={p.code}>
                   {p.name}
@@ -170,7 +172,7 @@ export default function ContactLocationSection({ form, setField, disabled }) {
         </label>
 
         <label className="text-sm">
-          <div className="font-medium mb-1">Quận/Huyện</div>
+          <div className="font-medium mb-1">{t("partner.contact.district_label")}</div>
           {disabled ? (
             <div className="w-full border rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
               {form.districtName || "—"}
@@ -183,7 +185,11 @@ export default function ContactLocationSection({ form, setField, disabled }) {
               disabled={!form.cityCode}
             >
               <option value="">
-                {!form.cityCode ? "-- Chọn tỉnh trước --" : loading.d ? "Đang tải..." : "-- Chọn quận/huyện --"}
+                {!form.cityCode
+                  ? t("partner.contact.district_pick_province_first")
+                  : loading.d
+                  ? t("common.loading")
+                  : t("partner.contact.district_select")}
               </option>
               {districts.map((d) => (
                 <option key={d.code} value={d.code}>
@@ -195,7 +201,7 @@ export default function ContactLocationSection({ form, setField, disabled }) {
         </label>
 
         <label className="text-sm">
-          <div className="font-medium mb-1">Phường/Xã</div>
+          <div className="font-medium mb-1">{t("partner.contact.ward_label")}</div>
           {disabled ? (
             <div className="w-full border rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
               {form.wardName || "—"}
@@ -208,7 +214,11 @@ export default function ContactLocationSection({ form, setField, disabled }) {
               disabled={!form.districtCode}
             >
               <option value="">
-                {!form.districtCode ? "-- Chọn quận/huyện trước --" : loading.w ? "Đang tải..." : "-- Chọn phường/xã --"}
+                {!form.districtCode
+                  ? t("partner.contact.ward_pick_district_first")
+                  : loading.w
+                  ? t("common.loading")
+                  : t("partner.contact.ward_select")}
               </option>
               {wards.map((w) => (
                 <option key={w.code} value={w.code}>

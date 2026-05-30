@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   fetchRecentPlans,
   removeRecentPlan,
@@ -8,6 +9,7 @@ import {
 import { showError, showSuccess } from "../../../utils/toastUtils";
 
 export function useRecentPlans() {
+  const { t } = useTranslation();
   const [recentPlans, setRecentPlans] = useState([]);
   const [loadingRecent, setLoadingRecent] = useState(false);
 
@@ -18,7 +20,7 @@ export function useRecentPlans() {
       setRecentPlans(data || []);
     } catch (e) {
       console.error(e);
-      showError("Không thể tải danh sách xem gần đây");
+      showError(t("plan.recent.load_failed"));
     } finally {
       setLoadingRecent(false);
     }
@@ -34,7 +36,7 @@ export function useRecentPlans() {
       setRecentPlans((prev) =>
         prev.filter((p) => String(p.id) !== String(planId))
       );
-      showSuccess("Đã xoá khỏi danh sách xem gần đây");
+      showSuccess(t("plan.recent.remove_success"));
     } catch (e) {
       console.error(e);
     }

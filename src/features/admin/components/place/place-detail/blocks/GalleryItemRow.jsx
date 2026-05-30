@@ -1,4 +1,5 @@
 import { PhotoIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { ui } from "../uiTokens";
 import { Label } from "../pills";
 
@@ -11,11 +12,12 @@ export default function GalleryItemRow({
   onRemoveItem,
   onUploadItem,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl border border-slate-200/70 p-4 dark:border-slate-800/70">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="md:col-span-2">
-          <Label required>URL ảnh</Label>
+          <Label required>{t("admin.gallery_image_url")}</Label>
           <input
             className={ui.input}
             disabled={isLockedReadOnly}
@@ -25,7 +27,7 @@ export default function GalleryItemRow({
         </div>
 
         <div>
-          <Label>Thứ tự</Label>
+          <Label>{t("admin.sort_order")}</Label>
           <input
             type="number"
             inputMode="numeric"
@@ -64,7 +66,7 @@ export default function GalleryItemRow({
             }`}
           >
             <PhotoIcon className="h-5 w-5" />
-            Tải ảnh lên
+            {t("admin.upload_image")}
             <input
               type="file"
               accept="image/*"
@@ -83,7 +85,7 @@ export default function GalleryItemRow({
             className={`${ui.btn} ${ui.btnGhost} px-3`}
             disabled={isLockedReadOnly}
             onClick={() => onRemoveItem(blockIdx, itemIdx)}
-            title="Xóa ảnh"
+            title={t("admin.delete_image")}
           >
             <TrashIcon className="h-5 w-5" />
           </button>

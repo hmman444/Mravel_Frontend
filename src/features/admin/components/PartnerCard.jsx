@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 export default function PartnerCard({ partner }) {
+    const { t } = useTranslation();
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex items-center gap-4 hover:shadow-md transition">
         <img
@@ -18,7 +21,7 @@ export default function PartnerCard({ partner }) {
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
             }`}
         >
-            {partner.status === "active" ? "Hoạt động" : "Tạm ngưng"}
+            {partner.status === "active" ? t('admin.partner_status_active') : t('admin.partner_status_inactive')}
         </span>
         </div>
     );

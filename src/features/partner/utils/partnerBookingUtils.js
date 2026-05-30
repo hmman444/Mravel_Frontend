@@ -1,6 +1,7 @@
 // src/features/partner/utils/partnerBookingUtils.js
+import i18n from "../../../i18n";
 
-//  Helpers 
+//  Helpers
 export const fmtMoney = (v) => {
   if (v == null) return "--";
   try {
@@ -42,37 +43,37 @@ export const isFuture = (iso) => {
 
 //  Status configs 
 export const BOOKING_STATUS = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", cls: "bg-yellow-100 text-yellow-700" },
-  PAID: { label: "Đã thanh toán", cls: "bg-emerald-100 text-emerald-700" },
-  CONFIRMED: { label: "Đã xác nhận", cls: "bg-blue-100 text-blue-700" },
-  COMPLETED: { label: "Hoàn tất", cls: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "Đã hủy", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
-  CANCELLED_BY_GUEST: { label: "Khách hủy", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
-  CANCELLED_BY_PARTNER: { label: "Đối tác hủy", cls: "bg-red-100 text-red-700" },
-  REFUNDED: { label: "Đã hoàn tiền", cls: "bg-purple-100 text-purple-700" },
+  PENDING_PAYMENT: { get label() { return i18n.t("partner.booking_status.pending_payment"); }, cls: "bg-yellow-100 text-yellow-700" },
+  PAID: { get label() { return i18n.t("partner.booking_status.paid"); }, cls: "bg-emerald-100 text-emerald-700" },
+  CONFIRMED: { get label() { return i18n.t("partner.booking_status.confirmed"); }, cls: "bg-blue-100 text-blue-700" },
+  COMPLETED: { get label() { return i18n.t("partner.booking_status.completed"); }, cls: "bg-green-100 text-green-700" },
+  CANCELLED: { get label() { return i18n.t("partner.booking_status.cancelled"); }, cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
+  CANCELLED_BY_GUEST: { get label() { return i18n.t("partner.booking_status.cancelled_by_guest"); }, cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
+  CANCELLED_BY_PARTNER: { get label() { return i18n.t("partner.booking_status.cancelled_by_partner"); }, cls: "bg-red-100 text-red-700" },
+  REFUNDED: { get label() { return i18n.t("partner.booking_status.refunded"); }, cls: "bg-purple-100 text-purple-700" },
 
   // fallback mapping cũ
-  PENDING: { label: "Chờ xác nhận", cls: "bg-yellow-100 text-yellow-700" },
+  PENDING: { get label() { return i18n.t("partner.booking_status.pending"); }, cls: "bg-yellow-100 text-yellow-700" },
 };
 
 export const PAYMENT_STATUS = {
-  PENDING: { label: "Chờ thanh toán", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
-  SUCCESS: { label: "Thành công", cls: "bg-green-100 text-green-700" },
-  FAILED: { label: "Thất bại", cls: "bg-red-100 text-red-700" },
-  REFUNDED: { label: "Đã hoàn tiền", cls: "bg-purple-100 text-purple-700" },
-  PARTIAL_REFUNDED: { label: "Hoàn một phần", cls: "bg-purple-100 text-purple-700" },
+  PENDING: { get label() { return i18n.t("partner.payment_status.pending"); }, cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
+  SUCCESS: { get label() { return i18n.t("partner.payment_status.success"); }, cls: "bg-green-100 text-green-700" },
+  FAILED: { get label() { return i18n.t("partner.payment_status.failed"); }, cls: "bg-red-100 text-red-700" },
+  REFUNDED: { get label() { return i18n.t("partner.payment_status.refunded"); }, cls: "bg-purple-100 text-purple-700" },
+  PARTIAL_REFUNDED: { get label() { return i18n.t("partner.payment_status.partial_refunded"); }, cls: "bg-purple-100 text-purple-700" },
 
   // fallback cũ
-  UNPAID: { label: "Chưa thanh toán", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
-  PAID: { label: "Đã thanh toán", cls: "bg-green-100 text-green-700" },
+  UNPAID: { get label() { return i18n.t("partner.payment_status.unpaid"); }, cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
+  PAID: { get label() { return i18n.t("partner.payment_status.paid"); }, cls: "bg-green-100 text-green-700" },
 };
 
 export const SERVICE_STATUS = {
-  ACTIVE: { label: "Đang hoạt động", cls: "bg-green-100 text-green-700" },
-  PENDING: { label: "Chờ duyệt", cls: "bg-yellow-100 text-yellow-700" },
-  REJECTED: { label: "Bị từ chối", cls: "bg-red-100 text-red-700" },
-  PARTNER_PAUSED: { label: "Đối tác tạm khóa", cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
-  ADMIN_BLOCKED: { label: "Admin khóa", cls: "bg-red-100 text-red-700" },
+  ACTIVE: { get label() { return i18n.t("partner.service_status.active"); }, cls: "bg-green-100 text-green-700" },
+  PENDING: { get label() { return i18n.t("partner.service_status.pending"); }, cls: "bg-yellow-100 text-yellow-700" },
+  REJECTED: { get label() { return i18n.t("partner.service_status.rejected"); }, cls: "bg-red-100 text-red-700" },
+  PARTNER_PAUSED: { get label() { return i18n.t("partner.service_status.partner_paused"); }, cls: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" },
+  ADMIN_BLOCKED: { get label() { return i18n.t("partner.service_status.admin_blocked"); }, cls: "bg-red-100 text-red-700" },
 };
 
 //  pick helpers 
@@ -143,18 +144,18 @@ export const pickUsedEnd = (b, type) => {
 export const pickSnapshot = (b) => b?.snapshot || b?.meta || b?.details || null;
 
 export const STATUS_TABS = [
-  { key: "all", label: "Tất cả" },
-  { key: "PENDING_PAYMENT", label: "Chờ thanh toán" },
-  { key: "CONFIRMED", label: "Đã xác nhận" },
-  { key: "COMPLETED", label: "Hoàn tất" },
-  { key: "CANCELLED", label: "Đã hủy" },
-  { key: "CANCELLED_BY_PARTNER", label: "Đối tác hủy" },
+  { key: "all", get label() { return i18n.t("common.all"); } },
+  { key: "PENDING_PAYMENT", get label() { return i18n.t("partner.booking_status.pending_payment"); } },
+  { key: "CONFIRMED", get label() { return i18n.t("partner.booking_status.confirmed"); } },
+  { key: "COMPLETED", get label() { return i18n.t("partner.booking_status.completed"); } },
+  { key: "CANCELLED", get label() { return i18n.t("partner.booking_status.cancelled"); } },
+  { key: "CANCELLED_BY_PARTNER", get label() { return i18n.t("partner.booking_status.cancelled_by_partner"); } },
 ];
 
 export const TYPE_OPTIONS = [
-  { key: "ALL", label: "Tất cả loại dịch vụ" },
-  { key: "HOTEL", label: "Khách sạn" },
-  { key: "RESTAURANT", label: "Quán ăn" },
+  { key: "ALL", get label() { return i18n.t("partner.type_option.all"); } },
+  { key: "HOTEL", get label() { return i18n.t("partner.type_option.hotel"); } },
+  { key: "RESTAURANT", get label() { return i18n.t("partner.type_option.restaurant"); } },
 ];
 
 export const CANCELLED_SET = new Set([

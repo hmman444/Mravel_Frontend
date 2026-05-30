@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PlanGridCard from "../../planFeed/components/PlanGridCard";
 import { fetchPlans } from "../../planFeed/services/planService";
 
@@ -18,6 +19,7 @@ function PlanSkeletonCard() {
 }
 
 export default function PlanSection() {
+  const { t } = useTranslation();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,7 +40,7 @@ export default function PlanSection() {
         setError(
           err?.response?.data?.message ||
             err?.message ||
-            "Khong tai duoc goi y lich trinh."
+            t("home.plans_error")
         );
       } finally {
         if (!cancelled) setLoading(false);
@@ -50,7 +52,7 @@ export default function PlanSection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const renderContent = () => {
     if (loading) {
@@ -74,7 +76,7 @@ export default function PlanSection() {
     if (!plans.length) {
       return (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white/80 px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-gray-900/70 dark:text-slate-400">
-          Hien chua co lich trinh goi y de hien thi.
+          {t("home.plans_empty")}
         </div>
       );
     }
@@ -94,11 +96,10 @@ export default function PlanSection() {
         <div className="mb-8 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 md:text-3xl">
-              Goi y lich trinh
+              {t("home.plans_title")}
             </h2>
             <p className="mt-1 max-w-xl text-sm text-gray-600 dark:text-gray-400">
-              Kham pha nhung lich trinh that tu cong dong Mravel va tai su dung
-              chung nhu diem bat dau cho chuyen di cua ban.
+              {t("home.plans_subtitle")}
             </p>
           </div>
 
@@ -106,7 +107,7 @@ export default function PlanSection() {
             to="/plans"
             className="hidden items-center gap-1 text-sm font-medium text-sky-700 transition hover:text-sky-900 dark:text-sky-300 dark:hover:text-sky-200 sm:inline-flex"
           >
-            Xem tat ca lich trinh →
+            {t("home.see_feed")} →
           </Link>
         </div>
 
@@ -117,13 +118,13 @@ export default function PlanSection() {
             to="/plans"
             className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-5 py-2.5 text-sm font-semibold text-sky-700 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md dark:border-sky-900/60 dark:bg-gray-900/80 dark:text-sky-300"
           >
-            Xem bang tin lich trinh
+            {t("home.see_feed")}
           </Link>
           <Link
             to="/plans/my-plans"
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-xl"
           >
-            Tao lich trinh cua ban
+            ✨ {t("home.create_plan_cta")}
           </Link>
         </div>
       </div>

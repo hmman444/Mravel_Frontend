@@ -2,6 +2,7 @@
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const ui = {
   card:
@@ -57,6 +58,7 @@ export default function ServiceFilters({
   hasAnyFilter,
   onReset,
 }) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence initial={false}>
       {open && (
@@ -74,8 +76,8 @@ export default function ServiceFilters({
               {/* Search */}
               <div className="w-full lg:max-w-md">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Tìm kiếm</label>
-                  <span className={ui.help}>Tên / slug</span>
+                  <label className={ui.title}>{t("common.search")}</label>
+                  <span className={ui.help}>{t("admin.service_filter_search_hint")}</span>
                 </div>
 
                 <div className="relative mt-1">
@@ -83,7 +85,7 @@ export default function ServiceFilters({
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Ví dụ: reverie / hoian..."
+                    placeholder={t("admin.service_filter_search_placeholder")}
                     className={`${ui.input} pl-10`}
                   />
                   {search && (
@@ -102,15 +104,15 @@ export default function ServiceFilters({
               {/* Active filter */}
               <div className="w-full lg:w-auto">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Active</label>
-                  <span className={ui.help}>Bật / Tắt</span>
+                  <label className={ui.title}>{t("admin.service_filter_active")}</label>
+                  <span className={ui.help}>{t("admin.service_filter_active_hint")}</span>
                 </div>
 
                 <div className={`mt-1 ${ui.chipWrap}`}>
                   {[
-                    { v: "ALL", label: "Tất cả" },
-                    { v: "ACTIVE", label: "Đang bật" },
-                    { v: "INACTIVE", label: "Đang tắt" },
+                    { v: "ALL", label: t("common.all") },
+                    { v: "ACTIVE", label: t("admin.service_filter_active_on") },
+                    { v: "INACTIVE", label: t("admin.service_filter_active_off") },
                   ].map((x) => {
                     const on = activeFilter === x.v;
                     return (
@@ -131,15 +133,15 @@ export default function ServiceFilters({
               {/* UnlockRequested */}
               <div className="w-full lg:w-auto">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Yêu cầu mở khoá</label>
+                  <label className={ui.title}>{t("admin.service_filter_unlock_requested")}</label>
                   <span className={ui.help}>unlockRequested</span>
                 </div>
 
                 <div className={`mt-1 ${ui.chipWrap}`}>
                   {[
-                    { v: "ALL", label: "Tất cả" },
-                    { v: "YES", label: "Có" },
-                    { v: "NO", label: "Không" },
+                    { v: "ALL", label: t("common.all") },
+                    { v: "YES", label: t("admin.service_filter_yes") },
+                    { v: "NO", label: t("admin.service_filter_no") },
                   ].map((x) => {
                     const on = unlockFilter === x.v;
                     return (
@@ -175,7 +177,7 @@ export default function ServiceFilters({
             {/* Row 2 */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label className={ui.title}>Trạng thái moderation</label>
+                <label className={ui.title}>{t("admin.service_filter_moderation_status")}</label>
                 <select value={status} onChange={(e) => setStatus(e.target.value)} className={`${ui.select} mt-1`}>
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>{s}</option>

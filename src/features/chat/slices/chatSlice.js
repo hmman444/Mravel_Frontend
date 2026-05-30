@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import {
   fetchConversations,
   fetchConversationDetail,
@@ -16,7 +17,7 @@ export const loadConversations = createAsyncThunk(
     try {
       return await fetchConversations();
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không thể tải danh sách cuộc trò chuyện");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("chat.load_conversations_failed"));
     }
   }
 );
@@ -27,7 +28,7 @@ export const loadConversationDetail = createAsyncThunk(
     try {
       return await fetchConversationDetail(id);
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không thể tải thông tin cuộc trò chuyện");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("chat.load_conversation_detail_failed"));
     }
   }
 );
@@ -39,7 +40,7 @@ export const loadMessages = createAsyncThunk(
       const data = await fetchMessages(conversationId, { before, size });
       return { conversationId, ...data };
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không thể tải tin nhắn");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("chat.load_messages_failed"));
     }
   }
 );
@@ -53,7 +54,7 @@ export const sendChatMessage = createAsyncThunk(
       const msg = await sendMessageApi(conversationId, payload);
       return { conversationId, message: msg };
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không thể gửi tin nhắn");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("chat.send_message_failed"));
     }
   }
 );
@@ -64,7 +65,7 @@ export const loadFriends = createAsyncThunk(
     try {
       return await fetchFriends();
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không thể tải danh sách bạn bè");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("chat.load_friends_failed"));
     }
   }
 );

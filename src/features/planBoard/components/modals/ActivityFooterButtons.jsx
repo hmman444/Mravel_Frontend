@@ -1,6 +1,8 @@
 // src/features/planBoard/components/ActivityFooterButtons.jsx
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 /**
  * Footer bên phải:
  * - Nút Hủy (màu trung tính, dùng chung)
@@ -12,6 +14,7 @@ export default function ActivityFooterButtons({
   submitLabel,
   submitClassName, // ví dụ: "bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30"
 }) {
+  const { t } = useTranslation();
   const baseSubmit =
     "px-4 sm:px-5 py-2 rounded-xl text-white text-xs sm:text-sm font-semibold " +
     "hover:shadow-xl hover:brightness-105 active:scale-[0.98] transition";
@@ -25,7 +28,7 @@ export default function ActivityFooterButtons({
         border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 text-slate-600
         dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Hủy
+        {t("common.cancel")}
       </button>
       <button
         type="button"

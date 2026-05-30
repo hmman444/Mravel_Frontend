@@ -1,5 +1,6 @@
 // src/features/booking/components/restaurant/RestaurantBookingDateTimePicker.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaClock, FaCalendarAlt } from "react-icons/fa";
 import MravelDatePicker from "../../../../components/MravelDatePicker";
 import {
@@ -22,6 +23,7 @@ export default function RestaurantBookingDateTimePicker({
   openingHours = [],      //  thêm
   stepMinutes = 30,       //  thêm
 }) {
+  const { t } = useTranslation();
   const [openTime, setOpenTime] = useState(false);
   const timeRef = useRef(null);
 
@@ -56,16 +58,16 @@ export default function RestaurantBookingDateTimePicker({
   }, [timeOptions]);
 
   const summary = useMemo(() => {
-    const d = date ? VN_DATE(date) : "Chọn ngày";
-    const t = time || "Chọn giờ";
-    return `${d} • ${t}`;
+    const d = date ? VN_DATE(date) : t("booking.select_date");
+    const tm = time || t("booking.select_time");
+    return `${d} • ${tm}`;
   }, [date, time]);
 
   const disabledTime = !timeOptions.length;
 
   return (
     <div className="space-y-2">
-      <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300">Thời gian đến</div>
+      <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300">{t("booking.arrival_time")}</div>
 
       <div className="text-[11px] text-gray-500 dark:text-gray-400">{openingLabel}</div>
 
@@ -100,7 +102,7 @@ export default function RestaurantBookingDateTimePicker({
         >
           <FaClock className="text-gray-400 mr-2" />
           <span className={`text-sm ${time ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
-            {disabledTime ? "Nhà hàng đóng cửa" : (time || "Chọn giờ")}
+            {disabledTime ? t("booking.restaurant_closed") : (time || t("booking.select_time"))}
           </span>
           <span className="ml-auto text-gray-400">▾</span>
 
@@ -110,7 +112,7 @@ export default function RestaurantBookingDateTimePicker({
               onMouseDown={(e) => e.stopPropagation()}
             >
               <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Giờ (cách nhau {stepMinutes} phút)
+                {t("booking.time_interval", { n: stepMinutes })}
               </div>
 
               {timeOptions.map((t) => (
@@ -137,7 +139,7 @@ export default function RestaurantBookingDateTimePicker({
       </div>
 
       <div className="text-[11px] text-gray-500 dark:text-gray-400">
-        Đã chọn: <span className="font-semibold">{summary}</span>
+        {t("booking.selected_label")} <span className="font-semibold">{summary}</span>
       </div>
     </div>
   );

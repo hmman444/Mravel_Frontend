@@ -16,6 +16,7 @@ import {
   getPartnerTokens,
   clearPartnerTokens,
 } from "../../../utils/partnerTokenManager";
+import i18n from "../../../i18n";
 
 export const partnerLoginUser = createAsyncThunk(
   "partnerAuth/login",
@@ -37,11 +38,11 @@ export const partnerLogoutUser = createAsyncThunk(
       const { refreshToken } = getPartnerTokens();
       const result = await partnerLogout(refreshToken);
       clearPartnerTokens();
-      if (result.success) return "Đăng xuất đối tác thành công";
+      if (result.success) return i18n.t("partnerAuth.logout_success");
       return rejectWithValue(result.message);
     } catch {
       clearPartnerTokens();
-      return rejectWithValue("Lỗi khi đăng xuất");
+      return rejectWithValue(i18n.t("partnerAuth.logout_error"));
     }
   }
 );
@@ -99,7 +100,7 @@ export const fetchCurrentPartner = createAsyncThunk(
   "partnerAuth/me",
   async (_, { rejectWithValue }) => {
     const result = await getCurrentPartner();
-    if (!result?.success) return rejectWithValue(result?.message || "Không lấy được thông tin đối tác");
+    if (!result?.success) return rejectWithValue(result?.message || i18n.t("partnerAuth.fetch_partner_error"));
 
     return result.data;
   }
@@ -140,7 +141,7 @@ const partnerAuthSlice = createSlice({
         s.loading = false;
         s.accessToken = a.payload.accessToken;
         s.refreshToken = a.payload.refreshToken;
-        s.message = "Đăng nhập đối tác thành công!";
+        s.message = i18n.t("partnerAuth.login_success");
       })
       .addCase(partnerLoginUser.rejected, (s, a) => {
         s.loading = false;
@@ -155,7 +156,7 @@ const partnerAuthSlice = createSlice({
         s.loading = false;
         s.accessToken = a.payload.accessToken;
         s.refreshToken = a.payload.refreshToken;
-        s.message = "Đăng nhập mạng xã hội thành công!";
+        s.message = i18n.t("partnerAuth.social_login_success");
       })
       .addCase(partnerSocialLoginUser.rejected, (s, a) => {
         s.loading = false;

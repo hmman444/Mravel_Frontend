@@ -1,5 +1,6 @@
 // src/features/partner/components/hotel/create/MapPickerModal.jsx
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
 function ClickToPick({ onPick }) {
@@ -12,6 +13,7 @@ function ClickToPick({ onPick }) {
 }
 
 export default function MapPickerModal({ open, initial, onClose, onConfirm }) {
+  const { t } = useTranslation();
   const center = useMemo(() => {
     const lat = Number(initial?.lat);
     const lng = Number(initial?.lng);
@@ -29,11 +31,11 @@ export default function MapPickerModal({ open, initial, onClose, onConfirm }) {
       <div className="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl border overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <div>
-            <div className="font-semibold">Chọn vị trí trên bản đồ</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Click vào bản đồ để chọn tọa độ.</div>
+            <div className="font-semibold">{t("partner.map_picker.title")}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{t("partner.map_picker.hint")}</div>
           </div>
           <button className="px-3 py-2 rounded-xl border hover:bg-gray-50" onClick={onClose}>
-            Đóng
+            {t("common.close")}
           </button>
         </div>
 
@@ -53,7 +55,7 @@ export default function MapPickerModal({ open, initial, onClose, onConfirm }) {
 
         <div className="p-4 border-t flex items-center justify-end gap-2">
           <button className="px-3 py-2 rounded-xl border hover:bg-gray-50" onClick={onClose}>
-            Hủy
+            {t("common.cancel")}
           </button>
         </div>
       </div>

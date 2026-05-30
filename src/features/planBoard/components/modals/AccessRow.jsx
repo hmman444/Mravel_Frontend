@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaUserCircle, FaChevronDown, FaTrashAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function AccessRow({
   user,
@@ -14,6 +15,7 @@ export default function AccessRow({
   canChangeRole,
   canRemove,
 }) {
+  const { t } = useTranslation();
   const isOwnerRow = user.owner;
   const hasMenu = (canChangeRole || canRemove) && !isOwnerRow;
   const open = activeMenu === user.email;
@@ -124,7 +126,7 @@ export default function AccessRow({
                   "
                 >
                   <FaTrashAlt size={12} />
-                  Xóa quyền truy cập
+                  {t("plan.member.remove_access")}
                 </button>
               </>
             )}
@@ -167,7 +169,7 @@ export default function AccessRow({
 
             {user.pending && (
               <p className="text-[11px] mt-0.5 text-amber-600 dark:text-amber-300">
-                Đã gửi lời mời
+                {t("plan.member.invite_sent")}
               </p>
             )}
           </div>
@@ -183,7 +185,7 @@ export default function AccessRow({
                 dark:bg-amber-500/10 dark:text-amber-300
               "
             >
-              Chủ sở hữu
+              {t("plan.member.role_owner")}
             </span>
           )}
 

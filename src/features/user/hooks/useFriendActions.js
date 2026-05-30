@@ -1,5 +1,6 @@
 // src/features/profile/hooks/useFriendActions.js
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import {
   sendFriendRequest,
@@ -9,6 +10,7 @@ import {
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
 export function useFriendActions(profileUserId, relationship, reloadProfile) {
+  const { t } = useTranslation();
   const { user: me } = useSelector((s) => s.auth);
   const [loadingAction, setLoadingAction] = useState(false);
 
@@ -26,7 +28,7 @@ export function useFriendActions(profileUserId, relationship, reloadProfile) {
     try {
       const ok = await fn();
       if (!ok?.success) {
-        showError(ok?.message || "Thao tác thất bại");
+        showError(ok?.message || t("user.action_failed"));
       } else {
         if (successMsg) showSuccess(successMsg);
         if (reloadProfile) reloadProfile();
@@ -39,19 +41,19 @@ export function useFriendActions(profileUserId, relationship, reloadProfile) {
   const handleSendRequest = () =>
     safeCall(
       () => sendFriendRequest(profileUserId),
-      "Đã gửi lời mời kết bạn."
+      t("user.friend_request_sent")
     );
 
   const handleAcceptRequest = () =>
     safeCall(
       () => acceptFriendRequest(profileUserId),
-      "Đã chấp nhận lời mời kết bạn."
+      t("user.friend_request_accepted")
     );
 
   const handleRemoveOrCancel = () =>
     safeCall(
       () => removeFriendOrCancel(profileUserId),
-      isFriend ? "Đã xóa bạn." : "Đã hủy lời mời kết bạn."
+      isFriend ? t("user.friend_removed") : t("user.friend_request_canceled")
     );
 
   const uiState = useMemo(() => {
@@ -61,7 +63,7 @@ export function useFriendActions(profileUserId, relationship, reloadProfile) {
     if (isBlocked) {
       return {
         mode: "BLOCKED",
-        label: "Đã chặn",
+        label: t("user.relation_blocked"),
         subLabel: null,
         variant: "secondary",
         disabled: true,
@@ -70,34 +72,34 @@ export function useFriendActions(profileUserId, relationship, reloadProfile) {
     if (isFriend) {
       return {
         mode: "FRIEND",
-        label: "Bạn bè",
-        subLabel: "Xóa bạn",
+        label: t("user.relation_friend"),
+        subLabel: t("user.friend_remove"),
         variant: "primary",
       };
     }
     if (isRequestSent) {
       return {
         mode: "REQUEST_SENT",
-        label: "Đã gửi lời mời",
-        subLabel: "Hủy lời mời",
+        label: t("user.request_sent_label"),
+        subLabel: t("user.request_cancel"),
         variant: "secondary",
       };
     }
     if (isRequestReceived) {
       return {
         mode: "REQUEST_RECEIVED",
-        label: "Chấp nhận",
-        subLabel: "Xóa lời mời",
+        label: t("user.request_accept"),
+        subLabel: t("user.request_remove"),
         variant: "primary",
       };
     }
     return {
       mode: "NONE",
-      label: "Kết bạn",
+      label: t("user.add_friend"),
       subLabel: null,
       variant: "primary",
     };
-  }, [isMe, isBlocked, isFriend, isRequestSent, isRequestReceived]);
+  }, [t, isMe, isBlocked, isFriend, isRequestSent, isRequestReceived]);
 
   return {
     isMe,

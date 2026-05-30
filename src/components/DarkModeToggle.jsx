@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Sun, Moon } from "lucide-react";
 
 export default function DarkModeToggle({ variant = "icon" }) {
+  const { t } = useTranslation();
   const [dark, setDark] = useState(
     () => localStorage.getItem("theme") === "dark"
   );
@@ -25,8 +27,8 @@ export default function DarkModeToggle({ variant = "icon" }) {
         hover:bg-gray-100 dark:hover:bg-gray-800
         transition
       "
-      aria-label="Đổi chế độ sáng tối"
-      title="Chế độ sáng / tối"
+      aria-label={t("common.toggle_dark_mode")}
+      title={t("common.toggle_dark_mode")}
     >
       {dark ? (
         <Moon className="w-5 h-5" />

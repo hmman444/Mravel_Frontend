@@ -1,17 +1,19 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { DAYS } from "../../../../utils/restaurantFormUtils";
 
-const dayLabel = {
-  MONDAY: "Thứ 2",
-  TUESDAY: "Thứ 3",
-  WEDNESDAY: "Thứ 4",
-  THURSDAY: "Thứ 5",
-  FRIDAY: "Thứ 6",
-  SATURDAY: "Thứ 7",
-  SUNDAY: "Chủ nhật",
-};
-
 export default function OpeningHoursEditor({ value = [], onChange, disabled }) {
+  const { t } = useTranslation();
+  const dayLabel = {
+    MONDAY: t("partner.opening_hours.day.monday"),
+    TUESDAY: t("partner.opening_hours.day.tuesday"),
+    WEDNESDAY: t("partner.opening_hours.day.wednesday"),
+    THURSDAY: t("partner.opening_hours.day.thursday"),
+    FRIDAY: t("partner.opening_hours.day.friday"),
+    SATURDAY: t("partner.opening_hours.day.saturday"),
+    SUNDAY: t("partner.opening_hours.day.sunday"),
+  };
+
   const map = useMemo(() => {
     const m = new Map();
     (Array.isArray(value) ? value : []).forEach((x) => {
@@ -49,8 +51,8 @@ export default function OpeningHoursEditor({ value = [], onChange, disabled }) {
   return (
     <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div>
-        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Giờ mở cửa (openingHours)</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Nhập dạng HH:mm (vd: 11:00 - 22:00).</div>
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.opening_hours.title")}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t("partner.opening_hours.hint")}</div>
       </div>
 
       <div className="space-y-2">
@@ -79,7 +81,7 @@ export default function OpeningHoursEditor({ value = [], onChange, disabled }) {
               disabled={disabled}
               className="md:col-span-3 px-3 py-2 rounded-xl border hover:bg-gray-50 text-sm disabled:opacity-50"
             >
-              Copy cho cả tuần
+              {t("partner.opening_hours.copy_week")}
             </button>
           </div>
         ))}

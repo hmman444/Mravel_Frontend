@@ -67,7 +67,7 @@ export default function ManageAmenitiesPage() {
       err?.response?.data?.error ||
       err?.message;
 
-    return msg || "Có lỗi xảy ra, vui lòng thử lại.";
+    return msg || t("admin.error_generic_retry");
   };
 
   const setRowToggling = (id, on) => {
@@ -190,10 +190,10 @@ export default function ManageAmenitiesPage() {
       // nếu API của bạn yêu cầu payload đầy đủ thì đổi thành update(id, { active:false, ... })
       await update(id, { active: false });
 
-      showSuccess("Đã tắt tiện ích");
+      showSuccess(t("admin.amenity_deactivate_success"));
       await load({ active: true });
     } catch (e) {
-      showError("Tắt tiện ích thất bại");
+      showError(t("admin.amenity_deactivate_failed"));
     } finally {
       setRowToggling(id, false);
     }
@@ -205,10 +205,10 @@ export default function ManageAmenitiesPage() {
     try {
       await update(id, { active: true });
 
-      showSuccess("Đã bật tiện ích");
+      showSuccess(t("admin.amenity_activate_success"));
       await load({ active: true });
     } catch (e) {
-      showError("Bật tiện ích thất bại");
+      showError(t("admin.amenity_activate_failed"));
     } finally {
       setRowToggling(id, false);
     }
@@ -232,17 +232,17 @@ export default function ManageAmenitiesPage() {
     };
 
     if (!payload.code || !payload.name) {
-      showError(t("Tên không thể trống"));
+      showError(t("admin.amenity_name_required"));
       return;
     }
 
     try {
       if (editing) {
         await update(editing.id, payload);
-        showSuccess(t("Cập nhật tiện ích thành công"));
+        showSuccess(t("admin.amenity_update_success"));
       } else {
         await create(payload);
-        showSuccess(t("Thêm tiện ích thành công"));
+        showSuccess(t("admin.amenity_create_success"));
       }
 
       setShowModal(false);
@@ -268,7 +268,7 @@ export default function ManageAmenitiesPage() {
               {t("manage_amenities")}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Quản lý danh sách tiện nghi theo scope / group / section.
+              {t("admin.amenity_page_subtitle")}
             </p>
           </div>
 
@@ -279,7 +279,7 @@ export default function ManageAmenitiesPage() {
               type="button"
             >
               <FunnelIcon className="h-5 w-5" />
-              Bộ lọc
+              {t("admin.filters")}
             </button>
 
             <button
@@ -333,7 +333,7 @@ export default function ManageAmenitiesPage() {
       ) : filteredAmenities.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không có tiện nghi phù hợp với bộ lọc hiện tại
+            {t("admin.amenity_empty_filtered")}
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <button
@@ -341,14 +341,14 @@ export default function ManageAmenitiesPage() {
               className={`${soft.btn} ${soft.btnGhost}`}
               onClick={resetFilters}
             >
-              Reset bộ lọc
+              {t("admin.reset_filters")}
             </button>
             <button
               type="button"
               className={`${soft.btn} ${soft.btnPrimary}`}
               onClick={openCreate}
             >
-              Thêm tiện nghi
+              {t("admin.add_amenity")}
             </button>
           </div>
         </div>
@@ -385,10 +385,10 @@ export default function ManageAmenitiesPage() {
       {/* Confirm delete modal */}
       <ConfirmModal
         open={confirmOpen}
-        title="Xóa tiện nghi"
-        message={`Bạn có chắc muốn xóa "${pendingDelete?.name || ""}" không?`}
-        confirmText="Xóa"
-        cancelText="Hủy"
+        title={t("admin.amenity_delete_title")}
+        message={t("admin.amenity_delete_confirm", { name: pendingDelete?.name || "" })}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
         onClose={closeConfirm}
         onConfirm={confirmDelete}
       />

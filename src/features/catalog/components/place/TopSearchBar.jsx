@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import Button from "../../../../components/Button";
 import { usePlaceTypeahead } from "../../hooks/usePlaceTypeahead";
 import { makePlaceDisplay } from "../../../../utils/makePlaceDisplay";
 
 export default function TopSearchBar({ initialLabel, onSubmit }) {
+  const { t } = useTranslation();
   const [q, setQ] = useState(initialLabel || "");
   const [open, setOpen] = useState(false);
   const [pickedSlug, setPickedSlug] = useState(null);
@@ -68,19 +70,19 @@ export default function TopSearchBar({ initialLabel, onSubmit }) {
                 value={q}
                 onChange={(e) => { setQ(e.target.value); setPickedSlug(null); }}
                 onFocus={() => setOpen(Boolean(q) && !pickedSlug)}  // NEW
-                placeholder="Nhập địa điểm (Hà Nội, Đà Nẵng...)"
+                placeholder={t("place.search_placeholder")}
                 className="w-full outline-none bg-transparent text-gray-900 dark:text-gray-100"
               />
             </div>
             <Button type="submit" className="h-10 px-4 md:px-5 rounded-lg bg-primary hover:bg-primaryHover whitespace-nowrap">
-              Tìm địa điểm
+              {t("place.search_submit")}
             </Button>
           </div>
 
           {open && (
             <div className="absolute left-0 right-0 mt-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 shadow-lg overflow-hidden z-50">
-              {loading && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Đang tìm…</div>}
-              {!loading && !suggestions.length && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Không có gợi ý</div>}
+              {loading && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t("common.searching")}</div>}
+              {!loading && !suggestions.length && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t("common.no_suggestions")}</div>}
               {suggestions.map(it => (
                 <button
                   key={it.slug}

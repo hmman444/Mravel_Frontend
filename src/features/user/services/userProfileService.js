@@ -1,5 +1,6 @@
 // src/features/profile/services/userProfileService.js
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 export const getUserProfilePage = async (userId) => {
   try {
@@ -13,7 +14,7 @@ export const getUserProfilePage = async (userId) => {
       message:
         error.response?.data?.message ||
         error.response?.data?.error ||
-        "Không thể tải hồ sơ người dùng",
+        i18n.t("user.load_profile_failed"),
     };
   }
 };
@@ -26,7 +27,7 @@ export const updateMyProfile = async (payload) => {
     console.error("❌ updateMyProfile error:", error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || "Không thể cập nhật hồ sơ.",
+      message: error.response?.data?.message || i18n.t("user.update_profile_failed"),
     };
   }
 };

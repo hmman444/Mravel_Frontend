@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,6 +41,7 @@ export default function PlanBoard({
   setConfirmDeleteCard,
   setConfirmDeleteList,
 }) {
+  const { t } = useTranslation();
   // trạng thái mở/đóng 9 modal activity
   const modalStates = {
     TRANSPORT: useState(false),
@@ -202,10 +204,10 @@ export default function PlanBoard({
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
-            Lịch trình chi tiết
+            {t("plan.board.title")}
           </h2>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Kéo thả để sắp xếp, thêm ngày và thẻ cho từng hoạt động
+            {t("plan.board.subtitle")}
           </p>
         </div>
 
@@ -226,7 +228,7 @@ export default function PlanBoard({
               `}
             >
               <FaTrashAlt className="text-[11px]" />
-              <span>Thùng rác</span>
+              <span>{t("plan.board.trash")}</span>
             </button>
           )}
 
@@ -240,7 +242,7 @@ export default function PlanBoard({
               "
             >
               <FaPlus className="text-[11px]" />
-              <span>Thêm ngày</span>
+              <span>{t("plan.board.add_day")}</span>
             </button>
           )}
           
@@ -314,7 +316,7 @@ export default function PlanBoard({
                 <div className="flex items-center justify-between px-3 pt-3 pb-1">
                   <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-300 flex items-center gap-1.5">
                     <FaTrashAlt className="text-[10px]" />
-                    Thùng rác
+                    {t("plan.board.trash")}
                   </span>
 
                   {canEditBoard && trashList?.cards?.length > 0 && clearTrash && (
@@ -328,7 +330,7 @@ export default function PlanBoard({
                         transition-all font-medium
                       "
                     >
-                      Xóa tất cả
+                      {t("plan.board.clear_trash")}
                     </button>
                   )}
                 </div>
@@ -371,9 +373,9 @@ export default function PlanBoard({
       {confirmClearTrash && (
         <ConfirmModal
           open={true}
-          title="Xóa toàn bộ thẻ trong thùng rác"
-          message="Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa tất cả thẻ trong thùng rác?"
-          confirmText="Xóa hết"
+          title={t("plan.board.clear_trash_confirm_title")}
+          message={t("plan.board.clear_trash_confirm_message")}
+          confirmText={t("plan.board.clear_trash_confirm_button")}
           onClose={() => setConfirmClearTrash(false)}
           onConfirm={handleConfirmClearTrash}
         />

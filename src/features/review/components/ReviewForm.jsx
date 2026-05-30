@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Trans, useTranslation } from "react-i18next";
 import { submitReview, editReview } from "../slices/reviewSlice";
 import StarRating from "./StarRating";
 import { toast } from "react-toastify";
 
 export default function ReviewForm({ targetType, targetId, onSubmitted }) {
+  const { t, i18n } = useTranslation();
+  const aspectLabel = (a) =>
+    i18n.language === "en" ? a?.labelEn || a?.labelVi : a?.labelVi;
   const dispatch = useDispatch();
   const { myReview, submitting } = useSelector((s) => s.review);
   const aspectDefinitions = useSelector(
@@ -40,7 +44,11 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
   if (!isLoggedIn) {
     return (
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-        Vui lòng <a href="/login" className="text-blue-600 hover:underline font-medium">đăng nhập</a> để đánh giá.
+        <Trans
+          i18nKey="review.login_to_review"
+          components={{ a: <a href="/login" className="text-blue-600 hover:underline font-medium" /> }}
+        />
+
       </div>
     );
   }
@@ -58,7 +66,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0) {
-      toast.warning("Vui lòng chọn số sao");
+      toast.warning(t("review.please_select_rating"));
       return;
     }
 
@@ -76,10 +84,10 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
     }
 
     if (!result.error) {
-      toast.success(isEditing ? "Cập nhật đánh giá thành công" : "Đánh giá thành công");
+      toast.success(isEditing ? t("review.update_success") : t("review.submit_success"));
       onSubmitted?.();
     } else {
-      toast.error(result.payload || "Có lỗi xảy ra");
+      toast.error(result.payload || t("review.error_generic"));
     }
   };
 
@@ -87,7 +95,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {isEditing ? "Chỉnh sửa đánh giá:" : "Đánh giá của bạn:"}
+          {isEditing ? t("review.edit_your_review_label") : t("review.your_review_label")}
         </span>
         <StarRating value={rating} onChange={setRating} size={28} />
       </div>
@@ -95,7 +103,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Chia sẻ trải nghiệm của bạn..."
+        placeholder={t("review.content_placeholder")}
         rows={3}
         className="w-full rounded-xl border border-gray-300 dark:border-gray-700 px-4 py-3 text-sm
                    focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
@@ -106,7 +114,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
       {aspectDefinitions.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-            Đánh giá chi tiết (tùy chọn)
+            {t("review.detailed_optional")}
           </p>
           <div className="flex flex-wrap gap-2">
             {aspectDefinitions.map((def) => {
@@ -122,7 +130,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
                       : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-400"
                   }`}
                 >
-                  {def.labelVi}
+                  {aspectLabel(def)}
                 </button>
               );
             })}
@@ -136,7 +144,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
                 .map((def) => (
                   <div key={def.code} className="grid grid-cols-[8rem_1fr] gap-3 items-start">
                     <span className="pt-2 text-xs font-semibold text-blue-600 dark:text-blue-400 leading-snug">
-                      {def.labelVi}
+                      {aspectLabel(def)}
                     </span>
                     <textarea
                       value={selectedAspects[def.code]}
@@ -146,7 +154,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
                           [def.code]: e.target.value,
                         }))
                       }
-                      placeholder={`Nhận xét về ${def.labelVi.toLowerCase()}...`}
+                      placeholder={t("review.aspect_comment_placeholder", { aspect: aspectLabel(def).toLowerCase() })}
                       rows={2}
                       className="w-full rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm
                                  focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
@@ -167,10 +175,10 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
                      hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
           {submitting
-            ? "Đang gửi..."
+            ? t("review.submitting")
             : isEditing
-              ? "Cập nhật"
-              : "Gửi đánh giá"}
+              ? t("review.update_btn")
+              : t("review.submit_review")}
         </button>
       </div>
     </form>

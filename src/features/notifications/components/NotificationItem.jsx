@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import i18n from "../../../i18n";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -64,13 +65,13 @@ const typeIcon = (type, dataJson) => {
 /** Display message for REACT (override generic message). */
 const reactVerb = (k) => {
   const key = (k || "").toLowerCase();
-  if (key === "like")  return "đã thích kế hoạch của bạn";
-  if (key === "love")  return "đã thả tim kế hoạch của bạn";
-  if (key === "haha")  return "đã thả haha vào kế hoạch của bạn";
-  if (key === "wow")   return "đã thả wow vào kế hoạch của bạn";
-  if (key === "sad")   return "đã thả buồn vào kế hoạch của bạn";
-  if (key === "angry") return "đã thả phẫn nộ vào kế hoạch của bạn";
-  return "đã thả cảm xúc vào kế hoạch của bạn";
+  if (key === "like")  return i18n.t("notification.react.like");
+  if (key === "love")  return i18n.t("notification.react.love");
+  if (key === "haha")  return i18n.t("notification.react.haha");
+  if (key === "wow")   return i18n.t("notification.react.wow");
+  if (key === "sad")   return i18n.t("notification.react.sad");
+  if (key === "angry") return i18n.t("notification.react.angry");
+  return i18n.t("notification.react.default");
 };
 
 /**

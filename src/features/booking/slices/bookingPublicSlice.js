@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getMyGuestBookings, lookupGuestBooking, clearGuestBookings } from "../services/bookingPublicService";
+import i18n from "../../../i18n";
 
 export const fetchGuestMyBookings = createAsyncThunk(
   "bookingPublic/fetchGuestMyBookings",
@@ -7,7 +8,7 @@ export const fetchGuestMyBookings = createAsyncThunk(
     try {
       return await getMyGuestBookings();
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không tải được danh sách đơn");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.load_bookings_failed"));
     }
   }
 );
@@ -18,7 +19,7 @@ export const lookupBookingPublic = createAsyncThunk(
     try {
       return await lookupGuestBooking(payload);
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Tra cứu thất bại");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.lookup_failed"));
     }
   }
 );
@@ -30,7 +31,7 @@ export const clearGuestDevice = createAsyncThunk(
       await clearGuestBookings();
       return true;
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Xoá thất bại");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.clear_failed"));
     }
   }
 );

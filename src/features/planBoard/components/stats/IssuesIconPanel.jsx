@@ -3,6 +3,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, BadgePercent, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function IssuesIconPanel({
   issues = [],
@@ -14,6 +15,7 @@ export default function IssuesIconPanel({
   iconWhenEmpty,
   iconWhenHas,
 }) {
+  const { t } = useTranslation();
   const issuesToShow = showAll ? issues : issues.slice(0, 6);
 
   return (
@@ -21,17 +23,17 @@ export default function IssuesIconPanel({
       <div className="flex items-center justify-between gap-3 p-5">
         <div>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Cái nào chưa chuẩn
+            {t("plan.stats.issues.heading")}
           </p>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            Bấm vào biểu tượng để xem cảnh báo (tên hoạt động + loại hoạt động)
+            {t("plan.stats.issues.subheading")}
           </p>
         </div>
 
         <button
           onClick={onToggle}
           className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200/70 bg-white dark:bg-gray-800 hover:bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900 dark:hover:bg-slate-800/60 transition"
-          title={open ? "Đóng cảnh báo" : "Mở cảnh báo"}
+          title={open ? t("plan.stats.issues.close") : t("plan.stats.issues.open")}
         >
           {issues.length === 0 ? iconWhenEmpty : iconWhenHas}
         </button>
@@ -49,7 +51,7 @@ export default function IssuesIconPanel({
             <div className="px-5 pb-5">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  {issues.length === 0 ? "Không có cảnh báo" : `Có ${issues.length} cảnh báo/lỗi`}
+                  {issues.length === 0 ? t("plan.stats.issues.none") : t("plan.stats.issues.count", { n: issues.length })}
                 </p>
 
                 {issues.length > 6 && (
@@ -59,11 +61,11 @@ export default function IssuesIconPanel({
                   >
                     {showAll ? (
                       <>
-                        Thu gọn <ChevronUp className="h-4 w-4" />
+                        {t("plan.stats.issues.collapse")} <ChevronUp className="h-4 w-4" />
                       </>
                     ) : (
                       <>
-                        Xem thêm <ChevronDown className="h-4 w-4" />
+                        {t("plan.stats.issues.show_more")} <ChevronDown className="h-4 w-4" />
                       </>
                     )}
                   </button>
@@ -78,9 +80,9 @@ export default function IssuesIconPanel({
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">Dữ liệu đang ổn</p>
+                        <p className="text-sm font-semibold">{t("plan.stats.issues.ok_title")}</p>
                         <p className="mt-0.5 text-xs opacity-90">
-                          Không phát hiện vấn đề lớn về thời gian/chi phí/split.
+                          {t("plan.stats.issues.ok_desc")}
                         </p>
                       </div>
                     </div>
@@ -127,7 +129,7 @@ export default function IssuesIconPanel({
                         </div>
 
                         <span className="shrink-0 text-[11px] font-semibold">
-                          {iss.severity === "ERROR" ? "Lỗi" : "Cảnh báo"}
+                          {iss.severity === "ERROR" ? t("plan.stats.issues.severity_error") : t("plan.stats.issues.severity_warning")}
                         </span>
                       </div>
                     </div>
@@ -136,7 +138,7 @@ export default function IssuesIconPanel({
 
                 {issues.length > 0 && !showAll && issues.length > 6 && (
                   <p className="pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                    Đang hiển thị 6/{issues.length}.
+                    {t("plan.stats.issues.showing", { n: issues.length })}
                   </p>
                 )}
               </div>

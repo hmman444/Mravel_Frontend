@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaPenFancy, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
@@ -30,13 +31,6 @@ import {
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
-const EXTRA_TYPES = [
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ thu" },
-  { value: "TAX", label: "Thuế" },
-  { value: "OTHER", label: "Khác" },
-];
-
 const safeJsonParse = (str) => {
   try {
     return str ? JSON.parse(str) : {};
@@ -53,6 +47,18 @@ export default function OtherActivityModal({
   planMembers = [],
   readOnly = false,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = useMemo(
+    () => [
+      { value: "SERVICE_FEE", label: t("plan.extra_cost.type_service_fee") },
+      { value: "SURCHARGE", label: t("plan.extra_cost.type_surcharge") },
+      { value: "TAX", label: t("plan.extra_cost.type_tax") },
+      { value: "OTHER", label: t("plan.extra_cost.type_other") },
+    ],
+    [t]
+  );
+
   const [title, setTitle] = useState("");
   const [locationText, setLocationText] = useState("");
 
@@ -86,7 +92,7 @@ export default function OtherActivityModal({
       const data = safeJsonParse(editingCard.activityDataJson);
       const cost = editingCard.cost || {};
 
-      setTitle(editingCard.text || data?.title || "Hoạt động khác");
+      setTitle(editingCard.text || data?.title || t("plan.modal.other.default_title"));
       setLocationText(data.locationText || data.location || "");
 
       const { start, end } = pickStartEndFromCard(editingCard, data);
@@ -277,11 +283,11 @@ export default function OtherActivityModal({
     const newErrors = {};
 
     if (!locationText.trim() && !effectiveOtherLocation) {
-      newErrors.location = "Vui lòng nhập hoặc chọn địa điểm.";
+      newErrors.location = t("plan.validation.location_required");
     }
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.validation.end_after_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -295,8 +301,8 @@ export default function OtherActivityModal({
 
     onSubmit?.({
       type: "OTHER",
-      title: title || "Hoạt động khác",
-      text: title || "Hoạt động khác",
+      title: title || t("plan.modal.other.default_title"),
+      text: title || t("plan.modal.other.default_title"),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -332,23 +338,28 @@ export default function OtherActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Hoạt động"
-      name={title || "Hoạt động khác"}
-      emptyLabelText="Đặt tên hoạt động để dễ phân biệt."
+      labelPrefix={t("plan.modal.other.footer_label_prefix")}
+      name={title || t("plan.modal.other.default_title")}
+      emptyLabelText={t("plan.modal.other.empty_name_hint")}
       locationText={
         effectiveOtherLocation || locationText
-          ? `Địa điểm: ${
-              effectiveOtherLocation?.label ||
-              effectiveOtherLocation?.name ||
-              effectiveOtherLocation?.address ||
-              effectiveOtherLocation?.fullAddress ||
-              locationText
-            }`
+          ? t("plan.modal.other.footer_location", {
+              location:
+                effectiveOtherLocation?.label ||
+                effectiveOtherLocation?.name ||
+                effectiveOtherLocation?.address ||
+                effectiveOtherLocation?.fullAddress ||
+                locationText,
+            })
           : ""
       }
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `Thời gian: ${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.modal.other.footer_time", {
+              start: startTime,
+              end: endTime,
+              minutes: durationMinutes,
+            })
           : ""
       }
     />
@@ -365,14 +376,14 @@ export default function OtherActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động khác"}
+      submitLabel={editingCard ? t("plan.modal.other.submit_edit") : t("plan.modal.other.submit_create")}
       submitClassName="bg-gradient-to-r from-slate-600 to-gray-700 shadow-lg shadow-slate-600/30"
     />
   );
@@ -387,9 +398,9 @@ export default function OtherActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-slate-600 to-gray-700",
         }}
-        title="Hoạt động khác"
+        title={t("plan.modal.other.title")}
         typeLabel="Other"
-        subtitle="Thêm hoạt động tuỳ chỉnh không thuộc các nhóm mặc định."
+        subtitle={t("plan.modal.other.subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -398,22 +409,22 @@ export default function OtherActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.modal.other.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Tên hoạt động + địa điểm + thời gian
+              {t("plan.modal.other.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động
+                {t("plan.modal.other.activity_name")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Sinh nhật, họp nhóm, check-in..."
+                placeholder={t("plan.modal.other.activity_name_placeholder")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
@@ -421,7 +432,7 @@ export default function OtherActivityModal({
             {/* ĐỊA ĐIỂM */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa điểm
+                {t("plan.modal.other.location")}
               </label>
 
               <button
@@ -453,7 +464,7 @@ export default function OtherActivityModal({
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
                         {effectiveOtherLocation?.label ||
                           effectiveOtherLocation?.name ||
-                          "Địa điểm đã chọn"}
+                          t("plan.modal.other.selected_location")}
                       </p>
                       {(effectiveOtherLocation?.address ||
                         effectiveOtherLocation?.fullAddress ||
@@ -467,7 +478,7 @@ export default function OtherActivityModal({
 
                       <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
+                          {t("plan.modal.other.picked_on_map")}
                         </span>
                         {effectiveOtherLocation?.lat != null &&
                           effectiveOtherLocation?.lng != null && (
@@ -481,10 +492,10 @@ export default function OtherActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn địa điểm trên bản đồ
+                        {t("plan.modal.other.pick_location_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn địa điểm cho hoạt động này (quán, công viên,...).
+                        {t("plan.modal.other.pick_location_hint")}
                       </p>
                     </>
                   )}
@@ -495,7 +506,7 @@ export default function OtherActivityModal({
                     text-slate-500 group-hover:text-slate-700 dark:text-slate-300
                     dark:group-hover:text-slate-100"
                 >
-                  Mở bản đồ
+                  {t("plan.modal.other.open_map")}
                 </span>
               </button>
 
@@ -507,9 +518,9 @@ export default function OtherActivityModal({
             {/* TIME */}
             <div className="mt-3">
               <ActivityTimeRangeSection
-                sectionLabel="Thời gian hoạt động"
-                startLabel="Bắt đầu"
-                endLabel="Kết thúc"
+                sectionLabel={t("plan.modal.other.activity_time")}
+                startLabel={t("plan.time.start")}
+                endLabel={t("plan.time.end")}
                 color="sky"
                 iconClassName="text-sky-500"
                 startTime={startTime}
@@ -519,7 +530,7 @@ export default function OtherActivityModal({
                 error={errors.time}
                 onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
-                durationHintPrefix="Thời lượng ước tính"
+                durationHintPrefix={t("plan.time.estimated_duration")}
               />
             </div>
           </div>
@@ -529,10 +540,10 @@ export default function OtherActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí
+              {t("plan.cost.title")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Ước lượng, chi thực tế và chi phí phát sinh
+              {t("plan.cost.subtitle")}
             </span>
           </div>
 
@@ -540,7 +551,7 @@ export default function OtherActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Chi phí ước lượng (chính)
+                  {t("plan.cost.estimated_main")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -549,7 +560,7 @@ export default function OtherActivityModal({
                     min="0"
                     value={estimatedCost}
                     onChange={(e) => setEstimatedCost(e.target.value)}
-                    placeholder="VD: 100.000"
+                    placeholder={t("plan.cost.placeholder_100k")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -558,7 +569,7 @@ export default function OtherActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Chi tiêu thực tế (chính)
+                  {t("plan.cost.actual_main")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -567,13 +578,17 @@ export default function OtherActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền sau khi hoàn thành"
+                    placeholder={t("plan.cost.actual_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>chi phí ước lượng</b> + <b>phát sinh</b> để chia tiền.
+                  {t("plan.cost.actual_empty_hint_1")}
+                  <b>{t("plan.cost.estimated_word")}</b>
+                  {t("plan.cost.actual_empty_hint_2")}
+                  <b>{t("plan.cost.extra_word")}</b>
+                  {t("plan.cost.actual_empty_hint_3")}
                 </p>
               </div>
             </div>
@@ -584,13 +599,13 @@ export default function OtherActivityModal({
               updateExtraCost={updateExtraCost}
               removeExtraCost={removeExtraCost}
               extraTypes={EXTRA_TYPES}
-              label="Chi phí phát sinh (tuỳ chọn)"
+              label={t("plan.extra_cost.section_label")}
             />
 
             <div className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho hoạt động (tuỳ chọn)
+                  {t("plan.cost.activity_budget")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-sky-500" />
@@ -599,7 +614,7 @@ export default function OtherActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 500.000"
+                    placeholder={t("plan.cost.placeholder_500k")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -608,22 +623,24 @@ export default function OtherActivityModal({
 
               <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
                 <div>
-                  Ước lượng ban đầu:{" "}
+                  {t("plan.cost.summary_initial_estimate")}{" "}
                   <span className="font-semibold">{estimatedValue.toLocaleString("vi-VN")}đ</span>
                 </div>
                 <div>
-                  Phát sinh:{" "}
+                  {t("plan.cost.summary_extra")}{" "}
                   <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
                 </div>
                 <div>
-                  Tổng dự kiến (để chia nếu chưa có thực tế):{" "}
+                  {t("plan.cost.summary_expected_total")}{" "}
                   <span className="font-semibold text-slate-800 dark:text-slate-100">
                     {estimatedTotal.toLocaleString("vi-VN")}đ
                   </span>
                 </div>
                 {actualCost && Number(actualCost) > 0 && (
                   <div>
-                    Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                    {t("plan.cost.summary_using_actual_1")}
+                    <b>{t("plan.cost.actual_word")}</b>
+                    {t("plan.cost.summary_using_actual_2")}{" "}
                     <span className="font-semibold text-slate-800 dark:text-slate-100">
                       {Number(actualCost).toLocaleString("vi-VN")}đ
                     </span>
@@ -631,7 +648,7 @@ export default function OtherActivityModal({
                 )}
                 {budgetAmount && Number(budgetAmount) > 0 && (
                   <div>
-                    Ngân sách:{" "}
+                    {t("plan.cost.summary_budget")}{" "}
                     <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                   </div>
                 )}
@@ -672,14 +689,14 @@ export default function OtherActivityModal({
         <section className="space-y-2">
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin thêm (tuỳ chọn)
+              {t("plan.modal.other.extra_info")}
             </label>
             <button
               type="button"
               onClick={handleAddField}
               className="text-[11px] text-sky-500 hover:text-sky-400"
             >
-              + Thêm trường
+              {t("plan.modal.other.add_field")}
             </button>
           </div>
 
@@ -687,7 +704,7 @@ export default function OtherActivityModal({
             {customFields.map((f, idx) => (
               <div key={idx} className="grid grid-cols-2 gap-2 mb-2">
                 <input
-                  placeholder="Tên trường (vd: Dresscode, mua quà, ...)"
+                  placeholder={t("plan.modal.other.field_key_placeholder")}
                   value={f.key}
                   onChange={(e) => handleChangeField(idx, "key", e.target.value)}
                   className={inputBase}
@@ -695,7 +712,7 @@ export default function OtherActivityModal({
 
                 <div className="flex items-center gap-2">
                   <input
-                    placeholder="Giá trị (vd: Trang phục màu đỏ, 500.000đ, ...)"
+                    placeholder={t("plan.modal.other.field_value_placeholder")}
                     value={f.value}
                     onChange={(e) => handleChangeField(idx, "value", e.target.value)}
                     className={`${inputBase} flex-1`}
@@ -717,17 +734,17 @@ export default function OtherActivityModal({
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
+              {t("plan.note.title")}
             </label>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Mô tả thêm cho cả nhóm
+              {t("plan.note.subtitle")}
             </span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Mô tả thêm về hoạt động..."
+            placeholder={t("plan.note.placeholder")}
             className={`${inputBase} w-full`}
           />
         </section>

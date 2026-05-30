@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -21,7 +22,7 @@ import ProfileFriendsAboutSection from "../components/ProfileFriendsAboutSection
 import LoadingOverlay from "../../../components/LoadingOverlay";
 import { createPrivateConversation } from "../../chat/services/chatService";
 import { upsertConversation, setActiveConversation } from "../../chat/slices/chatSlice";
-function buildUserView(profile, photoCount) {
+function buildUserView(profile, photoCount, t) {
   if (!profile) return null;
 
   const joinedYear =
@@ -37,8 +38,8 @@ function buildUserView(profile, photoCount) {
     cover: profile.coverImage,
 
     // INFO HIỂN THỊ
-    bio: profile.bio || "Người dùng chưa thêm giới thiệu.",
-    city: profile.city || "Chưa cập nhật",
+    bio: profile.bio || t("user.profile_no_bio"),
+    city: profile.city || t("user.profile_not_updated"),
     country: profile.country || "",
     hometown: profile.hometown || "",
     occupation: profile.occupation || "",
@@ -66,6 +67,7 @@ function buildUserView(profile, photoCount) {
 }
 
 export default function UserPublicProfilePage() {
+  const { t } = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -108,8 +110,8 @@ export default function UserPublicProfilePage() {
   }, [plans]);
 
   const userView = useMemo(
-    () => buildUserView(profile, photosFromPlans.length),
-    [profile, photosFromPlans.length]
+    () => buildUserView(profile, photosFromPlans.length, t),
+    [profile, photosFromPlans.length, t]
   );
 
   const isFeedEmpty = !loading && (!plans || plans.length === 0);
@@ -132,7 +134,7 @@ export default function UserPublicProfilePage() {
   if (isInitialLoading) {
     return (
       <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
-        <LoadingOverlay open={isInitialLoading} message="Đang tải hồ sơ du lịch..." />
+        <LoadingOverlay open={isInitialLoading} message={t("user.loading_travel_profile")} />
         
         <Navbar />
         <div className="h-[56px]" aria-hidden />
@@ -212,7 +214,7 @@ export default function UserPublicProfilePage() {
                 <section>
                   {isFeedEmpty ? (
                     <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-                      Người dùng này chưa chia sẻ lịch trình công khai nào.
+                      {t("user.no_public_plans")}
                     </div>
                   ) : (
                     <div className="space-y-4">

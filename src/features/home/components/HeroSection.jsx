@@ -1,5 +1,7 @@
+import { useTranslation } from "react-i18next";
 
 export default function HeroSection({ children }) {
+  const { t } = useTranslation();
   return (
     <section
       className="relative bg-cover bg-center"
@@ -22,20 +24,19 @@ export default function HeroSection({ children }) {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-[11px] md:text-xs text-sky-100 mb-4 shadow-sm shadow-sky-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="uppercase tracking-wide">
-                Mravel • Hỗ trợ du lịch tự phát
+                Mravel • {t("home.hero_badge")}
               </span>
             </div>
 
             {/* Heading */}
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-bold text-white leading-tight drop-shadow-[0_8px_24px_rgba(15,23,42,0.8)]">
-              Du lịch tự do,
-              <span className="text-sky-300"> trọn vẹn từng khoảnh khắc</span>
+              {t("home.hero_heading_1")}
+              <span className="text-sky-300"> {t("home.hero_heading_2")}</span>
             </h1>
 
             {/* Subtitle */}
             <p className="mt-3 md:mt-4 text-base md:text-lg text-sky-100/90 max-w-xl leading-relaxed">
-              Khám phá địa điểm, dịch vụ lưu trú, quán ăn và tự thiết kế hành
-              trình theo cách của riêng bạn – tất cả trên một nền tảng.
+              {t("home.hero_subtitle")}
             </p>
           </div>
 
@@ -63,15 +64,15 @@ export default function HeroSection({ children }) {
           <div className="relative z-10 mt-6 md:mt-7 flex flex-wrap gap-3 text-[11px] md:text-xs text-sky-100/85">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 border border-white/10 backdrop-blur-sm">
               <span>✈️</span>
-              <span>Hơn 50+ điểm đến nổi bật</span>
+              <span>{t("home.chip_destinations")}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 border border-white/10 backdrop-blur-sm">
               <span>🧭</span>
-              <span>Tự do lên lịch, không gò bó</span>
+              <span>{t("home.chip_flexible")}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 border border-white/10 backdrop-blur-sm">
               <span>🤝</span>
-              <span>Chia sẻ & khám phá từ cộng đồng</span>
+              <span>{t("home.chip_community")}</span>
             </span>
           </div>
         </div>

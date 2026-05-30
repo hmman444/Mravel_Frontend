@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
@@ -14,6 +15,7 @@ import {
 } from "../../../utils/validators";
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,20 +46,20 @@ export default function RegisterPage() {
   return (
     <AuthLayout>
       <a href="/" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Về Trang chủ Mravel
+        ← {t('auth.back_to_home')}
       </a>
 
-      <AuthCard title="Tạo tài khoản mới" subtitle="Điền thông tin bên dưới để đăng ký">
+      <AuthCard title={t('auth.create_new_account')} subtitle={t('auth.fill_info_to_register')}>
         <form onSubmit={handleSubmit} noValidate className="space-y-2">
           {/* Họ và tên */}
           <div>
             <AuthInput
-              label="Họ và tên"
+              label={t('auth.fullname')}
               icon={UserIcon}
               type="text"
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
-              placeholder="Nhập họ và tên của bạn"
+              placeholder={t('auth.fullname_placeholder')}
             />
             {errors.fullname && <p className="text-red-500 text-sm mt-1">{errors.fullname}</p>}
           </div>
@@ -65,12 +67,12 @@ export default function RegisterPage() {
           {/* Email */}
           <div>
             <AuthInput
-              label="Email"
+              label={t('common.email')}
               icon={EnvelopeIcon}
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Nhập email của bạn"
+              placeholder={t('auth.email_placeholder')}
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
@@ -78,10 +80,10 @@ export default function RegisterPage() {
           {/* Mật khẩu */}
           <div>
             <PasswordInput
-              label="Mật khẩu"
+              label={t('common.password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu mạnh (ít nhất 8 ký tự)"
+              placeholder={t('auth.password_placeholder')}
             />
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
@@ -89,10 +91,10 @@ export default function RegisterPage() {
           {/* Nhập lại mật khẩu */}
           <div>
             <PasswordInput
-              label="Nhập lại mật khẩu"
+              label={t('auth.confirm_password')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Xác nhận mật khẩu"
+              placeholder={t('auth.confirm_password_placeholder')}
             />
             {errors.confirmPassword && (
               <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
@@ -104,7 +106,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold disabled:opacity-60"
           >
-            {loading ? "Đang xử lý..." : "Đăng ký"}
+            {loading ? t('common.processing') : t('common.register')}
           </button>
 
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
@@ -114,9 +116,9 @@ export default function RegisterPage() {
         <SocialLogin />
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
-          Đã có tài khoản?{" "}
+          {t('auth.already_have_account')}{" "}
           <a href="/login" className="text-blue-500">
-            Đăng nhập ngay
+            {t('auth.login_now')}
           </a>
         </p>
       </AuthCard>

@@ -1,4 +1,6 @@
 // splitUtils.js
+import i18n from "../../../i18n";
+
 export function buildSplitBase({
   splitEnabled,
   splitType,             
@@ -31,7 +33,7 @@ export function buildSplitBase({
     const m = planMembers.find((x) => x.userId === id);
     return {
       memberId: id,
-      displayName: m?.displayName || m?.name || `Thành viên ${id}`,
+      displayName: m?.displayName || m?.name || i18n.t("plan.member.default_name_numbered", { id }),
       external: false,
     };
   });

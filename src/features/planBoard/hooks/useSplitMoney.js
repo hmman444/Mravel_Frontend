@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import i18n from "../../../i18n";
 
 /**
  * Hook dùng chung cho tất cả ActivityModal để xử lý CHIA TIỀN
@@ -190,7 +191,7 @@ export function buildSplitBase({
     const m = planMembers.find((x) => x.userId === id);
     return {
       memberId: id,
-      displayName: m?.displayName || m?.name || `Thành viên ${id}`,
+      displayName: m?.displayName || m?.name || i18n.t("plan.member.fallback_name", { id }),
       external: false,
     };
   });

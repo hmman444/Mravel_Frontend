@@ -1,5 +1,6 @@
 // src/features/booking/components/restaurant/RestaurantBookingForm.jsx
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Mail, Phone, Users } from "lucide-react";
 import RestaurantBookingDateTimePicker from "./RestaurantBookingDateTimePicker";
 
@@ -104,6 +105,7 @@ export default function RestaurantBookingForm({
   totalSeats = 0,
   seatErrorText = "",
 }) {
+  const { t } = useTranslation();
   const NOTE_MAX = 200;
 
   const [nameError, setNameError] = useState("");
@@ -113,16 +115,16 @@ export default function RestaurantBookingForm({
   //  realtime validate (khi value thay đổi) 
   useEffect(() => {
     const v = (contactName || "").trim();
-    if (!v) setNameError("Vui lòng nhập họ tên.");
-    else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(v)) setNameError("Họ tên chỉ được chứa chữ và khoảng trắng.");
+    if (!v) setNameError(t("booking.error_name_required"));
+    else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(v)) setNameError(t("booking.error_name_letters_only"));
     else setNameError("");
   }, [contactName]);
 
   useEffect(() => {
     const v = String(contactPhone || "");
-    if (!v) setPhoneError("Vui lòng nhập số điện thoại.");
-    else if (!/^\d+$/.test(v)) setPhoneError("Số điện thoại chỉ được chứa chữ số.");
-    else if (v.length !== 10) setPhoneError("Số điện thoại phải đúng 10 số.");
+    if (!v) setPhoneError(t("booking.error_phone_required"));
+    else if (!/^\d+$/.test(v)) setPhoneError(t("booking.error_phone_digits_only"));
+    else if (v.length !== 10) setPhoneError(t("booking.error_phone_exact_10"));
     else setPhoneError("");
   }, [contactPhone]);
 
@@ -132,7 +134,7 @@ export default function RestaurantBookingForm({
       setEmailError(""); // email có thể optional
       return;
     }
-    setEmailError(EMAIL_FULL_REGEX.test(v) ? "" : "Email chưa đúng định dạng (vd: name@gmail.com).");
+    setEmailError(EMAIL_FULL_REGEX.test(v) ? "" : t("booking.error_email_invalid"));
   }, [contactEmail]);
 
   //  handlers: chặn sai ngay lúc nhập 
@@ -165,10 +167,10 @@ export default function RestaurantBookingForm({
         </div>
         <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-            Thông tin đặt chỗ
+            {t("booking.reservation_info_title")}
           </h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
-            Điền thông tin liên hệ + chọn thời gian & loại bàn.
+            {t("booking.reservation_info_subtitle")}
           </p>
         </div>
       </div>
@@ -177,7 +179,7 @@ export default function RestaurantBookingForm({
         {/* Họ tên */}
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-            Họ tên <span className="text-red-500">*</span>
+            {t("booking.full_name_label")} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -188,7 +190,7 @@ export default function RestaurantBookingForm({
               nameError ? "border-red-400 focus:border-red-500" : "border-gray-300 dark:border-gray-700 focus:border-blue-500",
               "transition",
             ].join(" ")}
-            placeholder="Ví dụ: Nguyễn Văn A"
+            placeholder={t("booking.full_name_placeholder")}
             autoComplete="name"
           />
           {nameError && <p className="mt-1 text-xs text-red-500">{nameError}</p>}
@@ -198,7 +200,7 @@ export default function RestaurantBookingForm({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-              Số điện thoại <span className="text-red-500">*</span>
+              {t("booking.phone_label")} <span className="text-red-500">*</span>
             </label>
             <div
               className={[
@@ -214,20 +216,20 @@ export default function RestaurantBookingForm({
                 value={contactPhone || ""}
                 onChange={handlePhoneChange}
                 className="h-9 w-full border-none bg-transparent text-sm outline-none md:h-10"
-                placeholder="VD: 0901234567"
+                placeholder={t("booking.phone_placeholder")}
                 autoComplete="tel"
               />
             </div>
             {phoneError ? (
               <p className="mt-1 text-xs text-red-500">{phoneError}</p>
             ) : (
-              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Phải đúng 10 số.</p>
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{t("booking.phone_hint_exact_10")}</p>
             )}
           </div>
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-              Email
+              {t("booking.email_label")}
             </label>
             <div
               className={[
@@ -253,15 +255,15 @@ export default function RestaurantBookingForm({
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3">
           <div className="flex items-center gap-2 mb-2">
             <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Số khách</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.guests_label")}</div>
             <div className="ml-auto text-[11px] text-gray-500 dark:text-gray-400">
-              Tổng: <span className="font-semibold">{people}</span>
+              {t("common.total")}: <span className="font-semibold">{people}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Người lớn</div>
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">{t("booking.adults_label")}</div>
               <input
                 type="number"
                 min={1}
@@ -277,7 +279,7 @@ export default function RestaurantBookingForm({
             </div>
 
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Trẻ em</div>
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">{t("booking.children_label")}</div>
               <input
                 type="number"
                 min={0}
@@ -294,7 +296,7 @@ export default function RestaurantBookingForm({
           </div>
 
           <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-            Gợi ý: BE có thể auto-đề xuất loại bàn theo tổng số khách.
+            {t("booking.table_suggestion_hint")}
           </p>
         </div>
 
@@ -312,7 +314,7 @@ export default function RestaurantBookingForm({
           <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
             <div>
               <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Loại bàn <span className="text-red-500">*</span>
+                {t("booking.table_type_label")} <span className="text-red-500">*</span>
               </div>
 
               <select
@@ -321,11 +323,11 @@ export default function RestaurantBookingForm({
                 className="w-full h-11 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm outline-none focus:border-blue-500"
               >
                 <option value="" disabled>
-                  Chọn loại bàn
+                  {t("booking.select_table_type")}
                 </option>
-                {tableTypes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} • {t.seats} chỗ • Cọc {Number(t.depositPrice || 0).toLocaleString("vi-VN")} VND/bàn
+                {tableTypes.map((tt) => (
+                  <option key={tt.id} value={tt.id}>
+                    {tt.name} • {t("booking.seats_count", { n: tt.seats })} • {t("booking.deposit_per_table", { amount: Number(tt.depositPrice || 0).toLocaleString("vi-VN") })}
                   </option>
                 ))}
               </select>
@@ -334,13 +336,13 @@ export default function RestaurantBookingForm({
               {tableTypeId && tableType?.seats ? (
                 <div className="mt-2 text-[12px]">
                   <div className="text-gray-600 dark:text-gray-400">
-                    Gợi ý tối thiểu: <span className="font-semibold">{minTables}</span> bàn cho{" "}
-                    <span className="font-semibold">{people}</span> khách.
+                    {t("booking.min_tables_suggestion_prefix")} <span className="font-semibold">{minTables}</span> {t("booking.min_tables_suggestion_mid")}{" "}
+                    <span className="font-semibold">{people}</span> {t("booking.min_tables_suggestion_suffix")}
                   </div>
 
                   <div className={["mt-0.5 font-semibold", seatErrorText ? "text-red-600" : "text-emerald-700"].join(" ")}>
-                    Sức chứa: {tablesCount} × {tableType.seats} = {totalSeats} chỗ
-                    {seatErrorText ? " • Không đủ chỗ ngồi" : " • Đủ chỗ"}
+                    {t("booking.capacity_label")}: {tablesCount} × {tableType.seats} = {t("booking.seats_count", { n: totalSeats })}
+                    {seatErrorText ? ` • ${t("booking.not_enough_seats")}` : ` • ${t("booking.enough_seats")}`}
                   </div>
 
                   {seatErrorText ? (
@@ -352,7 +354,7 @@ export default function RestaurantBookingForm({
 
             {/* stepper số bàn */}
             <div>
-              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Số bàn</div>
+              <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">{t("booking.tables_count_label")}</div>
 
               <div className="h-11 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 flex items-center justify-between">
                 <button
@@ -384,7 +386,7 @@ export default function RestaurantBookingForm({
         {/* Note */}
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-            Ghi chú (tối đa {NOTE_MAX} ký tự)
+            {t("booking.note_label", { max: NOTE_MAX })}
           </label>
 
           <textarea
@@ -398,12 +400,12 @@ export default function RestaurantBookingForm({
               "transition",
               (note || "").length >= NOTE_MAX ? "border-orange-400 focus:border-orange-500" : "",
             ].join(" ")}
-            placeholder="Ví dụ: có trẻ nhỏ, cần bàn gần cửa sổ, dị ứng thực phẩm..."
+            placeholder={t("booking.note_placeholder_restaurant")}
           />
 
           <div className="mt-1 flex items-center justify-between">
             <p className="text-[11px] text-gray-500 dark:text-gray-400">
-              Ghi chú sẽ gửi kèm cho nhà hàng (không đảm bảo đáp ứng).
+              {t("booking.note_disclaimer")}
             </p>
             <span className="text-[11px] text-gray-500 dark:text-gray-400">
               {(note || "").length}/{NOTE_MAX}

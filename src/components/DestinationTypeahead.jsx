@@ -1,6 +1,7 @@
 // src/components/DestinationTypeahead.jsx
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { usePlaceTypeahead } from "../features/catalog/hooks/usePlaceTypeahead";
 import { makePlaceDisplay } from "../utils/makePlaceDisplay";
@@ -13,8 +14,8 @@ const slugToQuery = (slug) =>
     .replace(/\s+/g, " ");
 
 export default function DestinationTypeahead({
-  label = "Tìm địa điểm",
-  placeholder = "Nhập địa điểm muốn tham quan (TP. Hồ Chí Minh, Phú Quốc, Hội An...)",
+  label,
+  placeholder,
   onSubmit,
   onPick,
   onChangeText,
@@ -25,7 +26,11 @@ export default function DestinationTypeahead({
   value,        // text hiển thị
   defaultSlug,  // slug đã lưu
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const resolvedLabel = label === undefined ? t("search.find_place") : label;
+  const resolvedPlaceholder =
+    placeholder === undefined ? t("search.find_place_placeholder") : placeholder;
 
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
@@ -178,7 +183,7 @@ export default function DestinationTypeahead({
 
   return (
     <div className={["relative", className].join(" ")} ref={boxRef}>
-      {label && <div className="mb-1.5 text-sm font-semibold text-white/90">{label}</div>}
+      {resolvedLabel && <div className="mb-1.5 text-sm font-semibold text-white/90">{resolvedLabel}</div>}
 
       <div className="flex items-center w-full">
         <FaMapMarkerAlt className="text-gray-400 mr-2" />
@@ -193,7 +198,7 @@ export default function DestinationTypeahead({
           }}
           onFocus={() => setOpen(Boolean(q) && !pickedSlug)}
           onKeyDown={(e) => e.key === "Enter" && submit(e)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-200"
         />
         {typeof buttonSlot === "function"
@@ -203,9 +208,9 @@ export default function DestinationTypeahead({
 
       {open && (
         <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-20">
-          {loading && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Đang tìm...</div>}
+          {loading && <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t("search.searching")}</div>}
           {!loading && !allSuggestions.length && (
-            <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Không có gợi ý</div>
+            <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t("search.no_suggestions")}</div>
           )}
           {allSuggestions.map((it) => (
             <button

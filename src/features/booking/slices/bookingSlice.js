@@ -1,12 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getHotelAvailability, createHotelBookingAndPay } from "../services/bookingService";
+import i18n from "../../../i18n";
 
 export const fetchHotelAvailability = createAsyncThunk(
   "booking/fetchHotelAvailability",
   async (params, { rejectWithValue }) => {
     const res = await getHotelAvailability(params);
     if (res.success) return { data: res.data, params };
-    return rejectWithValue(res.message || "Lỗi kiểm tra phòng trống");
+    return rejectWithValue(res.message || i18n.t("booking.check_availability_error"));
   }
 );
 
@@ -15,7 +16,7 @@ export const createHotelPayment = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     const res = await createHotelBookingAndPay(payload);
     if (res.success) return res.data; // { bookingCode, payUrl, ... }
-    return rejectWithValue(res.message || "Lỗi tạo thanh toán");
+    return rejectWithValue(res.message || i18n.t("booking.create_payment_error"));
   }
 );
 
@@ -65,7 +66,7 @@ const bookingSlice = createSlice({
       })
       .addCase(fetchHotelAvailability.rejected, (state, action) => {
         state.hotelAvailability.loading = false;
-        state.hotelAvailability.error = action.payload || "Lỗi kiểm tra phòng trống";
+        state.hotelAvailability.error = action.payload || i18n.t("booking.check_availability_error");
       })
       .addCase(createHotelPayment.pending, (state) => {
         state.payment.loading = true;
@@ -78,7 +79,7 @@ const bookingSlice = createSlice({
       })
       .addCase(createHotelPayment.rejected, (state, action) => {
         state.payment.loading = false;
-        state.payment.error = action.payload || "Lỗi tạo thanh toán";
+        state.payment.error = action.payload || i18n.t("booking.create_payment_error");
       });
   },
 });

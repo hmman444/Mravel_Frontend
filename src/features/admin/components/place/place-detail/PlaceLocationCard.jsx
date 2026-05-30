@@ -1,12 +1,14 @@
 import { ui } from "./uiTokens";
 import { Label } from "./pills";
+import { useTranslation } from "react-i18next";
 
 export default function PlaceLocationCard({ form, setField, isLockedReadOnly }) {
+  const { t } = useTranslation();
   return (
     <div className={ui.card}>
       <div className={ui.cardHeader}>
         <div>
-          <div className={ui.title}>Địa chỉ & tọa độ</div>
+          <div className={ui.title}>{t("admin.place_address_coordinates")}</div>
           <div className={ui.sub}>location = [lon, lat]</div>
         </div>
       </div>
@@ -14,7 +16,7 @@ export default function PlaceLocationCard({ form, setField, isLockedReadOnly }) 
       <div className={ui.cardBody}>
         <div className="space-y-4">
           <div>
-            <Label>Địa chỉ</Label>
+            <Label>{t("admin.place_address")}</Label>
             <input
               className={ui.input}
               disabled={isLockedReadOnly}
@@ -26,7 +28,7 @@ export default function PlaceLocationCard({ form, setField, isLockedReadOnly }) 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Quốc gia</Label>
+              <Label>{t("admin.place_country")}</Label>
               <input
                 className={ui.input}
                 disabled={isLockedReadOnly}
@@ -36,7 +38,7 @@ export default function PlaceLocationCard({ form, setField, isLockedReadOnly }) 
               />
             </div>
             <div>
-              <Label>Tỉnh/Thành phố</Label>
+              <Label>{t("admin.place_province_city")}</Label>
               <input
                 className={ui.input}
                 disabled={isLockedReadOnly}
@@ -49,7 +51,7 @@ export default function PlaceLocationCard({ form, setField, isLockedReadOnly }) 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Kinh độ (Longitude)</Label>
+              <Label>{t("admin.place_longitude")}</Label>
               <input
                 type="number"
                 inputMode="decimal"
@@ -62,7 +64,7 @@ export default function PlaceLocationCard({ form, setField, isLockedReadOnly }) 
               />
             </div>
             <div>
-              <Label>Vĩ độ (Latitude)</Label>
+              <Label>{t("admin.place_latitude")}</Label>
               <input
                 type="number"
                 inputMode="decimal"

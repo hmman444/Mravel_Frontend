@@ -7,6 +7,7 @@ import {
   FaCopy,
   FaTimes,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { TYPE_STYLES } from "../../utils/activityStyles";
 import { formatTimeForDisplay } from "../../utils/timeUtils";
 
@@ -22,6 +23,7 @@ export default function PlanCard({
   canEdit = true,
   onOpenActivityModal,
 }) {
+  const { t } = useTranslation();
   const btnRef = useRef(null);
   const menuRef = useRef(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
@@ -213,7 +215,7 @@ export default function PlanCard({
               estimated != null && (
                 <>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Ước tính
+                    {t("plan.card.estimated")}
                   </span>
                   <span className="text-[12px] font-semibold text-slate-800 dark:text-slate-50">
                     {estimated.toLocaleString("vi-VN")}đ
@@ -224,7 +226,7 @@ export default function PlanCard({
 
             {budget != null && (
               <span className="mt-[1px] text-[10px] text-slate-400 dark:text-slate-500">
-                Ngân sách {budget.toLocaleString("vi-VN")}đ
+                {t("plan.card.budget_amount", { amount: budget.toLocaleString("vi-VN") })}đ
               </span>
             )}
           </div>
@@ -291,7 +293,7 @@ export default function PlanCard({
 
               {showParticipants && (
                 <span className="px-1.5 py-[1px] rounded-lg bg-gray-900/5 dark:bg-gray-900/60 border border-gray-200/60 dark:border-gray-700/80 text-[10px] whitespace-nowrap">
-                  👥 {participantCount} người
+                  👥 {t("plan.card.participant_count", { count: participantCount })}
                 </span>
               )}
             </div>
@@ -358,7 +360,7 @@ export default function PlanCard({
                 rounded-t-xl transition-all
               "
             >
-              <FaCopy className="text-gray-500 dark:text-gray-400" /> Tạo bản sao
+              <FaCopy className="text-gray-500 dark:text-gray-400" /> {t("plan.card.duplicate")}
             </button>
 
             <button
@@ -378,7 +380,7 @@ export default function PlanCard({
                 rounded-b-xl transition-all
               "
             >
-              <FaTimes className="text-red-500" /> Xóa
+              <FaTimes className="text-red-500" /> {t("common.delete")}
             </button>
           </div>,
           document.body

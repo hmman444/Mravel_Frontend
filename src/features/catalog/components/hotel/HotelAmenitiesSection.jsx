@@ -11,8 +11,10 @@ import {
   ShipWheel,
   Trees,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function HotelAmenitiesSection({ hotel }) {
+  const { t } = useTranslation();
   if (!hotel) return null;
 
   const hotelAmenitiesRaw = Array.isArray(hotel.amenities) ? hotel.amenities : [];
@@ -56,17 +58,17 @@ export default function HotelAmenitiesSection({ hotel }) {
   }
 
   const categoriesConfig = [
-    { key: "hotelService", title: "Dịch vụ khách sạn", icon: <HandHeart className="h-4 w-4" /> },
-    { key: "nearby", title: "Các tiện ích lân cận", icon: <MapPin className="h-4 w-4" /> },
-    { key: "publicFacilities", title: "Tiện nghi công cộng", icon: <Building2 className="h-4 w-4" /> },
-    { key: "roomFacilities", title: "Tiện nghi phòng", icon: <BedDouble className="h-4 w-4" /> },
-    { key: "generalFacilities", title: "Tiện nghi chung", icon: <Building2 className="h-4 w-4" /> },
-    { key: "transport", title: "Vận chuyển", icon: <BusFront className="h-4 w-4" /> },
-    { key: "shuttle", title: "Đưa đón", icon: <ShipWheel className="h-4 w-4" /> },
-    { key: "foodDrink", title: "Ẩm thực", icon: <Utensils className="h-4 w-4" /> },
-    { key: "activities", title: "Các hoạt động", icon: <Trees className="h-4 w-4" /> },
-    { key: "internet", title: "Kết nối mạng", icon: <Wifi className="h-4 w-4" /> },
-    { key: "sports", title: "Thể thao & Giải trí", icon: <PartyPopper className="h-4 w-4" /> },
+    { key: "hotelService", title: t("hotel.amenity_category_hotel_service"), icon: <HandHeart className="h-4 w-4" /> },
+    { key: "nearby", title: t("hotel.amenity_category_nearby"), icon: <MapPin className="h-4 w-4" /> },
+    { key: "publicFacilities", title: t("hotel.amenity_category_public_facilities"), icon: <Building2 className="h-4 w-4" /> },
+    { key: "roomFacilities", title: t("hotel.amenity_category_room_facilities"), icon: <BedDouble className="h-4 w-4" /> },
+    { key: "generalFacilities", title: t("hotel.amenity_category_general_facilities"), icon: <Building2 className="h-4 w-4" /> },
+    { key: "transport", title: t("hotel.amenity_category_transport"), icon: <BusFront className="h-4 w-4" /> },
+    { key: "shuttle", title: t("hotel.amenity_category_shuttle"), icon: <ShipWheel className="h-4 w-4" /> },
+    { key: "foodDrink", title: t("hotel.amenity_category_food_drink"), icon: <Utensils className="h-4 w-4" /> },
+    { key: "activities", title: t("hotel.amenity_category_activities"), icon: <Trees className="h-4 w-4" /> },
+    { key: "internet", title: t("hotel.amenity_category_internet"), icon: <Wifi className="h-4 w-4" /> },
+    { key: "sports", title: t("hotel.amenity_category_sports"), icon: <PartyPopper className="h-4 w-4" /> },
   ];
 
   const categories = categoriesConfig
@@ -78,10 +80,10 @@ export default function HotelAmenitiesSection({ hotel }) {
 
   const images = Array.isArray(hotel.images) ? hotel.images.slice(0, 4) : [];
   const imageLabels = [
-    "Phương tiện giải trí",
-    "Trung tâm thể thao",
-    "Khu vực công cộng",
-    "Dịch vụ khách sạn",
+    t("hotel.amenity_image_recreation"),
+    t("hotel.amenity_image_sports_center"),
+    t("hotel.amenity_image_public_area"),
+    t("hotel.amenity_image_hotel_service"),
   ];
 
   if (!categories.length && !images.length) return null;
@@ -91,7 +93,7 @@ export default function HotelAmenitiesSection({ hotel }) {
       {/* HEADER + GALLERY */}
       <div className="px-6 pt-5 pb-4">
         <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Tất cả những tiện ích tại {hotel.name}
+          {t("hotel.amenities_all_title", { name: hotel.name })}
         </h2>
 
         {images.length > 0 && (
@@ -104,7 +106,7 @@ export default function HotelAmenitiesSection({ hotel }) {
                 {img.url && (
                   <img
                     src={img.url}
-                    alt={img.caption || imageLabels[idx] || "Tiện ích"}
+                    alt={img.caption || imageLabels[idx] || t("hotel.amenity_image_default")}
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
@@ -112,7 +114,7 @@ export default function HotelAmenitiesSection({ hotel }) {
 
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pb-2 pt-6">
                   <p className="text-xs font-semibold text-white">
-                    {imageLabels[idx] || img.caption || "Tiện ích"}
+                    {imageLabels[idx] || img.caption || t("hotel.amenity_image_default")}
                   </p>
                 </div>
               </div>

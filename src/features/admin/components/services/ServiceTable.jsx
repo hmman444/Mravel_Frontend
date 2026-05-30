@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   CheckCircleIcon,
   XMarkIcon,
@@ -34,6 +35,7 @@ export default function ServiceTable({
   onBlock,
   onUnblock,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-sm dark:bg-slate-900 dark:border-slate-800">
       <div className="max-h-[72vh] overflow-auto">
@@ -41,12 +43,12 @@ export default function ServiceTable({
           <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-950">
             <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
               <th className="px-4 py-3 w-[64px] text-center">#</th>
-              <th className="px-4 py-3 w-[360px]">Dịch vụ</th>
-              <th className="px-4 py-3">Partner</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-center">Active</th>
-              <th className="px-4 py-3 text-center">Unlock?</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3 w-[360px]">{t("admin.service_column")}</th>
+              <th className="px-4 py-3">{t("admin.col_partner")}</th>
+              <th className="px-4 py-3">{t("admin.col_status")}</th>
+              <th className="px-4 py-3 text-center">{t("admin.col_active")}</th>
+              <th className="px-4 py-3 text-center">{t("admin.col_unlock")}</th>
+              <th className="px-4 py-3 text-right">{t("admin.col_actions")}</th>
             </tr>
           </thead>
 
@@ -132,7 +134,7 @@ export default function ServiceTable({
                       {x.unlockRequestedAt ? (
                         <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
                           <ShieldExclamationIcon className="h-5 w-5" />
-                          <span className="text-xs font-semibold">Có</span>
+                          <span className="text-xs font-semibold">{t("common.yes")}</span>
                         </span>
                       ) : (
                         <span className="text-xs text-slate-400">—</span>

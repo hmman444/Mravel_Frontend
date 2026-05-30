@@ -1,6 +1,10 @@
+import { useTranslation } from "react-i18next";
 import StarRating from "./StarRating";
 
 export default function ReviewSummary({ summary }) {
+  const { t, i18n } = useTranslation();
+  const aspectLabel = (a) =>
+    i18n.language === "en" ? a?.labelEn || a?.labelVi : a?.labelVi;
   if (!summary) return null;
 
   const {
@@ -23,7 +27,7 @@ export default function ReviewSummary({ summary }) {
           </div>
           <StarRating value={averageRating} readonly size={20} />
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            {totalReviews} đánh giá
+            {t("review.reviews_count", { count: totalReviews })}
           </span>
         </div>
 
@@ -52,7 +56,7 @@ export default function ReviewSummary({ summary }) {
       {popularAspects?.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-            Được nhắc đến nhiều
+            {t("review.popular_aspects")}
           </p>
           <div className="flex flex-wrap gap-2">
             {popularAspects.map((a) => (
@@ -61,7 +65,7 @@ export default function ReviewSummary({ summary }) {
                 className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300
                            border border-blue-100 dark:border-blue-800 px-2.5 py-1 rounded-full"
               >
-                {a.labelVi}
+                {aspectLabel(a)}
                 <span className="ml-1 text-blue-400 dark:text-blue-500">·{a.mentionCount}</span>
               </span>
             ))}

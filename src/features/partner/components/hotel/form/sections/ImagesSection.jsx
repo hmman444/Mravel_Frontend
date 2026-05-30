@@ -1,5 +1,6 @@
 // src/features/partner/components/hotel/ImagesSection.jsx
 import { PlusIcon, ArrowUpTrayIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 export default function ImagesSection({
   images,
@@ -8,14 +9,15 @@ export default function ImagesSection({
   setCover,
   removeImageAt,
   updateImageField,
-  disabled = false, // 
+  disabled = false, //
 }) {
+  const { t } = useTranslation();
   return (
     <details open className="group">
-      <summary className="cursor-pointer select-none font-semibold">Ảnh (Gallery)</summary>
+      <summary className="cursor-pointer select-none font-semibold">{t("partner.images.section_title")}</summary>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-gray-600 dark:text-gray-400">{images.length} ảnh</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">{t("partner.images.count", { n: images.length })}</div>
 
         <div className="flex items-center gap-2">
           <button
@@ -25,7 +27,7 @@ export default function ImagesSection({
             disabled={disabled}
           >
             <PlusIcon className="w-4 h-4" />
-            Thêm link ảnh
+            {t("partner.images.add_link")}
           </button>
 
           <label
@@ -34,14 +36,14 @@ export default function ImagesSection({
             }`}
           >
             <ArrowUpTrayIcon className="w-4 h-4" />
-            Tải ảnh lên
+            {t("partner.images.upload")}
             <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => !disabled && onPickFiles?.(e)} disabled={disabled} />
           </label>
         </div>
       </div>
 
       {images.length === 0 ? (
-        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có ảnh.</div>
+        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">{t("partner.images.empty")}</div>
       ) : (
         <div className="mt-3 space-y-3">
           {images.map((img, idx) => (
@@ -58,7 +60,7 @@ export default function ImagesSection({
                     img.cover ? "bg-green-50 border-green-200 text-green-700" : "hover:bg-gray-50"
                   }`}
                 >
-                  {img.cover ? "Ảnh bìa" : "Đặt làm bìa"}
+                  {img.cover ? t("partner.images.cover") : t("partner.images.set_cover")}
                 </button>
               </div>
 
@@ -76,7 +78,7 @@ export default function ImagesSection({
                     value={img.caption}
                     onChange={(e) => !disabled && updateImageField?.(idx, { caption: e.target.value })}
                     className="md:col-span-9 border rounded-xl px-3 py-2 text-sm"
-                    placeholder="Caption (tuỳ chọn)"
+                    placeholder={t("partner.images.caption_placeholder")}
                     disabled={disabled}
                   />
                   <input
@@ -94,7 +96,7 @@ export default function ImagesSection({
                   type="button"
                   onClick={() => !disabled && removeImageAt?.(idx)}
                   className="p-2 rounded-xl hover:bg-red-50 disabled:opacity-60"
-                  title="Xóa ảnh"
+                  title={t("partner.images.remove")}
                   disabled={disabled}
                 >
                   <TrashIcon className="w-5 h-5 text-red-600" />

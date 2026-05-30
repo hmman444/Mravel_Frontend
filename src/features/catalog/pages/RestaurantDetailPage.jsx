@@ -1,5 +1,6 @@
 // src/features/catalog/pages/RestaurantDetailPage.jsx
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useLocation  } from "react-router-dom";
 import { useCatalogRestaurants } from "../hooks/useCatalogRestaurants";
@@ -21,6 +22,7 @@ import RestaurantOpeningHoursSection from "../components/restaurant/RestaurantOp
 import ReviewSection from "../../review/components/ReviewSection";
 
 export default function RestaurantDetailPage() {
+  const { t } = useTranslation();
   const { handleBookingSubmit } = useCatalogRestaurants();
   const { slug } = useParams();
   const dispatch = useDispatch();
@@ -52,7 +54,7 @@ export default function RestaurantDetailPage() {
       <main className="flex-1 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
           {loading && (
-            <p className="py-10 text-center text-gray-500 dark:text-gray-400">Đang tải thông tin quán ăn...</p>
+            <p className="py-10 text-center text-gray-500 dark:text-gray-400">{t('restaurant.loading_detail')}</p>
           )}
 
           {!loading && error && (

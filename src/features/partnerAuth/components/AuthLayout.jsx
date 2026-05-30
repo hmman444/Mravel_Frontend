@@ -1,5 +1,7 @@
+import { useTranslation } from "react-i18next";
 
 export default function AuthLayout({ children }) {
+  const { t } = useTranslation();
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
@@ -10,9 +12,9 @@ export default function AuthLayout({ children }) {
       <div className="relative z-10 flex w-full max-w-7xl mr-20 px-6 md:px-12 lg:px-20">
         <div className="flex-1 hidden md:flex items-center justify-center">
           <h1 className="text-white text-4xl md:text-5xl font-extrabold leading-tight drop-shadow-lg text-center">
-            Trở thành đối tác
+            {t("partnerAuth.layout.heading_line1")}
             <br />
-            Nắm bắt thành công
+            {t("partnerAuth.layout.heading_line2")}
           </h1>
         </div>
 

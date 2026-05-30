@@ -2,6 +2,7 @@
 
 // src/features/admin/pages/AdminDashboard.jsx
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminLayout from "../components/AdminLayout";
 import {
   ArrowPathIcon,
@@ -47,38 +48,38 @@ const MOCK = {
   actionQueue: [
     {
       id: "svc-approve",
-      title: "Dịch vụ chờ phê duyệt",
+      titleKey: "admin.action_queue.svc_approve_title",
       count: 132,
       severity: "high",
-      hint: "Ưu tiên duyệt để tránh đối tác chờ lâu",
+      hintKey: "admin.action_queue.svc_approve_hint",
     },
     {
       id: "reports",
-      title: "Báo cáo vi phạm mới",
+      titleKey: "admin.action_queue.reports_title",
       count: 18,
       severity: "high",
-      hint: "Kiểm tra nội dung/ảnh mô tả không phù hợp",
+      hintKey: "admin.action_queue.reports_hint",
     },
     {
       id: "payment-failed",
-      title: "Đơn thanh toán thất bại",
+      titleKey: "admin.action_queue.payment_failed_title",
       count: 44,
       severity: "medium",
-      hint: "Theo dõi cổng thanh toán, rà soát retry",
+      hintKey: "admin.action_queue.payment_failed_hint",
     },
     {
       id: "partner-kyc",
-      title: "Đối tác cần bổ sung hồ sơ",
+      titleKey: "admin.action_queue.partner_kyc_title",
       count: 27,
       severity: "medium",
-      hint: "Nhắc đối tác hoàn thiện để được duyệt",
+      hintKey: "admin.action_queue.partner_kyc_hint",
     },
     {
       id: "support-tickets",
-      title: "Ticket hỗ trợ tồn",
+      titleKey: "admin.action_queue.support_tickets_title",
       count: 9,
       severity: "low",
-      hint: "Giảm backlog hỗ trợ",
+      hintKey: "admin.action_queue.support_tickets_hint",
     },
   ],
 
@@ -93,12 +94,12 @@ const MOCK = {
   ], // đơn vị: "triệu VND"
 
   bookingStatus: [
-    { key: "CONFIRMED", label: "Đã xác nhận", count: 6_430 },
-    { key: "PAID", label: "Đã thanh toán", count: 4_980 },
-    { key: "COMPLETED", label: "Hoàn tất", count: 3_210 },
-    { key: "CANCELLED", label: "Đã hủy", count: 860 },
-    { key: "REFUNDED", label: "Đã hoàn tiền", count: 170 },
-    { key: "FAILED", label: "Thất bại", count: 120 },
+    { key: "CONFIRMED", labelKey: "enum.booking_status.confirmed", count: 6_430 },
+    { key: "PAID", labelKey: "enum.booking_status.paid", count: 4_980 },
+    { key: "COMPLETED", labelKey: "enum.booking_status.completed", count: 3_210 },
+    { key: "CANCELLED", labelKey: "enum.booking_status.cancelled", count: 860 },
+    { key: "REFUNDED", labelKey: "enum.booking_status.refunded", count: 170 },
+    { key: "FAILED", labelKey: "enum.booking_status.failed", count: 120 },
   ],
 
   topServices: [
@@ -128,20 +129,20 @@ const MOCK = {
     {
       id: "cancel-spike",
       level: "warning",
-      title: "Tỷ lệ hủy tăng",
-      desc: "Cancel rate 7 ngày tăng +1.8% so với tuần trước",
+      titleKey: "admin.alert.cancel_spike_title",
+      descKey: "admin.alert.cancel_spike_desc",
     },
     {
       id: "payment-spike",
       level: "danger",
-      title: "Thanh toán lỗi tăng",
-      desc: "Payment failed tăng mạnh ở khung 20:00–22:00",
+      titleKey: "admin.alert.payment_spike_title",
+      descKey: "admin.alert.payment_spike_desc",
     },
     {
       id: "content-report",
       level: "warning",
-      title: "Báo cáo nội dung",
-      desc: "Có nhiều report liên quan ảnh mô tả dịch vụ",
+      titleKey: "admin.alert.content_report_title",
+      descKey: "admin.alert.content_report_desc",
     },
   ],
 };
@@ -212,13 +213,14 @@ function StatCard({ icon: Icon, label, value, sub, accent = "blue" }) {
 }
 
 function SeverityPill({ severity }) {
+  const { t } = useTranslation();
   const map = {
     high: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-200 dark:border-rose-900",
     medium:
       "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:border-amber-900",
     low: "bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800",
   };
-  const label = severity === "high" ? "Ưu tiên cao" : severity === "medium" ? "Trung bình" : "Thấp";
+  const label = severity === "high" ? t("admin.severity.high") : severity === "medium" ? t("admin.severity.medium") : t("admin.severity.low");
   return <span className={`${ui.pill} ${map[severity] || map.low}`}>{label}</span>;
 }
 
@@ -248,6 +250,7 @@ function AlertBox({ level, title, desc }) {
 /* = PAGE = */
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const [range, setRange] = useState("weekly"); // today | weekly | monthly | yearly
 
   const ov = MOCK.overview;
@@ -282,9 +285,9 @@ export default function AdminDashboard() {
           <div className="mb-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h1 className={ui.h1}>Dashboard quản trị</h1>
+                <h1 className={ui.h1}>{t("admin.dashboard.title")}</h1>
                 <p className={ui.sub}>
-                  Trang theo dõi tổng quan hệ thống: biết tình hình và biết việc cần xử lý.
+                  {t("admin.dashboard.subtitle")}
                 </p>
               </div>
 
@@ -294,10 +297,10 @@ export default function AdminDashboard() {
                   onChange={(e) => setRange(e.target.value)}
                   className="w-full sm:w-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                 >
-                  <option value="today">Hôm nay</option>
-                  <option value="weekly">7 ngày</option>
-                  <option value="monthly">Tháng</option>
-                  <option value="yearly">Năm</option>
+                  <option value="today">{t("admin.range.today")}</option>
+                  <option value="weekly">{t("admin.range.weekly")}</option>
+                  <option value="monthly">{t("admin.range.monthly")}</option>
+                  <option value="yearly">{t("admin.range.yearly")}</option>
                 </select>
 
                 <button
@@ -307,10 +310,10 @@ export default function AdminDashboard() {
                     // mock refresh
                     // sau này gọi api load overview/revenue/status
                   }}
-                  title="Tải lại"
+                  title={t("admin.reload")}
                 >
                   <ArrowPathIcon className="h-5 w-5" />
-                  Tải lại
+                  {t("admin.reload")}
                 </button>
               </div>
             </div>
@@ -319,7 +322,7 @@ export default function AdminDashboard() {
           {/* Alerts */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 mb-6">
             {MOCK.alerts.slice(0, 3).map((a) => (
-              <AlertBox key={a.id} level={a.level} title={a.title} desc={a.desc} />
+              <AlertBox key={a.id} level={a.level} title={t(a.titleKey)} desc={t(a.descKey)} />
             ))}
           </div>
 
@@ -327,30 +330,30 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6">
             <StatCard
               icon={UsersIcon}
-              label="Người dùng"
+              label={t("admin.stat.users")}
               value={formatInt(ov.totalUsers)}
-              sub={`Hoạt động 7 ngày: ${formatInt(ov.activeUsers7d)}`}
+              sub={t("admin.stat.active_7d", { n: formatInt(ov.activeUsers7d) })}
               accent="blue"
             />
             <StatCard
               icon={BuildingStorefrontIcon}
-              label="Đối tác"
+              label={t("admin.stat.partners")}
               value={formatInt(ov.partners)}
-              sub="Tổng số đối tác đã đăng ký"
+              sub={t("admin.stat.partners_sub")}
               accent="violet"
             />
             <StatCard
               icon={Squares2X2Icon}
-              label="Dịch vụ đang hoạt động"
+              label={t("admin.stat.services_active")}
               value={formatInt(ov.servicesActive)}
-              sub={`Chờ duyệt: ${formatInt(ov.servicesPendingApproval)}`}
+              sub={t("admin.stat.pending_approval", { n: formatInt(ov.servicesPendingApproval) })}
               accent="green"
             />
             <StatCard
               icon={CreditCardIcon}
-              label="Booking hôm nay"
+              label={t("admin.stat.bookings_today")}
               value={formatInt(ov.bookingsToday)}
-              sub={`7 ngày: ${formatInt(ov.bookings7d)}`}
+              sub={t("admin.stat.bookings_7d", { n: formatInt(ov.bookings7d) })}
               accent="amber"
             />
           </div>
@@ -366,23 +369,23 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <ChartBarIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                       <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                        Doanh thu theo thời gian
+                        {t("admin.revenue.title")}
                       </h2>
                     </div>
                     <div className="mt-1 text-xs text-slate-400">
-                      Tổng (kỳ đang xem): {formatMoneyM(revenueTotalM)} triệu VND
+                      {t("admin.revenue.period_total", { n: formatMoneyM(revenueTotalM) })}
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
-                      Kỳ: {range === "today" ? "Hôm nay" : range === "weekly" ? "7 ngày" : range === "monthly" ? "Tháng" : "Năm"}
+                      {t("admin.revenue.period_label", { v: range === "today" ? t("admin.range.today") : range === "weekly" ? t("admin.range.weekly") : range === "monthly" ? t("admin.range.monthly") : t("admin.range.yearly") })}
                     </span>
                     <span className={`${ui.pill} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-200`}>
-                      Hôm nay: {formatMoneyVnd(ov.revenueTodayVnd)} VND
+                      {t("admin.revenue.today_vnd", { n: formatMoneyVnd(ov.revenueTodayVnd) })}
                     </span>
                     <span className={`${ui.pill} bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-950/30 dark:border-blue-900 dark:text-blue-200`}>
-                      7 ngày: {formatMoneyVnd(ov.revenue7dVnd)} VND
+                      {t("admin.revenue.last_7d_vnd", { n: formatMoneyVnd(ov.revenue7dVnd) })}
                     </span>
                   </div>
                 </div>
@@ -392,30 +395,30 @@ export default function AdminDashboard() {
                     <LineChart data={MOCK.revenueSeries}>
                       <XAxis dataKey="label" />
                       <YAxis tickFormatter={(v) => `${formatMoneyM(v)}tr`} />
-                      <Tooltip formatter={(v) => [`${formatMoneyM(v)} triệu`, ""]} />
+                      <Tooltip formatter={(v) => [t("admin.revenue.million", { n: formatMoneyM(v) }), ""]} />
                       <Legend />
-                      <Line type="monotone" dataKey="total" name="Tổng" strokeWidth={2} dot={{ r: 3 }} />
-                      <Line type="monotone" dataKey="hotel" name="Khách sạn" strokeWidth={2} dot={{ r: 3 }} />
-                      <Line type="monotone" dataKey="restaurant" name="Nhà hàng" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="total" name={t("admin.revenue.series_total")} strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="hotel" name={t("admin.revenue.series_hotel")} strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="restaurant" name={t("admin.revenue.series_restaurant")} strokeWidth={2} dot={{ r: 3 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
-                    <div className="text-slate-500 dark:text-slate-300">Tỷ lệ hủy (7 ngày)</div>
+                    <div className="text-slate-500 dark:text-slate-300">{t("admin.metric.cancel_rate_7d")}</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {ov.cancelRate7dPct}%
                     </div>
                   </div>
                   <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
-                    <div className="text-slate-500 dark:text-slate-300">Tỷ lệ hoàn tiền (7 ngày)</div>
+                    <div className="text-slate-500 dark:text-slate-300">{t("admin.metric.refund_rate_7d")}</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {ov.refundRate7dPct}%
                     </div>
                   </div>
                   <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
-                    <div className="text-slate-500 dark:text-slate-300">Thanh toán thất bại (7 ngày)</div>
+                    <div className="text-slate-500 dark:text-slate-300">{t("admin.metric.payment_fail_7d")}</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {ov.paymentFail7dPct}%
                     </div>
@@ -431,11 +434,11 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <BoltIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                       <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                        Dịch vụ nổi bật
+                        {t("admin.top_services.title")}
                       </h3>
                     </div>
                     <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
-                      Top 4
+                      {t("admin.top_n", { n: 4 })}
                     </span>
                   </div>
 
@@ -443,9 +446,9 @@ export default function AdminDashboard() {
                     <table className="min-w-full text-sm">
                       <thead className="bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                         <tr>
-                          <th className="px-3 py-2 text-left font-semibold">Dịch vụ</th>
-                          <th className="px-3 py-2 text-right font-semibold">Đơn</th>
-                          <th className="px-3 py-2 text-right font-semibold">Doanh thu</th>
+                          <th className="px-3 py-2 text-left font-semibold">{t("admin.col.service")}</th>
+                          <th className="px-3 py-2 text-right font-semibold">{t("admin.col.orders")}</th>
+                          <th className="px-3 py-2 text-right font-semibold">{t("admin.col.revenue")}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -476,11 +479,11 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <ShieldCheckIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                       <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                        Đối tác đóng góp
+                        {t("admin.top_partners.title")}
                       </h3>
                     </div>
                     <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
-                      Top 4
+                      {t("admin.top_n", { n: 4 })}
                     </span>
                   </div>
 
@@ -488,9 +491,9 @@ export default function AdminDashboard() {
                     <table className="min-w-full text-sm">
                       <thead className="bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                         <tr>
-                          <th className="px-3 py-2 text-left font-semibold">Đối tác</th>
-                          <th className="px-3 py-2 text-right font-semibold">Dịch vụ</th>
-                          <th className="px-3 py-2 text-right font-semibold">Doanh thu</th>
+                          <th className="px-3 py-2 text-left font-semibold">{t("admin.col.partner")}</th>
+                          <th className="px-3 py-2 text-right font-semibold">{t("admin.col.service")}</th>
+                          <th className="px-3 py-2 text-right font-semibold">{t("admin.col.revenue")}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -524,11 +527,11 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <ClockIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                      Việc cần xử lý
+                      {t("admin.action_queue.title")}
                     </h2>
                   </div>
                   <span className={`${ui.pill} bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/30 dark:border-rose-900 dark:text-rose-200`}>
-                    Ưu tiên hôm nay
+                    {t("admin.action_queue.priority_today")}
                   </span>
                 </div>
 
@@ -541,10 +544,10 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="font-semibold text-slate-900 dark:text-slate-100 truncate">
-                            {x.title}
+                            {t(x.titleKey)}
                           </div>
                           <div className="mt-1 text-xs text-slate-400">
-                            {x.hint}
+                            {t(x.hintKey)}
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
@@ -564,7 +567,7 @@ export default function AdminDashboard() {
                             // nav("/admin/services?status=PENDING") ... (sau)
                           }}
                         >
-                          Mở danh sách
+                          {t("admin.action_queue.open_list")}
                         </button>
                       </div>
                     </div>
@@ -578,11 +581,11 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <ChartBarIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                      Trạng thái đơn
+                      {t("admin.booking_status.title")}
                     </h2>
                   </div>
                   <span className={`${ui.pill} bg-slate-50 dark:bg-gray-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200`}>
-                    Tổng: {formatInt(totalBookingStatus)}
+                    {t("admin.booking_status.total", { n: formatInt(totalBookingStatus) })}
                   </span>
                 </div>
 
@@ -591,9 +594,9 @@ export default function AdminDashboard() {
                     <div key={x.key} className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm text-slate-800 dark:text-slate-100 truncate">
-                          {x.label}
+                          {t(x.labelKey)}
                         </div>
-                        <div className="text-xs text-slate-400">{formatInt(x.count)} đơn</div>
+                        <div className="text-xs text-slate-400">{t("admin.booking_status.orders_count", { n: formatInt(x.count) })}</div>
                       </div>
                       <div className="shrink-0 text-sm font-semibold text-slate-900 dark:text-white">
                         {x.pct}%
@@ -609,11 +612,11 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                      Sức khỏe hệ thống
+                      {t("admin.system_health.title")}
                     </h2>
                   </div>
                   <span className={`${ui.pill} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-200`}>
-                    Uptime {MOCK.systemHealth.uptimePct}%
+                    {t("admin.system_health.uptime", { n: MOCK.systemHealth.uptimePct })}
                   </span>
                 </div>
 
@@ -637,7 +640,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 dark:border-slate-800">
-                    <div className="text-slate-500 dark:text-slate-300">Job lỗi</div>
+                    <div className="text-slate-500 dark:text-slate-300">{t("admin.system_health.failed_jobs")}</div>
                     <div className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                       {MOCK.systemHealth.failedJobs}
                     </div>
@@ -647,7 +650,7 @@ export default function AdminDashboard() {
                 <div className="mt-4 rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-sm dark:border-slate-800">
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                     <ExclamationTriangleIcon className="h-4 w-4" />
-                    <div className="font-semibold">Sự cố gần nhất</div>
+                    <div className="font-semibold">{t("admin.system_health.last_incident")}</div>
                   </div>
                   <div className="mt-1 text-slate-500 dark:text-slate-400">
                     {MOCK.systemHealth.lastIncident}
@@ -659,7 +662,7 @@ export default function AdminDashboard() {
 
           {/* Footer note */}
           <div className="mt-6 text-xs text-slate-400">
-            Dashboard này chỉ hiển thị thống kê và hàng chờ. Các trang quản lý chi tiết (users/partners/services/bookings) nằm ở mục riêng.
+            {t("admin.dashboard.footer_note")}
           </div>
         </div>
       </div>

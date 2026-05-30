@@ -1,6 +1,8 @@
 // src/features/planBoard/components/stats/utils/planStatsUtils.js
 "use client";
 
+import i18n from "../../../i18n";
+
 
 export function buildPlanStats(board) {
   const currency = board?.budgetCurrency || board?.costSummary?.budgetCurrency || "VND";
@@ -75,7 +77,7 @@ export function buildPlanStats(board) {
       (isFiniteNumber(participantCount) && participantCount > 0);
     if (hasParticipants) hasParticipantsCount++;
 
-    const cardTitle = (c?.text || "Hoạt động").trim() || "Hoạt động";
+    const cardTitle = (c?.text || i18n.t("plan.stats.default_activity")).trim() || i18n.t("plan.stats.default_activity");
     const activityType = String(c?.activityType || "OTHER");
     const dayDate = c?.__dayDate;
 
@@ -85,12 +87,12 @@ export function buildPlanStats(board) {
     if (isValidTime(c?.startTime) && isValidTime(c?.endTime)) {
       if (!isEndAfterStart(c.startTime, c.endTime)) {
         cardIssues.push(
-          issue("TIME_INVALID", "ERROR", "Thời gian chưa hợp lệ", "Giờ kết thúc phải lớn hơn giờ bắt đầu.")
+          issue("TIME_INVALID", "ERROR", i18n.t("plan.stats.issue.time_invalid_title"), i18n.t("plan.stats.issue.time_invalid_msg"))
         );
       }
     } else {
       cardIssues.push(
-        issue("TIME_MISSING", "WARN", "Thiếu thời gian", "Hoạt động chưa có giờ bắt đầu/kết thúc.")
+        issue("TIME_MISSING", "WARN", i18n.t("plan.stats.issue.time_missing_title"), i18n.t("plan.stats.issue.time_missing_msg"))
       );
     }
 
@@ -103,8 +105,8 @@ export function buildPlanStats(board) {
         issue(
           "PARTICIPANTS_MISMATCH",
           "WARN",
-          "Người tham gia chưa khớp",
-          `Số người tham gia (${participantCount}) khác với danh sách (${participants.length}).`
+          i18n.t("plan.stats.issue.participants_mismatch_title"),
+          i18n.t("plan.stats.issue.participants_mismatch_msg", { count: participantCount, listCount: participants.length })
         )
       );
     }
@@ -115,8 +117,8 @@ export function buildPlanStats(board) {
         issue(
           "ACTUAL_SUSPICIOUS",
           "WARN",
-          "Chi phí thực tế bất thường",
-          `Thực tế ${fmtMoney(actual, currency)} quá nhỏ so với dự toán ${fmtMoney(estimated, currency)}.`
+          i18n.t("plan.stats.issue.actual_suspicious_title"),
+          i18n.t("plan.stats.issue.actual_suspicious_msg", { actual: fmtMoney(actual, currency), estimated: fmtMoney(estimated, currency) })
         )
       );
     }
@@ -133,8 +135,8 @@ export function buildPlanStats(board) {
           issue(
             "SPLIT_MEMBERS_EMPTY",
             "ERROR",
-            "Chia tiền thiếu thành viên",
-            "Đang bật chia tiền nhưng chưa chọn ai tham gia chia."
+            i18n.t("plan.stats.issue.split_members_empty_title"),
+            i18n.t("plan.stats.issue.split_members_empty_msg")
           )
         );
       }
@@ -143,8 +145,8 @@ export function buildPlanStats(board) {
           issue(
             "SPLIT_DETAILS_EMPTY",
             "WARN",
-            "Thiếu chi tiết chia tiền",
-            "Chưa có chi tiết mỗi người trả bao nhiêu."
+            i18n.t("plan.stats.issue.split_details_empty_title"),
+            i18n.t("plan.stats.issue.split_details_empty_msg")
           )
         );
       } else {
@@ -154,8 +156,8 @@ export function buildPlanStats(board) {
             issue(
               "SPLIT_NOT_MATCH_TOTAL",
               "WARN",
-              "Chia tiền chưa khớp tổng",
-              `Tổng chia ${fmtMoney(sumDetails, currency)} nhưng tổng thực chi là ${fmtMoney(actualTotal, currency)}.`
+              i18n.t("plan.stats.issue.split_not_match_total_title"),
+              i18n.t("plan.stats.issue.split_not_match_total_msg", { split: fmtMoney(sumDetails, currency), total: fmtMoney(actualTotal, currency) })
             )
           );
         }
@@ -167,8 +169,8 @@ export function buildPlanStats(board) {
           issue(
             "PAYER_MISSING",
             "WARN",
-            "Chưa chọn người trả",
-            "Bạn đang bật chia tiền nhưng chưa chọn người trả và chưa có thanh toán."
+            i18n.t("plan.stats.issue.payer_missing_title"),
+            i18n.t("plan.stats.issue.payer_missing_msg")
           )
         );
       }
@@ -185,8 +187,8 @@ export function buildPlanStats(board) {
         cardIssues.length === 0
           ? null
           : cardIssues.some((x) => x.severity === "ERROR")
-          ? `${cardIssues.length} vấn đề`
-          : `${cardIssues.length} cảnh báo`;
+          ? i18n.t("plan.stats.issue_badge_problems", { count: cardIssues.length })
+          : i18n.t("plan.stats.issue_badge_warnings", { count: cardIssues.length });
 
       spendItems.push({
         dayDate,
@@ -285,7 +287,7 @@ export function buildPlanStats(board) {
 export function getAccuracyBadge(pct) {
   if (pct >= 90)
     return {
-      label: "Chuẩn",
+      label: i18n.t("plan.stats.accuracy_badge.exact"),
       tone: "good", // key để component tự render icon
       className:
         "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200",
@@ -293,14 +295,14 @@ export function getAccuracyBadge(pct) {
 
   if (pct >= 75)
     return {
-      label: "Tạm ổn",
+      label: i18n.t("plan.stats.accuracy_badge.ok"),
       tone: "ok",
       className:
         "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200",
     };
 
   return {
-    label: "Lệch",
+    label: i18n.t("plan.stats.accuracy_badge.off"),
     tone: "bad",
     className:
       "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-200",
@@ -310,27 +312,27 @@ export function getAccuracyBadge(pct) {
 export function getHealthBadge(score) {
   if (score >= 85)
     return {
-      label: "Rất tốt",
+      label: i18n.t("plan.stats.health_badge.very_good"),
       tone: "good",
       className:
         "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200",
     };
   if (score >= 70)
     return {
-      label: "Ổn",
+      label: i18n.t("plan.stats.health_badge.fine"),
       tone: "ok",
       className:
         "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-200",
     };
   if (score >= 50)
     return {
-      label: "Tạm",
+      label: i18n.t("plan.stats.health_badge.so_so"),
       tone: "warn",
       className:
         "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200",
     };
   return {
-    label: "Cần chỉnh",
+    label: i18n.t("plan.stats.health_badge.needs_work"),
     tone: "bad",
     className:
       "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-200",
@@ -344,25 +346,25 @@ export function getHealthBadge(score) {
 export function labelActivityType(type) {
   const t = String(type || "OTHER").toUpperCase();
   const map = {
-    TRANSPORT: "Di chuyển",
-    FOOD: "Ăn uống",
-    STAY: "Lưu trú",
-    ENTERTAIN: "Giải trí",
-    SIGHTSEEING: "Tham quan",
-    EVENT: "Sự kiện",
-    SHOPPING: "Mua sắm",
-    CINEMA: "Xem phim",
-    OTHER: "Khác",
+    TRANSPORT: i18n.t("plan.activity_type.transport"),
+    FOOD: i18n.t("plan.activity_type.food"),
+    STAY: i18n.t("plan.activity_type.stay"),
+    ENTERTAIN: i18n.t("plan.activity_type.entertain"),
+    SIGHTSEEING: i18n.t("plan.activity_type.sightseeing"),
+    EVENT: i18n.t("plan.activity_type.event"),
+    SHOPPING: i18n.t("plan.activity_type.shopping"),
+    CINEMA: i18n.t("plan.activity_type.cinema"),
+    OTHER: i18n.t("plan.activity_type.other"),
   };
-  return map[t] || "Khác";
+  return map[t] || i18n.t("plan.activity_type.other");
 }
 
 export function labelRole(role) {
   const r = String(role || "").toUpperCase();
-  if (r === "OWNER") return "Chủ kế hoạch";
-  if (r === "EDITOR") return "Chỉnh sửa";
-  if (r === "VIEWER") return "Xem";
-  return "Thành viên";
+  if (r === "OWNER") return i18n.t("plan.member.role_owner");
+  if (r === "EDITOR") return i18n.t("plan.member.role_editor");
+  if (r === "VIEWER") return i18n.t("plan.member.role_viewer");
+  return i18n.t("plan.member.role_member");
 }
 
 export function typeEmoji(type) {
@@ -409,10 +411,10 @@ function computeDataIntegrityPct(issues) {
 }
 
 function buildHealthSummary({ score, issueCount }) {
-  if (score >= 85) return "Rất ổn: kế hoạch khá chuẩn và dễ theo dõi.";
-  if (score >= 70) return `Ổn: còn ${issueCount} cảnh báo/lỗi nhỏ nên chỉnh để “chuẩn” hơn.`;
-  if (score >= 50) return "Tạm ổn: nên bổ sung thời gian/chi phí/chia tiền để dễ quản lý.";
-  return "Cần chỉnh nhiều: dữ liệu đang thiếu hoặc lệch khá lớn.";
+  if (score >= 85) return i18n.t("plan.stats.health_summary.very_good");
+  if (score >= 70) return i18n.t("plan.stats.health_summary.fine", { count: issueCount });
+  if (score >= 50) return i18n.t("plan.stats.health_summary.so_so");
+  return i18n.t("plan.stats.health_summary.needs_work");
 }
 
 function calcPct(a, b) {

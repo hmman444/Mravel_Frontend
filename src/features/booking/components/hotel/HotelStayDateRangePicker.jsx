@@ -1,5 +1,6 @@
 // src/features/booking/components/hotel/HotelStayDateRangePicker.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { vi } from "date-fns/locale";
 import { addMonths, addDays  } from "date-fns";
@@ -23,6 +24,7 @@ export default function HotelStayDateRangePicker({
   checkOut,
   onChange, // ({ checkIn, checkOut, nights })
 }) {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState(checkIn);
   const [endDate, setEndDate] = useState(checkOut);
   const [open, setOpen] = useState(false);
@@ -75,8 +77,8 @@ export default function HotelStayDateRangePicker({
   const hasRange = !!startDate && !!endDate;
 
   const summaryText = hasRange
-    ? `${VN_DATE(startDate)} – ${VN_DATE(endDate)} • ${days} ngày ${nights} đêm`
-    : "Chọn ngày nhận phòng và trả phòng";
+    ? `${VN_DATE(startDate)} – ${VN_DATE(endDate)} • ${t("booking.stay_days_nights", { days, nights })}`
+    : t("booking.select_check_in_out");
 
   const today = useMemo(() => {
     const t = new Date();
@@ -175,7 +177,7 @@ export default function HotelStayDateRangePicker({
                   )}
 
                   <span className="mravel-calendar__header-title">
-                    Tháng {month} {year}
+                    {t("booking.calendar_month_year", { month, year })}
                   </span>
 
                   {isLast && (
@@ -196,8 +198,8 @@ export default function HotelStayDateRangePicker({
           {/* Text mô tả dưới calendar */}
           <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 px-1">
             {hasRange
-              ? `Đã chọn ${days} ngày ${nights} đêm`
-              : "Chọn ngày nhận phòng, sau đó chọn ngày trả phòng."}
+              ? t("booking.selected_days_nights", { days, nights })
+              : t("booking.select_check_in_then_out")}
           </div>
         </div>
       )}

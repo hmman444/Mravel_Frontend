@@ -1,9 +1,13 @@
 // src/components/LoadingOverlay.jsx
 import React from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
-export default function LoadingOverlay({ open, message = "Đang xử lý..." }) {
+export default function LoadingOverlay({ open, message }) {
+  const { t } = useTranslation();
   if (!open) return null;
+
+  const resolvedMessage = message ?? t("common.processing");
 
   return createPortal(
     <div
@@ -27,7 +31,7 @@ export default function LoadingOverlay({ open, message = "Đang xử lý..." }) 
             animate-spin
           "
         />
-        {message}
+        {resolvedMessage}
       </div>
     </div>,
     document.body

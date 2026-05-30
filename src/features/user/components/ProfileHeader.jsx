@@ -11,6 +11,7 @@ import {
   UserMinus,
   Clock,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileHeader({
   userView,
@@ -22,11 +23,12 @@ export default function ProfileHeader({
   onOpenEdit,
   onMessage,
 }) {
+  const { t } = useTranslation();
   const tabs = [
-    { key: "feed", label: "Bài viết" },
-    { key: "about", label: "Giới thiệu" },
-    { key: "photos", label: "Ảnh" },
-    { key: "friends", label: "Bạn bè" },
+    { key: "feed", label: t("user.tab_feed") },
+    { key: "about", label: t("user.tab_about") },
+    { key: "photos", label: t("user.tab_photos") },
+    { key: "friends", label: t("user.tab_friends") },
   ];
 
   const isMe = friendActions.isMe;
@@ -42,7 +44,7 @@ export default function ProfileHeader({
           disabled={loadingAction}
         >
           <Check className="w-4 h-4" />
-          <span>Bạn bè</span>
+          <span>{t("user.status_friend")}</span>
         </button>
       );
     }
@@ -56,7 +58,7 @@ export default function ProfileHeader({
           className="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-100 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition"
         >
           <Clock className="w-4 h-4" />
-          <span>Đã gửi lời mời</span>
+          <span>{t("user.request_sent")}</span>
         </button>
       );
     }
@@ -71,7 +73,7 @@ export default function ProfileHeader({
             className="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full bg-sky-500 text-white shadow-sm hover:bg-sky-600 transition"
           >
             <Check className="w-4 h-4" />
-            <span>Chấp nhận</span>
+            <span>{t("user.accept")}</span>
           </button>
           <button
             type="button"
@@ -80,7 +82,7 @@ export default function ProfileHeader({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
           >
             <XCircle className="w-3.5 h-3.5" />
-            <span>Hủy</span>
+            <span>{t("common.cancel")}</span>
           </button>
         </div>
       );
@@ -94,7 +96,7 @@ export default function ProfileHeader({
           className="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed"
         >
           <Lock className="w-4 h-4" />
-          <span>Đã chặn</span>
+          <span>{t("user.blocked")}</span>
         </button>
       );
     }
@@ -108,7 +110,7 @@ export default function ProfileHeader({
         className="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full bg-sky-500 text-white shadow-sm hover:bg-sky-600 transition"
       >
         <UserPlus className="w-4 h-4" />
-        <span>Kết bạn</span>
+        <span>{t("user.add_friend")}</span>
       </button>
     );
   };
@@ -150,28 +152,28 @@ export default function ProfileHeader({
             <div className="pb-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-50">
-                  {userView?.fullname || "Người dùng Mravel"}
+                  {userView?.fullname || t("user.default_name")}
                 </h1>
                 {relationship?.type && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700/70">
                     {relationship.friend && <Check className="w-3 h-3" />}
                     <span>
-                      {relationship.type === "SELF" && "Đây là bạn"}
-                      {relationship.type === "FRIEND" && "Bạn bè"}
+                      {relationship.type === "SELF" && t("user.relationship_self")}
+                      {relationship.type === "FRIEND" && t("user.status_friend")}
                       {relationship.type === "REQUEST_SENT" &&
-                        "Đã gửi lời mời"}
+                        t("user.request_sent")}
                       {relationship.type === "REQUEST_RECEIVED" &&
-                        "Đã gửi lời mời cho bạn"}
-                      {relationship.type === "NONE" && "Chưa kết nối"}
-                      {relationship.type === "BLOCKED" && "Đã chặn"}
+                        t("user.request_received")}
+                      {relationship.type === "NONE" && t("user.relationship_none")}
+                      {relationship.type === "BLOCKED" && t("user.blocked")}
                     </span>
                   </span>
                 )}
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 @{userView?.username || "mravel.user"} ·{" "}
-                {userView?.totalFriends ?? 0} bạn ·{" "}
-                {userView?.mutualFriends ?? 0} bạn chung
+                {t("user.total_friends", { count: userView?.totalFriends ?? 0 })} ·{" "}
+                {t("user.mutual_friends", { count: userView?.mutualFriends ?? 0 })}
               </p>
             </div>
           </div>
@@ -185,7 +187,7 @@ export default function ProfileHeader({
                 onClick={onOpenEdit}
               >
                 <UserPlus className="w-4 h-4" />
-                <span>Chỉnh sửa hồ sơ</span>
+                <span>{t("user.edit_profile")}</span>
               </button>
             ) : (
               <>
@@ -197,7 +199,7 @@ export default function ProfileHeader({
                   className="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>Nhắn tin</span>
+                  <span>{t("user.message")}</span>
                 </button>
 
                 {friendActions.isFriend && (
@@ -206,7 +208,7 @@ export default function ProfileHeader({
                     onClick={friendActions.handleRemoveOrCancel}
                     disabled={friendActions.loadingAction}
                     className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-                    title="Xóa bạn"
+                    title={t("user.remove_friend")}
                   >
                     <UserMinus className="w-4 h-4" />
                   </button>
@@ -244,7 +246,7 @@ export default function ProfileHeader({
 
         {error && (
           <p className="mt-2 text-xs text-red-500">
-            Không thể tải hồ sơ: {error}
+            {t("user.load_profile_error", { error })}
           </p>
         )}
       </div>

@@ -1,66 +1,59 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { Info, FileText, X, Clock, CreditCard, PhoneCall, Ban } from "lucide-react";
 import { FaUserClock, FaGlassCheers, FaParking, FaWheelchair } from "react-icons/fa";
 
 export default function RestaurantBookingPolicyCard() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const importantNote = {
-    title: "Lưu ý quan trọng",
-    subtitle: "Chính sách giữ bàn & đặt cọc",
-    text:
-      "Sau khi đặt cọc thành công, hệ thống sẽ giữ bàn theo khung giờ bạn chọn. Vui lòng đến đúng giờ để đảm bảo có chỗ ngồi.",
+    title: t("booking.policy_important_note_title"),
+    subtitle: t("booking.policy_deposit_hold_title"),
+    text: t("booking.policy_important_note_text_restaurant"),
   };
 
   const sections = [
     {
       icon: <Clock className="h-4 w-4 text-blue-500" />,
-      title: "Giữ bàn",
-      text:
-        "Bàn được giữ theo khung giờ đã chọn.\n- Thời gian giữ bàn: 10–15 phút (tuỳ nhà hàng).\n- Nếu đến muộn quá thời gian giữ, nhà hàng có thể huỷ giữ bàn để phục vụ khách khác.",
+      title: t("booking.policy_table_hold_title"),
+      text: t("booking.policy_table_hold_text"),
     },
     {
       icon: <CreditCard className="h-4 w-4 text-emerald-600" />,
-      title: "Đặt cọc & thanh toán",
-      text:
-        "Khoản đặt cọc dùng để giữ bàn và được trừ vào hoá đơn (tuỳ chính sách nhà hàng).\n- Đặt cọc tính theo số bàn và loại bàn.\n- Nếu nhà hàng có chương trình đặc biệt (set menu/tiệc), phí có thể thay đổi theo thời điểm.",
+      title: t("booking.policy_deposit_payment_title"),
+      text: t("booking.policy_deposit_payment_text"),
     },
     {
       icon: <FaUserClock className="h-4 w-4 text-orange-500" />,
-      title: "Thay đổi giờ / loại bàn",
-      text:
-        "Bạn có thể liên hệ nhà hàng để hỗ trợ điều chỉnh.\n- Việc đổi giờ/loại bàn phụ thuộc tình trạng bàn trống.\n- Một số nhà hàng có thể yêu cầu đặt lại nếu thay đổi quá sát giờ.",
+      title: t("booking.policy_change_time_table_title"),
+      text: t("booking.policy_change_time_table_text"),
     },
     {
       icon: <Ban className="h-4 w-4 text-red-500" />,
-      title: "Huỷ & hoàn cọc",
-      text:
-        "Chính sách hoàn cọc phụ thuộc từng nhà hàng.\nVí dụ thường gặp:\n- Huỷ trước X giờ: hoàn cọc (hoặc hoàn một phần).\n- Huỷ sát giờ hoặc không đến: có thể mất cọc.\nVui lòng đọc kỹ phần mô tả của nhà hàng hoặc liên hệ trực tiếp để xác nhận.",
+      title: t("booking.policy_cancel_refund_title"),
+      text: t("booking.policy_cancel_refund_text"),
     },
     {
       icon: <PhoneCall className="h-4 w-4 text-purple-600" />,
-      title: "Liên hệ hỗ trợ",
-      text:
-        "Nếu bạn cần hỗ trợ (đổi giờ, đổi số bàn, ghi chú dị ứng…), hãy gọi trực tiếp nhà hàng.\nKhi liên hệ, vui lòng cung cấp:\n- Tên người đặt\n- Số điện thoại\n- Ngày/giờ đặt\n- Loại bàn & số bàn",
+      title: t("booking.policy_contact_support_title"),
+      text: t("booking.policy_contact_support_text"),
     },
     {
       icon: <FaGlassCheers className="h-4 w-4 text-pink-500" />,
-      title: "Sự kiện / ngày lễ",
-      text:
-        "Vào ngày lễ/Tết hoặc giờ cao điểm, nhà hàng có thể áp dụng:\n- Set menu bắt buộc\n- Thời lượng ngồi tối đa\n- Mức đặt cọc cao hơn\nThông tin sẽ hiển thị ở trang chi tiết (nếu có).",
+      title: t("booking.policy_event_holiday_title"),
+      text: t("booking.policy_event_holiday_text"),
     },
     {
       icon: <FaParking className="h-4 w-4 text-gray-700 dark:text-gray-300" />,
-      title: "Gửi xe",
-      text:
-        "Chỗ gửi xe tuỳ thuộc từng cơ sở.\n- Một số nhà hàng có bãi xe riêng hoặc hỗ trợ gửi xe gần đó.\n- Phí gửi xe (nếu có) do bãi xe thu, không bao gồm trong tiền cọc.",
+      title: t("booking.policy_parking_title"),
+      text: t("booking.policy_parking_text"),
     },
     {
       icon: <FaWheelchair className="h-4 w-4 text-indigo-600" />,
-      title: "Hỗ trợ đặc biệt",
-      text:
-        "Nếu bạn cần hỗ trợ (xe lăn, ghế trẻ em, bàn gần cửa sổ…), hãy ghi chú khi đặt.\nNhà hàng sẽ cố gắng sắp xếp nhưng không đảm bảo 100% do phụ thuộc tình trạng bàn thực tế.",
+      title: t("booking.policy_special_assistance_title"),
+      text: t("booking.policy_special_assistance_text"),
     },
   ];
 
@@ -73,7 +66,7 @@ export default function RestaurantBookingPolicyCard() {
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-              Chính sách đặt bàn
+              {t("booking.policy_card_title_restaurant")}
             </h2>
           </div>
           <button
@@ -81,7 +74,7 @@ export default function RestaurantBookingPolicyCard() {
             onClick={() => setOpen(true)}
             className="text-xs font-semibold text-blue-600 hover:underline md:text-sm"
           >
-            Đọc tất cả
+            {t("booking.policy_read_all")}
           </button>
         </div>
 
@@ -111,11 +104,10 @@ export default function RestaurantBookingPolicyCard() {
             <Clock className="mt-0.5 h-4 w-4 text-blue-500" />
             <div>
               <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
-                Giữ bàn theo khung giờ
+                {t("booking.policy_summary_hold_title")}
               </p>
               <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-                Bàn sẽ được giữ trong một khoảng thời gian ngắn. Nếu đến muộn quá thời gian giữ,
-                nhà hàng có thể huỷ giữ bàn.
+                {t("booking.policy_summary_hold_text")}
               </p>
             </div>
           </div>
@@ -124,10 +116,10 @@ export default function RestaurantBookingPolicyCard() {
             <CreditCard className="mt-0.5 h-4 w-4 text-emerald-600" />
             <div>
               <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
-                Đặt cọc theo loại bàn
+                {t("booking.policy_summary_deposit_title")}
               </p>
               <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-                Tiền cọc tính theo số bàn và loại bàn. Một số nhà hàng có chính sách hoàn cọc tuỳ thời điểm.
+                {t("booking.policy_summary_deposit_text")}
               </p>
             </div>
           </div>

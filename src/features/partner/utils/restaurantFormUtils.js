@@ -1,11 +1,20 @@
 // src/features/partner/utils/restaurantFormUtils.js
+import i18n from "../../../i18n";
 
-// 
+//
 // Helpers
-// 
+//
 export const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 export const asArray = (v) => (Array.isArray(v) ? v : []);
-export const asString = (v, fb = "") => (v == null ? fb : String(v));
+// Nội dung động từ BE có thể là Map<string,string> ({ vi, en }); pick theo ngôn ngữ hiện tại, fallback vi -> giá trị đầu.
+export const asString = (v, fb = "") => {
+  if (v == null) return fb;
+  if (typeof v === "object" && !Array.isArray(v)) {
+    const lang = i18n.language || "vi";
+    return v[lang] || v.vi || Object.values(v).find((x) => typeof x === "string") || fb;
+  }
+  return String(v);
+};
 
 export const sanitizeNumberStr = (v) => {
   const s = asString(v, "");

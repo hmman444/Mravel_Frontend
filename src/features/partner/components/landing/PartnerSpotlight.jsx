@@ -1,26 +1,29 @@
+import { useTranslation } from "react-i18next";
+
 export default function PartnerSpotlight() {
+  const { t } = useTranslation();
   return (
     <section className="mt-10">
       <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-8 shadow-sm">
         <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-          Nổi bật ngay từ đầu
+          {t("partner.spotlight.heading")}
         </h2>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <SpotItem
             icon={<BillboardIcon />}
-            title="Hồ sơ dịch vụ rõ ràng"
-            desc="Tối ưu trang dịch vụ với ảnh, mô tả, tiện ích và thông tin quan trọng để khách dễ quyết định đặt."
+            title={t("partner.spotlight.profile_title")}
+            desc={t("partner.spotlight.profile_desc")}
           />
           <SpotItem
             icon={<PuzzleIcon />}
-            title="Nhập thông tin nhanh"
-            desc="Form gọn gàng, có cấu trúc — giúp bạn đăng khách sạn/quán ăn nhanh chóng và hạn chế sai sót."
+            title={t("partner.spotlight.fast_input_title")}
+            desc={t("partner.spotlight.fast_input_desc")}
           />
           <SpotItem
             icon={<SearchIcon />}
-            title="Dễ được tìm thấy"
-            desc="Dịch vụ xuất hiện trong tìm kiếm theo địa điểm, mức giá, đánh giá và gợi ý theo lịch trình du lịch."
+            title={t("partner.spotlight.discoverable_title")}
+            desc={t("partner.spotlight.discoverable_desc")}
           />
         </div>
       </div>

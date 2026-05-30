@@ -7,8 +7,10 @@ import {
   CircleDot,
   AlertCircle,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function HotelNearbySection({ hotel }) {
+  const { t } = useTranslation();
   if (!hotel) return null;
 
   const address = hotel.addressLine;
@@ -26,7 +28,7 @@ export default function HotelNearbySection({ hotel }) {
       {/* HEADER */}
       <div className="px-6 pt-5 pb-3">
         <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Xung quanh {hotel.name} có gì
+          {t("hotel.nearby_section_title", { name: hotel.name })}
         </h2>
         {address && (
           <div className="mt-1 flex items-start gap-2 text-xs md:text-sm text-gray-600 dark:text-gray-400">
@@ -41,7 +43,7 @@ export default function HotelNearbySection({ hotel }) {
         <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-[#f3f4f6]">
           {lat != null && lng != null ? (
             <iframe
-              title={`Bản đồ ${hotel.name}`}
+              title={t("hotel.map_title", { name: hotel.name })}
               src={`https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`}
               className="h-[260px] w-full md:h-[300px]"
               loading="lazy"
@@ -49,7 +51,7 @@ export default function HotelNearbySection({ hotel }) {
             />
           ) : (
             <div className="flex h-[260px] w-full items-center justify-center text-xs text-gray-500 dark:text-gray-400 md:h-[300px]">
-              Không tìm thấy vị trí bản đồ cho khách sạn này.
+              {t("hotel.map_not_found")}
             </div>
           )}
 
@@ -57,7 +59,7 @@ export default function HotelNearbySection({ hotel }) {
             type="button"
             className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white dark:bg-gray-800 px-4 py-1.5 text-xs md:text-sm font-semibold text-[#0064d2] shadow-sm hover:bg-[#f3f4ff]"
           >
-            Khám phá nhiều địa điểm hơn
+            {t("hotel.explore_more_places")}
             <Navigation className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -65,7 +67,7 @@ export default function HotelNearbySection({ hotel }) {
         {/* Tag nhỏ bên dưới map */}
         <div className="mt-3 inline-flex items-center rounded-full bg-[#e6f4ea] px-3 py-1 text-[11px] font-medium text-[#137333]">
           <span className="mr-1 inline-block h-2 w-2 rounded-full bg-[#34a853]" />
-          Gần khu vui chơi giải trí
+          {t("hotel.near_entertainment_area")}
         </div>
       </div>
 
@@ -75,7 +77,7 @@ export default function HotelNearbySection({ hotel }) {
           {/* Cột 1: Địa điểm lân cận */}
           <NearbyColumn
             icon={<MapPin className="h-3.5 w-3.5" />}
-            title="Địa điểm lân cận"
+            title={t("hotel.nearby_places")}
             places={grouped.nearby}
           />
 
@@ -83,12 +85,12 @@ export default function HotelNearbySection({ hotel }) {
           <div className="space-y-6">
             <NearbyColumn
               icon={<Bus className="h-3.5 w-3.5" />}
-              title="Trung tâm giao thông"
+              title={t("hotel.transport_hub")}
               places={grouped.transport}
             />
             <NearbyColumn
               icon={<CircleDot className="h-3.5 w-3.5" />}
-              title="Khác"
+              title={t("hotel.other")}
               places={grouped.other}
             />
           </div>
@@ -96,7 +98,7 @@ export default function HotelNearbySection({ hotel }) {
           {/* Cột 3: Trung tâm giải trí */}
           <NearbyColumn
             icon={<PartyPopper className="h-3.5 w-3.5" />}
-            title="Trung tâm giải trí"
+            title={t("hotel.entertainment_hub")}
             places={grouped.entertainment}
           />
         </div>
@@ -104,10 +106,7 @@ export default function HotelNearbySection({ hotel }) {
         {/* Ghi chú khoảng cách + icon chấm than */}
         <p className="mt-4 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
           <AlertCircle className="h-3.5 w-3.5 text-gray-400" />
-          <span>
-            Khoảng cách hiển thị dựa trên đường chim bay. Khoảng cách di chuyển
-            thực tế có thể khác.
-          </span>
+          <span>{t("hotel.distance_disclaimer")}</span>
         </p>
       </div>
     </section>

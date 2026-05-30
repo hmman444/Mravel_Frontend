@@ -1,18 +1,20 @@
 import { useState } from "react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 
 const PRICE_LEVEL_LABELS = {
-  FREE: "Miễn phí",
-  CHEAP: "Bình dân",
-  MODERATE: "Tầm trung",
-  EXPENSIVE: "Cao cấp",
-  LUXURY: "Hạng sang",
+  FREE: i18n.t("place.price_level_free"),
+  CHEAP: i18n.t("place.price_level_cheap"),
+  MODERATE: i18n.t("place.price_level_moderate"),
+  EXPENSIVE: i18n.t("place.price_level_expensive"),
+  LUXURY: i18n.t("place.price_level_luxury"),
 };
 
 const SECTION_CONFIG = {
-  categories:  { title: "Danh mục", collapsible: true },
-  priceLevels: { title: "Mức giá" },
-  venueTypes:  { title: "Loại cơ sở" },
+  categories:  { title: i18n.t("place.section_categories"), collapsible: true },
+  priceLevels: { title: i18n.t("place.section_price_levels") },
+  venueTypes:  { title: i18n.t("place.section_venue_types") },
 };
 
 function getLabel(sectionKey, bucket) {
@@ -21,6 +23,7 @@ function getLabel(sectionKey, bucket) {
 }
 
 function FacetSection({ sectionKey, buckets, selectedValues, isRadio, onChange }) {
+  const { t } = useTranslation();
   const cfg = SECTION_CONFIG[sectionKey] ?? { title: sectionKey };
   const [expanded, setExpanded] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -77,7 +80,7 @@ function FacetSection({ sectionKey, buckets, selectedValues, isRadio, onChange }
               className="text-xs text-blue-600 hover:underline mt-1"
               onClick={() => setShowAll((v) => !v)}
             >
-              {showAll ? "Thu gọn" : `Xem thêm (${buckets.length - 5})`}
+              {showAll ? t("place.collapse") : t("common.see_more_count", { count: buckets.length - 5 })}
             </button>
           )}
         </div>
@@ -93,6 +96,7 @@ function FacetSection({ sectionKey, buckets, selectedValues, isRadio, onChange }
  *   onChange: (newFilters) => void
  */
 export default function PlaceFacetPanel({ facets, selectedFilters, onChange }) {
+  const { t } = useTranslation();
   if (!facets) return null;
 
   const hasFilters =
@@ -109,14 +113,14 @@ export default function PlaceFacetPanel({ facets, selectedFilters, onChange }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">Bộ lọc</h3>
+        <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">{t("place.filters")}</h3>
         {hasFilters && (
           <button
             type="button"
             className="text-xs text-blue-600 hover:underline"
             onClick={() => onChange({ categorySlugs: [], priceLevel: null, venueTypes: [] })}
           >
-            Xóa bộ lọc
+            {t("place.clear_filters")}
           </button>
         )}
       </div>

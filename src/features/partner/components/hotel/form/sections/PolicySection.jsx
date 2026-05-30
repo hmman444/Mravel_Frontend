@@ -1,5 +1,6 @@
 // src/features/partner/components/hotel/PolicySection.jsx
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 function buildTimeOptions(stepMinutes = 30) {
   const opts = [];
@@ -12,6 +13,7 @@ function buildTimeOptions(stepMinutes = 30) {
 }
 
 function TimeSelect({ label, value, onChange, step = 30 }) {
+  const { t } = useTranslation();
   const options = useMemo(() => buildTimeOptions(step), [step]);
 
   // nếu form đang có value lạ (vd "14:15") thì vẫn hiển thị được
@@ -29,7 +31,7 @@ function TimeSelect({ label, value, onChange, step = 30 }) {
         className="w-full border rounded-xl px-3 py-2 bg-white dark:bg-gray-800"
       >
         <option value="" disabled>
-          Chọn giờ...
+          {t("partner.policy.select_time")}
         </option>
         {options.map((t) => (
           <option key={t} value={t}>
@@ -41,7 +43,7 @@ function TimeSelect({ label, value, onChange, step = 30 }) {
       {/* nếu value hiện tại không nằm trong options thì báo nhẹ */}
       {!inList && safeValue ? (
         <div className="text-xs text-amber-600 mt-1">
-          Giá trị hiện tại ({safeValue}) không hợp lệ — vui lòng chọn lại theo bước 30 phút.
+          {t("partner.policy.invalid_time_value", { value: safeValue })}
         </div>
       ) : null}
     </label>
@@ -49,39 +51,40 @@ function TimeSelect({ label, value, onChange, step = 30 }) {
 }
 
 export default function PolicySection({ form, setField }) {
+  const { t } = useTranslation();
   return (
     <details className="group">
       <summary className="cursor-pointer select-none font-semibold">
-        Check-in / Check-out & Policy
+        {t("partner.policy.section_title")}
       </summary>
 
       <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
         <TimeSelect
-          label="Giờ check-in"
+          label={t("partner.policy.check_in_time")}
           value={form.defaultCheckInTime}
           onChange={(v) => setField("defaultCheckInTime", v)}
           step={30}
         />
 
         <TimeSelect
-          label="Giờ check-out"
+          label={t("partner.policy.check_out_time")}
           value={form.defaultCheckOutTime}
           onChange={(v) => setField("defaultCheckOutTime", v)}
           step={30}
         />
 
         <label className="text-sm md:col-span-2">
-          <div className="font-medium mb-1">Chính sách</div>
+          <div className="font-medium mb-1">{t("partner.policy.policies_label")}</div>
           <textarea
             value={form.policies ?? ""}
             onChange={(e) => setField("policies", e.target.value)}
             className="w-full border rounded-xl px-3 py-2 min-h-[110px]"
-            placeholder="Ví dụ: nhận phòng cần CCCD, không hút thuốc..."
+            placeholder={t("partner.policy.policies_placeholder")}
           />
         </label>
 
         <label className="text-sm md:col-span-2">
-          <div className="font-medium mb-1">Thông tin thêm</div>
+          <div className="font-medium mb-1">{t("partner.policy.extra_info_label")}</div>
           <textarea
             value={form.extraInfo ?? ""}
             onChange={(e) => setField("extraInfo", e.target.value)}

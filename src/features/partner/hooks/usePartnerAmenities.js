@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchGroupedAmenitiesForPartner } from "../services/partnerAmenityService";
 
 export function usePartnerAmenities(scope) {
+  const { t } = useTranslation();
   const [grouped, setGrouped] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,7 +19,7 @@ export function usePartnerAmenities(scope) {
         setGrouped(data);
       } catch (e) {
         if (!alive) return;
-        setError(e?.response?.data?.message || e?.message || "Không tải được tiện ích");
+        setError(e?.response?.data?.message || e?.message || t("partner.amenities.load_failed"));
       } finally {
         if (alive) setLoading(false);
       }

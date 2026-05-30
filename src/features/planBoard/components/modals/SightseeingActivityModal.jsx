@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaLandmark, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
@@ -26,13 +27,6 @@ import {
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
-const EXTRA_TYPES = [
-  { value: "PARKING", label: "Gửi xe" },
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ phí" },
-  { value: "OTHER", label: "Khác" },
-];
-
 function safeJsonParse(str) {
   try {
     if (!str) return {};
@@ -50,6 +44,15 @@ export default function SightseeingActivityModal({
   planMembers = [],
   readOnly,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = [
+    { value: "PARKING", label: t("plan.extra_cost.type_parking") },
+    { value: "SERVICE_FEE", label: t("plan.extra_cost.type_service_fee") },
+    { value: "SURCHARGE", label: t("plan.extra_cost.type_surcharge") },
+    { value: "OTHER", label: t("plan.extra_cost.type_other") },
+  ];
+
   const [title, setTitle] = useState("");
   const [placeName, setPlaceName] = useState("");
   const [address, setAddress] = useState("");
@@ -262,10 +265,10 @@ export default function SightseeingActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!placeName.trim()) newErrors.placeName = "Vui lòng nhập hoặc chọn địa điểm tham quan.";
+    if (!placeName.trim()) newErrors.placeName = t("plan.sightseeing.err_place_required");
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.activity.err_end_after_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -279,8 +282,8 @@ export default function SightseeingActivityModal({
 
     onSubmit?.({
       type: "SIGHTSEEING",
-      title: title || `Tham quan: ${placeName}`,
-      text: title || `Tham quan: ${placeName}`,
+      title: title || t("plan.sightseeing.default_title", { name: placeName }),
+      text: title || t("plan.sightseeing.default_title", { name: placeName }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -314,13 +317,13 @@ export default function SightseeingActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Tham quan"
+      labelPrefix={t("plan.sightseeing.label_prefix")}
       name={placeName}
-      emptyLabelText="Điền/chọn địa điểm tham quan để lưu hoạt động."
+      emptyLabelText={t("plan.sightseeing.empty_label")}
       locationText={effectiveSightLocation?.fullAddress || address || ""}
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.activity.time_range_minutes", { start: startTime, end: endTime, minutes: durationMinutes })
           : ""
       }
     />
@@ -337,14 +340,14 @@ export default function SightseeingActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động tham quan"}
+      submitLabel={editingCard ? t("plan.activity.save_edit") : t("plan.sightseeing.save_activity")}
       submitClassName="bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30"
     />
   );
@@ -359,9 +362,9 @@ export default function SightseeingActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-amber-500 to-orange-500",
         }}
-        title="Hoạt động tham quan"
+        title={t("plan.sightseeing.modal_title")}
         typeLabel="Sightseeing"
-        subtitle="Vé tham quan, chụp ảnh, địa điểm du lịch."
+        subtitle={t("plan.sightseeing.modal_subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -370,22 +373,22 @@ export default function SightseeingActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.activity.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Địa điểm + địa chỉ + thời gian
+              {t("plan.sightseeing.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
+                {t("plan.activity.activity_name_optional")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: VinWonders, Nhà thờ Đức Bà..."
+                placeholder={t("plan.sightseeing.name_placeholder")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
@@ -393,7 +396,7 @@ export default function SightseeingActivityModal({
             {/* MAP PICKER */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa chỉ / vị trí trên bản đồ
+                {t("plan.activity.address_map_label")}
               </label>
 
               <button
@@ -423,7 +426,7 @@ export default function SightseeingActivityModal({
                   {effectiveSightLocation || address ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {getLocDisplayLabel(effectiveSightLocation, placeName || "Địa điểm đã chọn")}
+                        {getLocDisplayLabel(effectiveSightLocation, placeName || t("plan.activity.selected_place"))}
                       </p>
 
                       {(effectiveSightLocation?.fullAddress || address) && (
@@ -434,7 +437,7 @@ export default function SightseeingActivityModal({
 
                       <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
+                          {t("plan.activity.picked_on_map")}
                         </span>
                         {effectiveSightLocation?.lat != null && effectiveSightLocation?.lng != null && (
                           <span className="px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
@@ -446,10 +449,10 @@ export default function SightseeingActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn địa điểm tham quan trên bản đồ
+                        {t("plan.sightseeing.pick_place_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn điểm du lịch / thắng cảnh / bảo tàng.
+                        {t("plan.sightseeing.pick_place_hint")}
                       </p>
                     </>
                   )}
@@ -460,7 +463,7 @@ export default function SightseeingActivityModal({
                     text-amber-500 group-hover:text-amber-600 dark:text-amber-300
                     dark:group-hover:text-amber-200"
                 >
-                  Mở bản đồ
+                  {t("plan.activity.open_map")}
                 </span>
               </button>
 
@@ -471,9 +474,9 @@ export default function SightseeingActivityModal({
 
             <div className="mt-3">
               <ActivityTimeRangeSection
-                sectionLabel="Thời gian tham quan"
-                startLabel="Bắt đầu"
-                endLabel="Kết thúc"
+                sectionLabel={t("plan.sightseeing.time_section")}
+                startLabel={t("plan.activity.start")}
+                endLabel={t("plan.activity.end")}
                 color="amber"
                 iconClassName="text-amber-500"
                 startTime={startTime}
@@ -483,7 +486,7 @@ export default function SightseeingActivityModal({
                 error={errors.time}
                 onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
-                durationHintPrefix="Thời lượng ước tính"
+                durationHintPrefix={t("plan.activity.duration_estimate")}
               />
             </div>
           </div>
@@ -493,10 +496,10 @@ export default function SightseeingActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí tham quan
+              {t("plan.sightseeing.cost_section")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Vé vào cổng + phụ phí + ngân sách + chi phí thực tế
+              {t("plan.sightseeing.cost_section_hint")}
             </span>
           </div>
 
@@ -504,7 +507,7 @@ export default function SightseeingActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Giá vé / người
+                  {t("plan.sightseeing.ticket_price_per_person")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -513,7 +516,7 @@ export default function SightseeingActivityModal({
                     min="0"
                     value={ticketPrice}
                     onChange={(e) => setTicketPrice(e.target.value)}
-                    placeholder="VD: 120000"
+                    placeholder={t("plan.sightseeing.ticket_price_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -522,7 +525,7 @@ export default function SightseeingActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Số người
+                  {t("plan.sightseeing.people_count")}
                 </label>
                 <input
                   type="number"
@@ -545,7 +548,7 @@ export default function SightseeingActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho hoạt động này (nếu có)
+                  {t("plan.activity.actual_total_cost")}
                 </label>
 
                 <div className="flex items-center gap-2">
@@ -555,20 +558,20 @@ export default function SightseeingActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền lại sau khi thanh toán"
+                    placeholder={t("plan.activity.actual_cost_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
 
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>chi phí vé</b> + <b>phát sinh</b> để chia tiền.
+                  {t("plan.sightseeing.actual_cost_hint")}
                 </p>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho hoạt động (tuỳ chọn)
+                  {t("plan.activity.budget_optional")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-amber-500" />
@@ -577,7 +580,7 @@ export default function SightseeingActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 800000"
+                    placeholder={t("plan.activity.budget_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -587,15 +590,15 @@ export default function SightseeingActivityModal({
 
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Tiền vé:{" "}
+                {t("plan.sightseeing.summary_ticket")}{" "}
                 <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh:{" "}
+                {t("plan.activity.summary_extra")}{" "}
                 <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến:{" "}
+                {t("plan.activity.summary_estimated_total")}{" "}
                 <span className="font-semibold text-amber-600 dark:text-amber-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
@@ -603,7 +606,7 @@ export default function SightseeingActivityModal({
 
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b>:{" "}
+                  {t("plan.activity.summary_using_actual")}{" "}
                   <span className="font-semibold text-amber-600 dark:text-amber-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -612,7 +615,7 @@ export default function SightseeingActivityModal({
 
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.activity.summary_budget")}{" "}
                   <span className="font-semibold">
                     {Number(budgetAmount).toLocaleString("vi-VN")}đ
                   </span>
@@ -654,17 +657,17 @@ export default function SightseeingActivityModal({
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
+              {t("plan.activity.note")}
             </label>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm lưu ý nhỏ cho cả nhóm
+              {t("plan.activity.note_hint")}
             </span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: nên đến sớm, có show nước 19h..."
+            placeholder={t("plan.sightseeing.note_placeholder")}
             className={`${inputBase} w-full`}
           />
         </section>

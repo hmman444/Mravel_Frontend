@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
@@ -26,13 +27,6 @@ import {
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
-const EXTRA_TYPES = [
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ thu" },
-  { value: "TAX", label: "Thuế" },
-  { value: "OTHER", label: "Khác" },
-];
-
 const safeJsonParse = (str) => {
   try {
     return str ? JSON.parse(str) : {};
@@ -49,6 +43,15 @@ export default function EventActivityModal({
   planMembers = [],
   readOnly = false,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = [
+    { value: "SERVICE_FEE", label: t("plan.extra_cost.service_fee") },
+    { value: "SURCHARGE", label: t("plan.extra_cost.surcharge") },
+    { value: "TAX", label: t("plan.extra_cost.tax") },
+    { value: "OTHER", label: t("plan.extra_cost.other") },
+  ];
+
   const [title, setTitle] = useState("");
   const [eventName, setEventName] = useState("");
   const [venue, setVenue] = useState("");
@@ -233,15 +236,15 @@ export default function EventActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!eventName.trim()) newErrors.eventName = "Vui lòng nhập tên sự kiện.";
+    if (!eventName.trim()) newErrors.eventName = t("plan.modal.event.err_event_name_required");
 
     // bắt buộc có địa điểm: chọn map hoặc nhập venue/address
     if (!effectiveEventLocation && !venue.trim() && !address.trim()) {
-      newErrors.venue = "Vui lòng chọn địa điểm sự kiện trên bản đồ hoặc nhập venue / địa chỉ.";
+      newErrors.venue = t("plan.modal.event.err_venue_required");
     }
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.modal.event.err_end_before_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -255,8 +258,8 @@ export default function EventActivityModal({
 
     onSubmit?.({
       type: "EVENT",
-      title: title || `Sự kiện: ${eventName}`,
-      text: title || `Sự kiện: ${eventName}`,
+      title: title || t("plan.modal.event.default_title", { name: eventName }),
+      text: title || t("plan.modal.event.default_title", { name: eventName }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -292,9 +295,9 @@ export default function EventActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Sự kiện"
+      labelPrefix={t("plan.modal.event.label_prefix")}
       name={eventName}
-      emptyLabelText="Điền tên sự kiện để lưu hoạt động."
+      emptyLabelText={t("plan.modal.event.empty_label")}
       locationText={
         effectiveEventLocation?.fullAddress || effectiveEventLocation?.address || address || venue
           ? `${
@@ -307,7 +310,7 @@ export default function EventActivityModal({
       }
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.time_range_with_duration", { start: startTime, end: endTime, minutes: durationMinutes })
           : ""
       }
     />
@@ -324,14 +327,14 @@ export default function EventActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động sự kiện"}
+      submitLabel={editingCard ? t("plan.modal.save_edit") : t("plan.modal.event.submit_create")}
       submitClassName="bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/30"
     />
   );
@@ -346,9 +349,9 @@ export default function EventActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-indigo-500 to-purple-500",
         }}
-        title="Hoạt động sự kiện"
+        title={t("plan.modal.event.title")}
         typeLabel="Event"
-        subtitle="Concert, lễ hội, workshop, show..."
+        subtitle={t("plan.modal.event.subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -357,29 +360,29 @@ export default function EventActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.modal.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Tên sự kiện + địa điểm + thời gian
+              {t("plan.modal.event.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
+                {t("plan.modal.activity_name_optional")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Concert Đen Vâu, lễ hội ánh sáng..."
+                placeholder={t("plan.modal.event.activity_name_placeholder")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
 
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên sự kiện <span className="text-red-500 align-middle">*</span>
+                {t("plan.modal.event.event_name")} <span className="text-red-500 align-middle">*</span>
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <FaCalendarAlt className="text-indigo-500" />
@@ -389,7 +392,7 @@ export default function EventActivityModal({
                     setEventName(e.target.value);
                     setErrors((prev) => ({ ...prev, eventName: "" }));
                   }}
-                  placeholder="Tên concert, show, workshop..."
+                  placeholder={t("plan.modal.event.event_name_placeholder")}
                   className={`${inputBase} flex-1 ${
                     errors.eventName
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/30"
@@ -405,7 +408,7 @@ export default function EventActivityModal({
             {/* ĐỊA ĐIỂM - chọn trên bản đồ */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa điểm tổ chức / venue{" "}
+                {t("plan.modal.event.venue_label")}{" "}
                 <span className="text-red-500 align-middle">*</span>
               </label>
 
@@ -442,7 +445,7 @@ export default function EventActivityModal({
                         {effectiveEventLocation?.label ||
                           effectiveEventLocation?.name ||
                           venue ||
-                          "Địa điểm đã chọn"}
+                          t("plan.modal.selected_location")}
                       </p>
 
                       {(effectiveEventLocation?.address ||
@@ -459,7 +462,7 @@ export default function EventActivityModal({
                         effectiveEventLocation?.lng != null && (
                           <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                             <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                              Đã chọn trên bản đồ
+                              {t("plan.modal.picked_on_map")}
                             </span>
                             <span className="px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
                               {effectiveEventLocation.lat.toFixed(4)},{" "}
@@ -471,10 +474,10 @@ export default function EventActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn địa điểm sự kiện trên bản đồ
+                        {t("plan.modal.event.pick_venue_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, tìm sân vận động, hội trường, venue tổ chức...
+                        {t("plan.modal.event.pick_venue_hint")}
                       </p>
                     </>
                   )}
@@ -485,7 +488,7 @@ export default function EventActivityModal({
                     text-indigo-500 group-hover:text-indigo-600 dark:text-indigo-300
                     dark:group-hover:text-indigo-200"
                 >
-                  Mở bản đồ
+                  {t("plan.modal.open_map")}
                 </span>
               </button>
 
@@ -497,9 +500,9 @@ export default function EventActivityModal({
             {/* Thời gian sự kiện */}
             <div className="mt-3">
               <ActivityTimeRangeSection
-                sectionLabel="Thời gian sự kiện"
-                startLabel="Bắt đầu"
-                endLabel="Kết thúc"
+                sectionLabel={t("plan.modal.event.time_section")}
+                startLabel={t("plan.modal.start_time")}
+                endLabel={t("plan.modal.end_time")}
                 color="indigo"
                 iconClassName="text-indigo-500"
                 startTime={startTime}
@@ -509,7 +512,7 @@ export default function EventActivityModal({
                 error={errors.time}
                 onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
-                durationHintPrefix="Thời lượng ước tính"
+                durationHintPrefix={t("plan.modal.duration_hint_prefix")}
               />
             </div>
           </div>
@@ -519,10 +522,10 @@ export default function EventActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí sự kiện
+              {t("plan.modal.event.cost_section")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Vé + phát sinh (gửi xe, đồ ăn, merch...) + ngân sách + thực tế
+              {t("plan.modal.event.cost_section_hint")}
             </span>
           </div>
 
@@ -531,7 +534,7 @@ export default function EventActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Giá vé / người
+                  {t("plan.modal.event.ticket_price")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -540,7 +543,7 @@ export default function EventActivityModal({
                     min="0"
                     value={ticketPrice}
                     onChange={(e) => setTicketPrice(e.target.value)}
-                    placeholder="VD: 500.000"
+                    placeholder={t("plan.modal.event.ticket_price_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -549,7 +552,7 @@ export default function EventActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Số vé (ước tính)
+                  {t("plan.modal.event.ticket_count")}
                 </label>
                 <input
                   type="number"
@@ -568,14 +571,14 @@ export default function EventActivityModal({
               updateExtraCost={updateExtraCost}
               removeExtraCost={removeExtraCost}
               extraTypes={EXTRA_TYPES}
-              label="Chi phí phát sinh (gửi xe, đồ ăn, merch...)"
+              label={t("plan.modal.event.extra_costs_label")}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Thực tế */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho sự kiện (nếu có)
+                  {t("plan.modal.event.actual_cost_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -584,20 +587,22 @@ export default function EventActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền sau khi thanh toán xong"
+                    placeholder={t("plan.modal.actual_cost_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>vé + phát sinh</b> để chia tiền.
+                  {t("plan.modal.event.actual_cost_hint_prefix")}{" "}
+                  <b>{t("plan.modal.event.ticket_plus_extra")}</b>{" "}
+                  {t("plan.modal.event.actual_cost_hint_suffix")}
                 </p>
               </div>
 
               {/* Ngân sách */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho sự kiện (tuỳ chọn)
+                  {t("plan.modal.event.budget_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-indigo-500" />
@@ -606,7 +611,7 @@ export default function EventActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 1.500.000"
+                    placeholder={t("plan.modal.event.budget_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -617,20 +622,22 @@ export default function EventActivityModal({
             {/* Tóm tắt */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Vé (ước tính): <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
+                {t("plan.modal.event.summary_ticket")} <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh: <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
+                {t("plan.modal.event.summary_extra")} <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến (vé + phát sinh):{" "}
+                {t("plan.modal.event.summary_estimated_total")}{" "}
                 <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                  {t("plan.modal.event.summary_using_actual_prefix")}{" "}
+                  <b>{t("plan.modal.event.summary_actual_cost")}</b>{" "}
+                  {t("plan.modal.event.summary_using_actual_suffix")}{" "}
                   <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -638,7 +645,7 @@ export default function EventActivityModal({
               )}
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.modal.event.summary_budget")}{" "}
                   <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
@@ -677,14 +684,14 @@ export default function EventActivityModal({
         {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm lưu ý nhỏ cho cả nhóm</span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.modal.note")}</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("plan.modal.note_hint")}</span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: đến sớm 30 phút, mang áo mưa nhẹ, hẹn nhau cổng số 3..."
+            placeholder={t("plan.modal.event.note_placeholder")}
             className={`${inputBase} w-full`}
           />
         </section>

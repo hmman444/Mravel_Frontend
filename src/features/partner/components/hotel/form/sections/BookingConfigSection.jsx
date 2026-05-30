@@ -1,4 +1,5 @@
 //src/features/partner/components/hotel/form/sections/BookingConfigSection.jsx
+import { useTranslation } from "react-i18next";
 const asString = (v) => (v == null ? "" : String(v));
 const toPercentStr = (v) => {
   const s = asString(v).replace(/[^\d.]/g, "");
@@ -14,12 +15,13 @@ const toIntStr = (v) => {
 };
 
 export default function BookingConfigSection({ form, setField, disabled }) {
+  const { t } = useTranslation();
   const cfg = form.bookingConfig || {};
 
   return (
     <details className="group">
       <summary className="cursor-pointer select-none font-semibold">
-        Booking config (thanh toán / đặt cọc / free-cancel)
+        {t("partner.booking_config.title")}
       </summary>
 
       <div className="mt-3 rounded-2xl border p-4 space-y-3">
@@ -33,7 +35,7 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               }
               disabled={disabled}
             />
-            <span className="font-medium">Cho phép thanh toán full</span>
+            <span className="font-medium">{t("partner.booking_config.allow_full_payment")}</span>
           </label>
 
           <label className="md:col-span-4 flex items-center gap-2 text-sm">
@@ -45,11 +47,11 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               }
               disabled={disabled}
             />
-            <span className="font-medium">Cho phép đặt cọc</span>
+            <span className="font-medium">{t("partner.booking_config.allow_deposit")}</span>
           </label>
 
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Miễn phí hủy (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.free_cancel_minutes")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.freeCancelMinutes)}
@@ -66,7 +68,7 @@ export default function BookingConfigSection({ form, setField, disabled }) {
         {cfg.allowDeposit ? (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
             <label className="md:col-span-4 text-sm">
-              <div className="font-medium mb-1">Phần trăm đặt cọc (%)</div>
+              <div className="font-medium mb-1">{t("partner.booking_config.deposit_percent")}</div>
               <input
                 inputMode="decimal"
                 value={asString(cfg.depositPercent)}

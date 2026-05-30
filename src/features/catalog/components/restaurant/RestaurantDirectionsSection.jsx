@@ -1,5 +1,6 @@
 // src/features/catalog/components/restaurant/RestaurantDirectionsSection.jsx
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { showSuccess } from "../../../../utils/toastUtils";
 
 function makeLatLng(location) {
@@ -10,6 +11,7 @@ function makeLatLng(location) {
 }
 
 export default function RestaurantDirectionsSection({ restaurant }) {
+  const { t } = useTranslation();
   const addr =
     restaurant?.addressLine ||
     [restaurant?.wardName, restaurant?.districtName, restaurant?.cityName]
@@ -42,11 +44,11 @@ export default function RestaurantDirectionsSection({ restaurant }) {
     const text = `${restaurant?.name || ""} - ${addr}${viewUrl ? `\n${viewUrl}` : ""}`;
     try {
         await navigator.clipboard.writeText(text);
-        showSuccess("Đã sao chép địa chỉ & liên kết!");
+        showSuccess(t('restaurant.copy_address_link_success'));
     } catch (err) {
         console.error("Clipboard copy failed:", err);
         // Fallback: mở prompt để người dùng tự copy
-        window.prompt("Sao chép thủ công nội dung sau:", text);
+        window.prompt(t('restaurant.copy_manual_prompt'), text);
     }
     };
 
@@ -54,7 +56,7 @@ export default function RestaurantDirectionsSection({ restaurant }) {
     <section className="px-5 md:px-6 pt-5 pb-6">
       {/* TITLE + ACTIONS */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">Chỉ đường</h2>
+        <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">{t('restaurant.directions')}</h2>
 
         <div className="flex gap-2">
           {viewUrl && (
@@ -64,15 +66,15 @@ export default function RestaurantDirectionsSection({ restaurant }) {
               rel="noreferrer"
               className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700"
             >
-              Mở Google Maps
+              {t('restaurant.open_google_maps')}
             </a>
           )}
           <button
             onClick={copyShare}
             className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200"
-            title="Sao chép địa chỉ & liên kết"
+            title={t('restaurant.copy_address_link')}
           >
-            Chia sẻ
+            {t('restaurant.share')}
           </button>
         </div>
       </div>
@@ -91,7 +93,7 @@ export default function RestaurantDirectionsSection({ restaurant }) {
           <div className="min-w-0">
             <div className="font-medium">{addr}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              (Nhấn vào bản đồ để xem chỉ đường, hoặc dùng nút phía trên bên phải)
+              {t('restaurant.map_hint')}
             </div>
           </div>
         </div>

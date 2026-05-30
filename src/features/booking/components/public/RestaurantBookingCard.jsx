@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { CalendarDays, CreditCard, Hash, UtensilsCrossed, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import api from "../../../../utils/axiosInstance";
 import CancelBookingModal from "../public/BookingCancelModal";
 
@@ -85,6 +86,7 @@ export default function RestaurantBookingCard({
   lookupCreds,
   onRefresh,
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -200,7 +202,7 @@ export default function RestaurantBookingCard({
         const data = await fetchDetail(code);
         if (!cancelled) setDetail(data ?? null);
       } catch (e) {
-        const msg = e?.response?.data?.message || e?.message || "Không tải được chi tiết đơn";
+        const msg = e?.response?.data?.message || e?.message || t("booking.load_detail_failed");
         if (!cancelled) setDetailError(msg);
       } finally {
         if (!cancelled) setDetailLoading(false);
@@ -271,10 +273,10 @@ export default function RestaurantBookingCard({
 
       const dto = res.data?.data;
       const payUrl = dto?.payUrl;
-      if (!payUrl) throw new Error("Không nhận được payUrl");
+      if (!payUrl) throw new Error(t("booking.no_pay_url"));
       window.location.assign(payUrl);
     } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Không thể tiếp tục thanh toán";
+      const msg = e?.response?.data?.message || e?.message || t("booking.resume_payment_failed");
       setResumeError(msg);
     } finally {
       setResuming(false);
@@ -316,7 +318,7 @@ export default function RestaurantBookingCard({
         setDetailLoading(false);
       }
     } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Hủy đơn thất bại";
+      const msg = e?.response?.data?.message || e?.message || t("booking.cancel_failed");
       setCancelError(msg);
     } finally {
       setCancelLoading(false);
@@ -342,24 +344,24 @@ export default function RestaurantBookingCard({
                 <div className="flex items-start justify-between gap-3 border-b border-gray-100 dark:border-gray-700 px-4 py-3 md:px-5 shrink-0">
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-                      Chi tiết đơn đặt bàn
+                      {t("booking.restaurant_detail_title")}
                     </h3>
                     <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      Mã: <span className="font-mono">{code}</span>
+                      {t("booking.code_label")}: <span className="font-mono">{code}</span>
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
-                    aria-label="Đóng"
+                    aria-label={t("common.close")}
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div className="px-4 py-3 md:px-5 md:py-4 overflow-y-auto">
-                  {detailLoading ? <p className="text-xs text-gray-500 dark:text-gray-400">Đang tải chi tiết...</p> : null}
+                  {detailLoading ? <p className="text-xs text-gray-500 dark:text-gray-400">{t("booking.loading_detail")}</p> : null}
 
                   {detailError ? (
                     <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -369,26 +371,26 @@ export default function RestaurantBookingCard({
 
                   <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
                     <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                      <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thông tin đơn</div>
+                      <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.order_info")}</div>
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Mã booking" value={code} mono />
+                      <DetailRow label={t("booking.booking_code")} value={code} mono />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Nhà hàng" value={restaurantName} />
+                      <DetailRow label={t("booking.restaurant")} value={restaurantName} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Giờ đặt" value={reservationLabel} />
+                      <DetailRow label={t("booking.reservation_time")} value={reservationLabel} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Loại bàn" value={tableTypeName} />
+                      <DetailRow label={t("booking.table_type")} value={tableTypeName} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Số bàn" value={tablesCount} />
+                      <DetailRow label={t("booking.tables_count")} value={tablesCount} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Tạo lúc" value={fmtDateTime(createdAt)} />
+                      <DetailRow label={t("booking.created_at")} value={fmtDateTime(createdAt)} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Thanh toán" value={paidAt ? fmtDateTime(paidAt) : "Chưa thanh toán"} />
+                      <DetailRow label={t("booking.payment")} value={paidAt ? fmtDateTime(paidAt) : t("booking.not_paid")} />
                     </div>
 
                     <div className="space-y-3">
                       <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thông tin liên hệ</div>
+                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.contact_info")}</div>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
                         {guestSessionId ? (
@@ -398,17 +400,17 @@ export default function RestaurantBookingCard({
                           </>
                         ) : null}
 
-                        <DetailRow label="Tên" value={contactName} />
+                        <DetailRow label={t("booking.contact_name")} value={contactName} />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="SĐT" value={contactPhone} mono />
+                        <DetailRow label={t("booking.contact_phone")} value={contactPhone} mono />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
                         <DetailRow label="Email" value={contactEmail} />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="Ghi chú" value={note} />
+                        <DetailRow label={t("booking.note")} value={note} />
                       </div>
 
                       <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thanh toán</div>
+                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.payment")}</div>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
                         <DetailRow label="Pay option" value={payOption} />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
@@ -428,7 +430,7 @@ export default function RestaurantBookingCard({
                     onClick={() => code && navigator.clipboard?.writeText(code)}
                     className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
                   >
-                    Copy mã booking
+                    {t("booking.copy_booking_code")}
                   </button>
 
                   <button
@@ -436,7 +438,7 @@ export default function RestaurantBookingCard({
                     onClick={() => setOpen(false)}
                     className="inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
                   >
-                    Đóng
+                    {t("common.close")}
                   </button>
 
                   {showCancelButton ? (
@@ -447,9 +449,9 @@ export default function RestaurantBookingCard({
                         "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold shadow-sm transition",
                         "border border-red-600 text-red-600 hover:bg-red-50",
                       ].join(" ")}
-                      title="Hủy đơn"
+                      title={t("booking.cancel_booking")}
                     >
-                      Hủy đơn
+                      {t("booking.cancel_booking")}
                     </button>
                   ) : null}
                 </div>
@@ -494,14 +496,14 @@ export default function RestaurantBookingCard({
               <UtensilsCrossed className="mt-0.5 h-4 w-4 shrink-0 text-gray-600 dark:text-gray-400" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-                  {restaurantName || "Nhà hàng"}
+                  {restaurantName || t("booking.restaurant")}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                  Giờ đặt: <span className="font-semibold">{reservationLabel}</span>
+                  {t("booking.reservation_time")}: <span className="font-semibold">{reservationLabel}</span>
                   {typeof tablesCount === "number" ? (
                     <>
                       {" "}
-                      · <span className="font-semibold">{tablesCount}</span> bàn
+                      · <span className="font-semibold">{tablesCount}</span> {t("booking.tables_unit")}
                     </>
                   ) : null}
                   {tableTypeName ? (
@@ -517,11 +519,11 @@ export default function RestaurantBookingCard({
             <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-700 dark:text-gray-300 md:grid-cols-2 md:text-sm">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <span>Tạo lúc: {fmtDateTime(createdAt)}</span>
+                <span>{t("booking.created_at")}: {fmtDateTime(createdAt)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <span>Thanh toán: {paidAt ? fmtDateTime(paidAt) : "Chưa thanh toán"}</span>
+                <span>{t("booking.payment")}: {paidAt ? fmtDateTime(paidAt) : t("booking.not_paid")}</span>
               </div>
             </div>
 
@@ -538,7 +540,7 @@ export default function RestaurantBookingCard({
               onClick={() => onOpenRestaurant?.(restaurantSlug)}
               className="w-full inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700 md:text-sm"
             >
-              Xem nhà hàng
+              {t("booking.view_restaurant")}
             </button>
 
             <button
@@ -546,7 +548,7 @@ export default function RestaurantBookingCard({
               onClick={() => setOpen(true)}
               className="w-full inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700 md:text-sm"
             >
-              Xem chi tiết đơn
+              {t("booking.view_order_detail")}
             </button>
 
             <button
@@ -554,7 +556,7 @@ export default function RestaurantBookingCard({
               onClick={() => code && navigator.clipboard?.writeText(code)}
               className="w-full inline-flex items-center justify-center rounded-xl bg-gray-900 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-800 md:text-sm"
             >
-              Copy mã
+              {t("booking.copy_code")}
             </button>
 
             {canResume ? (
@@ -569,13 +571,13 @@ export default function RestaurantBookingCard({
                       ? "bg-gray-400 cursor-not-allowed text-white"
                       : "bg-emerald-600 hover:bg-emerald-700 text-white",
                   ].join(" ")}
-                  title={`Còn ${fmtCountdown(expiresInMs)} để thanh toán`}
+                  title={t("booking.time_left_to_pay", { time: fmtCountdown(expiresInMs) })}
                 >
                   {resuming ? (
-                    "Đang mở MoMo..."
+                    t("booking.opening_momo")
                   ) : (
                     <>
-                      Tiếp tục thanh toán{" "}
+                      {t("booking.resume_payment")}{" "}
                       <span className="inline-block w-[52px] text-center font-mono tabular-nums">
                         ({fmtCountdown(expiresInMs)})
                       </span>
@@ -595,9 +597,9 @@ export default function RestaurantBookingCard({
                   "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
                   "border border-red-600 text-red-600 hover:bg-red-50",
                 ].join(" ")}
-                title="Hủy đơn"
+                title={t("booking.cancel_booking")}
               >
-                Hủy đơn
+                {t("booking.cancel_booking")}
               </button>
             ) : null}
           </div>

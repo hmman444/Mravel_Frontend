@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import i18n from "../../../i18n";
 import { showError, showSuccess } from "../../../utils/toastUtils";
 import { uploadToCloudinary } from "../../../utils/cloudinaryUpload";
 import { useAdminPlaces } from "./useAdminPlaces";
@@ -16,11 +18,12 @@ const toastErr = (e) => {
       : e?.response?.data?.message ||
         e?.response?.data?.error ||
         e?.message ||
-        "Có lỗi xảy ra";
+        i18n.t("admin.error_generic");
   showError(msg);
 };
 
 export function useAdminPlaceDetail() {
+  const { t } = useTranslation();
   const nav = useNavigate();
   const { slug } = useParams();
   const isCreate = !slug || slug === "new";
@@ -48,7 +51,10 @@ export function useAdminPlaceDetail() {
   const deleting = detail?.deleting;
 
   const isLockedReadOnly = !isEditing && !isCreate;
-  const headerTitle = useMemo(() => (isCreate ? "Thêm địa điểm" : "Chi tiết địa điểm"), [isCreate]);
+  const headerTitle = useMemo(
+    () => (isCreate ? t("admin.place_add_title") : t("admin.place_detail_title")),
+    [isCreate, t]
+  );
 
   //  effects 
   useEffect(() => {
@@ -124,13 +130,13 @@ export function useAdminPlaceDetail() {
 
   const validate = () => {
     const errs = [];
-    if (!form.name?.trim()) errs.push("Tên địa điểm là bắt buộc.");
-    if (!form.slug?.trim()) errs.push("Slug (đường dẫn) là bắt buộc.");
-    if (!form.kind) errs.push("Loại địa điểm là bắt buộc.");
+    if (!form.name?.trim()) errs.push(t("admin.place_name_required"));
+    if (!form.slug?.trim()) errs.push(t("admin.place_slug_required"));
+    if (!form.kind) errs.push(t("admin.place_kind_required"));
     if (form.kind !== "DESTINATION" && !form.parentSlug?.trim())
-      errs.push("Địa điểm con phải có Parent slug.");
-    if (form.lon !== "" && Number.isNaN(Number(form.lon))) errs.push("Kinh độ phải là số.");
-    if (form.lat !== "" && Number.isNaN(Number(form.lat))) errs.push("Vĩ độ phải là số.");
+      errs.push(t("admin.place_parent_slug_required"));
+    if (form.lon !== "" && Number.isNaN(Number(form.lon))) errs.push(t("admin.place_lon_must_be_number"));
+    if (form.lat !== "" && Number.isNaN(Number(form.lat))) errs.push(t("admin.place_lat_must_be_number"));
     return errs;
   };
 
@@ -145,7 +151,7 @@ export function useAdminPlaceDetail() {
         const created = await create(payload);
         const createdSlug = created?.slug || payload.slug;
 
-        showSuccess("Đã tạo địa điểm");
+        showSuccess(t("admin.place_created"));
         setDirty(false);
         setIsEditing(false);
 
@@ -153,10 +159,10 @@ export function useAdminPlaceDetail() {
         return;
       }
 
-      if (!form.id) return showError("Thiếu id địa điểm để cập nhật.");
+      if (!form.id) return showError(t("admin.place_missing_id_update"));
 
       const updated = await update(form.id, payload);
-      showSuccess("Đã lưu thay đổi");
+      showSuccess(t("admin.changes_saved"));
 
       setDirty(false);
       setIsEditing(false);
@@ -174,15 +180,15 @@ export function useAdminPlaceDetail() {
 
   const onToggleLock = async () => {
     try {
-      if (!form.id) return showError("Thiếu id.");
+      if (!form.id) return showError(t("admin.missing_id"));
 
       if (form.active) {
         await lock(form.id);
-        showSuccess("Đã khóa");
+        showSuccess(t("admin.locked"));
         setForm((s) => ({ ...s, active: false }));
       } else {
         await unlock(form.id);
-        showSuccess("Đã mở khóa");
+        showSuccess(t("admin.unlocked"));
         setForm((s) => ({ ...s, active: true }));
       }
     } catch (e) {
@@ -194,9 +200,9 @@ export function useAdminPlaceDetail() {
 
   const confirmDelete = async () => {
     try {
-      if (!form.id) return showError("Thiếu id để xóa.");
+      if (!form.id) return showError(t("admin.missing_id_delete"));
       await remove(form.id);
-      showSuccess("Đã xóa");
+      showSuccess(t("admin.deleted"));
       setDeleteOpen(false);
       nav("/admin/places");
     } catch (e) {
@@ -249,7 +255,7 @@ export function useAdminPlaceDetail() {
     try {
       const url = await uploadToCloudinary(file);
       updateImageField(idx, "url", url);
-      showSuccess("Đã tải ảnh lên cloud");
+      showSuccess(t("admin.image_uploaded"));
     } catch (e) {
       toastErr(e);
     }
@@ -297,7 +303,7 @@ export function useAdminPlaceDetail() {
       const url = await uploadToCloudinary(file);
       const cur = form.content?.[idx]?.image || {};
       patchBlock(idx, { image: { ...cur, url } });
-      showSuccess("Đã tải ảnh lên cloud");
+      showSuccess(t("admin.image_uploaded"));
     } catch (e) {
       toastErr(e);
     }
@@ -311,7 +317,7 @@ export function useAdminPlaceDetail() {
       const g = Array.isArray(block?.gallery) ? [...block.gallery] : [];
       g[itemIdx] = { ...(g[itemIdx] || {}), url };
       patchBlock(blockIdx, { gallery: g });
-      showSuccess("Đã tải ảnh lên cloud");
+      showSuccess(t("admin.image_uploaded"));
     } catch (e) {
       toastErr(e);
     }

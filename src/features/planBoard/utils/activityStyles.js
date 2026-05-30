@@ -1,4 +1,6 @@
 // activityStyles.js
+import i18n from "../../../i18n";
+
 export const inputBase =
   "bg-white/90 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.08)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition";
 
@@ -16,7 +18,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-sky-100",
     pillText: "text-sky-800",
     icon: "🚕",
-    label: "Di chuyển",
+    get label() {
+      return i18n.t("enum.activityType.TRANSPORT");
+    },
   },
   FOOD: {
     bg: "bg-orange-50",
@@ -25,7 +29,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-orange-100",
     pillText: "text-orange-800",
     icon: "🥘",
-    label: "Ăn uống",
+    get label() {
+      return i18n.t("enum.activityType.FOOD");
+    },
   },
   STAY: {
     bg: "bg-violet-50",
@@ -34,7 +40,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-violet-100",
     pillText: "text-violet-800",
     icon: "🛏️",
-    label: "Nghỉ ngơi",
+    get label() {
+      return i18n.t("enum.activityType.STAY");
+    },
   },
   ENTERTAIN: {
     bg: "bg-emerald-50",
@@ -43,7 +51,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-emerald-100",
     pillText: "text-emerald-800",
     icon: "🎡",
-    label: "Vui chơi",
+    get label() {
+      return i18n.t("enum.activityType.ENTERTAIN");
+    },
   },
   SIGHTSEEING: {
     bg: "bg-amber-50",
@@ -52,7 +62,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-amber-100",
     pillText: "text-amber-800",
     icon: "🏛️",
-    label: "Tham quan",
+    get label() {
+      return i18n.t("enum.activityType.SIGHTSEEING");
+    },
   },
   SHOPPING: {
     bg: "bg-pink-50",
@@ -61,7 +73,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-pink-100",
     pillText: "text-pink-800",
     icon: "🛍️",
-    label: "Mua sắm",
+    get label() {
+      return i18n.t("enum.activityType.SHOPPING");
+    },
   },
   CINEMA: {
     bg: "bg-rose-50",
@@ -70,7 +84,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-rose-100",
     pillText: "text-rose-800",
     icon: "🎬",
-    label: "Xem phim",
+    get label() {
+      return i18n.t("enum.activityType.CINEMA");
+    },
   },
   EVENT: {
     bg: "bg-indigo-50",
@@ -79,7 +95,9 @@ export const TYPE_STYLES = {
     pillBg: "bg-indigo-100",
     pillText: "text-indigo-800",
     icon: "🎤",
-    label: "Sự kiện",
+    get label() {
+      return i18n.t("enum.activityType.EVENT");
+    },
   },
   OTHER: {
     bg: "bg-slate-50 dark:bg-gray-900",
@@ -88,6 +106,8 @@ export const TYPE_STYLES = {
     pillBg: "bg-slate-100 dark:bg-gray-800",
     pillText: "text-slate-800 dark:text-slate-200",
     icon: "📝",
-    label: "Hoạt động",
+    get label() {
+      return i18n.t("enum.activityType.OTHER");
+    },
   },
 };

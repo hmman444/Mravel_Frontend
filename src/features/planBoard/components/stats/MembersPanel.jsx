@@ -1,6 +1,8 @@
 // src/features/planBoard/components/stats/components/MembersPanel.jsx
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 function clampInt(x, a, b) {
   const n = Math.round(Number(x));
   if (!Number.isFinite(n)) return a;
@@ -19,10 +21,11 @@ export default function MembersPanel({
   fmtMoney,
   labelRole,
 }) {
+  const { t } = useTranslation();
   if (!members?.length) {
     return (
       <p className="text-sm text-slate-500 dark:text-slate-400">
-        Chưa có dữ liệu thành viên.
+        {t("plan.member.empty")}
       </p>
     );
   }
@@ -48,10 +51,13 @@ export default function MembersPanel({
                 />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    {m.fullname || "Thành viên"}
+                    {m.fullname || t("plan.member.default_name")}
                   </p>
                   <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
-                    {labelRole(m.role)} • {m.activityCount || 0} hoạt động
+                    {labelRole(m.role)} •{" "}
+                    {t("plan.member.activity_count", {
+                      count: m.activityCount || 0,
+                    })}
                   </p>
                 </div>
               </div>
@@ -61,7 +67,7 @@ export default function MembersPanel({
                   {fmtMoney(m.shareActual ?? 0)}
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Phần chi của bạn
+                  {t("plan.member.your_share")}
                 </p>
               </div>
             </div>

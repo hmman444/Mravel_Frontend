@@ -2,8 +2,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { partnerResetPasswordAction } from "../slices/partnerAuthSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const useResetPassword = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.partnerAuth);
@@ -15,10 +17,10 @@ export const useResetPassword = () => {
     );
 
     if (partnerResetPasswordAction.fulfilled.match(action)) {
-      setMessage("Đặt lại mật khẩu thành công!");
+      setMessage(t("partnerAuth.reset_password.success"));
       setTimeout(() => navigate("/partner/login"), 1000);
     } else {
-      setMessage(action.payload || "Đặt lại mật khẩu thất bại!");
+      setMessage(action.payload || t("partnerAuth.reset_password.failed"));
     }
   };
 

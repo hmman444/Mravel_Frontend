@@ -20,6 +20,7 @@ import VisibilityDropdown from "../../planBoard/components/modals/VisibilityDrop
 import CurrencyDropdown from "./CurrencyDropdown";
 
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { createPlan } from "../services/planService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
@@ -28,6 +29,7 @@ registerLocale("vi", vi);
 
 export default function NewPlanModal({ open, onClose, onCreated }) {
   const { user } = useSelector((s) => s.auth);
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     title: "",
@@ -44,13 +46,13 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
 
   const handleStart = (d) => {
     if (form.endDate && d > form.endDate)
-      return showError("Ngày bắt đầu không thể sau ngày kết thúc!");
+      return showError(t("feed.newPlan.error.startAfterEnd"));
     setForm((f) => ({ ...f, startDate: d }));
   };
 
   const handleEnd = (d) => {
     if (form.startDate && d < form.startDate)
-      return showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+      return showError(t("feed.newPlan.error.endBeforeStart"));
     setForm((f) => ({ ...f, endDate: d }));
   };
 
@@ -61,17 +63,17 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
   };
 
   const visibilityLabel = {
-    PRIVATE: "Riêng tư",
-    FRIENDS: "Bạn bè",
-    PUBLIC: "Công khai",
+    PRIVATE: t("feed.newPlan.visibility.private"),
+    FRIENDS: t("feed.newPlan.visibility.friends"),
+    PUBLIC: t("feed.newPlan.visibility.public"),
   };
 
   const submit = async (e) => {
     e?.preventDefault();
 
-    if (!user?.id) return showError("Bạn cần đăng nhập!");
+    if (!user?.id) return showError(t("feed.newPlan.error.loginRequired"));
     if (!form.startDate || !form.endDate)
-      return showError("Vui lòng chọn ngày hợp lệ!");
+      return showError(t("feed.newPlan.error.invalidDate"));
 
     setSubmitting(true);
 
@@ -83,11 +85,11 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
       };
 
       const res = await createPlan(payload, user);
-      showSuccess("🎉 Tạo lịch trình thành công!");
+      showSuccess(t("feed.newPlan.success"));
       onCreated?.(res);
       onClose();
     } catch {
-      showError("Không thể tạo lịch trình!");
+      showError(t("feed.newPlan.error.createFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -144,10 +146,10 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Tạo lịch trình mới
+                    {t("feed.newPlan.title")}
                   </h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Lên kế hoạch chuyến đi và chia sẻ với mọi người
+                    {t("feed.newPlan.subtitle")}
                   </p>
                 </div>
               </div>
@@ -159,7 +161,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
               >
                 {/* TITLE */}
                 <div className="space-y-1">
-                  <label className={fieldLabel}>Tiêu đề lịch trình</label>
+                  <label className={fieldLabel}>{t("feed.newPlan.field.title")}</label>
                   <div className="flex items-center gap-3">
                     <div className={iconChip}>
                       <FaFlag />
@@ -170,7 +172,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                         onChange={(e) =>
                           setForm((f) => ({ ...f, title: e.target.value }))
                         }
-                        placeholder="Ví dụ: Đà Lạt 3N2Đ, Team building..."
+                        placeholder={t("feed.newPlan.field.titlePlaceholder")}
                         className="w-full bg-transparent outline-none"
                       />
                     </div>
@@ -179,7 +181,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
 
                 {/* DESCRIPTION */}
                 <div className="space-y-1">
-                  <label className={fieldLabel}>Mô tả</label>
+                  <label className={fieldLabel}>{t("feed.newPlan.field.description")}</label>
                   <div className="flex items-start gap-3">
                     <div className={iconChip}>
                       <FaAlignLeft />
@@ -194,7 +196,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                             description: e.target.value,
                           }))
                         }
-                        placeholder="Ghi chú nhanh về lịch trình, mục đích chuyến đi..."
+                        placeholder={t("feed.newPlan.field.descriptionPlaceholder")}
                         className="w-full bg-transparent outline-none resize-none"
                       />
                     </div>
@@ -206,7 +208,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <span className="text-xs text-gray-500 dark:text-gray-400 px-1">
-                        Từ ngày
+                        {t("feed.newPlan.field.fromDate")}
                       </span>
                       <div className="flex items-center gap-3">
                         <div className={iconChip}>
@@ -216,7 +218,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                           <DatePicker
                             selected={form.startDate}
                             onChange={handleStart}
-                            placeholderText="Chọn ngày bắt đầu"
+                            placeholderText={t("feed.newPlan.field.startPlaceholder")}
                             dateFormat="dd/MM/yyyy"
                             locale="vi"
                             className="w-full bg-transparent outline-none"
@@ -228,7 +230,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
 
                     <div className="space-y-1">
                       <span className="text-xs text-gray-500 dark:text-gray-400 px-1">
-                        Đến ngày
+                        {t("feed.newPlan.field.toDate")}
                       </span>
                       <div className="flex items-center gap-3">
                         <div className={iconChip}>
@@ -239,7 +241,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                             selected={form.endDate}
                             onChange={handleEnd}
                             minDate={form.startDate}
-                            placeholderText="Chọn ngày kết thúc"
+                            placeholderText={t("feed.newPlan.field.endPlaceholder")}
                             dateFormat="dd/MM/yyyy"
                             locale="vi"
                             className="w-full bg-transparent outline-none"
@@ -253,7 +255,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
 
                 {/* VISIBILITY */}
                 <div className="space-y-1">
-                  <label className={fieldLabel}>Quyền hiển thị</label>
+                  <label className={fieldLabel}>{t("feed.newPlan.field.visibility")}</label>
                   <div className="flex items-center gap-3">
                     <div className={iconChip}>{iconMap[form.visibility]}</div>
                     <div className={`${inputBox} flex items-center justify-between`}>
@@ -272,7 +274,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
 
                 {/* BUDGET */}
                 <div className="space-y-2">
-                  <label className={fieldLabel}>Ngân sách dự kiến</label>
+                  <label className={fieldLabel}>{t("feed.newPlan.field.budget")}</label>
 
 
                     <div className="flex items-center gap-3">
@@ -282,7 +284,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                       <div className={inputBox}>
                         <input
                           type="number"
-                          placeholder="Ngân sách tổng (ước tính)"
+                          placeholder={t("feed.newPlan.field.budgetTotalPlaceholder")}
                           value={form.budgetTotal}
                           onChange={(e) =>
                             setForm((f) => ({
@@ -304,7 +306,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                     <div className={inputBox}>
                       <input
                         type="number"
-                        placeholder="Ngân sách / người (nếu có)"
+                        placeholder={t("feed.newPlan.field.budgetPerPersonPlaceholder")}
                         value={form.budgetPerPerson}
                         onChange={(e) =>
                           setForm((f) => ({
@@ -328,7 +330,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                       hover:bg-gray-100 transition
                     "
                   >
-                    Hủy
+                    {t("common.cancel")}
                   </button>
 
                   <button
@@ -342,7 +344,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                       transition disabled:opacity-50
                     "
                   >
-                    {submitting ? "Đang tạo..." : "Tạo lịch trình"}
+                    {submitting ? t("feed.newPlan.creating") : t("feed.newPlan.submit")}
                   </button>
                 </div>
               </form>

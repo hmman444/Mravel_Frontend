@@ -4,8 +4,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getHotels } from "../../../catalog/services/catalogService";
 import { addDaysLocal, formatLocalDate, parseLocalDate } from "../../utils/dateLocal";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function HotelSearchResultsSection() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [sp] = useSearchParams();
 
@@ -72,7 +74,7 @@ export default function HotelSearchResultsSection() {
       .then((res) => {
         if (!alive) return;
         if (!res?.success) {
-          setError(res?.message || "Lỗi tìm kiếm khách sạn");
+          setError(res?.message || t('hotel.search_error'));
           setData({ items: [], totalPages: 0, totalElements: 0 });
           return;
         }
@@ -88,7 +90,7 @@ export default function HotelSearchResultsSection() {
       })
       .catch((e) => {
         if (!alive) return;
-        setError(e?.message || "Lỗi tìm kiếm khách sạn");
+        setError(e?.message || t('hotel.search_error'));
       })
       .finally(() => {
         if (!alive) return;
@@ -115,7 +117,7 @@ export default function HotelSearchResultsSection() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🔎</span>
-          <h2 className="text-2xl font-semibold">Kết quả tìm kiếm</h2>
+          <h2 className="text-2xl font-semibold">{t('hotel.search_results')}</h2>
         </div>
 
         <button
@@ -123,7 +125,7 @@ export default function HotelSearchResultsSection() {
           onClick={clearSearch}
           className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50"
         >
-          Xóa tìm kiếm
+          {t('hotel.clear_search')}
         </button>
       </div>
 
@@ -148,11 +150,11 @@ export default function HotelSearchResultsSection() {
       )}
 
       {!loading && error && (
-        <p className="mt-4 text-sm text-red-600">Không tìm được khách sạn: {error}</p>
+        <p className="mt-4 text-sm text-red-600">{t('hotel.not_found_prefix')}: {error}</p>
       )}
 
       {!loading && !error && (!data.items || data.items.length === 0) && (
-        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Không có kết quả phù hợp.</p>
+        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">{t('hotel.no_matching_results')}</p>
       )}
 
       {/* list */}
@@ -177,17 +179,17 @@ export default function HotelSearchResultsSection() {
                 onClick={() => setPageOnUrl(page - 1)}
                 disabled={page <= 0}
               >
-                Trước
+                {t('hotel.prev')}
               </button>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Trang <b>{page + 1}</b> / {data.totalPages}
+                {t('hotel.page')} <b>{page + 1}</b> / {data.totalPages}
               </span>
               <button
                 className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 disabled:opacity-50"
                 onClick={() => setPageOnUrl(page + 1)}
                 disabled={page + 1 >= data.totalPages}
               >
-                Sau
+                {t('hotel.next')}
               </button>
             </div>
           )}
@@ -199,6 +201,7 @@ export default function HotelSearchResultsSection() {
 
 /*  Card giống WeekendNearbyHotels nhưng dùng cho grid (w-full max-w-[280px]) */
 function HotelMiniCard({ hotel, onClick }) {
+  const { t } = useTranslation();
   const {
     name,
     slug,
@@ -224,12 +227,12 @@ function HotelMiniCard({ hotel, onClick }) {
   else if (oldPrice && price && oldPrice > price) {
     promoPercent = Math.round(((oldPrice - price) / oldPrice) * 100);
   }
-  const promo = promoLabel || (promoPercent ? `Tiết kiệm ${promoPercent}%` : null);
+  const promo = promoLabel || (promoPercent ? t('hotel.save_percent', { percent: promoPercent }) : null);
 
   const priceText =
     price && price > 0
       ? price.toLocaleString("vi-VN") + ` ${currencyCode || "VND"}`
-      : "Giá đang cập nhật";
+      : t('hotel.price_updating');
 
   const oldPriceText =
     oldPrice && oldPrice > 0
@@ -289,7 +292,7 @@ function HotelMiniCard({ hotel, onClick }) {
 
         {oldPriceText && <div className="mt-2 text-xs text-gray-400 line-through">{oldPriceText}</div>}
         <div className="text-[15px] font-bold text-[#ff5a00] mt-[2px]">{priceText}</div>
-        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Chưa bao gồm thuế và phí</div>
+        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{t('hotel.excludes_taxes_fees')}</div>
       </div>
     </div>
   );

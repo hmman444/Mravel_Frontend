@@ -25,7 +25,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 
-const ROLE_LABELS = { OWNER: "Chủ nhóm", ADMIN: "Quản trị", MEMBER: "Thành viên" };
+const ROLE_LABEL_KEYS = { OWNER: "chat.role_owner", ADMIN: "chat.role_admin", MEMBER: "chat.role_member" };
 const ROLE_COLORS = {
   OWNER: "text-yellow-600 bg-yellow-50",
   ADMIN: "text-blue-600 bg-blue-50",
@@ -33,6 +33,7 @@ const ROLE_COLORS = {
 };
 
 function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnline }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const isMe = member.userId === myUserId;
   const canManage = (myRole === "OWNER" || myRole === "ADMIN") && !isMe && member.role !== "OWNER";
@@ -70,10 +71,10 @@ function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnl
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">
-            {member.fullname}{isMe && <span className="text-gray-400 ml-1">(bạn)</span>}
+            {member.fullname}{isMe && <span className="text-gray-400 ml-1">{t("chat.you_suffix")}</span>}
           </p>
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${ROLE_COLORS[member.role]}`}>
-            {ROLE_LABELS[member.role]}
+            {t(ROLE_LABEL_KEYS[member.role])}
           </span>
         </div>
         {canManage && <ChevronRightIcon className="w-4 h-4 text-gray-400" />}
@@ -83,24 +84,24 @@ function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnl
         <div className="absolute right-2 top-10 bg-white shadow-xl rounded-xl border border-gray-100 z-20 min-w-44 py-1 text-sm">
           {canPromote && (
             <button onClick={doPromote} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50">
-              <ShieldCheckIcon className="w-4 h-4 text-blue-500" /> Thăng lên Admin
+              <ShieldCheckIcon className="w-4 h-4 text-blue-500" /> {t("chat.promote_to_admin")}
             </button>
           )}
           {canDemote && (
             <button onClick={doDemote} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50">
-              <ShieldCheckIcon className="w-4 h-4 text-gray-400" /> Hạ xuống Thành viên
+              <ShieldCheckIcon className="w-4 h-4 text-gray-400" /> {t("chat.demote_to_member")}
             </button>
           )}
           {myRole === "OWNER" && (
             <button onClick={doTransfer} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-orange-600">
-              <ShieldCheckIcon className="w-4 h-4" /> Chuyển quyền chủ nhóm
+              <ShieldCheckIcon className="w-4 h-4" /> {t("chat.transfer_ownership")}
             </button>
           )}
           <button onClick={doRemove} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-red-500">
-            <UserMinusIcon className="w-4 h-4" /> Xóa khỏi nhóm
+            <UserMinusIcon className="w-4 h-4" /> {t("chat.remove_from_group")}
           </button>
           <button onClick={() => setOpen(false)} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-500">
-            <XMarkIcon className="w-4 h-4" /> Đóng
+            <XMarkIcon className="w-4 h-4" /> {t("common.close")}
           </button>
         </div>
       )}
@@ -170,7 +171,7 @@ export default function GroupInfoPanel({ conversationId, onClose, compact = fals
               <button
                 onClick={() => setShowAddMembersModal(true)}
                 className="p-1 rounded hover:bg-blue-50 text-blue-500 transition-colors"
-                title="Thêm thành viên"
+                title={t("chat.add_member")}
               >
                 <UserPlusIcon className="w-5 h-5" />
               </button>
@@ -194,7 +195,7 @@ export default function GroupInfoPanel({ conversationId, onClose, compact = fals
                 onKeyDown={(e) => e.key === "Enter" && handleRename()}
               />
               <button onClick={handleRename} className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm">
-                Lưu
+                {t("common.save")}
               </button>
               <button onClick={() => setEditName(false)} className="px-2 py-1.5 text-gray-500">
                 <XMarkIcon className="w-4 h-4" />
@@ -211,7 +212,7 @@ export default function GroupInfoPanel({ conversationId, onClose, compact = fals
               )}
             </div>
           )}
-          <p className="text-xs text-gray-400 mt-1">{detail.memberCount} thành viên</p>
+          <p className="text-xs text-gray-400 mt-1">{t("chat.member_count", { count: detail.memberCount })}</p>
         </div>
 
         {/* Members */}

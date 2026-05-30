@@ -1,6 +1,7 @@
 // src/features/partner/components/restaurants/editors/CuisinesEditor.jsx
 import { useMemo, useRef, useState } from "react";
 import { PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 //  TẠM THỜI: bạn có thể thay bằng options fetch từ API rồi truyền vào prop `options`
 const CUISINE_SEED = [
@@ -41,6 +42,7 @@ export default function CuisinesEditor({
   disabled,
   options = CUISINE_SEED, //  sau này bạn fetch API xong truyền vào đây
 }) {
+  const { t } = useTranslation();
   const list = Array.isArray(value) ? value : [];
   const emit = (next) => onChange?.(next);
 
@@ -142,9 +144,9 @@ export default function CuisinesEditor({
   return (
     <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div>
-        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ẩm thực</div>
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("partner.cuisines.title")}</div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Gõ để tìm và chọn. Bấm <span className="font-medium">Enter</span> để chọn nhanh (hoặc thêm mới nếu không có trong danh sách).
+          {t("partner.cuisines.hint_prefix")} <span className="font-medium">Enter</span> {t("partner.cuisines.hint_suffix")}
         </div>
       </div>
 
@@ -158,7 +160,7 @@ export default function CuisinesEditor({
           onKeyDown={onKeyDown}
           disabled={disabled}
           className="w-full border rounded-xl px-3 py-2 text-sm disabled:opacity-50"
-          placeholder="Ví dụ: Việt Nam, Châu Á, Âu, Buffet..."
+          placeholder={t("partner.cuisines.search_placeholder")}
         />
 
         {/* Suggestions */}
@@ -171,8 +173,8 @@ export default function CuisinesEditor({
                 onClick={addCustomFromQuery}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
               >
-                Không thấy trong danh sách —{" "}
-                <span className="font-medium">Thêm mới:</span> “{q.trim() || "…"}”
+                {t("partner.cuisines.not_found")} —{" "}
+                <span className="font-medium">{t("partner.cuisines.add_new_label")}</span> “{q.trim() || "…"}”
               </button>
             ) : (
               <>
@@ -188,17 +190,17 @@ export default function CuisinesEditor({
                       className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
                         picked ? "opacity-50" : ""
                       }`}
-                      title={picked ? "Đã chọn" : "Chọn"}
+                      title={picked ? t("partner.cuisines.picked") : t("partner.cuisines.pick")}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <div className="font-medium text-gray-900 dark:text-gray-100">
-                            {c?.name || "(Không tên)"}
+                            {c?.name || t("partner.cuisines.no_name")}
                             {c?.region ? <span className="text-gray-500 dark:text-gray-400"> • {c.region}</span> : null}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            Mã: <span className="font-mono">{c?.code || "—"}</span>
-                            {picked ? <span className="ml-2">(đã chọn)</span> : null}
+                            {t("partner.cuisines.code_label")} <span className="font-mono">{c?.code || "—"}</span>
+                            {picked ? <span className="ml-2">{t("partner.cuisines.picked_paren")}</span> : null}
                           </div>
                         </div>
                       </div>
@@ -214,9 +216,9 @@ export default function CuisinesEditor({
                     className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                     disabled={!q.trim()}
                   >
-                    Thêm mới theo nội dung đang gõ: <span className="font-medium">“{q.trim() || "…"}”</span>{" "}
+                    {t("partner.cuisines.add_new_from_query")} <span className="font-medium">“{q.trim() || "…"}”</span>{" "}
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      (mã tự tạo: <span className="font-mono">{toCuisineCode(q.trim()) || "—"}</span>)
+                      ({t("partner.cuisines.auto_code")} <span className="font-mono">{toCuisineCode(q.trim()) || "—"}</span>)
                     </span>
                   </button>
                 </div>
@@ -228,7 +230,7 @@ export default function CuisinesEditor({
 
       {/* Selected chips */}
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa chọn ẩm thực nào.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{t("partner.cuisines.empty")}</div>
       ) : (
         <div className="flex flex-wrap gap-2">
           {list.map((x, i) => {
@@ -243,11 +245,11 @@ export default function CuisinesEditor({
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                      {name || <span className="text-gray-400">(Chưa nhập tên)</span>}
+                      {name || <span className="text-gray-400">{t("partner.cuisines.no_name_entered")}</span>}
                       {region ? <span className="text-gray-500 dark:text-gray-400 font-normal"> • {region}</span> : null}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Mã: <span className="font-mono">{code || "—"}</span>
+                      {t("partner.cuisines.code_label")} <span className="font-mono">{code || "—"}</span>
                     </div>
                   </div>
 
@@ -257,10 +259,10 @@ export default function CuisinesEditor({
                       onClick={() => toggleEdit(i)}
                       disabled={disabled}
                       className="px-2 py-2 rounded-xl border hover:bg-gray-50 text-sm disabled:opacity-50 flex items-center gap-2"
-                      title="Chỉnh chi tiết (tuỳ chọn)"
+                      title={t("partner.cuisines.edit_detail_title")}
                     >
                       <PencilSquareIcon className="h-4 w-4" />
-                      {isEdit ? "Đóng" : "Sửa"}
+                      {isEdit ? t("common.close") : t("common.edit")}
                     </button>
 
                     <button
@@ -268,7 +270,7 @@ export default function CuisinesEditor({
                       onClick={() => remove(i)}
                       disabled={disabled}
                       className="px-2 py-2 rounded-xl hover:bg-red-50 disabled:opacity-50"
-                      title="Xóa"
+                      title={t("common.delete")}
                     >
                       <XMarkIcon className="h-5 w-5 text-red-600" />
                     </button>
@@ -279,7 +281,7 @@ export default function CuisinesEditor({
                 {isEdit && (
                   <div className="px-3 pb-3 grid grid-cols-1 md:grid-cols-12 gap-2">
                     <div className="md:col-span-5">
-                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Tên ẩm thực</div>
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t("partner.cuisines.name_field")}</div>
                       <input
                         value={x?.name || ""}
                         onChange={(e) => {
@@ -288,13 +290,13 @@ export default function CuisinesEditor({
                           patch(i, { name: newName, code: nextCode });
                         }}
                         className="w-full border rounded-xl px-3 py-2 text-sm"
-                        placeholder="Ví dụ: Việt Nam"
+                        placeholder={t("partner.cuisines.name_placeholder")}
                         disabled={disabled}
                       />
                     </div>
 
                     <div className="md:col-span-4">
-                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Mã (code)</div>
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t("partner.cuisines.code_field")}</div>
                       <input
                         value={x?.code || ""}
                         onChange={(e) => patch(i, { code: e.target.value })}
@@ -302,16 +304,16 @@ export default function CuisinesEditor({
                         placeholder="VIETNAMESE"
                         disabled={disabled}
                       />
-                      <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Có thể để trống để tự tạo từ tên.</div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{t("partner.cuisines.code_hint")}</div>
                     </div>
 
                     <div className="md:col-span-3">
-                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nhóm/Khu vực (tuỳ chọn)</div>
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t("partner.cuisines.region_field")}</div>
                       <input
                         value={x?.region || ""}
                         onChange={(e) => patch(i, { region: e.target.value })}
                         className="w-full border rounded-xl px-3 py-2 text-sm"
-                        placeholder="Ví dụ: ASIA / EUROPE / CENTRAL..."
+                        placeholder={t("partner.cuisines.region_placeholder")}
                         disabled={disabled}
                       />
                     </div>

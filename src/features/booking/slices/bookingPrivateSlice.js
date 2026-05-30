@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getMyUserBookings, claimGuestBookings } from "../services/bookingPrivateService";
+import i18n from "../../../i18n";
 
 export const fetchMyUserBookings = createAsyncThunk(
   "bookingPrivate/fetchMyUserBookings",
@@ -7,7 +8,7 @@ export const fetchMyUserBookings = createAsyncThunk(
     try {
       return await getMyUserBookings(userId);
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không tải được đơn theo tài khoản");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.fetch_my_bookings_failed"));
     }
   }
 );
@@ -19,7 +20,7 @@ export const claimMyGuestBookings = createAsyncThunk(
       const claimed = await claimGuestBookings(userId);
       return claimed; // number
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Gộp đơn thất bại");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.claim_guest_bookings_failed"));
     }
   }
 );

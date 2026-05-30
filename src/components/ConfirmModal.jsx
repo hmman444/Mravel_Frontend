@@ -1,16 +1,23 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 export default function ConfirmModal({
   open,
-  title = "Xác nhận",
-  message = "Bạn có chắc muốn thực hiện thao tác này?",
-  confirmText = "Xác nhận",
-  cancelText = "Hủy",
+  title,
+  message,
+  confirmText,
+  cancelText,
   onClose,
   onConfirm,
 }) {
+  const { t } = useTranslation();
   if (!open) return null;
+
+  const resolvedTitle = title ?? t("common.confirm");
+  const resolvedMessage = message ?? t("common.confirm_action_message");
+  const resolvedConfirm = confirmText ?? t("common.confirm");
+  const resolvedCancel = cancelText ?? t("common.cancel");
 
   return createPortal(
     <div
@@ -33,11 +40,11 @@ export default function ConfirmModal({
         "
       >
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {title}
+          {resolvedTitle}
         </h3>
 
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-          {message}
+          {resolvedMessage}
         </p>
 
         <div className="mt-6 flex justify-end gap-3">
@@ -52,7 +59,7 @@ export default function ConfirmModal({
               transition-all shadow-sm
             "
           >
-            {cancelText}
+            {resolvedCancel}
           </button>
 
           <button
@@ -65,7 +72,7 @@ export default function ConfirmModal({
               transition-all
             "
           >
-            {confirmText}
+            {resolvedConfirm}
           </button>
         </div>
       </div>

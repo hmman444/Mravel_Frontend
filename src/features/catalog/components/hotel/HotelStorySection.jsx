@@ -1,7 +1,9 @@
 // src/features/hotels/components/hotel/HotelStorySection.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function HotelStorySection({ hotel }) {
+  const { t } = useTranslation();
   // Hook luôn đứng ở top, không nằm sau bất kỳ early return nào
   const [expanded, setExpanded] = useState(false);
 
@@ -54,7 +56,7 @@ export default function HotelStorySection({ hotel }) {
     // Dính liền card trên: chỉ border-top + padding
     <section className="border-t border-gray-100 dark:border-gray-700 px-6 py-5">
       <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
-        Giới thiệu về {hotel.name}
+        {t("hotel.story_about", { name: hotel.name })}
       </h2>
 
       <div className="mt-3 space-y-3 md:space-y-4 text-sm md:text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
@@ -95,7 +97,7 @@ export default function HotelStorySection({ hotel }) {
             onClick={() => setExpanded((prev) => !prev)}
             className="text-xs md:text-sm font-semibold text-[#0064d2] hover:underline"
           >
-            {expanded ? "Thu gọn" : "Xem thêm >"}
+            {expanded ? t("common.collapse") : t("hotel.see_more_arrow")}
           </button>
         </div>
       )}

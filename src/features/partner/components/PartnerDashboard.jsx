@@ -10,6 +10,9 @@ import {
   LineChart,
 } from "recharts";
 
+import { useTranslation } from "react-i18next";
+
+import i18n from "../../../i18n";
 import { usePartnerStats } from "../hooks/usePartnerStats";
 import { listPartnerHotels, listPartnerRestaurants } from "../services/partnerService";
 
@@ -83,16 +86,16 @@ const buildRange = (filter) => {
 
   if (filter === "today") {
     from = new Date(now);
-    title = "ngày";
+    title = i18n.t("partner.dashboard.range_day");
   } else if (filter === "weekly") {
     from = startOfWeekMonday(now);
-    title = "tuần";
+    title = i18n.t("partner.dashboard.range_week");
   } else if (filter === "monthly") {
     from = startOfMonth(now);
-    title = "tháng";
+    title = i18n.t("partner.dashboard.range_month");
   } else {
     from = startOfYear(now);
-    title = "năm";
+    title = i18n.t("partner.dashboard.range_year");
   }
 
   return {
@@ -102,20 +105,20 @@ const buildRange = (filter) => {
   };
 };
 
-const STATUS_VI = {
-  PENDING_PAYMENT: "Chờ thanh toán",
-  CONFIRMED: "Đã xác nhận",
-  PAID: "Đã thanh toán",
-  COMPLETED: "Hoàn tất",
-  CANCELLED: "Đã hủy",
-  CANCELLED_BY_PARTNER: "Đối tác hủy",
-  REFUNDED: "Đã hoàn tiền",
-  FAILED: "Thất bại",
+const STATUS_KEY = {
+  PENDING_PAYMENT: "partner.booking_status.pending_payment",
+  CONFIRMED: "partner.booking_status.confirmed",
+  PAID: "partner.booking_status.paid",
+  COMPLETED: "partner.booking_status.completed",
+  CANCELLED: "partner.booking_status.cancelled",
+  CANCELLED_BY_PARTNER: "partner.booking_status.cancelled_by_partner",
+  REFUNDED: "partner.booking_status.refunded",
+  FAILED: "partner.booking_status.failed",
 };
 
-const TYPE_VI = {
-  HOTEL: "Khách sạn",
-  RESTAURANT: "Nhà hàng",
+const TYPE_KEY = {
+  HOTEL: "partner.service_type.hotel",
+  RESTAURANT: "partner.service_type.restaurant",
 };
 
 const toVietnameseStatusLabel = (rawKey) => {
@@ -132,8 +135,8 @@ const toVietnameseStatusLabel = (rawKey) => {
     status = status.slice("RESTAURANT_".length);
   }
 
-  const typeLabel = type ? TYPE_VI[type] : null;
-  const statusLabel = STATUS_VI[status] || status;
+  const typeLabel = type ? i18n.t(TYPE_KEY[type]) : null;
+  const statusLabel = STATUS_KEY[status] ? i18n.t(STATUS_KEY[status]) : status;
 
   return typeLabel ? `${typeLabel}: ${statusLabel}` : statusLabel;
 };
@@ -242,6 +245,7 @@ const formatMillion = (amountMaybeVnd) => {
 /* == COMPONENT == */
 
 export default function PartnerDashboard() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState("weekly");
   const range = useMemo(() => buildRange(filter), [filter]);
 
@@ -343,7 +347,7 @@ export default function PartnerDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Tổng quan đối tác</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("partner.dashboard.title")}</h1>
 
       {error ? (
         <div className="mb-6 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -358,24 +362,24 @@ export default function PartnerDashboard() {
           {/* Quick stats (bề ngang đúng bằng chart) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard
-              label="Dịch vụ đang hoạt động"
+              label={t("partner.dashboard.active_services")}
               value={svcLoading ? "—" : String(svcCounts.active)}
-              sub="Đang hiển thị cho khách"
-              badgeText="Tổng"
+              sub={t("partner.dashboard.active_services_sub")}
+              badgeText={t("partner.dashboard.badge_total")}
               badgeClass="bg-green-50 text-green-700"
             />
             <StatCard
-              label="Dịch vụ đang chờ duyệt"
+              label={t("partner.dashboard.pending_services")}
               value={svcLoading ? "—" : String(svcCounts.pending)}
-              sub="Chờ admin duyệt"
-              badgeText="Tổng"
+              sub={t("partner.dashboard.pending_services_sub")}
+              badgeText={t("partner.dashboard.badge_total")}
               badgeClass="bg-yellow-50 text-yellow-700"
             />
             <StatCard
-              label="Doanh thu (triệu)"
+              label={t("partner.dashboard.revenue_million")}
               value={revenue?.loading ? "—" : formatMillion(sumRevenue)}
-              sub="Chỉ tính các đơn đã thanh toán thành công"
-              badgeText={filter === "today" ? "Hôm nay" : "Theo lọc"}
+              sub={t("partner.dashboard.revenue_sub")}
+              badgeText={filter === "today" ? t("partner.dashboard.badge_today") : t("partner.dashboard.badge_by_filter")}
               badgeClass="bg-purple-50 text-purple-700"
             />
           </div>
@@ -384,7 +388,7 @@ export default function PartnerDashboard() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow flex flex-col">
             <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
               <h2 className="text-lg font-semibold">
-                Đơn & doanh thu theo {range.title}
+                {t("partner.dashboard.orders_revenue_by", { range: range.title })}
               </h2>
 
               <select
@@ -392,27 +396,27 @@ export default function PartnerDashboard() {
                 onChange={(e) => setFilter(e.target.value)}
                 className="px-3 py-1 border rounded text-sm"
               >
-                <option value="today">Hôm nay</option>
-                <option value="weekly">Tuần</option>
-                <option value="monthly">Tháng</option>
-                <option value="yearly">Năm</option>
+                <option value="today">{t("partner.dashboard.filter_today")}</option>
+                <option value="weekly">{t("partner.dashboard.filter_week")}</option>
+                <option value="monthly">{t("partner.dashboard.filter_month")}</option>
+                <option value="yearly">{t("partner.dashboard.filter_year")}</option>
               </select>
             </div>
 
             <div className="text-xs text-gray-400 mb-3">
-              Khoảng thời gian: {range.from} → {range.to}
+              {t("partner.dashboard.time_range", { from: range.from, to: range.to })}
             </div>
 
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={revenueSeries}>
                 <XAxis dataKey="label" />
                 <YAxis tickFormatter={(v) => formatMillion(v)} />
-                <Tooltip formatter={(v) => [`${formatMillion(v)} triệu`, ""]} />
+                <Tooltip formatter={(v) => [t("partner.dashboard.value_million", { value: formatMillion(v) }), ""]} />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="hotelRevenue"
-                  name="Doanh thu khách sạn"
+                  name={t("partner.dashboard.hotel_revenue")}
                   stroke="#2563EB"          // xanh
                   strokeWidth={2}
                   dot={{ r: 3, fill: "#2563EB" }}
@@ -422,7 +426,7 @@ export default function PartnerDashboard() {
                 <Line
                   type="monotone"
                   dataKey="restaurantRevenue"
-                  name="Doanh thu nhà hàng"
+                  name={t("partner.dashboard.restaurant_revenue")}
                   stroke="#F97316"          // cam
                   strokeWidth={2}
                   dot={{ r: 3, fill: "#F97316" }}
@@ -433,7 +437,7 @@ export default function PartnerDashboard() {
 
             {!revenue?.loading && revenueSeries.length === 0 ? (
               <div className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                Không có dữ liệu doanh thu trong khoảng thời gian này.
+                {t("partner.dashboard.no_revenue_data")}
               </div>
             ) : null}
           </div>
@@ -443,21 +447,21 @@ export default function PartnerDashboard() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow flex flex-col">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Tỷ lệ trạng thái đơn</h2>
+              <h2 className="text-lg font-semibold">{t("partner.dashboard.status_ratio_title")}</h2>
               <div className="text-xs text-gray-400 mt-1">
-                Theo khoảng thời gian: {range.from} → {range.to}
+                {t("partner.dashboard.by_time_range", { from: range.from, to: range.to })}
               </div>
             </div>
             <span className="text-xs rounded-full px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-              {bookingLoading ? "Đang tải" : `Tổng: ${statusTotal}`}
+              {bookingLoading ? t("common.loading") : t("partner.dashboard.total_count", { count: statusTotal })}
             </span>
           </div>
 
           {bookingLoading ? (
-            <div className="text-sm text-gray-500 dark:text-gray-400">Đang tải thống kê...</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t("partner.dashboard.loading_stats")}</div>
           ) : statusRatioList.length === 0 ? (
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Không có dữ liệu trạng thái đơn trong khoảng thời gian này.
+              {t("partner.dashboard.no_status_data")}
             </div>
           ) : (
             <div className="space-y-3">
@@ -465,7 +469,7 @@ export default function PartnerDashboard() {
                 <div key={it.rawKey} className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-sm text-gray-800 dark:text-gray-200 truncate">{it.name}</div>
-                    <div className="text-xs text-gray-400">{it.value} đơn</div>
+                    <div className="text-xs text-gray-400">{t("partner.dashboard.order_count", { count: it.value })}</div>
                   </div>
                   <div className="shrink-0 text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {it.percent}%

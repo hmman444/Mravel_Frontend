@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { updateMyProfile } from "../services/userProfileService";
 import { getTokens } from "../../../utils/tokenManager";
 import { setUser } from "../../auth/slices/authSlice";
+import i18n from "../../../i18n";
 
 export const updateUserProfile = createAsyncThunk(
   "userProfile/updateUserProfile",
@@ -13,7 +14,7 @@ export const updateUserProfile = createAsyncThunk(
     const accessToken = accessTokenFromState || accessTokenFromStorage;
 
     if (!accessToken) {
-      return rejectWithValue("Không có token, vui lòng đăng nhập lại.");
+      return rejectWithValue(i18n.t("user.no_token_please_login"));
     }
 
     const result = await updateMyProfile(payload);
@@ -23,7 +24,7 @@ export const updateUserProfile = createAsyncThunk(
       dispatch(setUser(result.data));
       return result.data;
     } else {
-      return rejectWithValue(result.message || "Cập nhật hồ sơ thất bại.");
+      return rejectWithValue(result.message || i18n.t("user.update_profile_failed"));
     }
   }
 );
@@ -50,7 +51,7 @@ const userProfileSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state) => {
         state.saving = false;
-        state.success = "Cập nhật hồ sơ thành công!";
+        state.success = i18n.t("user.update_profile_success");
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.saving = false;

@@ -1,5 +1,6 @@
 // src/features/hotels/components/hotel/WeekendNearbyHotels.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
@@ -7,6 +8,7 @@ import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 import { useCatalogHotels } from "../../../catalog/hooks/useCatalogHotels";
 
 export default function WeekendNearbyHotels() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { items, loading, error, fetchHotels } = useCatalogHotels();
   const [activeKey, setActiveKey] = useState(null);
@@ -25,7 +27,7 @@ export default function WeekendNearbyHotels() {
 
     items.forEach((h) => {
         const key = h.destinationSlug || h.cityName || "other";
-        const label = h.cityName || h.destinationSlug || "Khác";
+        const label = h.cityName || h.destinationSlug || t("hotel.other");
 
         if (!map.has(key)) {
         map.set(key, { key, label, hotels: [] });
@@ -66,7 +68,7 @@ export default function WeekendNearbyHotels() {
       {/* TITLE */}
       <div className="flex items-center gap-2 mb-4">
         <span className="text-2xl">🌴</span>
-        <h2 className="text-2xl font-semibold">Chơi cuối tuần gần nhà</h2>
+        <h2 className="text-2xl font-semibold">{t("hotel.weekend_nearby_title")}</h2>
       </div>
 
       {/* TABS ĐIỂM ĐẾN */}
@@ -138,7 +140,7 @@ export default function WeekendNearbyHotels() {
       {/* lỗi */}
       {error && (
         <p className="mt-2 text-sm text-red-600">
-          Không tải được danh sách khách sạn: {error}
+          {t("hotel.load_hotels_error", { error })}
         </p>
       )}
     </section>
@@ -148,6 +150,7 @@ export default function WeekendNearbyHotels() {
 /*  CARD NHỎ GIỐNG TRAVELOKA  */
 
 function HotelMiniCard({ hotel, onClick }) {
+  const { t } = useTranslation();
   // đoán các field từ HotelSummaryDTO – nếu tên khác bạn chỉ cần chỉnh lại ở đây
   const {
     name,
@@ -176,7 +179,7 @@ function HotelMiniCard({ hotel, onClick }) {
   const priceText =
     price && price > 0
       ? price.toLocaleString("vi-VN") + ` ${currencyCode || "VND"}`
-      : "Giá đang cập nhật";
+      : t("hotel.price_updating");
 
   const oldPriceText =
     oldPrice && oldPrice > 0
@@ -195,7 +198,7 @@ function HotelMiniCard({ hotel, onClick }) {
     (hotel.images && hotel.images[0]?.url) ||
     "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80&auto=format&fit=crop";
 
-  const promo = promoLabel || (promoPercent ? `Tiết kiệm ${promoPercent}%` : null);
+  const promo = promoLabel || (promoPercent ? t("hotel.save_percent", { percent: promoPercent }) : null);
 
   return (
     <div
@@ -261,7 +264,7 @@ function HotelMiniCard({ hotel, onClick }) {
           {priceText}
         </div>
         <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-          Chưa bao gồm thuế và phí
+          {t("hotel.taxes_fees_excluded")}
         </div>
       </div>
     </div>

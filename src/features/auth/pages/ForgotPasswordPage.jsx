@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
@@ -8,6 +9,7 @@ import LoadingOverlay from "../../../components/LoadingOverlay";
 import { validateEmail } from "../../../utils/validators";
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
   const { handleForgot, message, loading, error, cooldown } = useForgotPassword();
@@ -27,22 +29,22 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout>
-      <LoadingOverlay show={loading} text="Đang gửi mã OTP..." />
+      <LoadingOverlay show={loading} text={t("auth.sending_otp")} />
 
       <a href="/" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Về Trang chủ Mravel
+        ← {t("auth.back_to_home")}
       </a>
 
-      <AuthCard title="Quên mật khẩu" subtitle="Nhập email để nhận mã OTP đặt lại mật khẩu">
+      <AuthCard title={t("auth.forgot_password_title")} subtitle={t("auth.forgot_password_subtitle")}>
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <AuthInput
-              label="Email"
+              label={t("common.email")}
               type="text"
               icon={EnvelopeIcon}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Nhập email của bạn"
+              placeholder={t("auth.email_placeholder")}
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
@@ -52,7 +54,7 @@ export default function ForgotPasswordPage() {
             disabled={loading || cooldown > 0}
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold disabled:opacity-60"
           >
-            {cooldown > 0 ? `Gửi lại OTP sau ${cooldown}s` : "Gửi mã OTP"}
+            {cooldown > 0 ? t("auth.resend_otp_in", { n: cooldown }) : t("auth.send_otp")}
           </button>
 
           {error && !errors.email && (
@@ -65,7 +67,7 @@ export default function ForgotPasswordPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           <a href="/login" className="text-blue-500">
-            Quay lại đăng nhập
+            {t("auth.back_to_login")}
           </a>
         </p>
       </AuthCard>

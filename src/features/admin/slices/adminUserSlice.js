@@ -1,6 +1,7 @@
 // src/features/admin/slices/adminUserSlice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { fetchAdminUsers, lockUser, unlockUser } from "../services/adminUserService";
+import i18n from "../../../i18n";
 
 const initialState = {
   items: [],
@@ -15,8 +16,8 @@ const apiMessage = (err) => {
     err?.response?.data?.error ||
     err?.message;
 
-  if (err?.response?.status === 401) return "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
-  return msg || "Có lỗi xảy ra";
+  if (err?.response?.status === 401) return i18n.t("admin.error_unauthorized");
+  return msg || i18n.t("admin.error_generic");
 };
 
 export const loadAdminUsers = createAsyncThunk(

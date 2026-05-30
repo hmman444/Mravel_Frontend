@@ -1,5 +1,6 @@
 import axios from "axios";
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,7 +10,7 @@ const RESTAURANT_INVENTORY_PREFIX = `${CATALOG_PREFIX}/restaurants/inventory`;
 const BOOKING_PREFIX = "/booking";
 const RESTAURANT_BOOKING_PREFIX = `${BOOKING_PREFIX}/restaurants`;
 
-const toError = (error, fallback = "Lỗi kết nối đến server") => {
+const toError = (error, fallback = i18n.t("booking.error_server_connection")) => {
   if (error?.response?.data) {
     const msg = error.response.data.message || error.response.data.error || fallback;
     return { success: false, message: msg };
@@ -47,7 +48,7 @@ export const createRestaurantBookingAndPay = async (payload) => {
     return { success: true, data: dto };
   } catch (error) {
     console.error("createRestaurantBookingAndPay error:", error?.response || error);
-    return toError(error, "Không tạo được thanh toán đặt bàn");
+    return toError(error, i18n.t("booking.error_create_reservation_payment"));
   }
 };
 
@@ -76,6 +77,6 @@ export const getRestaurantAvailability = async ({
     return { success: true, data: res.data?.data };
   } catch (error) {
     console.error("getRestaurantAvailability error:", error?.response || error);
-    return toError(error, "Không kiểm tra được bàn trống");
+    return toError(error, i18n.t("booking.error_check_table_availability"));
   }
 };

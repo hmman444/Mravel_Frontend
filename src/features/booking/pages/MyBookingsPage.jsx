@@ -1,6 +1,7 @@
 // src/features/booking/pages/MyBookingsPage.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -16,6 +17,7 @@ import RestaurantBookingCard from "../components/public/RestaurantBookingCard";
 import { useMyBookingsPage } from "../hooks/useMyBookingsPage";
 
 export default function MyBookingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => window.scrollTo(0, 0), []);
@@ -97,17 +99,17 @@ export default function MyBookingsPage() {
         ].join(" ")}
         title={
           !isLoggedIn
-            ? "Bạn chưa đăng nhập, bấm để chuyển tới trang đăng nhập"
+            ? t("booking.claim_login_hint")
             : type === "HOTEL"
-            ? "Gộp đơn khách sạn guest vào tài khoản"
-            : "Gộp đơn đặt bàn guest vào tài khoản"
+            ? t("booking.claim_hotel_hint")
+            : t("booking.claim_restaurant_hint")
         }
       >
-        {claimLoading ? "Đang gộp..." : "Gộp vào tài khoản"}
+        {claimLoading ? t("booking.claiming") : t("booking.claim_to_account")}
       </button>
 
       {!isLoggedIn ? (
-        <span className="text-[11px] text-gray-500 dark:text-gray-400">(Cần đăng nhập)</span>
+        <span className="text-[11px] text-gray-500 dark:text-gray-400">{t("booking.login_required")}</span>
       ) : null}
     </>
   );
@@ -123,10 +125,10 @@ export default function MyBookingsPage() {
           onClearDevice={onClearDevice}
           onOpenHotel={onOpenHotel}
           detailScope="PUBLIC"
-          title="Đơn khách sạn trên thiết bị này"
-          description="Danh sách này dựa trên cookie trình duyệt. Nếu bạn xoá dữ liệu trình duyệt, danh sách có thể mất."
-          emptyTitle="Chưa có đơn khách sạn nào trên thiết bị này."
-          emptyDescription="Bạn có thể tra cứu theo mã ở tab “Tra cứu”."
+          title={t("booking.device_hotel_title")}
+          description={t("booking.device_list_description")}
+          emptyTitle={t("booking.device_hotel_empty_title")}
+          emptyDescription={t("booking.device_empty_description")}
           rightActions={claimButton}
         />
       );
@@ -141,10 +143,10 @@ export default function MyBookingsPage() {
         onClearDevice={onClearDevice}
         onOpenRestaurant={onOpenRestaurant}
         detailScope="PUBLIC"
-        title="Đơn đặt bàn trên thiết bị này"
-        description="Danh sách này dựa trên cookie trình duyệt. Nếu bạn xoá dữ liệu trình duyệt, danh sách có thể mất."
-        emptyTitle="Chưa có đơn đặt bàn nào trên thiết bị này."
-        emptyDescription="Bạn có thể tra cứu theo mã ở tab “Tra cứu”."
+        title={t("booking.device_restaurant_title")}
+        description={t("booking.device_list_description")}
+        emptyTitle={t("booking.device_restaurant_empty_title")}
+        emptyDescription={t("booking.device_empty_description")}
         rightActions={claimButton}
       />
     );
@@ -155,10 +157,10 @@ export default function MyBookingsPage() {
       return (
         <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-            Vui lòng đăng nhập
+            {t("booking.please_login")}
           </h2>
           <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-            Bạn cần đăng nhập để xem đơn trong tài khoản.
+            {t("booking.login_to_view_account_bookings")}
           </p>
 
           <button
@@ -166,7 +168,7 @@ export default function MyBookingsPage() {
             onClick={goLogin}
             className="mt-4 inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition"
           >
-            Đăng nhập
+            {t("booking.login")}
           </button>
         </div>
       );
@@ -181,10 +183,10 @@ export default function MyBookingsPage() {
           onRefresh={onRefreshAccount}
           onOpenHotel={onOpenHotel}
           detailScope="PRIVATE"
-          title="Đơn khách sạn trong tài khoản"
-          description="Danh sách này gắn với tài khoản đang đăng nhập."
-          emptyTitle="Chưa có đơn khách sạn nào trong tài khoản."
-          emptyDescription="Bạn có thể đặt phòng hoặc xem đơn theo thiết bị ở tab bên cạnh."
+          title={t("booking.account_hotel_title")}
+          description={t("booking.account_list_description")}
+          emptyTitle={t("booking.account_hotel_empty_title")}
+          emptyDescription={t("booking.account_hotel_empty_description")}
           showClearDevice={false}
         />
       );
@@ -198,10 +200,10 @@ export default function MyBookingsPage() {
         onRefresh={onRefreshAccount}
         onOpenRestaurant={onOpenRestaurant}
         detailScope="PRIVATE"
-        title="Đơn đặt bàn trong tài khoản"
-        description="Danh sách này gắn với tài khoản đang đăng nhập."
-        emptyTitle="Chưa có đơn đặt bàn nào trong tài khoản."
-        emptyDescription="Bạn có thể đặt bàn hoặc xem đơn theo thiết bị ở tab bên cạnh."
+        title={t("booking.account_restaurant_title")}
+        description={t("booking.account_list_description")}
+        emptyTitle={t("booking.account_restaurant_empty_title")}
+        emptyDescription={t("booking.account_restaurant_empty_description")}
         showClearDevice={false}
       />
     );
@@ -220,11 +222,13 @@ export default function MyBookingsPage() {
         <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 md:px-6 md:pt-8">
           <div className="mb-5">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 md:text-2xl">
-              Đơn đã đặt
+              {t("booking.my_bookings_title")}
             </h1>
             <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-              Bạn có thể xem theo <b>tài khoản</b>, theo <b>cookie thiết bị</b>, hoặc{" "}
-              <b>tra cứu bằng mã</b>.
+              <Trans
+                i18nKey="booking.my_bookings_subtitle"
+                components={{ b: <b /> }}
+              />
             </p>
           </div>
 
@@ -241,7 +245,7 @@ export default function MyBookingsPage() {
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50",
                 ].join(" ")}
               >
-                Đơn trong tài khoản
+                {t("booking.tab_account")}
               </button>
 
               <button
@@ -254,7 +258,7 @@ export default function MyBookingsPage() {
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50",
                 ].join(" ")}
               >
-                Đơn trên thiết bị này
+                {t("booking.tab_device")}
               </button>
 
               <button
@@ -267,12 +271,12 @@ export default function MyBookingsPage() {
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50",
                 ].join(" ")}
               >
-                Tra cứu
+                {t("booking.tab_lookup")}
               </button>
             </div>
 
             <div className="text-[11px] text-gray-500 dark:text-gray-400 md:text-xs">
-              Tip: Sau khi đặt xong, bạn nên copy/chụp lại mã booking để tra cứu.
+              {t("booking.lookup_tip")}
             </div>
           </div>
 
@@ -280,8 +284,10 @@ export default function MyBookingsPage() {
           <div className="mb-5">
             <BookingTypeTabs type={type} setType={setType} />
             <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-              Khách sạn: {tab === "ACCOUNT" ? accountHotelCount : deviceHotelCount}
-              {" "}· Quán ăn: {tab === "ACCOUNT" ? accountRestCount : deviceRestCount}
+              {t("booking.counts_summary", {
+                hotel: tab === "ACCOUNT" ? accountHotelCount : deviceHotelCount,
+                restaurant: tab === "ACCOUNT" ? accountRestCount : deviceRestCount,
+              })}
             </p>
           </div>
 

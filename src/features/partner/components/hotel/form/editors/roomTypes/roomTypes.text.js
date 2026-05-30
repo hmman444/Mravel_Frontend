@@ -1,74 +1,194 @@
+import i18n from "../../../../../../../i18n";
+
 export const TEXT = {
-  SECTION_TITLE: "Loại phòng",
-  SECTION_HINT: "Thêm loại phòng + gói giá (rate plan) + tiện ích phòng (scope ROOM).",
-  ADD_ROOM: "Thêm loại phòng",
-  ROOM_PREFIX: "Phòng",
-  ROOM_UNNAMED: "(chưa đặt tên)",
-  CODE_LABEL: "Mã phòng",
-  MOVE_UP: "Lên",
-  MOVE_DOWN: "Xuống",
-  DELETE_ROOM: "Xóa phòng",
+  get SECTION_TITLE() {
+    return i18n.t("partner.room_types.section_title");
+  },
+  get SECTION_HINT() {
+    return i18n.t("partner.room_types.section_hint");
+  },
+  get ADD_ROOM() {
+    return i18n.t("partner.room_types.add_room");
+  },
+  get ROOM_PREFIX() {
+    return i18n.t("partner.room_types.room_prefix");
+  },
+  get ROOM_UNNAMED() {
+    return i18n.t("partner.room_types.room_unnamed");
+  },
+  get CODE_LABEL() {
+    return i18n.t("partner.room_types.code_label");
+  },
+  get MOVE_UP() {
+    return i18n.t("partner.room_types.move_up");
+  },
+  get MOVE_DOWN() {
+    return i18n.t("partner.room_types.move_down");
+  },
+  get DELETE_ROOM() {
+    return i18n.t("partner.room_types.delete_room");
+  },
 
-  BASIC_NAME: "Tên phòng *",
-  BASIC_CODE: "Mã phòng *",
-  BASIC_DESC: "Mô tả",
-  BASIC_AREA: "Diện tích (m²)",
-  BASIC_QTY: "Số lượng phòng",
-  BASIC_MAX_ADULTS: "Tối đa người lớn",
-  BASIC_MAX_CHILDREN: "Tối đa trẻ em",
-  CODE_AUTO: "Mã tự tạo theo tên phòng (có thể sửa).",
-  CODE_MANUAL: "Bạn đang sửa mã thủ công.",
+  get BASIC_NAME() {
+    return i18n.t("partner.room_types.basic_name");
+  },
+  get BASIC_CODE() {
+    return i18n.t("partner.room_types.basic_code");
+  },
+  get BASIC_DESC() {
+    return i18n.t("partner.room_types.basic_desc");
+  },
+  get BASIC_AREA() {
+    return i18n.t("partner.room_types.basic_area");
+  },
+  get BASIC_QTY() {
+    return i18n.t("partner.room_types.basic_qty");
+  },
+  get BASIC_MAX_ADULTS() {
+    return i18n.t("partner.room_types.basic_max_adults");
+  },
+  get BASIC_MAX_CHILDREN() {
+    return i18n.t("partner.room_types.basic_max_children");
+  },
+  get CODE_AUTO() {
+    return i18n.t("partner.room_types.code_auto");
+  },
+  get CODE_MANUAL() {
+    return i18n.t("partner.room_types.code_manual");
+  },
 
-  IMAGES_TITLE: "Ảnh phòng",
-  IMAGES_HINT: "Thêm ảnh bằng link hoặc tải từ máy (preview).",
-  PASTE_IMAGE_URL: "Dán link ảnh...",
-  ADD_BY_URL: "Thêm link",
-  UPLOAD_IMAGES: "Tải ảnh",
-  NO_IMAGES: "Chưa có ảnh phòng.",
-  SET_COVER: "Đặt làm ảnh bìa",
-  COVER: "Ảnh bìa",
-  DELETE_IMAGE: "Xóa ảnh",
+  get IMAGES_TITLE() {
+    return i18n.t("partner.room_types.images_title");
+  },
+  get IMAGES_HINT() {
+    return i18n.t("partner.room_types.images_hint");
+  },
+  get PASTE_IMAGE_URL() {
+    return i18n.t("partner.room_types.paste_image_url");
+  },
+  get ADD_BY_URL() {
+    return i18n.t("partner.room_types.add_by_url");
+  },
+  get UPLOAD_IMAGES() {
+    return i18n.t("partner.room_types.upload_images");
+  },
+  get NO_IMAGES() {
+    return i18n.t("partner.room_types.no_images");
+  },
+  get SET_COVER() {
+    return i18n.t("partner.room_types.set_cover");
+  },
+  get COVER() {
+    return i18n.t("partner.room_types.cover");
+  },
+  get DELETE_IMAGE() {
+    return i18n.t("partner.room_types.delete_image");
+  },
 
-  BEDS_TITLE: "Giường",
-  ADD_BED: "Thêm giường",
-  BED_COUNT: "Số lượng",
-  DELETE: "Xóa",
+  get BEDS_TITLE() {
+    return i18n.t("partner.room_types.beds_title");
+  },
+  get ADD_BED() {
+    return i18n.t("partner.room_types.add_bed");
+  },
+  get BED_COUNT() {
+    return i18n.t("partner.room_types.bed_count");
+  },
+  get DELETE() {
+    return i18n.t("common.delete");
+  },
 
-  RATE_PLANS_TITLE: "Gói giá (Rate plans)",
-  ADD_RATE_PLAN: "Thêm gói giá",
-  NO_RATE_PLANS: "Chưa có gói giá.",
-  RP_NAME: "Tên gói",
-  RP_CODE: "Mã gói",
-  RP_BOARD: "Bữa ăn",
-  RP_PAYMENT: "Thanh toán",
-  RP_PRICE: "Giá/đêm",
-  RP_REF_PRICE: "Giá gốc/đêm",
-  RP_REFUNDABLE: "Hoàn/Hủy được",
-  RP_INCLUDES_TAX: "Đã gồm thuế",
-  RP_INCLUDES_FEE: "Đã gồm phí DV",
-  RP_LOW_AVAIL: "Hiện sắp hết",
-  RP_PROMO: "Nhãn khuyến mãi",
-  RP_CANCEL: "Chính sách hủy",
+  get RATE_PLANS_TITLE() {
+    return i18n.t("partner.room_types.rate_plans_title");
+  },
+  get ADD_RATE_PLAN() {
+    return i18n.t("partner.room_types.add_rate_plan");
+  },
+  get NO_RATE_PLANS() {
+    return i18n.t("partner.room_types.no_rate_plans");
+  },
+  get RP_NAME() {
+    return i18n.t("partner.room_types.rp_name");
+  },
+  get RP_CODE() {
+    return i18n.t("partner.room_types.rp_code");
+  },
+  get RP_BOARD() {
+    return i18n.t("partner.room_types.rp_board");
+  },
+  get RP_PAYMENT() {
+    return i18n.t("partner.room_types.rp_payment");
+  },
+  get RP_PRICE() {
+    return i18n.t("partner.room_types.rp_price");
+  },
+  get RP_REF_PRICE() {
+    return i18n.t("partner.room_types.rp_ref_price");
+  },
+  get RP_REFUNDABLE() {
+    return i18n.t("partner.room_types.rp_refundable");
+  },
+  get RP_INCLUDES_TAX() {
+    return i18n.t("partner.room_types.rp_includes_tax");
+  },
+  get RP_INCLUDES_FEE() {
+    return i18n.t("partner.room_types.rp_includes_fee");
+  },
+  get RP_LOW_AVAIL() {
+    return i18n.t("partner.room_types.rp_low_avail");
+  },
+  get RP_PROMO() {
+    return i18n.t("partner.room_types.rp_promo");
+  },
+  get RP_CANCEL() {
+    return i18n.t("partner.room_types.rp_cancel");
+  },
 
-  AMENITIES_TITLE: "Tiện ích phòng (scope ROOM)",
-  AMENITIES_HINT: "Chọn các tiện ích thuộc phòng.",
+  get AMENITIES_TITLE() {
+    return i18n.t("partner.room_types.amenities_title");
+  },
+  get AMENITIES_HINT() {
+    return i18n.t("partner.room_types.amenities_hint");
+  },
 
   // option labels
   BOARD_OPTIONS: {
-    ROOM_ONLY: "Chỉ phòng (không ăn)",
-    BREAKFAST_INCLUDED: "Có ăn sáng",
-    HALF_BOARD: "Ăn 2 bữa (thường sáng + tối)",
-    FULL_BOARD: "Ăn 3 bữa (sáng + trưa + tối)",
-},
+    get ROOM_ONLY() {
+      return i18n.t("enum.board_type.room_only");
+    },
+    get BREAKFAST_INCLUDED() {
+      return i18n.t("enum.board_type.breakfast_included");
+    },
+    get HALF_BOARD() {
+      return i18n.t("enum.board_type.half_board");
+    },
+    get FULL_BOARD() {
+      return i18n.t("enum.board_type.full_board");
+    },
+  },
   PAYMENT_OPTIONS: {
-    PREPAID: "Thanh toán trước",
-    PAY_AT_HOTEL: "Thanh toán tại khách sạn",
+    get PREPAID() {
+      return i18n.t("enum.payment_type.prepaid");
+    },
+    get PAY_AT_HOTEL() {
+      return i18n.t("enum.payment_type.pay_at_hotel");
+    },
   },
   BED_TYPES: {
-    SINGLE: "Giường đơn",
-    DOUBLE: "Giường đôi",
-    QUEEN: "Queen",
-    KING: "King",
-    TWIN: "Twin",
+    get SINGLE() {
+      return i18n.t("enum.bed_type.single");
+    },
+    get DOUBLE() {
+      return i18n.t("enum.bed_type.double");
+    },
+    get QUEEN() {
+      return i18n.t("enum.bed_type.queen");
+    },
+    get KING() {
+      return i18n.t("enum.bed_type.king");
+    },
+    get TWIN() {
+      return i18n.t("enum.bed_type.twin");
+    },
   },
 };

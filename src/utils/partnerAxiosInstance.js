@@ -1,5 +1,6 @@
 // src/utils/partnerAxiosInstance.js
 import axios from "axios";
+import i18n from "../i18n";
 import { getStore } from "../redux/storeInjector";
 import {
   getPartnerTokens,
@@ -23,6 +24,8 @@ partnerApi.interceptors.request.use(
   (config) => {
     const { accessToken } = getPartnerTokens();
     if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+    config.headers["Accept-Language"] =
+      i18n.language || localStorage.getItem("language") || "vi";
     return config;
   },
   (error) => Promise.reject(error)

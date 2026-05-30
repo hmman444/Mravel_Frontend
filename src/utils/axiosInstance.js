@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "../i18n";
 import { getTokens, setTokens, clearTokens } from "./tokenManager";
 import { decodeJwtPayload } from "./jwt";
 import { showError } from "./toastUtils";
@@ -21,6 +22,10 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    // Gắn ngôn ngữ hiện tại để BE trả content/message đúng locale (vi/en)
+    const lang = i18n.language || localStorage.getItem("language") || "vi";
+    config.headers["Accept-Language"] = lang;
 
     const store = getStore();
     const authState = store?.getState?.()?.auth;

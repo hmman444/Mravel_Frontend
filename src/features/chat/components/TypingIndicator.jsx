@@ -1,10 +1,13 @@
+import { useTranslation } from "react-i18next";
+
 export default function TypingIndicator({ names }) {
+  const { t } = useTranslation();
   if (!names || names.length === 0) return null;
 
   const label =
     names.length === 1
-      ? `${names[0]} đang nhập...`
-      : `${names.slice(0, 2).join(", ")} đang nhập...`;
+      ? t("chat.typing", { name: names[0] })
+      : t("chat.typing", { name: names.slice(0, 2).join(", ") });
 
   return (
     <div className="flex items-center gap-2 px-4 py-1 text-xs text-gray-500">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminLayout from "../components/AdminLayout";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import { useAdminServices } from "../hooks/useAdminServices";
@@ -31,6 +32,7 @@ function useDebounced(value, delay = 350) {
 }
 
 export default function ManageServicesPage() {
+    const { t } = useTranslation();
     const { mode, setMode, items, loading, acting, load, act } = useAdminServices();
 
     /** == FILTER UI STATE == */
@@ -93,7 +95,7 @@ export default function ManageServicesPage() {
         } catch (e) {
         // chỉ show error cho request mới nhất
         if (mySeq === reqSeqRef.current) {
-            showError(typeof e === "string" ? e : "Không tải được danh sách");
+            showError(typeof e === "string" ? e : t("admin.services_load_failed"));
         }
         throw e;
         }
@@ -135,10 +137,10 @@ export default function ManageServicesPage() {
     const onApprove = async (x) => {
         try {
         await act({ mode, action: "APPROVE", id: x.id });
-        showSuccess("Đã approve");
+        showSuccess(t("admin.services_approve_success"));
         await reload(mode, queryParams);
         } catch (e) {
-        showError(typeof e === "string" ? e : "Approve thất bại");
+        showError(typeof e === "string" ? e : t("admin.services_approve_failed"));
         }
     };
 
@@ -152,22 +154,22 @@ export default function ManageServicesPage() {
         if (!target?.id) return;
         try {
         await act({ mode, action: reasonMode, id: target.id, reason });
-        showSuccess(reasonMode === "REJECT" ? "Đã reject" : "Đã block");
+        showSuccess(reasonMode === "REJECT" ? t("admin.services_reject_success") : t("admin.services_block_success"));
         setReasonOpen(false);
         setTarget(null);
         await reload(mode, queryParams);
         } catch (e) {
-        showError(typeof e === "string" ? e : "Thao tác thất bại");
+        showError(typeof e === "string" ? e : t("admin.services_action_failed"));
         }
     };
 
     const onUnblock = async (x) => {
         try {
         await act({ mode, action: "UNBLOCK", id: x.id });
-        showSuccess("Đã unblock");
+        showSuccess(t("admin.services_unblock_success"));
         await reload(mode, queryParams);
         } catch (e) {
-        showError(typeof e === "string" ? e : "Unblock thất bại");
+        showError(typeof e === "string" ? e : t("admin.services_unblock_failed"));
         }
     };
 
@@ -178,10 +180,10 @@ export default function ManageServicesPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Quản lý dịch vụ
+                {t("admin.services_title")}
                 </h1>
                 <p className="mt-1 text-sm text-slate-500">
-                Duyệt / từ chối / chặn dịch vụ do partner đăng.
+                {t("admin.services_subtitle")}
                 </p>
             </div>
 
@@ -218,7 +220,7 @@ export default function ManageServicesPage() {
                 type="button"
                 >
                 <FunnelIcon className="h-5 w-5" />
-                Bộ lọc
+                {t("admin.services_filters")}
                 </button>
 
                 <button
@@ -226,7 +228,7 @@ export default function ManageServicesPage() {
                 className={`${soft.btn} ${soft.btnPrimary}`}
                 type="button"
                 disabled={loading}
-                title="Gọi lại API theo bộ lọc hiện tại"
+                title={t("admin.services_reload_hint")}
                 >
                 Reload
                 </button>
@@ -268,7 +270,7 @@ export default function ManageServicesPage() {
         ) : list.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
             <p className="text-sm text-slate-600 dark:text-slate-300">
-                Không có dữ liệu phù hợp với bộ lọc hiện tại.
+                {t("admin.services_empty")}
             </p>
             </div>
         ) : (
@@ -285,7 +287,7 @@ export default function ManageServicesPage() {
         {/* Reason modal */}
         <ReasonModal
             open={reasonOpen}
-            title={reasonMode === "REJECT" ? "Từ chối dịch vụ" : "Chặn dịch vụ"}
+            title={reasonMode === "REJECT" ? t("admin.services_reject_title") : t("admin.services_block_title")}
             confirmText={reasonMode === "REJECT" ? "Reject" : "Block"}
             loading={acting}
             onClose={() => setReasonOpen(false)}

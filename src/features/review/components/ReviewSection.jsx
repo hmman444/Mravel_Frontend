@@ -12,9 +12,11 @@ import ReviewSummary from "./ReviewSummary";
 import ReviewForm from "./ReviewForm";
 import ReviewCard from "./ReviewCard";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import ConfirmModal from "../../../components/ConfirmModal";
 
 export default function ReviewSection({ targetType, targetId }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const {
     reviews,
@@ -63,7 +65,7 @@ export default function ReviewSection({ targetType, targetId }) {
     if (!reviewIdToDelete) return;
     const result = await dispatch(removeReview(reviewIdToDelete));
     if (!result.error) {
-      toast.success("Đã xóa đánh giá");
+      toast.success(t("review.delete_success"));
       dispatch(fetchReviewSummary({ targetType, targetId }));
     }
     handleCloseConfirm();
@@ -81,7 +83,7 @@ export default function ReviewSection({ targetType, targetId }) {
   return (
     <div className="px-6 py-8 sm:px-8">
       <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-        Đánh giá
+        {t("review.title")}
       </h2>
 
       {/* Summary */}
@@ -100,7 +102,7 @@ export default function ReviewSection({ targetType, targetId }) {
       <div className="mt-6">
         {reviews.length === 0 && !loading && (
           <p className="text-sm text-gray-400 text-center py-4">
-            Chưa có đánh giá nào. Hãy là người đầu tiên!
+            {t("review.empty")}
           </p>
         )}
 
@@ -115,7 +117,7 @@ export default function ReviewSection({ targetType, targetId }) {
 
         {loading && (
           <p className="text-center text-sm text-gray-400 py-4">
-            Đang tải...
+            {t("common.loading")}
           </p>
         )}
 
@@ -126,7 +128,7 @@ export default function ReviewSection({ targetType, targetId }) {
               className="text-sm text-blue-600 hover:text-blue-800 font-medium
                          transition-colors"
             >
-              Xem thêm đánh giá
+              {t("review.load_more")}
             </button>
           </div>
         )}
@@ -136,10 +138,10 @@ export default function ReviewSection({ targetType, targetId }) {
         open={isConfirmOpen}
         onClose={handleCloseConfirm}
         onConfirm={handleConfirmDelete}
-        title="Xác nhận xóa"
-        message="Bạn có chắc muốn xóa nhận xét này hay không?"
-        confirmText="Đồng ý"
-        cancelText="Hủy"
+        title={t("review.confirm_delete_title")}
+        message={t("review.confirm_delete_message")}
+        confirmText={t("review.confirm_delete_yes")}
+        cancelText={t("common.cancel")}
       />
     </div>
   );

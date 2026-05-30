@@ -1,5 +1,6 @@
 // src/features/partner/components/restaurant/form/PartnerRestaurantFormPage.jsx
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { usePartnerAmenities } from "../../../hooks/usePartnerAmenities";
 import { usePartnerRestaurantForm } from "../../../hooks/usePartnerRestaurantForm";
 
@@ -35,6 +36,7 @@ export default function PartnerRestaurantFormPage({
   onBack,
   onSubmit,
 }) {
+  const { t } = useTranslation();
   const restaurantAmenity = usePartnerAmenities("RESTAURANT");
 
   const initialForm = useMemo(() => {
@@ -57,10 +59,10 @@ export default function PartnerRestaurantFormPage({
         onReset={fm.reset}
         onSubmit={fm.submit}
         canSubmit={fm.requiredOk}
-        title="Thêm nhà hàng"
-        subtitle="Sau khi tạo sẽ về PENDING chờ admin duyệt."
-        submitLabel="Lưu nhà hàng"
-        submittingLabel="Đang lưu..."
+        title={t("partner.restaurant.form_title")}
+        subtitle={t("partner.restaurant.pending_note")}
+        submitLabel={t("partner.restaurant.submit_label")}
+        submittingLabel={t("common.processing")}
       />
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4">
@@ -89,28 +91,28 @@ export default function PartnerRestaurantFormPage({
         />
 
         <CodeNameListEditor
-          title="Phù hợp (suitableFor)"
-          hint="Nhập code + tên hiển thị."
+          title={t("partner.restaurant.suitable_for_title")}
+          hint={t("partner.restaurant.code_name_hint")}
           value={fm.form.suitableFor || []}
           onChange={(next) => fm.setField("suitableFor", next)}
           disabled={loading}
         />
 
         <CodeNameListEditor
-          title="Không gian (ambience)"
-          hint="Nhập code + tên hiển thị."
+          title={t("partner.restaurant.ambience_title")}
+          hint={t("partner.restaurant.code_name_hint")}
           value={fm.form.ambience || []}
           onChange={(next) => fm.setField("ambience", next)}
           disabled={loading}
         />
 
         <SimpleListEditor
-          title="Món đặc sắc (signatureDishes)"
-          hint="Chỉ cần nhập tên món."
+          title={t("partner.restaurant.signature_dishes_title")}
+          hint={t("partner.restaurant.signature_dishes_hint")}
           value={(fm.form.signatureDishes || []).map((x) => (typeof x === "string" ? x : x?.name || ""))}
           onChange={(next) => fm.setField("signatureDishes", next.map((name) => ({ name })))}
           disabled={loading}
-          placeholder="Ví dụ: Cơm gà Hội An"
+          placeholder={t("partner.restaurant.signature_dishes_placeholder")}
         />
 
         <BookingConfigSection form={fm.form} setField={fm.setField} disabled={loading} />
@@ -118,8 +120,8 @@ export default function PartnerRestaurantFormPage({
         <PolicySection form={fm.form} setField={fm.setField} disabled={loading} />
 
         <AmenityMultiSelect
-          title="Tiện ích quán ăn"
-          hint={restaurantAmenity.loading ? "Đang tải tiện ích..." : "Chọn tiện ích thuộc quán ăn."}
+          title={t("partner.restaurant.amenity_title")}
+          hint={restaurantAmenity.loading ? t("partner.restaurant.amenity_loading") : t("partner.restaurant.amenity_hint")}
           items={restaurantAmenity.flat || []}
           value={fm.form.amenityCodes || []}
           onChange={(next) => fm.setField("amenityCodes", next)}

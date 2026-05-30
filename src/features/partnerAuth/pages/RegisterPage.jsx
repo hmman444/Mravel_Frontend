@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
@@ -14,6 +15,7 @@ import {
 } from "../../../utils/validators";
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,51 +46,51 @@ export default function RegisterPage() {
   return (
     <AuthLayout>
       <a href="/partner" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Về Cổng đối tác
+        ← {t('partnerAuth.register.back_to_portal')}
       </a>
 
-      <AuthCard title="Tạo tài khoản đối tác" subtitle="Điền thông tin bên dưới để đăng ký">
+      <AuthCard title={t('partnerAuth.register.title')} subtitle={t('partnerAuth.register.subtitle')}>
         <form onSubmit={handleSubmit} noValidate className="space-y-2">
           <div>
             <AuthInput
-              label="Họ và tên"
+              label={t('partnerAuth.register.fullname_label')}
               icon={UserIcon}
               type="text"
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
-              placeholder="Nhập họ và tên"
+              placeholder={t('partnerAuth.register.fullname_placeholder')}
             />
             {errors.fullname && <p className="text-red-500 text-sm mt-1">{errors.fullname}</p>}
           </div>
 
           <div>
             <AuthInput
-              label="Email"
+              label={t('common.email')}
               icon={EnvelopeIcon}
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Nhập email"
+              placeholder={t('partnerAuth.register.email_placeholder')}
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div>
             <PasswordInput
-              label="Mật khẩu"
+              label={t('common.password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu mạnh (ít nhất 8 ký tự)"
+              placeholder={t('partnerAuth.register.password_placeholder')}
             />
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
           <div>
             <PasswordInput
-              label="Nhập lại mật khẩu"
+              label={t('partnerAuth.register.confirm_password_label')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Xác nhận mật khẩu"
+              placeholder={t('partnerAuth.register.confirm_password_placeholder')}
             />
             {errors.confirmPassword && (
               <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
@@ -99,7 +101,7 @@ export default function RegisterPage() {
             type="submit"
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold"
           >
-            Đăng ký
+            {t('common.register')}
           </button>
 
           {message && <p className="text-green-600 text-sm text-center mt-2">{message}</p>}
@@ -108,9 +110,9 @@ export default function RegisterPage() {
         <SocialLogin />
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
-          Đã có tài khoản?{" "}
+          {t('partnerAuth.register.have_account')}{" "}
           <a href="/partner/login" className="text-blue-500">
-            Đăng nhập ngay
+            {t('partnerAuth.register.login_now')}
           </a>
         </p>
       </AuthCard>

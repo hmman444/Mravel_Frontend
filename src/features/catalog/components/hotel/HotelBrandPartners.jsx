@@ -1,4 +1,6 @@
 // src/components/hotel/HotelBrandPartners.jsx
+import { useTranslation } from "react-i18next";
+
 const hotelPartners = [
   "https://upload.wikimedia.org/wikipedia/vi/thumb/7/72/AccorHotels_logo.svg/1200px-AccorHotels_logo.svg.png",
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbkmFAbt4Lm8mr77tSlRhNjK3bVNm_FSeqvg&s",
@@ -11,19 +13,19 @@ const hotelPartners = [
 ];
 
 export default function HotelBrandPartners() {
+  const { t } = useTranslation();
   return (
     <section className="max-w-7xl mx-auto w-full px-6 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left text */}
         <div>
-          <h2 className="text-2xl font-bold">Đối tác khách sạn</h2>
+          <h2 className="text-2xl font-bold">{t('hotel.brand_partners_title')}</h2>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Đối tác khách sạn trong nước & quốc tế
+            {t('hotel.brand_partners_subtitle')}
           </p>
 
           <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-            Chúng tôi hợp tác với các chuỗi khách sạn uy tín toàn cầu để mang đến
-            cho bạn chỗ ở thoải mái và đáng tin cậy, dù bạn đi bất cứ đâu.
+            {t('hotel.brand_partners_description')}
           </p>
         </div>
 

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getMyUserRestaurantBookings, claimGuestRestaurantBookings } from "../services/restaurantBookingPrivateService";
+import i18n from "../../../i18n";
 
 export const fetchMyUserRestaurantBookings = createAsyncThunk(
   "bookingRestaurantPrivate/fetchMyUserRestaurantBookings",
@@ -7,7 +8,7 @@ export const fetchMyUserRestaurantBookings = createAsyncThunk(
     try {
       return await getMyUserRestaurantBookings();
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không tải được đơn đặt bàn theo tài khoản");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.load_user_restaurant_bookings_failed"));
     }
   }
 );
@@ -19,7 +20,7 @@ export const claimMyGuestRestaurantBookings = createAsyncThunk(
       const claimed = await claimGuestRestaurantBookings();
       return claimed;
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Gộp đơn đặt bàn thất bại");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.claim_guest_restaurant_bookings_failed"));
     }
   }
 );

@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { createHotelPayment, clearDraftPayment } from "../slices/bookingSlice";
@@ -9,6 +10,7 @@ const formatVnd = (n) => {
 };
 
 export function usePaymentMethodPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -18,16 +20,16 @@ export function usePaymentMethodPage() {
   const payLoading = useSelector((s) => s.booking.payment.loading);
   const payError = useSelector((s) => s.booking.payment.error);
 
-  const [modal, setModal] = useState({ open: false, title: "Thông báo", message: "" });
+  const [modal, setModal] = useState({ open: false, title: t("booking.notification"), message: "" });
 
   const meta = draft?.meta;
   const amountText = useMemo(() => formatVnd(meta?.amount), [meta?.amount]);
 
   const showMissing = !draft?.payload;
 
-  const openModal = useCallback((message, title = "Thông báo") => {
+  const openModal = useCallback((message, title = t("booking.notification")) => {
     setModal({ open: true, title, message });
-  }, []);
+  }, [t]);
 
   const closeModal = useCallback(() => setModal((m) => ({ ...m, open: false })), []);
 
@@ -37,8 +39,8 @@ export function usePaymentMethodPage() {
     async (method) => {
       if (!method?.supported) {
         openModal(
-          `Phương thức “${method?.label}” hiện chưa được hỗ trợ. Vui lòng chọn MoMo / VNPay / ZaloPay.`,
-          "Chưa hỗ trợ"
+          t("booking.payment_method_not_supported", { method: method?.label }),
+          t("booking.not_supported")
         );
         return;
       }
@@ -47,7 +49,7 @@ export function usePaymentMethodPage() {
       const canPayHotel = draft?.type === "HOTEL" && !!draft?.payload;
 
       if (typeParam !== "hotel" || !canPayHotel) {
-        openModal("Dữ liệu đơn không hợp lệ hoặc chưa có draft thanh toán.", "Lỗi");
+        openModal(t("booking.invalid_order_or_no_draft"), t("booking.error"));
         return;
       }
 
@@ -61,17 +63,17 @@ export function usePaymentMethodPage() {
 
         const url = result?.payUrl || result?.paymentUrl;
         if (!url) {
-          openModal("Không nhận được URL thanh toán từ hệ thống.", "Lỗi");
+          openModal(t("booking.no_payment_url"), t("booking.error"));
           return;
         }
 
         dispatch(clearDraftPayment());
         window.location.href = url;
       } catch (e) {
-        openModal(typeof e === "string" ? e : "Tạo thanh toán thất bại.", "Lỗi");
+        openModal(typeof e === "string" ? e : t("booking.create_payment_failed"), t("booking.error"));
       }
     },
-    [dispatch, draft, openModal, typeParam]
+    [dispatch, draft, openModal, typeParam, t]
   );
 
   return {

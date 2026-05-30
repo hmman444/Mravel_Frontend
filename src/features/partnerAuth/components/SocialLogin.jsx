@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -8,6 +9,7 @@ import { partnerSocialLoginUser } from "../slices/partnerAuthSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function SocialLogin() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -86,7 +88,7 @@ export default function SocialLogin() {
     <>
       <div className="flex items-center mt-6">
         <hr className="flex-grow border-gray-200 dark:border-gray-700" />
-        <span className="mx-4 text-xs text-gray-400">Hoặc đăng nhập bằng</span>
+        <span className="mx-4 text-xs text-gray-400">{t("partnerAuth.social.divider")}</span>
         <hr className="flex-grow border-gray-200 dark:border-gray-700" />
       </div>
 

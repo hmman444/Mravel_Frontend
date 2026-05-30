@@ -1,4 +1,5 @@
 // src/features/booking/components/hotel/HotelBookingLayout.jsx
+import { useTranslation } from "react-i18next";
 import HotelBookingForm from "./HotelBookingForm";
 import HotelBookingSelectedRoomCard from "./HotelBookingSelectedRoomCard";
 import HotelBookingPriceSummaryCard from "./HotelBookingPriceSummaryCard";
@@ -37,16 +38,16 @@ export default function HotelBookingLayout({
   onPay,
   payLoading,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-10 pt-6 md:px-6 md:pt-8">
       {/* Title */}
       <div className="mb-5">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 md:text-2xl">
-          Hoàn tất đặt phòng
+          {t("booking.complete_booking_title")}
         </h1>
         <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-          Vui lòng kiểm tra lại thông tin liên hệ và chi tiết đặt phòng trước khi
-          thanh toán.
+          {t("booking.complete_booking_subtitle")}
         </p>
       </div>
 
@@ -106,7 +107,7 @@ export default function HotelBookingLayout({
       </div>
 
       {loading && (
-        <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">Đang tải thông tin phòng...</p>
+        <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">{t("booking.loading_room_info")}</p>
       )}
     </div>
   );

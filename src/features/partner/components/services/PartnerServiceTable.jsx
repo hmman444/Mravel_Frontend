@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   PencilIcon,
   TrashIcon,
@@ -15,14 +16,6 @@ const fadeUp = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 8 },
-};
-
-const STATUS_LABELS = {
-  ACTIVE: "Đang hoạt động",
-  PENDING: "Chờ duyệt",
-  REJECTED: "Bị từ chối",
-  PARTNER_PAUSED: "Tạm khóa",
-  ADMIN_BLOCKED: "Admin khóa",
 };
 
 const statusBadge = (s) => {
@@ -44,6 +37,16 @@ export default function PartnerServiceTable({
   onRequestUnlock,
   onDelete,
 }) {
+  const { t } = useTranslation();
+
+  const STATUS_LABELS = {
+    ACTIVE: t("partner.service_table.status.active"),
+    PENDING: t("partner.service_table.status.pending"),
+    REJECTED: t("partner.service_table.status.rejected"),
+    PARTNER_PAUSED: t("partner.service_table.status.partner_paused"),
+    ADMIN_BLOCKED: t("partner.service_table.status.admin_blocked"),
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-sm dark:bg-slate-900 dark:border-slate-800">
       <div className="max-h-[72vh] overflow-auto">
@@ -51,10 +54,10 @@ export default function PartnerServiceTable({
           <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-950">
             <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
               <th className="px-4 py-3 w-[64px] text-center">#</th>
-              <th className="px-4 py-3 w-[420px]">Dịch vụ</th>
-              <th className="px-4 py-3">Trạng thái</th>
+              <th className="px-4 py-3 w-[420px]">{t("partner.service_table.col_service")}</th>
+              <th className="px-4 py-3">{t("partner.service_table.col_status")}</th>
               <th className="px-4 py-3 text-center">Active</th>
-              <th className="px-4 py-3 text-right">Hành động</th>
+              <th className="px-4 py-3 text-right">{t("partner.service_table.col_action")}</th>
             </tr>
           </thead>
 
@@ -114,13 +117,15 @@ export default function PartnerServiceTable({
 
                       {st === "REJECTED" && (
                         <div className="mt-1 line-clamp-2 text-xs text-rose-600">
-                          Lý do: {x.rejectReason || "—"}
+                          {t("partner.service_table.reason_label")} {x.rejectReason || "—"}
                         </div>
                       )}
 
                       {st === "ADMIN_BLOCKED" && (
                         <div className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-300">
-                          {x.blockedReason ? `Lý do: ${x.blockedReason}` : "Cần gửi yêu cầu mở khóa"}
+                          {x.blockedReason
+                            ? `${t("partner.service_table.reason_label")} ${x.blockedReason}`
+                            : t("partner.service_table.need_request_unlock")}
                         </div>
                       )}
                     </td>
@@ -143,7 +148,7 @@ export default function PartnerServiceTable({
                           onClick={() => onEdit?.(x)}
                           disabled={acting}
                           className="rounded-lg p-2 hover:bg-slate-100 disabled:opacity-40 dark:hover:bg-slate-800"
-                          title="Chỉnh sửa"
+                          title={t("common.edit")}
                         >
                           <PencilIcon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
                         </button>
@@ -152,7 +157,7 @@ export default function PartnerServiceTable({
                           onClick={() => onPause?.(x)}
                           disabled={!isActive || acting}
                           className="rounded-lg p-2 hover:bg-rose-50 disabled:opacity-40 dark:hover:bg-slate-800"
-                          title="Tạm khóa dịch vụ"
+                          title={t("partner.service_table.action_pause")}
                         >
                           <LockClosedIcon className="h-5 w-5 text-rose-600" />
                         </button>
@@ -161,7 +166,7 @@ export default function PartnerServiceTable({
                           onClick={() => onResume?.(x)}
                           disabled={!isPaused || acting}
                           className="rounded-lg p-2 hover:bg-emerald-50 disabled:opacity-40 dark:hover:bg-slate-800"
-                          title="Mở lại dịch vụ"
+                          title={t("partner.service_table.action_resume")}
                         >
                           <LockOpenIcon className="h-5 w-5 text-emerald-600" />
                         </button>
@@ -170,7 +175,7 @@ export default function PartnerServiceTable({
                           onClick={() => onRequestUnlock?.(x)}
                           disabled={!isBlocked || acting}
                           className="rounded-lg p-2 hover:bg-sky-50 disabled:opacity-40 dark:hover:bg-slate-800"
-                          title="Gửi yêu cầu mở khóa cho admin"
+                          title={t("partner.service_table.action_request_unlock")}
                         >
                           <PaperAirplaneIcon className="h-5 w-5 text-sky-600" />
                         </button>
@@ -179,7 +184,7 @@ export default function PartnerServiceTable({
                           onClick={() => onDelete?.(x)}
                           disabled={acting}
                           className="rounded-lg p-2 hover:bg-slate-100 disabled:opacity-40 dark:hover:bg-slate-800"
-                          title="Xóa dịch vụ"
+                          title={t("partner.service_table.action_delete")}
                         >
                           <TrashIcon className="h-5 w-5 text-slate-700 dark:text-slate-300" />
                         </button>

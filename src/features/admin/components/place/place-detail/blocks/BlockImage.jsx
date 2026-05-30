@@ -1,13 +1,15 @@
 import { PhotoIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { ui } from "../uiTokens";
 import { Label } from "../pills";
 
 export default function BlockImage({ idx, block, isLockedReadOnly, onPatch, onUpload }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
-          <Label required>URL ảnh</Label>
+          <Label required>{t("admin.block_image_url_label")}</Label>
           <input
             className={ui.input}
             disabled={isLockedReadOnly}
@@ -27,7 +29,7 @@ export default function BlockImage({ idx, block, isLockedReadOnly, onPatch, onUp
             onChange={(e) =>
               onPatch(idx, { image: { ...(block.image || {}), caption: e.target.value } })
             }
-            placeholder="Ví dụ: Phố cổ lung linh"
+            placeholder={t("admin.block_image_caption_placeholder")}
           />
         </div>
       </div>
@@ -35,7 +37,7 @@ export default function BlockImage({ idx, block, isLockedReadOnly, onPatch, onUp
       <div className="flex flex-wrap items-center gap-2">
         <label className={`${ui.btn} ${ui.btnGhost} gap-2 ${isLockedReadOnly ? "pointer-events-none opacity-50" : ""}`}>
           <PhotoIcon className="h-5 w-5" />
-          Tải ảnh lên
+          {t("admin.block_image_upload")}
           <input
             type="file"
             accept="image/*"

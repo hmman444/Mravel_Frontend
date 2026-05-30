@@ -5,8 +5,10 @@ import { usePlaceDetail } from "../hooks/usePlaceDetail";
 import PlaceContentRenderer from "../components/place/PlaceContentRenderer";
 import DetailThumbStripPeek from "../components/place/DetailThumbStripPeek";
 import ReviewSection from "../../review/components/ReviewSection";
+import { useTranslation } from "react-i18next";
 
 export default function PlaceDetailPage() {
+  const { t } = useTranslation();
   const { slug } = useParams();
   const { data, loading, error } = usePlaceDetail(slug);
 
@@ -14,7 +16,7 @@ export default function PlaceDetailPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <Navbar />
-        <div className="max-w-6xl mx-auto px-6 py-10">Đang tải...</div>
+        <div className="max-w-6xl mx-auto px-6 py-10">{t("common.loading")}</div>
         <Footer />
       </div>
     );

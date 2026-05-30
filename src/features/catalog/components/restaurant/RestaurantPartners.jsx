@@ -9,20 +9,22 @@ const restaurantPartners = [
   "https://images.seeklogo.com/logo-png/46/1/texas-chicken-logo-png_seeklogo-463089.png",
 ];
 
+import { useTranslation } from "react-i18next";
+
 export default function RestaurantPartners() {
+  const { t } = useTranslation();
   return (
     <section className="max-w-7xl mx-auto w-full px-6 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left text */}
         <div>
-          <h2 className="text-2xl font-bold">Đối tác nhà hàng</h2>
+          <h2 className="text-2xl font-bold">{t('restaurant.partners_title')}</h2>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Chuỗi nhà hàng, quán ăn được khách hàng tin tưởng
+            {t('restaurant.partners_subtitle')}
           </p>
 
           <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-            Từ thương hiệu lớn đến quán ăn địa phương, chúng tôi hợp tác cùng các
-            đối tác uy tín để mang đến cho bạn trải nghiệm ẩm thực đa dạng.
+            {t('restaurant.partners_description')}
           </p>
         </div>
 

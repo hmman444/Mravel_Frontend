@@ -1,5 +1,6 @@
 // src/features/booking/components/public/BookingCard.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { CalendarDays, CreditCard, Hotel, Hash, X } from "lucide-react";
 import api from "../../../../utils/axiosInstance";
@@ -98,6 +99,7 @@ export default function BookingCard({
   lookupCreds,
   onRefresh,
 }) {
+  const { t } = useTranslation();
   // detail state
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -228,7 +230,7 @@ export default function BookingCard({
         const data = res.data?.data ?? null;
         if (!cancelled) setDetail(data);
       } catch (e) {
-        const msg = e?.response?.data?.message || e?.message || "Không tải được chi tiết đơn";
+        const msg = e?.response?.data?.message || e?.message || t("booking.load_detail_failed");
         if (!cancelled) setDetailError(msg);
       } finally {
         if (!cancelled) setDetailLoading(false);
@@ -267,10 +269,10 @@ export default function BookingCard({
 
       const dto = res.data?.data;
       const payUrl = dto?.payUrl;
-      if (!payUrl) throw new Error("Không nhận được payUrl");
+      if (!payUrl) throw new Error(t("booking.no_pay_url"));
       window.location.assign(payUrl);
     } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Không thể tiếp tục thanh toán";
+      const msg = e?.response?.data?.message || e?.message || t("booking.resume_payment_failed");
       setResumeError(msg);
     } finally {
       setResuming(false);
@@ -330,7 +332,7 @@ export default function BookingCard({
         setDetailLoading(false);
       }
     } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Hủy đơn thất bại";
+      const msg = e?.response?.data?.message || e?.message || t("booking.cancel_failed");
       setCancelError(msg);
     } finally {
       setCancelLoading(false);
@@ -388,10 +390,10 @@ export default function BookingCard({
                 <div className="flex items-start justify-between gap-3 border-b border-gray-100 dark:border-gray-700 px-4 py-3 md:px-5 shrink-0">
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-                      Chi tiết đơn đặt phòng
+                      {t("booking.detail_title")}
                     </h3>
                     <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      Mã: <span className="font-mono">{code}</span>
+                      {t("booking.code_label")}: <span className="font-mono">{code}</span>
                     </p>
                   </div>
 
@@ -399,7 +401,7 @@ export default function BookingCard({
                     type="button"
                     onClick={() => setOpen(false)}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
-                    aria-label="Đóng"
+                    aria-label={t("common.close")}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -427,24 +429,24 @@ export default function BookingCard({
                       </span>
                       {typeof roomsCount === "number" ? (
                         <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
-                          · {roomsCount} phòng
+                          · {t("booking.rooms_count_value", { count: roomsCount })}
                         </span>
                       ) : null}
                     </div>
 
                     <div className="mt-2 text-xs text-gray-700 dark:text-gray-300">
                       <div>
-                        Khách sạn:{" "}
+                        {t("booking.hotel_label")}:{" "}
                         <span className="font-semibold">{hotelName || "--"}</span>
                       </div>
                       <div className="mt-0.5">
-                        Lưu trú: <span className="font-semibold">{stayRange2}</span>
+                        {t("booking.stay_label")}: <span className="font-semibold">{stayRange2}</span>
                       </div>
                     </div>
                   </div>
 
                   {detailLoading ? (
-                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">Đang tải chi tiết...</p>
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t("booking.loading_detail")}</p>
                   ) : null}
 
                   {detailError ? (
@@ -456,36 +458,36 @@ export default function BookingCard({
                   <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                     {/* Cột 1 */}
                     <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                      <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thông tin đơn</div>
+                      <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.order_info")}</div>
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
-                      <DetailRow label="Mã booking" value={code} mono />
+                      <DetailRow label={t("booking.booking_code")} value={code} mono />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
                       <DetailRow
-                        label="Check-in"
+                        label={t("booking.check_in")}
                         value={checkInDate ? new Date(checkInDate).toLocaleDateString("vi-VN") : "--"}
                       />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
                       <DetailRow
-                        label="Check-out"
+                        label={t("booking.check_out")}
                         value={checkOutDate ? new Date(checkOutDate).toLocaleDateString("vi-VN") : "--"}
                       />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
-                      <DetailRow label="Số đêm" value={nights} />
+                      <DetailRow label={t("booking.nights")} value={nights} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Tạo lúc" value={fmtDate(createdAt)} />
+                      <DetailRow label={t("booking.created_at")} value={fmtDate(createdAt)} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Cập nhật" value={fmtDate(updatedAt)} />
+                      <DetailRow label={t("booking.updated_at")} value={fmtDate(updatedAt)} />
                       <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                      <DetailRow label="Thanh toán" value={paidAt ? fmtDate(paidAt) : "Chưa thanh toán"} />
+                      <DetailRow label={t("booking.payment")} value={paidAt ? fmtDate(paidAt) : t("booking.not_paid")} />
                     </div>
 
                     {/* Cột 2 */}
                     <div className="space-y-3">
                       <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thông tin liên hệ</div>
+                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.contact_info")}</div>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
                         {guestSessionId ? (
@@ -495,17 +497,17 @@ export default function BookingCard({
                           </>
                         ) : null}
 
-                        <DetailRow label="Tên" value={contactName} />
+                        <DetailRow label={t("booking.contact_name")} value={contactName} />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="SĐT" value={contactPhone} mono />
+                        <DetailRow label={t("booking.contact_phone")} value={contactPhone} mono />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
                         <DetailRow label="Email" value={contactEmail} />
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                        <DetailRow label="Ghi chú" value={note} />
+                        <DetailRow label={t("booking.note")} value={note} />
                       </div>
 
                       <div className="rounded-xl border border-gray-200 dark:border-gray-700 px-3">
-                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Thanh toán</div>
+                        <div className="py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.payment")}</div>
                         <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
                         <DetailRow label="Pay option" value={payOption} />
@@ -519,14 +521,14 @@ export default function BookingCard({
                         {cancelReasonDb ? (
                           <>
                             <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                            <DetailRow label="Lý do huỷ" value={cancelReasonDb} />
+                            <DetailRow label={t("booking.cancel_reason")} value={cancelReasonDb} />
                           </>
                         ) : null}
 
                         {cancelledAtDb ? (
                           <>
                             <div className="h-px bg-gray-100 dark:bg-gray-800" />
-                            <DetailRow label="Huỷ lúc" value={fmtDate(cancelledAtDb)} />
+                            <DetailRow label={t("booking.cancelled_at")} value={fmtDate(cancelledAtDb)} />
                           </>
                         ) : null}
                       </div>
@@ -535,7 +537,7 @@ export default function BookingCard({
 
                   {Array.isArray(rooms) && rooms.length > 0 ? (
                     <div className="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Chi tiết phòng</div>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("booking.room_detail")}</div>
 
                       <div className="mt-2 space-y-2 max-h-[260px] overflow-y-auto pr-1">
                         {rooms.map((r) => (
@@ -546,7 +548,7 @@ export default function BookingCard({
                             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {r.roomTypeName}{" "}
                               <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                                × {r.quantity} · {r.nights} đêm
+                                × {r.quantity} · {t("booking.nights_count", { count: r.nights })}
                               </span>
                             </div>
 
@@ -556,7 +558,7 @@ export default function BookingCard({
                             </div>
 
                             <div className="mt-1 text-xs text-gray-700 dark:text-gray-300">
-                              Giá/đêm: <span className="font-semibold">{r.pricePerNight}</span> · Tổng:{" "}
+                              {t("booking.price_per_night")}: <span className="font-semibold">{r.pricePerNight}</span> · {t("common.total")}:{" "}
                               <span className="font-semibold">{r.totalAmount}</span>
                             </div>
                           </div>
@@ -573,7 +575,7 @@ export default function BookingCard({
                     onClick={() => code && navigator.clipboard?.writeText(code)}
                     className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
                   >
-                    Copy mã booking
+                    {t("booking.copy_booking_code")}
                   </button>
 
                   <button
@@ -581,7 +583,7 @@ export default function BookingCard({
                     onClick={() => setOpen(false)}
                     className="inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
                   >
-                    Đóng
+                    {t("common.close")}
                   </button>
                 </div>
               </div>
@@ -626,14 +628,14 @@ export default function BookingCard({
               <Hotel className="mt-0.5 h-4 w-4 shrink-0 text-gray-600 dark:text-gray-400" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-                  {hotelName || "Khách sạn"}
+                  {hotelName || t("booking.hotel_label")}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                  Ngày lưu trú: <span className="font-semibold">{stayRange}</span>
+                  {t("booking.stay_date")}: <span className="font-semibold">{stayRange}</span>
                   {typeof roomsCount === "number" ? (
                     <>
                       {" "}
-                      · <span className="font-semibold">{roomsCount}</span> phòng
+                      · <span className="font-semibold">{roomsCount}</span> {t("booking.rooms_unit")}
                     </>
                   ) : null}
                 </p>
@@ -643,11 +645,11 @@ export default function BookingCard({
             <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-700 dark:text-gray-300 md:grid-cols-2 md:text-sm">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <span>Tạo lúc: {fmtDate(createdAt)}</span>
+                <span>{t("booking.created_at")}: {fmtDate(createdAt)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <span>Thanh toán: {paidAt ? fmtDate(paidAt) : "Chưa thanh toán"}</span>
+                <span>{t("booking.payment")}: {paidAt ? fmtDate(paidAt) : t("booking.not_paid")}</span>
               </div>
             </div>
           </div>
@@ -658,7 +660,7 @@ export default function BookingCard({
               onClick={() => onOpenHotel?.(hotelSlug)}
               className="w-full inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700 md:text-sm"
             >
-              Xem khách sạn
+              {t("booking.view_hotel")}
             </button>
 
             <button
@@ -666,7 +668,7 @@ export default function BookingCard({
               onClick={() => setOpen(true)}
               className="w-full inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700 md:text-sm"
             >
-              Xem chi tiết đơn
+              {t("booking.view_detail")}
             </button>
 
             <button
@@ -674,7 +676,7 @@ export default function BookingCard({
               onClick={() => code && navigator.clipboard?.writeText(code)}
               className="w-full inline-flex items-center justify-center rounded-xl bg-gray-900 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-800 md:text-sm"
             >
-              Copy mã
+              {t("booking.copy_code")}
             </button>
 
             {canResume ? (
@@ -689,13 +691,13 @@ export default function BookingCard({
                       ? "bg-gray-400 cursor-not-allowed text-white"
                       : "bg-emerald-600 hover:bg-emerald-700 text-white",
                   ].join(" ")}
-                  title={`Còn ${fmtCountdown(expiresInMs)} để thanh toán`}
+                  title={t("booking.resume_countdown_title", { time: fmtCountdown(expiresInMs) })}
                 >
                   {resuming ? (
-                    "Đang mở MoMo..."
+                    t("booking.opening_momo")
                   ) : (
                     <>
-                      Tiếp tục thanh toán{" "}
+                      {t("booking.resume_payment")}{" "}
                       <span className="inline-block w-[52px] text-center font-mono tabular-nums">
                         ({fmtCountdown(expiresInMs)})
                       </span>
@@ -715,9 +717,9 @@ export default function BookingCard({
                   "w-full inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition md:text-sm",
                   "border border-red-600 text-red-600 hover:bg-red-50",
                 ].join(" ")}
-                title="Hủy đơn"
+                title={t("booking.cancel_booking")}
               >
-                Hủy đơn
+                {t("booking.cancel_booking")}
               </button>
             ) : null}
           </div>
@@ -725,7 +727,7 @@ export default function BookingCard({
 
         {hotelSlug ? (
           <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-400">
-            Slug: <span className="font-mono">{hotelSlug}</span>
+            {t("booking.slug_label")}: <span className="font-mono">{hotelSlug}</span>
           </p>
         ) : null}
       </article>

@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { fetchCurrentPartner, partnerLogoutUser } from "../slices/partnerAuthSlice";
 
 export default function PartnerProtectedRoute() {
+  const { t } = useTranslation();
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -30,7 +32,7 @@ export default function PartnerProtectedRoute() {
   if (!partner && loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Đang kiểm tra đăng nhập...</div>
+        <div className="text-gray-600 dark:text-gray-400">{t("partnerAuth.checking_login")}</div>
       </div>
     );
   }

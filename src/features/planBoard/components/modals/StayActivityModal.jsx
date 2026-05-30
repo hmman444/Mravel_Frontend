@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaBed, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
@@ -29,13 +30,6 @@ import {
 } from "../../utils/locationUtils";
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
-
-const EXTRA_TYPES = [
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ thu" },
-  { value: "TAX", label: "Thuế" },
-  { value: "OTHER", label: "Khác" },
-];
 
 function safeJsonParse(str) {
   try {
@@ -67,6 +61,15 @@ export default function StayActivityModal({
   stayLocation: stayLocationProp,
   readOnly,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = [
+    { value: "SERVICE_FEE", label: t("plan.extra_type.service_fee") },
+    { value: "SURCHARGE", label: t("plan.extra_type.surcharge") },
+    { value: "TAX", label: t("plan.extra_type.tax") },
+    { value: "OTHER", label: t("plan.extra_type.other") },
+  ];
+
   const [title, setTitle] = useState("");
   const [hotelName, setHotelName] = useState("");
   const [address, setAddress] = useState("");
@@ -311,10 +314,10 @@ export default function StayActivityModal({
     const newErrors = {};
 
     if (!hotelName.trim())
-      newErrors.hotelName = "Vui lòng nhập hoặc chọn chỗ nghỉ.";
+      newErrors.hotelName = t("plan.stay.error_name_required");
 
     if (checkIn && checkOut && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.activity.error_end_before_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -328,8 +331,8 @@ export default function StayActivityModal({
 
     onSubmit?.({
       type: "STAY",
-      title: title || `Nghỉ tại ${hotelName}`,
-      text: title || `Nghỉ tại ${hotelName}`,
+      title: title || t("plan.stay.default_title", { name: hotelName }),
+      text: title || t("plan.stay.default_title", { name: hotelName }),
       description: note || "",
       startTime: checkIn || null,
       endTime: checkOut || null,
@@ -365,13 +368,17 @@ export default function StayActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Nghỉ tại"
+      labelPrefix={t("plan.stay.label_prefix")}
       name={hotelName}
-      emptyLabelText="Điền/chọn tên chỗ nghỉ để lưu hoạt động nghỉ ngơi."
+      emptyLabelText={t("plan.stay.empty_label")}
       locationText={effectiveStayLocation?.fullAddress || address || ""}
       timeText={
         checkIn && checkOut && durationMinutes != null && !errors.time
-          ? `${checkIn} - ${checkOut} (${durationMinutes} phút)`
+          ? t("plan.activity.time_range_minutes", {
+              start: checkIn,
+              end: checkOut,
+              minutes: durationMinutes,
+            })
           : ""
       }
     />
@@ -388,14 +395,18 @@ export default function StayActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động nghỉ ngơi"}
+      submitLabel={
+        editingCard
+          ? t("plan.activity.save_edit")
+          : t("plan.stay.submit_create")
+      }
       submitClassName="bg-gradient-to-r from-violet-500 to-purple-500 shadow-lg shadow-violet-500/30"
     />
   );
@@ -410,9 +421,9 @@ export default function StayActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-violet-500 to-purple-500",
         }}
-        title="Hoạt động nghỉ ngơi"
+        title={t("plan.stay.modal_title")}
         typeLabel="Stay"
-        subtitle="Chỗ nghỉ cho một phần trong ngày (trưa, tối, qua đêm...)."
+        subtitle={t("plan.stay.modal_subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -421,22 +432,22 @@ export default function StayActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.activity.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Chỗ nghỉ + địa chỉ + thời gian nghỉ
+              {t("plan.stay.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
+                {t("plan.activity.activity_name_optional")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Nghỉ trưa homestay A, ngủ đêm khách sạn B..."
+                placeholder={t("plan.stay.title_placeholder")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
@@ -444,7 +455,7 @@ export default function StayActivityModal({
             {/* PICK STAY LOCATION */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa chỉ / vị trí trên bản đồ
+                {t("plan.activity.address_location_label")}
               </label>
 
               <button
@@ -476,7 +487,7 @@ export default function StayActivityModal({
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
                         {getLocDisplayLabel(
                           effectiveStayLocation,
-                          hotelName || "Chỗ nghỉ đã chọn"
+                          hotelName || t("plan.stay.selected_place")
                         )}
                       </p>
 
@@ -488,7 +499,7 @@ export default function StayActivityModal({
 
                       <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
+                          {t("plan.activity.picked_on_map")}
                         </span>
                         {effectiveStayLocation?.lat != null &&
                           effectiveStayLocation?.lng != null && (
@@ -502,10 +513,10 @@ export default function StayActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn chỗ nghỉ trên bản đồ
+                        {t("plan.stay.pick_place_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn khách sạn/homestay làm chỗ nghỉ.
+                        {t("plan.stay.pick_place_hint")}
                       </p>
                     </>
                   )}
@@ -516,7 +527,7 @@ export default function StayActivityModal({
                     text-violet-500 group-hover:text-violet-600 dark:text-violet-300
                     dark:group-hover:text-violet-200"
                 >
-                  Mở bản đồ
+                  {t("plan.activity.open_map")}
                 </span>
               </button>
 
@@ -528,9 +539,9 @@ export default function StayActivityModal({
             </div>
 
             <ActivityTimeRangeSection
-              sectionLabel="Thời gian nghỉ"
-              startLabel="Bắt đầu nghỉ"
-              endLabel="Kết thúc nghỉ"
+              sectionLabel={t("plan.stay.time_section")}
+              startLabel={t("plan.stay.start_label")}
+              endLabel={t("plan.stay.end_label")}
               color="violet"
               iconClassName="text-violet-500"
               startTime={checkIn}
@@ -542,7 +553,7 @@ export default function StayActivityModal({
                 setErrors((prev) => ({ ...prev, time: msg }))
               }
               onDurationChange={(mins) => setDurationMinutes(mins)}
-              durationHintPrefix="Thời lượng dự kiến"
+              durationHintPrefix={t("plan.activity.duration_hint_prefix")}
             />
           </div>
         </section>
@@ -551,10 +562,10 @@ export default function StayActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí nghỉ ngơi
+              {t("plan.stay.cost_section")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Base + phát sinh + ngân sách + thực tế
+              {t("plan.activity.cost_section_hint")}
             </span>
           </div>
 
@@ -562,7 +573,7 @@ export default function StayActivityModal({
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Chi phí cơ bản (không gồm phát sinh)
+                  {t("plan.activity.base_cost_label")}
                 </label>
 
                 <div className="flex items-center gap-2">
@@ -572,7 +583,7 @@ export default function StayActivityModal({
                     min="0"
                     value={pricePerNight}
                     onChange={(e) => setPricePerNight(e.target.value)}
-                    placeholder="VD: 450000"
+                    placeholder={t("plan.stay.base_cost_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -581,7 +592,7 @@ export default function StayActivityModal({
 
               <div className="flex-1">
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Số đêm của cả booking (thông tin thêm)
+                  {t("plan.stay.nights_label")}
                 </label>
 
                 <input
@@ -605,7 +616,7 @@ export default function StayActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế (nếu có)
+                  {t("plan.activity.actual_cost_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -614,19 +625,22 @@ export default function StayActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền lại sau khi thanh toán"
+                    placeholder={t("plan.activity.actual_cost_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>chi phí vé</b> + <b>phát sinh</b> để chia tiền.
+                  {t("plan.activity.actual_cost_empty_prefix")}{" "}
+                  <b>{t("plan.activity.ticket_cost")}</b> +{" "}
+                  <b>{t("plan.activity.extra_cost")}</b>{" "}
+                  {t("plan.activity.actual_cost_empty_suffix")}
                 </p>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách (tuỳ chọn)
+                  {t("plan.activity.budget_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -635,7 +649,7 @@ export default function StayActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 1000000"
+                    placeholder={t("plan.activity.budget_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -645,26 +659,27 @@ export default function StayActivityModal({
 
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Chi phí cơ bản:{" "}
+                {t("plan.activity.summary_base_cost")}:{" "}
                 <span className="font-semibold">
                   {baseEstimated.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               <div>
-                Phát sinh:{" "}
+                {t("plan.activity.summary_extra")}:{" "}
                 <span className="font-semibold">
                   {extraTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               <div>
-                Tổng dự kiến (để chia khi auto):{" "}
+                {t("plan.activity.summary_estimated_total")}:{" "}
                 <span className="font-semibold text-violet-600 dark:text-violet-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b>:{" "}
+                  {t("plan.activity.summary_using_prefix")}{" "}
+                  <b>{t("plan.activity.summary_actual_cost")}</b>:{" "}
                   <span className="font-semibold text-violet-600 dark:text-violet-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -706,17 +721,17 @@ export default function StayActivityModal({
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
+              {t("plan.activity.note")}
             </label>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm thông tin nhỏ cho cả nhóm
+              {t("plan.activity.note_hint")}
             </span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: yêu cầu phòng yên tĩnh, gần thang máy, có hồ bơi..."
+            placeholder={t("plan.stay.note_placeholder")}
             className={`${inputBase} w-full`}
           />
         </section>

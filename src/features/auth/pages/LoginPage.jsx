@@ -9,8 +9,10 @@ import { useLogin } from "../hooks/useLogin";
 import { validateEmail, validatePassword } from "../../../utils/validators";
 import LoadingOverlay from "../../../components/LoadingOverlay";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -48,28 +50,28 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <LoadingOverlay show={loading} text="Đang đăng nhập..." />
+      <LoadingOverlay show={loading} text={t("auth.logging_in")} />
 
       <a
         href="/"
         className="text-base font-semibold text-white mb-2 inline-block"
       >
-        ← Về Trang chủ Mravel
+        ← {t("auth.back_to_home")}
       </a>
 
       <AuthCard
-        title="Tận hưởng kỳ nghỉ của bạn"
-        subtitle="Đăng nhập với email và mật khẩu"
+        title={t("auth.login_title")}
+        subtitle={t("auth.login_subtitle")}
       >
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <AuthInput
-              label="Email"
+              label={t("common.email")}
               icon={UserIcon}
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Nhập email của bạn"
+              placeholder={t("auth.email_placeholder")}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -78,10 +80,10 @@ export default function LoginPage() {
 
           <div>
             <PasswordInput
-              label="Mật khẩu"
+              label={t("common.password")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu của bạn"
+              placeholder={t("auth.password_placeholder")}
             />
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
@@ -96,11 +98,11 @@ export default function LoginPage() {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)} 
               />
-              Ghi nhớ đăng nhập
+              {t("auth.remember_me")}
             </label>
 
             <a href="/forgot-password" className="text-sm text-blue-500">
-              Quên mật khẩu?
+              {t("auth.forgot_password")}
             </a>
           </div>
 
@@ -113,7 +115,7 @@ export default function LoginPage() {
                 : "bg-gradient-to-r from-blue-600 to-blue-500"
             }`}
           >
-            {loading ? "Đang xử lý..." : "Đăng nhập"}
+            {loading ? t("common.processing") : t("common.login")}
           </button>
 
           {error && (
@@ -124,9 +126,9 @@ export default function LoginPage() {
         <SocialLogin />
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
-          Chưa có tài khoản?{" "}
+          {t("auth.no_account")}{" "}
           <a href="/register" className="text-blue-500">
-            Đăng ký ngay
+            {t("auth.register_now")}
           </a>
         </p>
       </AuthCard>

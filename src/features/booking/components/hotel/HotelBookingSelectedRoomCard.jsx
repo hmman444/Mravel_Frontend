@@ -1,5 +1,6 @@
 // src/features/booking/components/hotel/HotelBookingSelectedRoomCard.jsx
 import { CalendarDays, Users, Wifi, ShieldCheck, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const FULL_VN_DATE = (d) =>
   d?.toLocaleDateString("vi-VN", {
@@ -17,16 +18,18 @@ export default function HotelBookingSelectedRoomCard({
   roomsCount = 1,
   checkInDate,
   checkOutDate,
-  remainingRoomsText = "Đang kiểm tra phòng trống...",
+  remainingRoomsText,
   isEnoughRooms = true,
   refundable, // true / false / null
 }) {
+  const { t } = useTranslation();
+  const remainingText = remainingRoomsText ?? t("booking.checking_room_availability");
   const checkInLabel = checkInDate ? FULL_VN_DATE(checkInDate) : "--";
   const checkOutLabel = checkOutDate ? FULL_VN_DATE(checkOutDate) : "--";
 
-  let refundText = "Đặt phòng này không được hoàn tiền.";
+  let refundText = t("booking.room_non_refundable");
   if (refundable === true) {
-    refundText = "Có thể hoàn tiền / miễn phí huỷ theo chính sách.";
+    refundText = t("booking.room_refundable");
   }
 
   return (
@@ -37,14 +40,14 @@ export default function HotelBookingSelectedRoomCard({
           !
         </span>
         <p>
-          Dừng khoảnh khắc chỉ là 2 giây!{" "}
+          {t("booking.hurry_banner_prefix")}{" "}
           <span className={`${isEnoughRooms ? "text-red-600" : "text-red-700"}`}>
-            {remainingRoomsText}
+            {remainingText}
           </span>{" "}
-          cho khách sạn này.
+          {t("booking.hurry_banner_suffix")}
           {!isEnoughRooms && (
             <span className="ml-2 font-bold text-red-700">
-              (Không đủ số phòng bạn chọn)
+              {t("booking.not_enough_rooms")}
             </span>
           )}
         </p>
@@ -55,13 +58,13 @@ export default function HotelBookingSelectedRoomCard({
         {/* Tiêu đề + room */}
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            {hotelName || "Khách sạn của bạn"}
+            {hotelName || t("booking.your_hotel")}
           </p>
           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
             ({roomsCount}x) {roomName || "Superior Double/Twin"}
           </p>
           <p className="text-xs font-semibold text-red-600 md:text-sm">
-            {remainingRoomsText}
+            {remainingText}
           </p>
         </div>
 
@@ -69,23 +72,23 @@ export default function HotelBookingSelectedRoomCard({
         <div className="grid grid-cols-2 gap-3 rounded-xl bg-white dark:bg-gray-800 p-3 text-xs text-gray-800 dark:text-gray-200 md:text-sm">
           <div className="flex flex-col gap-1 border-r border-dashed border-gray-200 dark:border-gray-700 pr-3">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Nhận phòng
+              {t("booking.check_in")}
             </span>
             <div className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <span>{checkInLabel}</span>
             </div>
-            <span className="text-[11px] text-gray-500 dark:text-gray-400">Từ 14:00</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">{t("booking.check_in_time")}</span>
           </div>
           <div className="flex flex-col gap-1 pl-1">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Trả phòng
+              {t("booking.check_out")}
             </span>
             <div className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <span>{checkOutLabel}</span>
             </div>
-            <span className="text-[11px] text-gray-500 dark:text-gray-400">Trước 12:00</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">{t("booking.check_out_time")}</span>
           </div>
         </div>
 
@@ -94,7 +97,7 @@ export default function HotelBookingSelectedRoomCard({
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>
-              {guests} khách · {roomsCount} phòng · {nights} đêm
+              {t("booking.guests_rooms_nights", { guests, rooms: roomsCount, nights })}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -103,11 +106,11 @@ export default function HotelBookingSelectedRoomCard({
           </div>
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span>Không thể thay đổi ngày lưu trú.</span>
+            <span>{t("booking.dates_not_changeable")}</span>
           </div>
           <div className="flex items-center gap-2">
             <Wifi className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span>WiFi miễn phí, các tiện nghi cơ bản khác.</span>
+            <span>{t("booking.free_wifi_amenities")}</span>
           </div>
         </div>
       </div>

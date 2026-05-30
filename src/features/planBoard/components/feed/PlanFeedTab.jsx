@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import PlanPostCard from "../../../planFeed/components/PlanPostCard"; 
 import PostSkeleton from "../../../planFeed/components/PostSkeleton"; 
 import { usePlans } from "../../../planFeed/hooks/usePlans";
 
 export default function PlanFeedTab({ planId, active }) {
+  const { t } = useTranslation();
   const { user } = useSelector((s) => s.auth);
   const { current, currentLoading, currentError, loadFeedDetail } = usePlans();
 
@@ -46,7 +48,7 @@ export default function PlanFeedTab({ planId, active }) {
         {currentError && !current && (
           <div className="rounded-2xl border border-rose-200/60 bg-rose-50 p-4">
             <div className="text-sm font-semibold text-rose-700">
-              Không tải được bài viết
+              {t("plan.feed.load_error")}
             </div>
             <div className="mt-1 text-xs text-rose-600">
               {currentError}

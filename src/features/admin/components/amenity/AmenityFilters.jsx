@@ -90,7 +90,7 @@ export default function AmenityFilters({
               <div className="w-full lg:max-w-md">
                 <div className="flex items-center justify-between">
                   <label className={ui.title}>{t("search_amenity")}</label>
-                  <span className={ui.help}>Tên / Code / Mô tả</span>
+                  <span className={ui.help}>{t("admin.amenity_search_hint")}</span>
                 </div>
 
                 <div className="relative mt-1">
@@ -98,7 +98,7 @@ export default function AmenityFilters({
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Ví dụ: WIFI / PARKING / phòng..."
+                    placeholder={t("admin.amenity_search_placeholder")}
                     className={`${ui.input} pl-10`}
                   />
                   {search && (
@@ -117,15 +117,15 @@ export default function AmenityFilters({
               {/* Active filter (3-state chips) */}
               <div className="w-full lg:w-auto">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Trạng thái</label>
+                  <label className={ui.title}>{t("admin.status")}</label>
                   <span className={ui.help}>Active / Inactive</span>
                 </div>
 
                 <div className={`mt-1 ${ui.chipWrap}`}>
                   {[
-                    { v: "ALL", label: "Tất cả" },
-                    { v: "ACTIVE", label: "Đang bật" },
-                    { v: "INACTIVE", label: "Đang tắt" },
+                    { v: "ALL", label: t("common.all") },
+                    { v: "ACTIVE", label: t("admin.amenity_status_active") },
+                    { v: "INACTIVE", label: t("admin.amenity_status_inactive") },
                   ].map((x) => {
                     const on = activeFilter === x.v;
                     return (
@@ -150,7 +150,7 @@ export default function AmenityFilters({
                   onClick={onReset}
                   className={`${ui.btn} ${ui.btnGhost}`}
                   disabled={!hasAnyFilter}
-                  title="Reset bộ lọc"
+                  title={t("admin.reset_filters")}
                 >
                   Reset
                 </button>
@@ -196,7 +196,7 @@ export default function AmenityFilters({
               </div>
 
               <div>
-                <label className={ui.title}>Sắp xếp</label>
+                <label className={ui.title}>{t("admin.sort_by")}</label>
                 <div className="relative mt-1">
                   <ArrowsUpDownIcon className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
                   <select

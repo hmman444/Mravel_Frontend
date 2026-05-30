@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import RestaurantBookingForm from "./RestaurantBookingForm";
 import RestaurantBookingSelectedTableCard from "./RestaurantBookingSelectedTableCard";
 import RestaurantBookingPriceSummaryCard from "./RestaurantBookingPriceSummaryCard";
@@ -55,15 +56,15 @@ export default function RestaurantBookingLayout({
   isSeatEnough = true,
   seatErrorText = "",
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-10 pt-6 md:px-6 md:pt-8">
       <div className="mb-5">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 md:text-2xl">
-          Hoàn tất đặt bàn
+          {t("booking.complete_table_booking")}
         </h1>
         <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-          Vui lòng kiểm tra lại thông tin liên hệ, thời gian và loại bàn trước khi
-          thanh toán đặt cọc.
+          {t("booking.table_booking_review_hint")}
         </p>
       </div>
 
@@ -130,7 +131,7 @@ export default function RestaurantBookingLayout({
       </div>
 
       {loading && (
-        <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">Đang tải thông tin nhà hàng...</p>
+        <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">{t("booking.loading_restaurant_info")}</p>
       )}
     </div>
   );

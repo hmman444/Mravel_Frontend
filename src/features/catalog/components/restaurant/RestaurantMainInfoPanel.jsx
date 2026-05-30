@@ -1,4 +1,6 @@
 import { FaMapMarkerAlt, FaFlag, FaDollarSign, FaClock, FaStar } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 import FavoriteButton from "../../../../components/FavoriteButton";
 
 /*  Helpers  */
@@ -21,13 +23,10 @@ const buildAddress = (r) => {
   return parts.join(", ");
 };
 
-// Mô tả loại hình + cuisines
-const buildTypeCuisine = (r) => {
+// Mô tả loại hình + cuisines (t: hàm dịch i18n)
+const buildTypeCuisine = (r, t) => {
   const typeText = r?.restaurantType
-    ? r.restaurantType
-        .replaceAll("_", " ")
-        .replace("GOI MON", "Gọi món")
-        .replace("BUFFET VA GOI MON", "Buffet & Gọi món")
+    ? t(`enum.restaurantType.${r.restaurantType}`, r.restaurantType)
     : null;
 
   const cuisinesText = Array.isArray(r?.cuisines)
@@ -56,8 +55,8 @@ const computeOpenStatus = (openingHours = []) => {
   const today = openingHours.find((d) => d?.dayOfWeek === todayName);
   if (!today) return null;
 
-  if (today.closed) return { kind: "closed", label: "Hôm nay: Đóng cửa" };
-  if (today.open24h) return { kind: "open", label: "Mở cửa 24h hôm nay" };
+  if (today.closed) return { kind: "closed", label: i18n.t("restaurant.today_closed") };
+  if (today.open24h) return { kind: "open", label: i18n.t("restaurant.open_24h_today") };
 
   const now = new Date();
   const minutesNow = now.getHours() * 60 + now.getMinutes();
@@ -68,23 +67,24 @@ const computeOpenStatus = (openingHours = []) => {
   if (minutesNow < openM) {
     const hh = String(Math.floor(openM / 60)).padStart(2, "0");
     const mm = String(Math.floor(openM % 60)).padStart(2, "0");
-    return { kind: "soon", label: `Sắp mở cửa: ${hh}:${mm}` };
+    return { kind: "soon", label: i18n.t("restaurant.opening_soon", { time: `${hh}:${mm}` }) };
   }
   if (minutesNow >= openM && minutesNow <= closeM) {
     const hh = String(Math.floor(closeM / 60)).padStart(2, "0");
     const mm = String(Math.floor(closeM % 60)).padStart(2, "0");
-    return { kind: "open", label: `Đang mở cửa • Đóng lúc ${hh}:${mm}` };
+    return { kind: "open", label: i18n.t("restaurant.open_now_until", { time: `${hh}:${mm}` }) };
   }
   const hh = String(Math.floor(openM / 60)).padStart(2, "0");
   const mm = String(Math.floor(openM % 60)).padStart(2, "0");
-  return { kind: "closed", label: `Đã đóng • Mở lúc ${hh}:${mm} ngày mai` };
+  return { kind: "closed", label: i18n.t("restaurant.closed_open_tomorrow", { time: `${hh}:${mm}` }) };
 };
 
 export default function RestaurantMainInfoPanel({ restaurant }) {
+  const { t } = useTranslation();
   if (!restaurant) return null;
 
   const address = buildAddress(restaurant);
-  const typeCuisine = buildTypeCuisine(restaurant);
+  const typeCuisine = buildTypeCuisine(restaurant, t);
   const minV = formatCurrencyVND(restaurant?.minPricePerPerson);
   const maxV = formatCurrencyVND(restaurant?.maxPricePerPerson);
   const currency = restaurant?.currencyCode || "VND";
@@ -110,7 +110,7 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug">
-            {restaurant?.name || restaurant?.slug || "Nhà hàng"}
+            {restaurant?.name || restaurant?.slug || t("restaurant.fallback_name")}
           </h1>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
               <span>{score}</span>
             </div>
             {typeof restaurant?.reviewsCount === "number" && (
-              <span className="text-gray-500 dark:text-gray-400 font-normal">({restaurant.reviewsCount} đánh giá)</span>
+              <span className="text-gray-500 dark:text-gray-400 font-normal">{t("restaurant.reviews_count", { count: restaurant.reviewsCount })}</span>
             )}
           </div>
         )}
@@ -151,7 +151,7 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
         <div className="mt-2 flex items-start gap-2 text-[15px]">
           <FaFlag className="mt-0.5 shrink-0 text-gray-600 dark:text-gray-400" />
           <span>
-            <span className="text-gray-700 dark:text-gray-300">Loại hình:&nbsp;</span>
+            <span className="text-gray-700 dark:text-gray-300">{t("restaurant.type_label")}&nbsp;</span>
             <span className="font-medium text-rose-600">{typeCuisine}</span>
           </span>
         </div>
@@ -169,11 +169,11 @@ export default function RestaurantMainInfoPanel({ restaurant }) {
             )}
             {(minV || maxV) && (
               <span className="text-gray-800 dark:text-gray-200">
-                <span className="text-gray-700 dark:text-gray-300">Khoảng giá:&nbsp;</span>
+                <span className="text-gray-700 dark:text-gray-300">{t("restaurant.price_range_label")}&nbsp;</span>
                 {minV ? `${minV}` : "—"}
                 {minV || maxV ? " - " : ""}
                 {maxV ? `${maxV}` : "—"}
-                &nbsp;<span className="text-gray-500 dark:text-gray-400">đ/người</span>
+                &nbsp;<span className="text-gray-500 dark:text-gray-400">{t("restaurant.price_per_person_unit")}</span>
               </span>
             )}
             {currency !== "VND" && (

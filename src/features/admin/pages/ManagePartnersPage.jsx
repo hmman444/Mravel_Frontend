@@ -2,6 +2,7 @@
 
 // src/features/admin/pages/ManagePartnersPage.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminLayout from "../components/AdminLayout";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -20,7 +21,8 @@ const soft = {
 };
 
 export default function ManagePartnersPage() {
-  const title = "Quản lý đối tác";
+  const { t } = useTranslation();
+  const title = t("admin.manage_partners_title");
   const roleParam = "PARTNER";
 
   const { items, loading, toggling, error, load, lock, unlock } = useAdminPartners();
@@ -112,10 +114,10 @@ export default function ManagePartnersPage() {
     try {
       if (action === "LOCK") {
         await lock(id);
-        showSuccess("Đã khóa tài khoản đối tác");
+        showSuccess(t("admin.partner_locked_success"));
       } else {
         await unlock(id);
-        showSuccess("Đã mở khóa tài khoản đối tác");
+        showSuccess(t("admin.partner_unlocked_success"));
       }
 
       // reload để sync đúng DB
@@ -127,7 +129,7 @@ export default function ManagePartnersPage() {
           : e?.response?.data?.message ||
             e?.response?.data?.error ||
             e?.message ||
-            "Thao tác thất bại";
+            t("admin.action_failed");
       showError(msg);
     } finally {
       setRowToggling(id, false);
@@ -143,7 +145,7 @@ export default function ManagePartnersPage() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Danh sách tài khoản (PARTNER). Có thể khóa / mở khóa.
+              {t("admin.manage_partners_subtitle")}
             </p>
           </div>
 
@@ -154,7 +156,7 @@ export default function ManagePartnersPage() {
               type="button"
             >
               <FunnelIcon className="h-5 w-5" />
-              Bộ lọc
+              {t("admin.filters")}
             </button>
           </div>
         </div>
@@ -188,7 +190,7 @@ export default function ManagePartnersPage() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không có đối tác phù hợp với bộ lọc hiện tại
+            {t("admin.no_partners_match_filter")}
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <button
@@ -196,7 +198,7 @@ export default function ManagePartnersPage() {
               className={`${soft.btn} ${soft.btnGhost}`}
               onClick={resetFilters}
             >
-              Reset bộ lọc
+              {t("admin.reset_filters")}
             </button>
           </div>
         </div>
@@ -218,14 +220,14 @@ export default function ManagePartnersPage() {
       {/* Confirm */}
       <ConfirmModal
         open={confirmOpen}
-        title={pendingAction?.action === "LOCK" ? "Khóa tài khoản đối tác" : "Mở khóa tài khoản đối tác"}
+        title={pendingAction?.action === "LOCK" ? t("admin.lock_partner_title") : t("admin.unlock_partner_title")}
         message={
           pendingAction?.action === "LOCK"
-            ? `Bạn có chắc muốn khóa "${pendingAction?.email || ""}" không?`
-            : `Bạn có chắc muốn mở khóa "${pendingAction?.email || ""}" không?`
+            ? t("admin.confirm_lock_partner", { email: pendingAction?.email || "" })
+            : t("admin.confirm_unlock_partner", { email: pendingAction?.email || "" })
         }
-        confirmText={pendingAction?.action === "LOCK" ? "Khóa" : "Mở khóa"}
-        cancelText="Hủy"
+        confirmText={pendingAction?.action === "LOCK" ? t("admin.lock") : t("admin.unlock")}
+        cancelText={t("common.cancel")}
         onClose={closeConfirm}
         onConfirm={confirmToggle}
       />

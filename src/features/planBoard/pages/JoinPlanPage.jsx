@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CheckCircle, XCircle, Loader2, Users } from "lucide-react";
 import { acceptInvite } from "../services/planBoardService";
 import { showSuccess, showError } from "../../../utils/toastUtils";
 
 export default function JoinPlanPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading | success | error
@@ -17,7 +19,7 @@ export default function JoinPlanPage() {
     const join = async () => {
       if (!token) {
         setStatus("error");
-        showError("Token không hợp lệ");
+        showError(t("plan.join.invalid_token"));
         return;
       }
 
@@ -39,13 +41,13 @@ export default function JoinPlanPage() {
         if (!planId) throw new Error("Missing planId");
 
         setStatus("success");
-        showSuccess("Tham gia kế hoạch thành công!");
+        showSuccess(t("plan.join.success"));
 
         setTimeout(() => navigate(`/plans/${planId}`), 1500);
       } catch (err) {
         console.error("Join failed", err);
         setStatus("error");
-        showError("Lời mời không hợp lệ hoặc đã hết hạn");
+        showError(t("plan.join.invalid_invite"));
       }
     };
 
@@ -65,10 +67,10 @@ export default function JoinPlanPage() {
           <>
             <Loader2 className="mx-auto mb-4 h-6 w-6 animate-spin text-sky-600" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Đang xác nhận lời mời
+              {t("plan.join.loading_title")}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Vui lòng chờ trong giây lát…
+              {t("plan.join.loading_desc")}
             </p>
           </>
         )}
@@ -77,10 +79,10 @@ export default function JoinPlanPage() {
           <>
             <CheckCircle className="mx-auto mb-4 h-8 w-8 text-emerald-500" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Tham gia thành công 🎉
+              {t("plan.join.success_title")}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Đang chuyển bạn đến kế hoạch…
+              {t("plan.join.redirecting")}
             </p>
           </>
         )}
@@ -89,17 +91,17 @@ export default function JoinPlanPage() {
           <>
             <XCircle className="mx-auto mb-4 h-8 w-8 text-red-500" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Không thể tham gia
+              {t("plan.join.error_title")}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Lời mời không hợp lệ hoặc đã hết hạn.
+              {t("plan.join.error_desc")}
             </p>
 
             <button
               onClick={() => navigate("/")}
               className="mt-6 inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 transition"
             >
-              Về trang chủ
+              {t("plan.join.back_home")}
             </button>
           </>
         )}

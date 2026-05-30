@@ -1,10 +1,12 @@
 import { useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { loadMessages, markConversationSeen } from "../slices/chatSlice";
 import MessageItem from "./MessageItem";
 import TypingIndicator from "./TypingIndicator";
 
 export default function MessageList({ conversationId, isGroup }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const myUserId = useSelector((s) => s.auth?.user?.id);
   const conversationDetail = useSelector((s) => s.chat.conversationDetails[conversationId]);
@@ -112,14 +114,14 @@ export default function MessageList({ conversationId, isGroup }) {
           {loading ? (
             <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           ) : (
-            <span className="text-xs text-gray-400">Cuộn lên để xem thêm</span>
+            <span className="text-xs text-gray-400">{t("chat.load_more")}</span>
           )}
         </div>
       )}
 
       {messages.length === 0 && !loading && (
         <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
-          Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
+          {t("chat.empty_conversation")}
         </div>
       )}
 

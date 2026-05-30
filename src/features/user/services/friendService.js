@@ -1,5 +1,6 @@
 // src/features/profile/services/friendService.js
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 export async function sendFriendRequest(targetUserId) {
   try {
@@ -12,7 +13,7 @@ export async function sendFriendRequest(targetUserId) {
     return {
       success: false,
       message:
-        error.response?.data?.message || "Không thể gửi lời mời kết bạn.",
+        error.response?.data?.message || i18n.t("user.send_friend_request_failed"),
     };
   }
 }
@@ -26,7 +27,7 @@ export async function acceptFriendRequest(otherUserId) {
     return {
       success: false,
       message:
-        error.response?.data?.message || "Không thể chấp nhận lời mời kết bạn.",
+        error.response?.data?.message || i18n.t("user.accept_friend_request_failed"),
     };
   }
 }
@@ -40,7 +41,7 @@ export async function removeFriendOrCancel(otherUserId) {
     return {
       success: false,
       message:
-        error.response?.data?.message || "Không thể xóa / hủy kết bạn.",
+        error.response?.data?.message || i18n.t("user.remove_friend_failed"),
     };
   }
 }

@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FaPlus,
   FaUserCircle,
@@ -23,6 +24,7 @@ import { showSuccess, showError } from "../../../utils/toastUtils";
 import { deletePlan as deletePlanApi, copyPlan as copyPlanApi } from "../services/planBoardService";
 
 export default function ListPlanPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [openNewPlan, setOpenNewPlan] = useState(false);
 
@@ -55,16 +57,16 @@ export default function ListPlanPage() {
   };
 
   const statusLabels = {
-    DRAFT: "Bản nháp",
-    ACTIVE: "Đang diễn ra",
-    COMPLETED: "Hoàn thành",
-    CANCELLED: "Đã hủy",
+    DRAFT: t("plan.status.draft"),
+    ACTIVE: t("plan.status.active"),
+    COMPLETED: t("plan.status.completed"),
+    CANCELLED: t("plan.status.cancelled"),
   };
 
   const roleLabels = {
-    OWNER: "Chủ sở hữu",
-    EDITOR: "Chỉnh sửa",
-    VIEWER: "Chỉ xem",
+    OWNER: t("plan.member.role_owner"),
+    EDITOR: t("plan.member.role_editor"),
+    VIEWER: t("plan.member.role_viewer"),
   };
 
   const filtered = useMemo(() => {
@@ -98,30 +100,30 @@ export default function ListPlanPage() {
     try {
       const copied = await copyPlanApi(plan.id);
       if (copied?.id) {
-        showSuccess("Đã tạo bản sao lịch trình");
+        showSuccess(t("plan.toast.copy_success"));
         await reloadMyPlans?.();
         await reloadRecent?.();
         navigate(`/plans/${copied.id}`);
       } else {
-        showError("Không thể tạo bản sao lịch trình");
+        showError(t("plan.toast.copy_error"));
       }
     } catch (e) {
       console.error(e);
-      showError("Không thể tạo bản sao lịch trình");
+      showError(t("plan.toast.copy_error"));
     }
   };
 
   const handleDeletePlan = async (plan) => {
     try {
       await deletePlanApi(plan.id);
-      showSuccess("Đã xoá lịch trình");
+      showSuccess(t("plan.toast.delete_success"));
       await reloadMyPlans?.();
       await reloadRecent?.();
 
       // nếu đang ở /my-plans thì vẫn ở lại, chỉ refresh danh sách
     } catch (e) {
       console.error(e);
-      showError("Không thể xoá lịch trình");
+      showError(t("plan.toast.delete_error"));
     }
   };
 
@@ -147,7 +149,7 @@ export default function ListPlanPage() {
     >
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Danh sách lịch trình
+          {t("plan.list.title")}
         </h1>
 
         <button
@@ -161,7 +163,7 @@ export default function ListPlanPage() {
             transition-all
           "
         >
-          <FaPlus size={12} /> Tạo kế hoạch
+          <FaPlus size={12} /> {t("plan.list.create_plan")}
         </button>
       </div>
 
@@ -181,30 +183,30 @@ export default function ListPlanPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm kế hoạch..."
+            placeholder={t("plan.list.search_placeholder")}
             className="bg-transparent focus:outline-none flex-1"
           />
         </div>
 
         <Dropdown
-          label={month ? `Tháng ${month}` : "Tháng"}
+          label={month ? t("plan.filter.month_n", { n: month }) : t("plan.filter.month")}
           value={month}
           onChange={setMonth}
           options={[
-            { label: "Tất cả tháng", value: "" },
+            { label: t("plan.filter.all_months"), value: "" },
             ...Array.from({ length: 12 }).map((_, i) => ({
-              label: `Tháng ${i + 1}`,
+              label: t("plan.filter.month_n", { n: i + 1 }),
               value: i + 1,
             })),
           ]}
         />
 
         <Dropdown
-          label={year ? `Năm ${year}` : "Năm"}
+          label={year ? t("plan.filter.year_n", { n: year }) : t("plan.filter.year")}
           value={year}
           onChange={setYear}
           options={[
-            { label: "Tất cả năm", value: "" },
+            { label: t("plan.filter.all_years"), value: "" },
             { label: "2024", value: 2024 },
             { label: "2025", value: 2025 },
             { label: "2026", value: 2026 },
@@ -213,38 +215,38 @@ export default function ListPlanPage() {
 
         <Dropdown
           label={
-            statusFilter ? statusLabels[statusFilter] || "Trạng thái" : "Trạng thái"
+            statusFilter ? statusLabels[statusFilter] || t("plan.filter.status") : t("plan.filter.status")
           }
           value={statusFilter}
           onChange={setStatusFilter}
           options={[
-            { label: "Tất cả trạng thái", value: "" },
-            { label: "Bản nháp", value: "DRAFT" },
-            { label: "Đang diễn ra", value: "ACTIVE" },
-            { label: "Hoàn thành", value: "COMPLETED" },
-            { label: "Đã hủy", value: "CANCELLED" },
+            { label: t("plan.filter.all_statuses"), value: "" },
+            { label: t("plan.status.draft"), value: "DRAFT" },
+            { label: t("plan.status.active"), value: "ACTIVE" },
+            { label: t("plan.status.completed"), value: "COMPLETED" },
+            { label: t("plan.status.cancelled"), value: "CANCELLED" },
           ]}
         />
 
         <Dropdown
-          label={roleFilter ? roleLabels[roleFilter] || "Vai trò" : "Vai trò"}
+          label={roleFilter ? roleLabels[roleFilter] || t("plan.filter.role") : t("plan.filter.role")}
           value={roleFilter}
           onChange={setRoleFilter}
           options={[
-            { label: "Tất cả vai trò", value: "" },
-            { label: "Chủ sở hữu", value: "OWNER" },
-            { label: "Chỉnh sửa", value: "EDITOR" },
-            { label: "Chỉ xem", value: "VIEWER" },
+            { label: t("plan.filter.all_roles"), value: "" },
+            { label: t("plan.member.role_owner"), value: "OWNER" },
+            { label: t("plan.member.role_editor"), value: "EDITOR" },
+            { label: t("plan.member.role_viewer"), value: "VIEWER" },
           ]}
         />
 
         <Dropdown
-          label={sort === "asc" ? "Ngày tăng dần" : "Ngày giảm dần"}
+          label={sort === "asc" ? t("plan.filter.date_asc") : t("plan.filter.date_desc")}
           value={sort}
           onChange={setSort}
           options={[
-            { label: "Ngày tăng dần", value: "asc" },
-            { label: "Ngày giảm dần", value: "desc" },
+            { label: t("plan.filter.date_asc"), value: "asc" },
+            { label: t("plan.filter.date_desc"), value: "desc" },
           ]}
         />
 
@@ -261,7 +263,7 @@ export default function ListPlanPage() {
             }
           `}
         >
-          {hasBudgetOnly ? "Chỉ kế hoạch có ngân sách" : "Lọc kế hoạch có ngân sách"}
+          {hasBudgetOnly ? t("plan.filter.budget_only_on") : t("plan.filter.budget_only_off")}
         </button>
       </div>
 
@@ -322,7 +324,7 @@ export default function ListPlanPage() {
 
                   <div className="absolute top-2 left-3 flex flex-col gap-1">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/40 text-white backdrop-blur">
-                      {statusLabels[p.status] || "Không xác định"}
+                      {statusLabels[p.status] || t("plan.status.unknown")}
                     </span>
 
                     {myRoleLabel && (
@@ -334,7 +336,7 @@ export default function ListPlanPage() {
 
                   {days && (
                     <span className="absolute bottom-2 right-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/50 text-white backdrop-blur">
-                      {days} ngày
+                      {t("plan.card.days", { n: days })}
                     </span>
                   )}
 
@@ -342,7 +344,7 @@ export default function ListPlanPage() {
                   <div className="absolute top-2 right-2 flex items-center gap-2">
                     <button
                       type="button"
-                      title="Sao chép"
+                      title={t("plan.card.copy")}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -363,7 +365,7 @@ export default function ListPlanPage() {
 
                     <button
                       type="button"
-                      title={canDelete ? "Xoá lịch trình" : "Chỉ chủ sở hữu được xoá"}
+                      title={canDelete ? t("plan.card.delete") : t("plan.card.delete_owner_only")}
                       disabled={!canDelete}
                       onClick={(e) => {
                         e.preventDefault();
@@ -409,7 +411,7 @@ export default function ListPlanPage() {
                   <div className="grid grid-cols-3 gap-2 text-[10px] text-gray-500 dark:text-gray-400 mb-2">
                     <div>
                       <div className="uppercase tracking-wide text-[9px] text-gray-400 dark:text-gray-500">
-                        Ngân sách
+                        {t("plan.card.budget")}
                       </div>
                       <div className="font-semibold text-gray-800 dark:text-gray-200 text-[11px]">
                         {budget ? formatMoney(budget, currency) : "—"}
@@ -418,7 +420,7 @@ export default function ListPlanPage() {
 
                     <div>
                       <div className="uppercase tracking-wide text-[9px] text-gray-400 dark:text-gray-500">
-                        Ước tính
+                        {t("plan.card.estimated")}
                       </div>
                       <div className="font-semibold text-blue-600 dark:text-blue-400 text-[11px]">
                         {estimated ? formatMoney(estimated, currency) : "—"}
@@ -427,7 +429,7 @@ export default function ListPlanPage() {
 
                     <div>
                       <div className="uppercase tracking-wide text-[9px] text-gray-400 dark:text-gray-500">
-                        Thực tế
+                        {t("plan.card.actual")}
                       </div>
                       <div className="font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
                         {actual ? formatMoney(actual, currency) : "—"}
@@ -438,7 +440,7 @@ export default function ListPlanPage() {
                   {budgetUsage !== null && (
                     <div className="mb-2">
                       <div className="flex justify-between items-center text-[10px] text-gray-500 dark:text-gray-400 mb-1">
-                        <span>Đã dùng {budgetUsage}% ngân sách</span>
+                        <span>{t("plan.card.budget_used", { n: budgetUsage })}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                         <div
@@ -453,11 +455,11 @@ export default function ListPlanPage() {
                     <span className="flex items-center gap-1">
                       <FaUserCircle className="text-gray-400" />
                       <span className="truncate max-w-[140px]">
-                        {p.owner || "Chưa rõ chủ sở hữu"}
+                        {p.owner || t("plan.card.unknown_owner")}
                       </span>
                     </span>
 
-                    <span>{p.members || 1} thành viên</span>
+                    <span>{t("plan.card.member_count", { n: p.members || 1 })}</span>
                   </div>
                 </div>
               </div>
@@ -479,7 +481,7 @@ export default function ListPlanPage() {
             "
           >
             <FaPlus size={22} />
-            <span className="mt-2 text-sm">Tạo kế hoạch mới</span>
+            <span className="mt-2 text-sm">{t("plan.list.create_new_plan")}</span>
           </div>
         )}
       </div>
@@ -511,9 +513,9 @@ export default function ListPlanPage() {
       {confirmDeletePlan && (
         <ConfirmModal
           open={true}
-          title="Xoá lịch trình"
-          message={`Xác nhận xoá "${confirmDeletePlan.title}"? Hành động này không thể hoàn tác.`}
-          confirmText="Xoá"
+          title={t("plan.list.delete_confirm_title")}
+          message={t("plan.list.delete_confirm_message", { name: confirmDeletePlan.title })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmDeletePlan(null)}
           onConfirm={async () => {
             const plan = confirmDeletePlan;

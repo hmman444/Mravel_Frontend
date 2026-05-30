@@ -2,6 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { PlayIcon } from "@heroicons/react/24/solid";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import SafeAvatar from "./SafeAvatar";
 
 function ImageBubble({ src, isMine }) {
@@ -47,6 +48,7 @@ function VideoBubble({ src }) {
 }
 
 export default function MessageItem({ message, isMine, showAvatar, showSenderName }) {
+  const { t } = useTranslation();
   const { senderName, senderAvatar, content, createdAt, deleted, seenBy, messageType, mediaUrl } = message;
 
   const timeStr = createdAt ? format(new Date(createdAt), "HH:mm") : "";
@@ -84,7 +86,7 @@ export default function MessageItem({ message, isMine, showAvatar, showSenderNam
               isMine ? "bg-blue-500 text-white rounded-br-md" : "bg-white text-gray-900 rounded-bl-md shadow-sm border border-gray-100"
             }`}
           >
-            <span className="text-xs">Tin nhắn đã bị xóa</span>
+            <span className="text-xs">{t("chat.message_deleted")}</span>
           </div>
         ) : isImage && mediaUrl ? (
           <ImageBubble src={mediaUrl} isMine={isMine} />
@@ -119,7 +121,7 @@ export default function MessageItem({ message, isMine, showAvatar, showSenderNam
         <div className={`flex items-center gap-1 mt-0.5 ${isMine ? "flex-row-reverse" : "flex-row"}`}>
           <span className="text-[10px] text-gray-400">{timeStr}</span>
           {isMine && seenBy && seenBy.length > 0 && (
-            <span className="text-[10px] text-blue-400">Đã xem</span>
+            <span className="text-[10px] text-blue-400">{t("chat.seen")}</span>
           )}
         </div>
       </div>

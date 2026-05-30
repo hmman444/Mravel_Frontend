@@ -1,13 +1,15 @@
 // src/features/admin/components/user/userTerms.js
+import i18n from "../../../../i18n";
+
 export const ROLE_LABEL = {
-  USER: "Khách hàng",
-  PARTNER: "Đối tác",
-  ADMIN: "Quản trị",
+  USER: i18n.t("admin.user_role_user"),
+  PARTNER: i18n.t("admin.user_role_partner"),
+  ADMIN: i18n.t("admin.user_role_admin"),
 };
 
 export const STATUS_LABEL = {
-  ACTIVE: "Hoạt động",
-  LOCKED: "Bị khóa",
+  ACTIVE: i18n.t("admin.user_status_active"),
+  LOCKED: i18n.t("admin.user_status_locked"),
 };
 
 export const STATUS_BADGE = (status) => {

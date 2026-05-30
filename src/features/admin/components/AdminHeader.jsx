@@ -110,8 +110,8 @@ export default function AdminHeader() {
                 text-gray-700 dark:text-gray-200
                 hover:bg-gray-100 dark:hover:bg-gray-800 transition
               "
-              aria-label={t("notifications") || "Thông báo"}
-              title={t("notifications") || "Thông báo"}
+              aria-label={t("admin.notifications")}
+              title={t("admin.notifications")}
             >
               <Bell className="w-6 h-6" />
               {unreadCount > 0 && (
@@ -165,7 +165,7 @@ export default function AdminHeader() {
                            border border-gray-300 dark:border-white/10"
               />
               <span className="hidden md:inline font-semibold max-w-[160px] truncate text-gray-800 dark:text-gray-100">
-                {t("admin") || "Quản trị viên"}
+                {t("admin.role_admin")}
               </span>
               <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-300" />
             </button>
@@ -184,10 +184,10 @@ export default function AdminHeader() {
               >
                 <div className="px-4 py-3 border-b border-gray-200/70 dark:border-gray-800/70">
                   <p className="text-sm font-bold truncate text-gray-900 dark:text-white">
-                    {t("admin") || "Quản trị viên"}
+                    {t("admin.role_admin")}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                    {t("admin_panel") || "Admin Panel"}
+                    {t("admin.admin_panel")}
                   </p>
                 </div>
 
@@ -205,7 +205,7 @@ export default function AdminHeader() {
                       <ShieldCheck className="w-4 h-4" />
                     </span>
                     <span className="font-medium">
-                      {t("admin_settings") || "Cài đặt quản trị"}
+                      {t("admin.admin_settings")}
                     </span>
                   </button>
 
@@ -224,7 +224,7 @@ export default function AdminHeader() {
                     "
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>{t("logout") || "Đăng xuất"}</span>
+                    <span>{t("common.logout")}</span>
                   </button>
                 </div>
               </div>

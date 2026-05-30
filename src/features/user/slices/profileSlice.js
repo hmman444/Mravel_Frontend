@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getUserProfilePage, updateMyProfile  } from "../../user/services/userProfileService";
 import { reactPlan, commentPlan } from "../../planFeed/slices/planSlice";
+import i18n from "../../../i18n";
 
 export const loadProfilePage = createAsyncThunk(
   "profile/loadProfilePage",
@@ -54,7 +55,7 @@ const profileSlice = createSlice({
       })
       .addCase(loadProfilePage.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Không thể tải hồ sơ người dùng";
+        state.error = action.payload || i18n.t("user.load_profile_failed");
       })
       .addCase(reactPlan.fulfilled, (state, action) => {
         if (!state.data?.plansPreview) return;

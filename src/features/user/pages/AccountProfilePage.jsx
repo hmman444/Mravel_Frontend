@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLoadUser } from "../../auth/hooks/useLoadUser";
 
 import Navbar from "../../../components/Navbar";
@@ -11,6 +12,7 @@ import LinkedAccountsCard from "../components/LinkedAccountsCard";
 
 // AccountProfilePage.jsx
 export default function AccountProfilePage() {
+  const { t } = useTranslation();
   useLoadUser();
 
   const [selectedTab, setSelectedTabState] = useState(
@@ -36,7 +38,7 @@ export default function AccountProfilePage() {
 
       <main className="flex-1 max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-10 md:pt-7 md:pb-12">
         <h1 className="text-2xl md:text-3xl font-semibold mb-4 text-slate-900 dark:text-slate-50">
-          Hồ sơ cá nhân
+          {t("user.profile_title")}
         </h1>
 
         {/* tăng width sidebar: 280px và làm sticky */}

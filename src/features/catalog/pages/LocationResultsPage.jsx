@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "../../../components/Footer";
 import Navbar from "../../../components/Navbar";
@@ -18,6 +19,7 @@ import ResultList from "../components/ResultList";
 const EMPTY_FILTERS = { categorySlugs: [], priceLevel: null };
 
 export default function LocationResultsPage() {
+  const { t } = useTranslation();
   const [sp] = useSearchParams();
   const navigate = useNavigate();
   const spec = sp.get("spec");
@@ -48,7 +50,7 @@ export default function LocationResultsPage() {
       const tail = dest?.provinceName
         ? `, ${dest.provinceName}`
         : dest?.countryCode === "VN"
-        ? ", Việt Nam"
+        ? `, ${t("place.vietnam")}`
         : "";
       setLabel(`${dest.name}${tail}`);
     } else {
@@ -133,7 +135,7 @@ export default function LocationResultsPage() {
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
             <div className="mb-4">
               <ControlBar
-                title={dest?.name ? makePlaceDisplay(dest) : q || "Kết quả"}
+                title={dest?.name ? makePlaceDisplay(dest) : q || t("place.results")}
                 count={displayed.length}
                 sortBy={sortBy}
                 setSortBy={setSortBy}
@@ -147,18 +149,18 @@ export default function LocationResultsPage() {
 
               <section className="col-span-12 lg:col-span-9">
                 {loading && (
-                  <div className="text-gray-500 dark:text-gray-400 mb-3">Đang tải…</div>
+                  <div className="text-gray-500 dark:text-gray-400 mb-3">{t("common.loading")}</div>
                 )}
 
                 {noDataOnFirstPage && (
                   <div className="text-gray-500 dark:text-gray-400 mb-3">
-                    Không tìm thấy địa điểm phù hợp.
+                    {t("place.no_matching_places")}
                   </div>
                 )}
 
                 {endOfList && (
                   <div className="mb-4 text-gray-500 dark:text-gray-400">
-                    Bạn đã ở cuối danh sách.
+                    {t("place.end_of_list")}
                   </div>
                 )}
 
@@ -174,14 +176,14 @@ export default function LocationResultsPage() {
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
                   >
-                    Trang trước
+                    {t("common.prev_page")}
                   </button>
                   <button
                     className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primaryHover disabled:opacity-50"
                     onClick={() => setPage((p) => p + 1)}
                     disabled={page + 1 >= totalPages}
                   >
-                    Trang sau
+                    {t("common.next_page")}
                   </button>
                 </div>
               </section>
@@ -194,7 +196,7 @@ export default function LocationResultsPage() {
         <FadeInSection delay={120}>
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
             <h2 className="text-xl font-semibold mb-4">
-              Các địa điểm khác có thể bạn sẽ thích
+              {t("place.other_places_you_may_like")}
             </h2>
             <SuggestedDestinations currentSlug={spec || ""} size={6} />
           </div>
