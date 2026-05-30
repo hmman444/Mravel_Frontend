@@ -14,6 +14,7 @@ import {
   renameGroup,
 } from "../services/chatService";
 import AddMembersModal from "./AddMembersModal";
+import SafeAvatar from "./SafeAvatar";
 import {
   XMarkIcon,
   PencilIcon,
@@ -63,13 +64,7 @@ function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnl
         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${canManage ? "hover:bg-gray-50 cursor-pointer" : ""}`}
       >
         <div className="relative flex-shrink-0">
-          {member.avatar ? (
-            <img src={member.avatar} alt={member.fullname} className="w-8 h-8 rounded-full object-cover" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center font-semibold">
-              {(member.fullname || "?")[0].toUpperCase()}
-            </div>
-          )}
+          <SafeAvatar src={member.avatar} name={member.fullname} size="md" bgClassName="bg-blue-400" />
           {isOnline && (
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" />
           )}

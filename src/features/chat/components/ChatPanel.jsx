@@ -12,6 +12,7 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import GroupInfoPanel from "./GroupInfoPanel";
 import NewChatModal from "./NewChatModal";
+import SafeAvatar from "./SafeAvatar";
 import {
   ChevronLeftIcon,
   InformationCircleIcon,
@@ -20,17 +21,6 @@ import {
   UserIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-
-function Avatar({ src, name, size = "sm" }) {
-  const sz = size === "md" ? "w-9 h-9" : "w-7 h-7";
-  if (src) return <img src={src} alt={name} className={`${sz} rounded-full object-cover flex-shrink-0`} />;
-  const initials = (name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  return (
-    <div className={`${sz} rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0`}>
-      {initials}
-    </div>
-  );
-}
 
 export default function ChatPanel({ conversationId, compact = false, onClose }) {
   const { t } = useTranslation();
@@ -109,7 +99,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
               className="rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1"
               aria-label={t("chat.options")}
             >
-              <Avatar src={conv?.avatarUrl} name={conv?.name} size="md" />
+              <SafeAvatar src={conv?.avatarUrl} name={conv?.name} size="lg" />
             </button>
 
             {/* Avatar context menu */}

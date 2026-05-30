@@ -672,6 +672,8 @@
     "review_comment_2": "Không khí mát mẻ, cảnh đẹp như châu Âu. Cầu Vàng quá ấn tượng!",
     "chat": {
         "title": "Tin nhắn",
+        "planner_title": "MAI (Mravel AI)",
+        "planner_subtitle": "Trợ lý du lịch AI của Mravel",
         "new_message": "Tin nhắn mới",
         "search_conversations": "Tìm kiếm cuộc trò chuyện...",
         "search_users": "Tìm kiếm người dùng...",
@@ -4492,5 +4494,22 @@
             "days": "{{n}} ngày trước",
             "weeks": "{{n}} tuần trước"
         }
-    }
+    },
+    "ai_plan_button": "Lập kế hoạch với AI",
+    "ai_plan_drawer_eyebrow": "AI Trợ lý",
+    "ai_plan_drawer_title": "Lập kế hoạch chuyến đi",
+    "ai_plan_close": "Đóng",
+    "ai_plan_send": "Gửi",
+    "ai_plan_thinking": "Đang suy nghĩ...",
+    "ai_plan_input_placeholder": "VD: Mình muốn đi Đà Nẵng 3 ngày 2 người",
+    "ai_plan_revision_placeholder": "Yêu cầu chỉnh sửa: rẻ hơn, đổi khách sạn...",
+    "ai_plan_regenerate": "Tạo lại nháp",
+    "ai_plan_approve": "Duyệt & tạo plan",
+    "ai_plan_empty_hint": "Mô tả chuyến đi bạn muốn: điểm đến, số ngày, số người, ngân sách, sở thích...",
+    "ai_plan_current_draft": "Bản nháp hiện tại",
+    "ai_plan_missing_fields": "Cần bổ sung",
+    "ai_plan_destination": "Điểm đến",
+    "ai_plan_travelers": "người",
+    "ai_plan_estimated_cost": "Chi phí ước tính",
+    "ai_plan_approved_toast": "Đã tạo plan từ bản nháp"
 }

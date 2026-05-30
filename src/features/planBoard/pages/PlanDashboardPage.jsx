@@ -137,7 +137,7 @@ export default function PlanDashboardPage() {
       if (reloadMyPlans) {
         await reloadMyPlans();
       }
-      if (reloadRecent){
+      if (reloadRecent) {
         await reloadRecent();
       }
     } catch {
@@ -149,12 +149,12 @@ export default function PlanDashboardPage() {
   const handleCopyFromSidebar = async (plan) => {
     try {
       const copied = await copyPlan(plan.id);
-      if (copied?.id){
+      if (copied?.id) {
         showSuccess(t("plan.copy.success"));
         if (reloadMyPlans) {
           await reloadMyPlans();
         }
-        if (reloadRecent){
+        if (reloadRecent) {
           await reloadRecent();
         }
         navigate(`/plans/${copied.id}`);
@@ -165,7 +165,7 @@ export default function PlanDashboardPage() {
       console.error(e);
       showError(t("plan.copy.error"));
     }
-  }
+  };
 
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
@@ -352,7 +352,6 @@ export default function PlanDashboardPage() {
     try {
       setAccessLoadingType("VIEW");
       await requestAccess("VIEW");
-      
     } finally {
       setAccessLoadingType(null);
     }
@@ -362,7 +361,6 @@ export default function PlanDashboardPage() {
     try {
       setAccessLoadingType("EDIT");
       await requestAccess("EDIT");
-      
     } finally {
       setAccessLoadingType(null);
     }
@@ -398,7 +396,7 @@ export default function PlanDashboardPage() {
   const handleRemoveRecentFromSidebar = async (plan) => {
     await removeRecent(plan.id);
   };
-  
+
   const permissionDenied =
     !loading &&
     !board &&
@@ -438,7 +436,6 @@ export default function PlanDashboardPage() {
       ) || null
     );
   };
-
 
   return (
     <PlanLayout
@@ -518,12 +515,12 @@ export default function PlanDashboardPage() {
           { key: "members", label: t("plan.tab.members") },
           { key: "feed", label: t("plan.tab.feed") },
           { key: "stats", label: t("plan.tab.stats") }
-        ].map((t) => {
-          const ac = activeTab === t.key;
+        ].map((tab) => {
+          const ac = activeTab === tab.key;
           return (
             <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
               className={`
                 relative rounded-full px-4 py-1.5 text-xs font-medium 
                 transition-all duration-200
@@ -534,7 +531,7 @@ export default function PlanDashboardPage() {
                 }
               `}
             >
-              {t.label}
+              {tab.label}
               {ac && (
                 <span className="absolute inset-x-3 -bottom-1 h-0.5 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400" />
               )}
@@ -589,10 +586,8 @@ export default function PlanDashboardPage() {
             board={board}
             canEdit={canEditGeneral}
             planMembers={planMembers}
-            
             createActivityCard={createActivityCard}
             updateActivityCard={updateActivityCard}
-            
             onMoveCard={async ({
               cardId,
               sourceDate,

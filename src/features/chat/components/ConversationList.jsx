@@ -9,8 +9,10 @@ import {
   upsertConversation,
 } from "../slices/chatSlice";
 import { createPrivateConversation } from "../services/chatService";
+import { PLANNER_CONV_ID } from "../planner";
 import ConversationItem from "./ConversationItem";
 import NewChatModal from "./NewChatModal";
+import SafeAvatar from "./SafeAvatar";
 import { PencilSquareIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 function FriendRow({ friend, onStartChat }) {
@@ -19,19 +21,13 @@ function FriendRow({ friend, onStartChat }) {
       onClick={() => onStartChat(friend)}
       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors group"
     >
-      {friend.avatar ? (
-        <img src={friend.avatar} alt={friend.fullname} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-      ) : (
-        <div className="w-8 h-8 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0">
-          {(friend.fullname || "?")[0].toUpperCase()}
-        </div>
-      )}
+      <SafeAvatar src={friend.avatar} name={friend.fullname} size="md" bgClassName="bg-blue-400" />
       <span className="flex-1 text-left text-sm text-gray-700 truncate">{friend.fullname}</span>
     </button>
   );
 }
 
-export default function ConversationList({ activeId, onClose }) {
+export default function ConversationList({ activeId, onClose, showPlanner = false }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { conversations, conversationsLoading, conversationsLoaded, friends, friendsLoaded } = useSelector((s) => s.chat);
@@ -139,6 +135,29 @@ export default function ConversationList({ activeId, onClose }) {
       <div className="flex-1 overflow-y-auto">
         {/* Conversation list */}
         <div className="px-2 py-1 space-y-0.5">
+          {/* Pinned Mravel Planner entry (only on the full chat page, hidden while searching) */}
+          {showPlanner && !hasSearch && (
+            <button
+              onClick={() => dispatch(setActiveConversation(PLANNER_CONV_ID))}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-left ${
+                activeId === PLANNER_CONV_ID ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-gray-100"
+              }`}
+            >
+              <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primaryHover text-white shadow-sm">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                  <path d="M12 2L14.5 9L22 12L14.5 15L12 22L9.5 15L2 12L9.5 9L12 2Z" />
+                </svg>
+                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-medium truncate ${activeId === PLANNER_CONV_ID ? "text-blue-700" : "text-gray-900"}`}>
+                  {t("chat.planner_title")}
+                </div>
+                <div className="text-xs text-gray-500 truncate">{t("chat.planner_subtitle")}</div>
+              </div>
+            </button>
+          )}
+
           {conversationsLoading && conversations.length === 0 ? (
             <div className="flex justify-center items-center h-24">
               <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
