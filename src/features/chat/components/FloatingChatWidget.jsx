@@ -1,23 +1,57 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useChatRealtime } from "../hooks/useChatRealtime";
+import { setActiveConversation } from "../slices/chatSlice";
+import { PLANNER_CONV_ID } from "../planner";
 import ConversationList from "./ConversationList";
 import ChatPanel from "./ChatPanel";
+import { AIPlanPanelView } from "../../aiPlan/components/AIPlanPanel";
+import { useAIPlanSession } from "../../aiPlan/hooks/useAIPlanSession";
 import { ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 export default function FloatingChatWidget() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const { accessToken, role } = useSelector((s) => s.auth);
   const activeId = useSelector((s) => s.chat.activeConversationId);
   const conversations = useSelector((s) => s.chat.conversations);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
+  // MAI (Mravel AI) is a pinned virtual assistant: its sentinel conversation renders
+  // the full planner panel right inside the widget. `chatActiveId` strips the sentinel
+  // so ChatPanel/realtime never receive the non-numeric "planner" id.
+  const isPlanner = activeId === PLANNER_CONV_ID;
+  const chatActiveId = isPlanner ? null : activeId;
+
+  // The MAI session lives HERE (not inside the popup) so an in-flight answer keeps
+  // streaming and is saved even if the user closes the popup. A red dot then signals
+  // the new reply. The session also rehydrates on mount → returning users see history.
+  const maiSession = useAIPlanSession(null);
+  const [maiUnread, setMaiUnread] = useState(false);
+  const prevMaiLenRef = useRef(maiSession.messages.length);
+  const viewingMai = isOpen && isPlanner;
+
+  useEffect(() => {
+    const len = maiSession.messages.length;
+    const prev = prevMaiLenRef.current;
+    prevMaiLenRef.current = len;
+    // prev > 0 skips the initial rehydrate (0 → N) so resuming an old chat doesn't
+    // light up a fake unread dot — only genuinely new replies do.
+    if (prev > 0 && len > prev && !viewingMai && maiSession.messages[len - 1]?.role === "ASSISTANT") {
+      setMaiUnread(true);
+    }
+  }, [maiSession.messages, viewingMai]);
+
+  useEffect(() => {
+    if (viewingMai) setMaiUnread(false);
+  }, [viewingMai]);
+
   // Global realtime subscriptions — moved here from ChatPage so there is only one
   // subscription point regardless of whether the user is on /chat or elsewhere.
-  useChatRealtime(activeId);
+  useChatRealtime(chatActiveId);
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
@@ -41,10 +75,16 @@ export default function FloatingChatWidget() {
             "overflow-hidden flex flex-col"
           }
         >
-          {activeId ? (
-            <ChatPanel conversationId={activeId} compact onClose={handleClose} />
+          {isPlanner ? (
+            <AIPlanPanelView
+              session={maiSession}
+              autoFocus={false}
+              onClose={() => dispatch(setActiveConversation(null))}
+            />
+          ) : chatActiveId ? (
+            <ChatPanel conversationId={chatActiveId} compact onClose={handleClose} />
           ) : (
-            <ConversationList activeId={activeId} onClose={handleClose} />
+            <ConversationList activeId={activeId} onClose={handleClose} showPlanner />
           )}
         </div>
       )}
@@ -64,7 +104,7 @@ export default function FloatingChatWidget() {
         aria-label={t("chat.open")}
       >
         <ChatBubbleOvalLeftEllipsisIcon className="w-7 h-7" />
-        {totalUnread > 0 && (
+        {totalUnread > 0 ? (
           <span
             className={
               "absolute -top-1 -right-1 " +
@@ -75,6 +115,13 @@ export default function FloatingChatWidget() {
           >
             {totalUnread > 99 ? "99+" : totalUnread}
           </span>
+        ) : (
+          maiUnread && (
+            <span
+              className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-red-500 ring-2 ring-white"
+              aria-label="MAI có phản hồi mới"
+            />
+          )
         )}
       </button>
     </>

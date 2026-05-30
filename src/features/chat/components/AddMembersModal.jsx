@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { addMembers } from "../services/chatService";
 import { loadFriends } from "../slices/chatSlice";
+import SafeAvatar from "./SafeAvatar";
 
 export default function AddMembersModal({ conversationId, members, onClose, onAdded }) {
   const dispatch = useDispatch();
@@ -83,18 +84,14 @@ export default function AddMembersModal({ conversationId, members, onClose, onAd
                     onChange={() => toggleSelect(friend.id)}
                     className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-400"
                   />
-                  <div className="flex-1 min-w-0">
-                    {friend.avatar ? (
-                      <img
-                        src={friend.avatar}
-                        alt={friend.fullname}
-                        className="w-10 h-10 rounded-full object-cover float-left mr-3"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-blue-400 text-white text-sm flex items-center justify-center font-semibold float-left mr-3">
-                        {(friend.fullname || "?")?.[0]?.toUpperCase()}
-                      </div>
-                    )}
+                  <div className="flex-1 min-w-0 flex items-center gap-3">
+                    <SafeAvatar
+                      src={friend.avatar}
+                      name={friend.fullname}
+                      size="lg"
+                      bgClassName="bg-blue-400"
+                      className="!w-10 !h-10"
+                    />
                     <p className="font-medium text-sm text-gray-900 truncate">
                       {friend.fullname}
                     </p>

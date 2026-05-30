@@ -3,16 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useSelector, useDispatch } from "react-redux";
 import { createPrivateConversation, createGroupConversation, searchUsers } from "../services/chatService";
 import { loadFriends } from "../slices/chatSlice";
+import SafeAvatar from "./SafeAvatar";
 import { XMarkIcon, MagnifyingGlassIcon, UserGroupIcon, CheckIcon } from "@heroicons/react/24/outline";
 
-function UserAvatar({ user, size = "w-8 h-8" }) {
-  return user.avatar ? (
-    <img src={user.avatar} alt={user.fullname} className={`${size} rounded-full object-cover flex-shrink-0`} />
-  ) : (
-    <div className={`${size} rounded-full bg-blue-400 text-white text-sm flex items-center justify-center font-semibold flex-shrink-0`}>
-      {(user.fullname || "?")[0].toUpperCase()}
-    </div>
-  );
+function UserAvatar({ user }) {
+  return <SafeAvatar src={user.avatar} name={user.fullname} size="md" bgClassName="bg-blue-400" />;
 }
 
 function UserResult({ user, selected, onToggle, badge }) {

@@ -2,23 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { PlayIcon } from "@heroicons/react/24/solid";
 import { createPortal } from "react-dom";
-
-function Avatar({ src, name }) {
-  if (src) {
-    return <img src={src} alt={name} className="w-7 h-7 rounded-full object-cover flex-shrink-0" />;
-  }
-  const initials = (name || "?")
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  return (
-    <div className="w-7 h-7 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0">
-      {initials}
-    </div>
-  );
-}
+import SafeAvatar from "./SafeAvatar";
 
 function ImageBubble({ src, isMine }) {
   const [lightbox, setLightbox] = useState(false);
@@ -83,7 +67,7 @@ export default function MessageItem({ message, isMine, showAvatar, showSenderNam
       {/* Avatar — only for others */}
       {!isMine ? (
         showAvatar ? (
-          <Avatar src={senderAvatar} name={senderName} />
+          <SafeAvatar src={senderAvatar} name={senderName} size="sm" bgClassName="bg-blue-400" />
         ) : (
           <div className="w-7 flex-shrink-0" />
         )

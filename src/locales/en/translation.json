@@ -253,6 +253,8 @@
 
     "chat": {
         "title": "Messages",
+        "planner_title": "MAI (Mravel AI)",
+        "planner_subtitle": "Mravel's AI travel assistant",
         "new_message": "New message",
         "search_conversations": "Search conversations...",
         "search_users": "Search users...",
@@ -282,5 +284,22 @@
         "friend_badge": "Friend",
         "creating": "Creating...",
         "open": "Open chat"
-    }
+    },
+    "ai_plan_button": "Plan with AI",
+    "ai_plan_drawer_eyebrow": "AI Assistant",
+    "ai_plan_drawer_title": "Plan your trip",
+    "ai_plan_close": "Close",
+    "ai_plan_send": "Send",
+    "ai_plan_thinking": "Thinking...",
+    "ai_plan_input_placeholder": "e.g. I want to visit Da Nang for 3 days with 2 people",
+    "ai_plan_revision_placeholder": "Revision: cheaper, different hotel...",
+    "ai_plan_regenerate": "Regenerate draft",
+    "ai_plan_approve": "Approve & create plan",
+    "ai_plan_empty_hint": "Describe the trip you want: destination, duration, travelers, budget, interests...",
+    "ai_plan_current_draft": "Current draft",
+    "ai_plan_missing_fields": "Need more info",
+    "ai_plan_destination": "Destination",
+    "ai_plan_travelers": "travelers",
+    "ai_plan_estimated_cost": "Estimated cost",
+    "ai_plan_approved_toast": "Plan created from the AI draft"
 }

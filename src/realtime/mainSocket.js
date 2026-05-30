@@ -109,22 +109,66 @@ class MainSocket {
         console.warn("[WS] WebSocket closed on stale client");
         return;
       }
-      console.warn("[WS] Socket closed:", event.code, event.reason);
+      console.warn("[WS] Socket closed:", event?.code, event?.reason);
       this.connected = false;
       // Do NOT null out this.client — STOMP auto-reconnects via reconnectDelay.
+    };
+
+    client.onWebSocketError = (event) => {
+      console.warn("[WS] Socket error:", event?.message || event);
     };
   }
 
   connect(accessToken) {
+    const tokenChanged =
+      accessToken && this.accessToken && accessToken !== this.accessToken;
+
     this.setAccessToken(accessToken || null);
 
     if (!this.client) {
       this._createClient();
     }
 
+    // If the token changed and the client is currently connected, force a
+    // reconnect so the new JWT is used immediately (otherwise the existing
+    // STOMP session keeps running with the old token until the next natural
+    // disconnect — which can mean stale auth context after a refresh or
+    // account switch).
+    if (tokenChanged && this.client.active) {
+      this._forceReconnect();
+      return;
+    }
+
     if (this.client.active) return;
 
     this.client.activate();
+  }
+
+  // Deactivate the current STOMP client and immediately re-activate it so that
+  // the next CONNECT frame carries the latest in-memory access token. Kept
+  // subscriptions in `subscribers` so they get reinstated by onConnect.
+  _forceReconnect() {
+    if (!this.client) return;
+    const client = this.client;
+    this.connected = false;
+    // Drop the old STOMP-side subscription handles (the new client.subscribe
+    // call inside onConnect will replace them anyway). Without this, an
+    // unsubscribe() during the brief reconnect gap would call into a dead
+    // STOMP session and noisily fail.
+    this.subscribers.forEach((entry) => {
+      entry.unsub = null;
+    });
+    Promise.resolve()
+      .then(() => client.deactivate())
+      .catch(() => {})
+      .then(() => {
+        if (this.client !== client) return;
+        try {
+          client.activate();
+        } catch (e) {
+          console.warn("[WS] Re-activate after token refresh failed:", e);
+        }
+      });
   }
 
   disconnect() {
@@ -174,6 +218,9 @@ class MainSocket {
         this.pendingSubs.push({ id, destination, handler });
       }
     } else {
+      // Not yet connected — record in subscribers so a future onConnect
+      // re-subscribes it even if it's the first time. Also push to pendingSubs
+      // so the initial activation path picks it up.
       this.pendingSubs.push({ id, destination, handler });
     }
 
