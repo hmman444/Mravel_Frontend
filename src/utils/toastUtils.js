@@ -7,3 +7,11 @@ export const showSuccess = (msg) => {
 export const showError = (msg) => {
   toast.error(msg);
 };
+
+export const showWarning = (msg) => {
+  toast.warn(msg);
+};
+
+export const showInfo = (msg) => {
+  toast.info(msg);
+};

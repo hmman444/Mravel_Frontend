@@ -484,20 +484,22 @@ export default function PlanDashboardPage() {
         </div>
 
         {board && (
-          <button
-            onClick={() => setOpenShare(true)}
-            className="
-              inline-flex items-center gap-2 rounded-full 
-              bg-gradient-to-r from-blue-500/90 via-blue-500/90 to-indigo-500/90 
-              px-4 py-2 text-sm font-semibold text-white 
-              shadow-md shadow-blue-500/30 
-              transition-all duration-200 
-              hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 
-              active:translate-y-0
-            "
-          >
-            <span>Chia sẻ</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setOpenShare(true)}
+              className="
+                inline-flex items-center gap-2 rounded-full
+                bg-gradient-to-r from-blue-500/90 via-blue-500/90 to-indigo-500/90
+                px-4 py-2 text-sm font-semibold text-white
+                shadow-md shadow-blue-500/30
+                transition-all duration-200
+                hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40
+                active:translate-y-0
+              "
+            >
+              <span>Chia sẻ</span>
+            </button>
+          </div>
         )}
       </div>
 

@@ -1,32 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
-
-function Avatar({ src, name, size = "md" }) {
-  const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-11 h-11 text-sm";
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt={name}
-        className={`${sizeClass} rounded-full object-cover flex-shrink-0`}
-      />
-    );
-  }
-  const initials = (name || "?")
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  return (
-    <div
-      className={`${sizeClass} rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold flex-shrink-0`}
-    >
-      {initials}
-    </div>
-  );
-}
+import SafeAvatar from "./SafeAvatar";
 
 function GroupAvatarStack({ members }) {
   const shown = members.slice(0, 3);
@@ -46,7 +21,7 @@ function GroupAvatarStack({ members }) {
             zIndex: 3 - i,
           }}
         >
-          <Avatar src={m.avatar} name={m.fullname} size="sm" />
+          <SafeAvatar src={m.avatar} name={m.fullname} size={shown.length === 1 ? "xl" : "md"} />
         </div>
       ))}
     </div>
@@ -87,7 +62,7 @@ export default function ConversationItem({ conversation, active, onClick, isOnli
         <GroupAvatarStack members={members} />
       ) : (
         <div className="relative flex-shrink-0">
-          <Avatar src={avatarUrl} name={name} />
+          <SafeAvatar src={avatarUrl} name={name} size="xl" />
           {isOnline && (
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full" />
           )}
