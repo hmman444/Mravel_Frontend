@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import {
   fetchAdminHotels,
   fetchAdminRestaurants,
@@ -20,8 +21,8 @@ const apiMessage = (err) => {
     err?.response?.data?.error ||
     err?.message;
 
-  if (err?.response?.status === 401) return "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
-  return msg || "Có lỗi xảy ra";
+  if (err?.response?.status === 401) return i18n.t("admin.session_expired");
+  return msg || i18n.t("admin.error_occurred");
 };
 
 const initialState = {
@@ -165,13 +166,23 @@ const adminServiceSlice = createSlice({
       .addCase(actOnService.fulfilled, (state, action) => {
         state.acting = false;
 
+        // BE trả raw doc (name/cityName dạng Map). KHÔNG nhét nguyên vào list flat (sẽ crash khi render Map).
+        // Chỉ patch các field trạng thái lên item flat đang có (giữ name/cityName String đã flatten).
         const updated = action.payload;
+        const mod = updated?.moderation || null;
+        const patch = (item) => ({
+          ...item,
+          active: updated?.active ?? item.active,
+          moderationStatus: mod?.status ?? item.moderationStatus,
+          rejectionReason: mod?.rejectionReason ?? item.rejectionReason,
+          blockedReason: mod?.blockedReason ?? item.blockedReason,
+        });
 
         const idx = state.items.findIndex((x) => x.id === updated?.id);
-        if (idx !== -1) state.items[idx] = updated;
+        if (idx !== -1) state.items[idx] = patch(state.items[idx]);
 
         if (state.selected?.id && state.selected.id === updated?.id) {
-          state.selected = updated;
+          state.selected = patch(state.selected);
         }
       })
       .addCase(actOnService.rejected, (state, action) => {

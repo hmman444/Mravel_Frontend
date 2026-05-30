@@ -9,6 +9,7 @@ import {
 } from "../services/authService";
 import { setTokens, getTokens, clearTokens } from "../../../utils/tokenManager";
 import { socialLogin, getCurrentUser } from "../services/authService";
+import i18n from "../../../i18n";
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -32,11 +33,11 @@ export const logoutUser = createAsyncThunk(
       const { refreshToken } = getTokens();
       const result = await logout(refreshToken);
       clearTokens();
-      if (result.success) return "Đăng xuất thành công";
+      if (result.success) return i18n.t("auth.logout_success");
       return rejectWithValue(result.message);
     } catch {
       clearTokens();
-      return rejectWithValue("Lỗi khi đăng xuất");
+      return rejectWithValue(i18n.t("auth.logout_error"));
     }
   }
 );
@@ -98,7 +99,7 @@ export const fetchCurrentUser = createAsyncThunk(
     const token = getState().auth.accessToken;
     if (!token) {
       console.warn("⚠️ Không có token trong Redux state");
-      return rejectWithValue("Không có token");
+      return rejectWithValue(i18n.t("auth.no_token"));
     }
 
     const result = await getCurrentUser(token);
@@ -150,7 +151,7 @@ const authSlice = createSlice({
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
         state.role = action.payload.role;
-        state.message = "Đăng nhập thành công!";
+        state.message = i18n.t("auth.login_success");
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -166,7 +167,7 @@ const authSlice = createSlice({
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
         state.role = action.payload.role;
-        state.message = "Đăng nhập mạng xã hội thành công!";
+        state.message = i18n.t("auth.social_login_success");
       })
       .addCase(socialLoginUser.rejected, (state, action) => {
         state.loading = false;

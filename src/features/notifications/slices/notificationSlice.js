@@ -5,6 +5,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from "../services/notificationService";
+import i18n from "../../../i18n";
 
 const initialState = {
   items: [],
@@ -29,8 +30,8 @@ const apiMessage = (err) => {
     err?.message;
 
   if (err?.response?.status === 401)
-    return "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
-  return msg || "Có lỗi xảy ra";
+    return i18n.t("notification.error.unauthorized");
+  return msg || i18n.t("notification.error.generic");
 };
 
 const SOCIAL_TYPES = new Set([

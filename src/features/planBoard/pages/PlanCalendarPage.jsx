@@ -4,6 +4,7 @@
 
   import { useState } from "react";
   import { useNavigate } from "react-router-dom";
+  import { useTranslation } from "react-i18next";
   import PlanLayout from "../components/PlanLayout";
   import {
     FaChevronLeft,
@@ -13,6 +14,7 @@
   } from "react-icons/fa";
   
   export default function PlanCalendarPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const plans = [
@@ -103,7 +105,7 @@
         {/* PAGE HEADER */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <FaCalendarAlt /> Lịch tổng quan kế hoạch
+            <FaCalendarAlt /> {t("plan.calendar.overview_title")}
           </h1>
 
           <div className="flex items-center gap-3">
@@ -137,9 +139,9 @@
 
         {/* DAY LABELS */}
         <div className="grid grid-cols-7 text-center font-medium text-sm text-gray-600 dark:text-gray-300 mb-2">
-          {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d) => (
+          {["sun", "mon", "tue", "wed", "thu", "fri", "sat"].map((d) => (
             <div key={d} className="py-2">
-              {d}
+              {t(`plan.calendar.weekday.${d}`)}
             </div>
           ))}
         </div>

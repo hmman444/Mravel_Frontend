@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import ReasonModal from "../components/services/ReasonModal";
@@ -59,6 +60,7 @@ function Badge({ children, tone = "slate" }) {
 }
 
 export default function AdminRestaurantReviewPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -73,7 +75,7 @@ export default function AdminRestaurantReviewPage() {
   useEffect(() => {
     if (!id) return;
     loadRestaurantDetail(id).catch((e) =>
-      showError(typeof e === "string" ? e : "Không tải được chi tiết restaurant")
+      showError(typeof e === "string" ? e : t("admin.restaurant_detail_load_failed"))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -105,31 +107,31 @@ export default function AdminRestaurantReviewPage() {
   const onApprove = async () => {
     try {
       await act({ mode: "RESTAURANT", action: "APPROVE", id });
-      showSuccess("Đã approve");
+      showSuccess(t("admin.approve_success"));
       await loadRestaurantDetail(id);
     } catch (e) {
-      showError(typeof e === "string" ? e : "Approve thất bại");
+      showError(typeof e === "string" ? e : t("admin.approve_failed"));
     }
   };
 
   const onConfirmReason = async (reason) => {
     try {
       await act({ mode: "RESTAURANT", action: reasonMode, id, reason });
-      showSuccess(reasonMode === "REJECT" ? "Đã reject" : "Đã block");
+      showSuccess(reasonMode === "REJECT" ? t("admin.reject_success") : t("admin.block_success"));
       setReasonOpen(false);
       await loadRestaurantDetail(id);
     } catch (e) {
-      showError(typeof e === "string" ? e : "Thao tác thất bại");
+      showError(typeof e === "string" ? e : t("admin.action_failed"));
     }
   };
 
   const onUnblock = async () => {
     try {
       await act({ mode: "RESTAURANT", action: "UNBLOCK", id });
-      showSuccess("Đã unblock");
+      showSuccess(t("admin.unblock_success"));
       await loadRestaurantDetail(id);
     } catch (e) {
-      showError(typeof e === "string" ? e : "Unblock thất bại");
+      showError(typeof e === "string" ? e : t("admin.unblock_failed"));
     }
   };
 
@@ -141,7 +143,7 @@ export default function AdminRestaurantReviewPage() {
           <div className="min-w-0">
             <div className="text-xs text-slate-500">Restaurant ID: {id}</div>
             <h1 className="mt-1 truncate text-xl font-bold text-slate-900 dark:text-white">
-              {restaurant?.name || (detailLoading ? "Đang tải..." : "—")}
+              {form?.name || (detailLoading ? t("common.loading") : "—")}
             </h1>
 
             <div className="mt-2 flex flex-wrap gap-2 text-xs">
@@ -167,17 +169,17 @@ export default function AdminRestaurantReviewPage() {
 
             {mod?.rejectionReason ? (
               <div className="mt-2 text-sm text-amber-700 dark:text-amber-300">
-                Lý do bị từ chối: {mod.rejectionReason}
+                {t("admin.rejection_reason_label")}: {mod.rejectionReason}
               </div>
             ) : null}
             {mod?.blockedReason ? (
               <div className="mt-2 text-sm text-rose-700 dark:text-rose-300">
-                Lý do bị chặn: {mod.blockedReason}
+                {t("admin.blocked_reason_label")}: {mod.blockedReason}
               </div>
             ) : null}
             {mod?.unlockRequestReason ? (
               <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                Yêu cầu mở khoá: {mod.unlockRequestReason}
+                {t("admin.unlock_request_reason_label")}: {mod.unlockRequestReason}
               </div>
             ) : null}
           </div>
@@ -189,7 +191,7 @@ export default function AdminRestaurantReviewPage() {
               onClick={() => navigate(-1)}
               disabled={acting}
             >
-              Quay lại
+              {t("common.back")}
             </button>
 
             <button
@@ -197,7 +199,7 @@ export default function AdminRestaurantReviewPage() {
               className={`${soft.btn} ${soft.btnPrimary}`}
               onClick={onApprove}
               disabled={acting || !canApprove}
-              title={!canApprove ? "Chỉ approve khi PENDING_REVIEW" : ""}
+              title={!canApprove ? t("admin.approve_only_when_pending") : ""}
             >
               Approve
             </button>
@@ -207,7 +209,7 @@ export default function AdminRestaurantReviewPage() {
               className={`${soft.btn} ${soft.btnWarn}`}
               onClick={() => openReason("REJECT")}
               disabled={acting || !canReject}
-              title={!canReject ? "Chỉ reject khi PENDING_REVIEW" : ""}
+              title={!canReject ? t("admin.reject_only_when_pending") : ""}
             >
               Reject
             </button>
@@ -217,7 +219,7 @@ export default function AdminRestaurantReviewPage() {
               className={`${soft.btn} ${soft.btnDanger}`}
               onClick={() => openReason("BLOCK")}
               disabled={acting || !canBlock}
-              title={!canBlock ? "Chỉ block khi APPROVED" : ""}
+              title={!canBlock ? t("admin.block_only_when_approved") : ""}
             >
               Block
             </button>
@@ -227,7 +229,7 @@ export default function AdminRestaurantReviewPage() {
               className={`${soft.btn} ${soft.btnGhost}`}
               onClick={onUnblock}
               disabled={acting || !canUnblock}
-              title={!canUnblock ? "Chỉ unblock khi BLOCKED" : ""}
+              title={!canUnblock ? t("admin.unblock_only_when_blocked") : ""}
             >
               Unblock
             </button>
@@ -248,7 +250,7 @@ export default function AdminRestaurantReviewPage() {
       ) : !restaurant ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không tìm thấy restaurant.
+            {t("admin.restaurant_not_found")}
           </p>
         </div>
       ) : (
@@ -260,8 +262,8 @@ export default function AdminRestaurantReviewPage() {
             onReset={() => {}}
             onSubmit={() => {}}
             canSubmit={false}
-            title="Chi tiết nhà hàng"
-            subtitle="Xem đầy đủ thông tin theo đúng layout form của partner."
+            title={t("admin.restaurant_detail_title")}
+            subtitle={t("admin.restaurant_detail_subtitle")}
             submitLabel="—"
             submittingLabel="—"
           />
@@ -325,8 +327,8 @@ export default function AdminRestaurantReviewPage() {
 
             <div className="pointer-events-none">
               <CodeNameListEditor
-                title="Phù hợp (suitableFor)"
-                hint="Nhập code + tên hiển thị."
+                title={t("admin.suitable_for_title")}
+                hint={t("admin.code_name_hint")}
                 value={form.suitableFor || []}
                 onChange={() => {}}
                 disabled
@@ -335,8 +337,8 @@ export default function AdminRestaurantReviewPage() {
 
             <div className="pointer-events-none">
               <CodeNameListEditor
-                title="Không gian (ambience)"
-                hint="Nhập code + tên hiển thị."
+                title={t("admin.ambience_title")}
+                hint={t("admin.code_name_hint")}
                 value={form.ambience || []}
                 onChange={() => {}}
                 disabled
@@ -345,14 +347,14 @@ export default function AdminRestaurantReviewPage() {
 
             <div className="pointer-events-none">
               <SimpleListEditor
-                title="Món đặc sắc (signatureDishes)"
-                hint="Chỉ cần nhập tên món."
+                title={t("admin.signature_dishes_title")}
+                hint={t("admin.signature_dishes_hint")}
                 value={(form.signatureDishes || []).map((x) =>
                   typeof x === "string" ? x : x?.name || ""
                 )}
                 onChange={() => {}}
                 disabled
-                placeholder="Ví dụ: Cơm gà Hội An"
+                placeholder={t("admin.signature_dishes_placeholder")}
               />
             </div>
 
@@ -369,8 +371,8 @@ export default function AdminRestaurantReviewPage() {
             />
 
             <AmenityMultiSelect
-              title="Tiện ích quán ăn"
-              hint={restaurantAmenity.loading ? "Đang tải tiện ích..." : "Tiện ích thuộc quán ăn."}
+              title={t("admin.restaurant_amenities_title")}
+              hint={restaurantAmenity.loading ? t("admin.amenities_loading") : t("admin.restaurant_amenities_hint")}
               items={restaurantAmenity.flat || []}
               value={form.amenityCodes || []}
               onChange={() => {}}
@@ -403,7 +405,7 @@ export default function AdminRestaurantReviewPage() {
       {/* Reason modal */}
       <ReasonModal
         open={reasonOpen}
-        title={reasonMode === "REJECT" ? "Từ chối dịch vụ" : "Chặn dịch vụ"}
+        title={reasonMode === "REJECT" ? t("admin.reject_service_title") : t("admin.block_service_title")}
         confirmText={reasonMode === "REJECT" ? "Reject" : "Block"}
         loading={acting}
         onClose={() => setReasonOpen(false)}

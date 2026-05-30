@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
@@ -11,6 +12,7 @@ import LoadingOverlay from "../../../components/LoadingOverlay";
 import { validatePassword, validateConfirmPassword, validateOtp } from "../../../utils/validators";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const email = searchParams.get("email") || localStorage.getItem("last_fp_email") || "";
   const { handleResetPassword, loading, error } = useResetPassword();
@@ -45,22 +47,22 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthLayout>
-      <LoadingOverlay show={loading} text="Đang xử lý..." />
+      <LoadingOverlay show={loading} text={t("common.processing")} />
       <Link to="/" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Về Trang chủ Mravel
+        ← {t("auth.back_to_home")}
       </Link>
 
-      <AuthCard title="Đặt lại mật khẩu" subtitle={`Nhập mã OTP được gửi tới email: ${email}`}>
+      <AuthCard title={t("auth.reset_password_title")} subtitle={t("auth.reset_password_subtitle", { email })}>
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {/* OTP */}
           <div>
             <AuthInput
-              label="Mã OTP"
+              label={t("auth.otp_code")}
               icon={KeyIcon}
               type="text"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              placeholder="Nhập mã OTP"
+              placeholder={t("auth.otp_code_placeholder")}
             />
             {inputErrors.otp && <p className="text-red-500 text-sm">{inputErrors.otp}</p>}
             <div className="flex justify-end mt-1">
@@ -75,7 +77,7 @@ export default function ResetPasswordPage() {
                 }`}
               >
                 <ArrowPathIcon className="w-4 h-4" />
-                {cooldown > 0 ? `Gửi lại sau ${cooldown}s` : "Gửi lại mã OTP"}
+                {cooldown > 0 ? t("auth.resend_otp_after", { cooldown }) : t("auth.resend_otp")}
               </button>
             </div>
           </div>
@@ -83,11 +85,11 @@ export default function ResetPasswordPage() {
           {/* Mật khẩu */}
           <div>
             <PasswordInput
-              label="Mật khẩu mới"
+              label={t("auth.new_password")}
               icon={LockClosedIcon}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu mới"
+              placeholder={t("auth.new_password_placeholder")}
             />
             {inputErrors.password && (
               <p className="text-red-500 text-sm">{inputErrors.password}</p>
@@ -97,11 +99,11 @@ export default function ResetPasswordPage() {
           {/* Xác nhận mật khẩu */}
           <div>
             <PasswordInput
-              label="Nhập lại mật khẩu"
+              label={t("auth.confirm_password")}
               icon={LockClosedIcon}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Xác nhận mật khẩu"
+              placeholder={t("auth.confirm_password_placeholder")}
             />
             {inputErrors.confirm && (
               <p className="text-red-500 text-sm">{inputErrors.confirm}</p>
@@ -113,7 +115,7 @@ export default function ResetPasswordPage() {
             disabled={loading}
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold disabled:opacity-60"
           >
-            Xác nhận
+            {t("common.confirm")}
           </button>
 
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
@@ -121,7 +123,7 @@ export default function ResetPasswordPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           <Link to="/login" className="text-blue-500">
-            Quay lại đăng nhập
+            {t("auth.back_to_login")}
           </Link>
         </p>
       </AuthCard>

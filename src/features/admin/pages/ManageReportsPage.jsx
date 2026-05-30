@@ -35,7 +35,7 @@ export default function ManageReportsPage() {
         reporter: "Lê Hoa",
         content: t("report_user_misconduct"),
         date: "26/09/2025",
-        type: t("user"),
+        type: t("lbl_user"),
         status: "processing",
         },
     ];

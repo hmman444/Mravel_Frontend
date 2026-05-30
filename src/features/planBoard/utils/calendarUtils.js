@@ -1,4 +1,5 @@
 // src/features/planBoard/utils/calendarUtils.js
+import i18n from "../../../i18n";
 
 // parse "00:00:00" hoặc "00:00" → { hh, mm }
 function parseTimeString(timeStr) {
@@ -58,7 +59,7 @@ export function buildCalendarEventsFromBoard(board) {
         list,
         listId: list.id,
         activityType: card.activityType,
-        title: card.text || "(Không có tiêu đề)",
+        title: card.text || i18n.t("plan.calendar.untitled_event"),
         description: card.description || "",
         date: dayDate,
         start,

@@ -54,7 +54,7 @@ function GroupAvatarStack({ members }) {
 }
 
 export default function ConversationItem({ conversation, active, onClick, isOnline }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = i18n.language === "vi" ? vi : enUS;
 
   const { name, avatarUrl, type, lastMessage, unreadCount, updatedAt, members } = conversation;
@@ -65,11 +65,11 @@ export default function ConversationItem({ conversation, active, onClick, isOnli
 
   const lastText = lastMessage
     ? lastMessage.deleted
-      ? "Tin nhắn đã bị xóa"
+      ? t("chat.message_deleted")
       : lastMessage.messageType === "IMAGE"
-      ? "[Hình ảnh]"
+      ? t("chat.message_image")
       : lastMessage.messageType === "VIDEO"
-      ? "[Video]"
+      ? t("chat.message_video")
       : lastMessage.content
     : "";
 
@@ -104,7 +104,7 @@ export default function ConversationItem({ conversation, active, onClick, isOnli
         </div>
         <div className="flex items-center justify-between mt-0.5">
           <p className={`text-xs truncate ${unreadCount > 0 ? "font-semibold text-gray-800" : "text-gray-500"}`}>
-            {lastText || <span className="italic text-gray-400">Chưa có tin nhắn</span>}
+            {lastText || <span className="italic text-gray-400">{t("chat.no_messages")}</span>}
           </p>
           {unreadCount > 0 && (
             <span className="ml-2 flex-shrink-0 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">

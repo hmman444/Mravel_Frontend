@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 /**  helpers  */
 function pickMenuImages(restaurant) {
@@ -8,6 +9,7 @@ function pickMenuImages(restaurant) {
 
 /**  Lightbox modal  */
 function MenuLightbox({ images, startIndex = 0, onClose }) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(startIndex);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ function MenuLightbox({ images, startIndex = 0, onClose }) {
                 className={`relative rounded-lg overflow-hidden border ${
                   i === index ? "border-white" : "border-transparent opacity-70 hover:opacity-100"
                 }`}
-                title={`Trang ${i + 1}`}
+                title={t('restaurant.page_number', { n: i + 1 })}
               >
                 <img src={src} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover aspect-[4/3]" />
               </button>
@@ -60,14 +62,14 @@ function MenuLightbox({ images, startIndex = 0, onClose }) {
           <button
             onClick={() => go(index - 1)}
             className="absolute left-2 md:left-4 p-2 rounded-full bg-white/80 hover:bg-white transition"
-            title="Trước"
+            title={t('restaurant.previous')}
           >
             ‹
           </button>
           <button
             onClick={() => go(index + 1)}
             className="absolute right-2 md:right-4 p-2 rounded-full bg-white/80 hover:bg-white transition"
-            title="Sau"
+            title={t('restaurant.next')}
           >
             ›
           </button>
@@ -81,9 +83,9 @@ function MenuLightbox({ images, startIndex = 0, onClose }) {
             <button
               onClick={onClose}
               className="pointer-events-auto px-3 py-1 rounded-md bg-white/90 hover:bg-white text-black font-medium"
-              title="Đóng"
+              title={t('common.close')}
             >
-              Đóng
+              {t('common.close')}
             </button>
           </div>
         </div>
@@ -94,6 +96,7 @@ function MenuLightbox({ images, startIndex = 0, onClose }) {
 
 /**  Public component  */
 export default function RestaurantMenuGallery({ restaurant }) {
+  const { t } = useTranslation();
   const allImages = useMemo(() => pickMenuImages(restaurant), [restaurant]);
 
   const limit = 9;
@@ -116,7 +119,7 @@ export default function RestaurantMenuGallery({ restaurant }) {
   return (
     <section className="px-5 md:px-6 pt-5 pb-6">
       <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">
-        Bảng giá {restaurant?.name}
+        {t('restaurant.price_list', { name: restaurant?.name })}
       </h2>
 
       {/* Grid 9 ảnh, ô cuối có overlay +n */}
@@ -129,7 +132,7 @@ export default function RestaurantMenuGallery({ restaurant }) {
               key={`${src}-${i}`}
               onClick={() => openAt(i)}
               className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm group"
-              title={`Xem ảnh ${i + 1}`}
+              title={t('restaurant.view_image', { n: i + 1 })}
             >
               <img
                 src={src}

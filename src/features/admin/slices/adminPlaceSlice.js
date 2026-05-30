@@ -9,6 +9,7 @@ import {
   lockAdminPlace,
   unlockAdminPlace
 } from "../services/adminPlaceService";
+import i18n from "../../../i18n";
 
 const apiMessage = (err) => {
   const msg =
@@ -17,8 +18,8 @@ const apiMessage = (err) => {
     err?.message;
 
   if (err?.response?.status === 401)
-    return "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
-  return msg || "Có lỗi xảy ra";
+    return i18n.t("admin.session_expired");
+  return msg || i18n.t("admin.error_occurred");
 };
 
 /* = THUNKS = */
@@ -170,7 +171,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(createPlaceThunk.rejected, (state, action) => {
         state.detail.saving = false;
-        state.detail.error = action.payload || "Tạo mới thất bại";
+        state.detail.error = action.payload || i18n.t("admin.create_failed");
       })
       .addCase(loadDestinations.pending, (state) => {
         state.destinations.loading = true;
@@ -182,7 +183,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(loadDestinations.rejected, (state, action) => {
         state.destinations.loading = false;
-        state.destinations.error = action.payload || "Lỗi tải destinations";
+        state.destinations.error = action.payload || i18n.t("admin.load_destinations_failed");
       });
 
     // children
@@ -198,7 +199,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(loadChildren.rejected, (state, action) => {
         state.children.loading = false;
-        state.children.error = action.payload || "Lỗi tải children";
+        state.children.error = action.payload || i18n.t("admin.load_children_failed");
       });
 
       //lock
@@ -226,7 +227,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(lockPlaceThunk.rejected, (state, action) => {
         state.detail.deleting = false;
-        state.detail.error = action.payload || "Khóa thất bại";
+        state.detail.error = action.payload || i18n.t("admin.lock_failed");
       });
 
     // unlock 
@@ -251,7 +252,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(unlockPlaceThunk.rejected, (state, action) => {
         state.detail.deleting = false;
-        state.detail.error = action.payload || "Mở khóa thất bại";
+        state.detail.error = action.payload || i18n.t("admin.unlock_failed");
       });
 
     // detail
@@ -267,7 +268,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(loadPlaceDetailAdmin.rejected, (state, action) => {
         state.detail.loading = false;
-        state.detail.error = action.payload || "Không tải được chi tiết";
+        state.detail.error = action.payload || i18n.t("admin.load_detail_failed");
       });
 
     // update
@@ -282,7 +283,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(updatePlaceThunk.rejected, (state, action) => {
         state.detail.saving = false;
-        state.detail.error = action.payload || "Cập nhật thất bại";
+        state.detail.error = action.payload || i18n.t("admin.update_failed");
       });
 
     // delete
@@ -296,7 +297,7 @@ const adminPlaceSlice = createSlice({
       })
       .addCase(deletePlaceThunk.rejected, (state, action) => {
         state.detail.deleting = false;
-        state.detail.error = action.payload || "Xóa thất bại";
+        state.detail.error = action.payload || i18n.t("admin.delete_failed");
       });
   },
 });

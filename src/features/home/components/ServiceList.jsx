@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useCatalogPlaces } from "../../catalog/hooks/useCatalogPlaces";
 
 export default function ServiceList() {
+  const { t } = useTranslation();
   const { items, loading, error, fetchPlaces } = useCatalogPlaces();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function ServiceList() {
     if (loading) {
       return (
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Đang tải các địa điểm tham quan...
+          {t("home.loading_places")}
         </div>
       );
     }
@@ -25,7 +27,7 @@ export default function ServiceList() {
     if (error) {
       return (
         <div className="text-sm text-red-500">
-          {error || "Không tải được danh sách địa điểm."}
+          {error || t("home.error_places")}
         </div>
       );
     }
@@ -33,7 +35,7 @@ export default function ServiceList() {
     if (!items || items.length === 0) {
       return (
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Hiện chưa có địa điểm nổi bật để hiển thị.
+          {t("home.empty_places")}
         </div>
       );
     }
@@ -63,7 +65,7 @@ export default function ServiceList() {
 
               <div className="absolute inset-x-3 bottom-3">
                 <span className="inline-flex px-2 py-1 text-[11px] rounded-full bg-white/15 text-slate-100 border border-white/20 mb-1.5">
-                  Điểm đến phổ biến
+                  {t("home.popular_badge")}
                 </span>
                 <h3 className="text-white text-lg font-semibold drop-shadow-md tracking-wide line-clamp-2">
                   {poi.name}
@@ -82,10 +84,10 @@ export default function ServiceList() {
         <div className="flex items-center justify-between gap-3 mb-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-50">
-              Địa điểm phổ biến
+              {t("home.popular_title")}
             </h2>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Gợi ý những nơi được nhiều du khách tìm kiếm và yêu thích.
+              {t("home.popular_subtitle")}
             </p>
           </div>
 
@@ -93,7 +95,7 @@ export default function ServiceList() {
             href="/places"
             className="hidden sm:inline-flex items-center text-sm text-primary hover:text-primaryHover"
           >
-            Xem tất cả địa điểm →
+            {t("home.see_all_places")} →
           </a>
         </div>
 

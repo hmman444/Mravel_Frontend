@@ -1,4 +1,5 @@
 import { ArrowLeftIcon, PencilSquareIcon, CheckIcon, XMarkIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { ui } from "./uiTokens";
 import { KindPill, StatusPill } from "./pills";
 
@@ -18,10 +19,11 @@ export default function PlaceTopBar({
   onToggleLock,
   onAskDelete,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-3">
-        <button type="button" onClick={onBack} className={`${ui.btn} ${ui.btnGhost} px-3`} title="Quay lại">
+        <button type="button" onClick={onBack} className={`${ui.btn} ${ui.btnGhost} px-3`} title={t("common.back")}>
           <ArrowLeftIcon className="h-5 w-5" />
         </button>
 
@@ -38,9 +40,9 @@ export default function PlaceTopBar({
 
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
             {isCreate
-              ? "Tạo địa điểm theo phong cách seed (nội dung dạng blocks)."
-              : "Xem chi tiết – bấm Chỉnh sửa để thay đổi."}
-            {(isCreate || isEditing) && dirty ? " (Có thay đổi chưa lưu)" : ""}
+              ? t("admin.place_create_subtitle")
+              : t("admin.place_detail_subtitle")}
+            {(isCreate || isEditing) && dirty ? t("admin.unsaved_changes_suffix") : ""}
           </p>
         </div>
       </div>
@@ -50,7 +52,7 @@ export default function PlaceTopBar({
           <>
             <button type="button" className={`${ui.btn} ${ui.btnGhost} gap-2`} onClick={onEdit}>
               <PencilSquareIcon className="h-5 w-5" />
-              Chỉnh sửa
+              {t("common.edit")}
             </button>
 
             <button
@@ -58,9 +60,9 @@ export default function PlaceTopBar({
               className={`${ui.btn} ${ui.btnGhost}`}
               onClick={onToggleLock}
               disabled={loading || deleting}
-              title="Khóa/Mở khóa"
+              title={t("admin.lock_unlock")}
             >
-              {form.active ? "Khóa" : "Mở khóa"}
+              {form.active ? t("admin.lock") : t("admin.unlock")}
             </button>
 
             <button
@@ -68,10 +70,10 @@ export default function PlaceTopBar({
               className={`${ui.btn} ${ui.btnDanger} gap-2`}
               onClick={onAskDelete}
               disabled={loading || deleting}
-              title="Xóa"
+              title={t("common.delete")}
             >
               <TrashIcon className="h-5 w-5" />
-              Xóa
+              {t("common.delete")}
             </button>
           </>
         )}
@@ -80,7 +82,7 @@ export default function PlaceTopBar({
           <>
             <button type="button" className={`${ui.btn} ${ui.btnGhost} gap-2`} onClick={onCancel}>
               <XMarkIcon className="h-5 w-5" />
-              Hủy
+              {t("common.cancel")}
             </button>
 
             <button
@@ -90,7 +92,7 @@ export default function PlaceTopBar({
               disabled={loading || saving}
             >
               <CheckIcon className="h-5 w-5" />
-              Lưu
+              {t("common.save")}
             </button>
           </>
         )}

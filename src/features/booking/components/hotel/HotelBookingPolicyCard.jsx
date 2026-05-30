@@ -3,42 +3,42 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Info, FileText, X } from "lucide-react";
 import { FaUtensils, FaSmokingBan, FaDog } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function HotelBookingPolicyCard() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const importantNote = {
-    title: "Lưu ý quan trọng",
-    subtitle: "Chính sách tài liệu",
-    text:
-      "Khi nhận phòng, bạn phải mang theo Chứng minh thư. Các tài liệu cần thiết có thể ở dạng bản mềm.",
+    title: t("booking.policy_important_note_title"),
+    subtitle: t("booking.policy_document_policy"),
+    text: t("booking.policy_important_note_text"),
   };
 
   const sections = [
     {
       icon: <FileText className="h-4 w-4 text-blue-500" />,
-      title: "Giấy Tờ Bắt Buộc",
-      text:
-        "Khi nhận phòng, bạn cần cung cấp CMND/CCCD. Các giấy tờ cần thiết có thể ở dạng bản mềm.",
+      title: t("booking.policy_required_documents_title"),
+      text: t("booking.policy_required_documents_text"),
     },
     {
       icon: <FaUtensils className="h-4 w-4 text-orange-500" />,
-      title: "Bữa sáng",
-      text: "Bữa sáng tại cơ sở lưu trú được phục vụ từ 06:30 đến 10:00.",
+      title: t("booking.policy_breakfast_title"),
+      text: t("booking.policy_breakfast_text"),
     },
     {
       icon: <FaSmokingBan className="h-4 w-4 text-red-500" />,
-      title: "Hút Thuốc",
-      text: "Chỉ được phép hút thuốc trong khu vực chỉ định.",
+      title: t("booking.policy_smoking_title"),
+      text: t("booking.policy_smoking_text"),
     },
     {
       icon: <FaDog className="h-4 w-4 text-red-500" />,
-      title: "Thú cưng",
-      text: "Không được mang theo thú cưng.",
+      title: t("booking.policy_pets_title"),
+      text: t("booking.policy_pets_text"),
     },
     {
       icon: <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />,
-      title: "Chính Sách Bổ Sung",
+      title: t("booking.policy_additional_title"),
       text: `Child Policy:
 - Baby cot will be setup free of charge, subject to availability.
 - Children under 06 years old will be free of charge, sharing bed with parents, maximum 01 free child per room.
@@ -53,13 +53,12 @@ Chính sách trẻ em:
     },
     {
       icon: <FileText className="h-4 w-4 text-purple-500" />,
-      title: "Tiệc Gala",
-      text:
-        "Giá phòng của bạn đã bao gồm chi phí cho buổi tiệc Gala (GALA DINNER 2024) trong thời gian 31-12-2024 - 1-1-2025.",
+      title: t("booking.policy_gala_title"),
+      text: t("booking.policy_gala_text"),
     },
     {
       icon: <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />,
-      title: "Hướng Dẫn Nhận Phòng Chung",
+      title: t("booking.policy_general_checkin_title"),
       text:
         "Child Policy:\n- Baby cot will be setup free of charge, subject to availability.\n- Children under 06 years old will be free of charge, sharing bed with parents, maximum 01 free child per room. Children from 06 to 11 years old will be surcharged at 250,000VND/child/night, sharing bed with parents, maximum 01 child per room.\n- Children from 12 years old will be surcharged as adult at 650,000VND/child/night, including extra bed, maximum 01 extra child per room.",
     },
@@ -74,7 +73,7 @@ Chính sách trẻ em:
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-              Chính sách Chỗ ở
+              {t("booking.policy_card_title")}
             </h2>
           </div>
           <button
@@ -82,7 +81,7 @@ Chính sách trẻ em:
             onClick={() => setOpen(true)}
             className="text-xs font-semibold text-blue-600 hover:underline md:text-sm"
           >
-            Đọc tất cả
+            {t("booking.policy_read_all")}
           </button>
         </div>
 
@@ -111,11 +110,10 @@ Chính sách trẻ em:
           <FileText className="mt-0.5 h-4 w-4 text-blue-500" />
           <div>
             <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
-              Giấy Tờ Bắt Buộc
+              {t("booking.policy_required_documents_title")}
             </p>
             <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-              Khi nhận phòng, bạn cần cung cấp CMND/CCCD. Các giấy tờ cần thiết
-              có thể ở dạng bản mềm.
+              {t("booking.policy_required_documents_text")}
             </p>
           </div>
         </div>

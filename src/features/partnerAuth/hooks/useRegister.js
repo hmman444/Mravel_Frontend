@@ -2,10 +2,12 @@ import { useDispatch } from "react-redux";
 import { partnerRegisterUser } from "../slices/partnerAuthSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const useRegister = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [message, setMessage] = useState("");
 
   const handleRegister = async (fullname, email, password) => {
@@ -14,13 +16,13 @@ export const useRegister = () => {
     );
 
     if (partnerRegisterUser.fulfilled.match(action)) {
-      setMessage("Đăng ký thành công! Vui lòng kiểm tra email để xác thực OTP.");
+      setMessage(t("partnerAuth.register.success"));
       localStorage.setItem("partner_last_reg_email", email.trim().toLowerCase());
       navigate(
         `/partner/verify-otp?email=${encodeURIComponent(email.trim().toLowerCase())}`
       );
     } else {
-      setMessage(action.payload || "Đăng ký thất bại!");
+      setMessage(action.payload || t("partnerAuth.register.failed"));
     }
   };
 

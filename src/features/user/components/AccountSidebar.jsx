@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { useLogout } from "../../auth/hooks/useLogout";
 import {
   Ticket,
@@ -32,6 +33,7 @@ const TIER_EMOJI = {
 };
 
 export default function AccountSidebar({ selectedTab, onSelectTab }) {
+  const { t } = useTranslation();
   const { user } = useSelector((state) => state.auth);
   const { handleLogout } = useLogout();
 
@@ -65,11 +67,11 @@ export default function AccountSidebar({ selectedTab, onSelectTab }) {
 
         <div className="min-w-0">
           <p className="font-semibold text-sm text-slate-900 dark:text-slate-50 line-clamp-1">
-            {user?.fullname || "Người dùng Mravel"}
+            {user?.fullname || t("user.default_user_name")}
           </p>
           {/* EMAIL: không tràn nữa, tự xuống dòng / cắt */}
           <p className="text-xs text-slate-500 dark:text-slate-400 break-all leading-snug">
-            {user?.email || "Tài khoản Mravel"}
+            {user?.email || t("user.default_account")}
           </p>
         </div>
       </div>
@@ -78,7 +80,7 @@ export default function AccountSidebar({ selectedTab, onSelectTab }) {
       <div className="bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 flex items-center gap-2">
         <span className="text-lg">{tierEmoji}</span>
         <div className="text-xs text-white">
-          <p>Bạn là thành viên</p>
+          <p>{t("user.membership_label")}</p>
           <p className="font-semibold">{tierLabel}</p>
         </div>
       </div>
@@ -97,7 +99,7 @@ export default function AccountSidebar({ selectedTab, onSelectTab }) {
               }`}
           >
             <Settings className="w-4 h-4 text-sky-500" />
-            <span>Cài đặt hồ sơ</span>
+            <span>{t("user.profile_settings")}</span>
           </button>
 
 
@@ -110,7 +112,7 @@ export default function AccountSidebar({ selectedTab, onSelectTab }) {
           className="w-full flex items-center gap-3 px-4 py-2.5 mt-2 text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 transition"
         >
           <LogOut className="w-4 h-4" />
-          <span>Đăng xuất</span>
+          <span>{t("user.logout")}</span>
         </button>
       </nav>
     </aside>

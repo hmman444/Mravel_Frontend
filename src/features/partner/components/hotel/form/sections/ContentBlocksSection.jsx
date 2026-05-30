@@ -1,5 +1,6 @@
 // src/features/partner/components/hotel/ContentBlocksSection.jsx
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PlusIcon, TrashIcon, XMarkIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
 const BLOCK_TYPES = [
@@ -46,6 +47,7 @@ export default function ContentBlocksSection({
   updateBlockField,
   onPickBlockImage,         //  optional: (idx, event) => upload/convert base64 rồi update imageUrl
 }) {
+  const { t } = useTranslation();
   const blocks = useMemo(() => asArray(content), [content]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -80,10 +82,10 @@ export default function ContentBlocksSection({
 
   return (
     <details className="group">
-      <summary className="cursor-pointer select-none font-semibold">Content blocks</summary>
+      <summary className="cursor-pointer select-none font-semibold">{t("partner.content_blocks.title")}</summary>
 
       <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="text-sm text-gray-600 dark:text-gray-400">{blocks.length} block</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">{t("partner.content_blocks.count", { count: blocks.length })}</div>
 
         <button
           type="button"
@@ -91,12 +93,12 @@ export default function ContentBlocksSection({
           className="px-3 py-2 border rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2"
         >
           <PlusIcon className="w-4 h-4" />
-          Thêm block
+          {t("partner.content_blocks.add_block")}
         </button>
       </div>
 
       {blocks.length === 0 ? (
-        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chưa có content.</div>
+        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">{t("partner.content_blocks.empty")}</div>
       ) : (
         <div className="mt-3 space-y-3">
           {blocks.map((b = {}, idx) => {
@@ -108,7 +110,7 @@ export default function ContentBlocksSection({
                 {/* header */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-medium">
-                    Block #{idx + 1}{" "}
+                    {t("partner.content_blocks.block_index", { index: idx + 1 })}{" "}
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       ({section} • {type})
                     </span>
@@ -117,7 +119,7 @@ export default function ContentBlocksSection({
                     type="button"
                     onClick={() => remove(idx)}
                     className="p-2 rounded-xl hover:bg-red-50"
-                    title="Xóa block"
+                    title={t("partner.content_blocks.delete_block")}
                   >
                     <TrashIcon className="w-5 h-5 text-red-600" />
                   </button>
@@ -126,7 +128,7 @@ export default function ContentBlocksSection({
                 {/* meta row: section + sort (type không cần dropdown nữa, vì type chọn từ lúc tạo) */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
                   <label className="md:col-span-4 text-sm">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vị trí (section)</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("partner.content_blocks.section_label")}</div>
                     <select
                       value={section}
                       onChange={(e) => update(idx, { section: e.target.value })}
@@ -152,7 +154,7 @@ export default function ContentBlocksSection({
                   </label>
 
                   <div className="md:col-span-5 text-sm">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Loại block</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("partner.content_blocks.type_label")}</div>
                     <div className="w-full border rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900">
                       {type}
                     </div>
@@ -162,7 +164,7 @@ export default function ContentBlocksSection({
                 {/* body fields by type */}
                 {type === "DIVIDER" ? (
                   <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                    Divider không có nội dung.
+                    {t("partner.content_blocks.divider_no_content")}
                   </div>
                 ) : type === "IMAGE" ? (
                   <div className="space-y-2">
@@ -173,7 +175,7 @@ export default function ContentBlocksSection({
                       </div>
                     ) : (
                       <div className="w-full max-w-md h-40 bg-gray-50 dark:bg-gray-900 rounded-2xl border flex items-center justify-center text-sm text-gray-400">
-                        Chưa có ảnh
+                        {t("partner.content_blocks.no_image")}
                       </div>
                     )}
 
@@ -181,7 +183,7 @@ export default function ContentBlocksSection({
                       {/* upload */}
                       <label className="px-3 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 cursor-pointer flex items-center gap-2">
                         <ArrowUpTrayIcon className="w-4 h-4" />
-                        Tải ảnh lên
+                        {t("partner.content_blocks.upload_image")}
                         <input
                           type="file"
                           accept="image/*"
@@ -192,7 +194,7 @@ export default function ContentBlocksSection({
 
                       {/* hint */}
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Ảnh sẽ thuộc section: <b>{section}</b>
+                        {t("partner.content_blocks.image_section_hint")} <b>{section}</b>
                       </div>
                     </div>
 
@@ -207,7 +209,7 @@ export default function ContentBlocksSection({
                         value={asString(b.imageCaption)}
                         onChange={(e) => update(idx, { imageCaption: e.target.value })}
                         className="border rounded-xl px-3 py-2 text-sm"
-                        placeholder="Image caption (tuỳ chọn)"
+                        placeholder={t("partner.content_blocks.image_caption_placeholder")}
                       />
                     </div>
                   </div>
@@ -219,12 +221,12 @@ export default function ContentBlocksSection({
                       className="w-full border rounded-xl px-3 py-2 text-sm min-h-[110px]"
                       placeholder={
                         type === "HEADING"
-                          ? "Nhập tiêu đề..."
+                          ? t("partner.content_blocks.placeholder_heading")
                           : type === "QUOTE"
-                          ? "Nhập trích dẫn..."
+                          ? t("partner.content_blocks.placeholder_quote")
                           : type === "INFOBOX"
-                          ? "Nhập nội dung hộp thông tin..."
-                          : "Nhập nội dung..."
+                          ? t("partner.content_blocks.placeholder_infobox")
+                          : t("partner.content_blocks.placeholder_text")
                       }
                     />
                   </div>
@@ -246,16 +248,16 @@ export default function ContentBlocksSection({
           <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-gray-800 border shadow-xl overflow-hidden">
             <div className="px-5 py-3 border-b flex items-center justify-between">
               <div>
-                <div className="text-base font-bold text-gray-900 dark:text-gray-100">Chọn loại block</div>
+                <div className="text-base font-bold text-gray-900 dark:text-gray-100">{t("partner.content_blocks.picker_title")}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Chọn loại trước để form hiển thị đúng field
+                  {t("partner.content_blocks.picker_subtitle")}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setPickerOpen(false)}
                 className="rounded-xl p-2 hover:bg-gray-100"
-                title="Đóng"
+                title={t("common.close")}
               >
                 <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
@@ -273,10 +275,10 @@ export default function ContentBlocksSection({
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{x.label}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {x.type === "IMAGE"
-                        ? "Thêm ảnh + caption + upload từ máy tính"
+                        ? t("partner.content_blocks.desc_image")
                         : x.type === "DIVIDER"
-                        ? "Đường phân cách, không có nội dung"
-                        : "Thêm nội dung văn bản"}
+                        ? t("partner.content_blocks.desc_divider")
+                        : t("partner.content_blocks.desc_text")}
                     </div>
                   </button>
                 ))}
@@ -289,7 +291,7 @@ export default function ContentBlocksSection({
                 onClick={() => setPickerOpen(false)}
                 className="px-4 py-2 text-sm rounded-xl border bg-white dark:bg-gray-800 hover:bg-gray-50"
               >
-                Hủy
+                {t("common.cancel")}
               </button>
             </div>
           </div>

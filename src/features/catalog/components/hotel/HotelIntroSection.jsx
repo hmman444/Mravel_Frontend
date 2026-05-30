@@ -1,11 +1,13 @@
 // src/features/components/hotel/HotelIntroSection.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function HotelIntroSection() {
+  const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   /* ─ SHORT CONTENT (2 đoạn đầu) ─ */
-  const shortHtml = `
+  const shortHtmlVi = `
 <p>
   Mravel là một trong những nền tảng du lịch trực tuyến hàng đầu Đông Nam Á, cung cấp đầy đủ tiện ích cho một chuyến đi trọn vẹn với các sản phẩm chính gồm: Vé máy bay, Khách sạn, Vé xe khách cùng Hoạt động du lịch như vé vui chơi, tour.
 </p>
@@ -15,8 +17,8 @@ export default function HotelIntroSection() {
 `;
 
   /* ─ FULL CONTENT (giữ nguyên nội dung, đổi Traveloka -> Mravel) ─ */
-  const fullHtml = `
-${shortHtml}
+  const fullHtmlVi = `
+${shortHtmlVi}
 
 <p><strong>Tại sao nên đặt phòng khách sạn trên Mravel?</strong></p>
 <p>
@@ -222,10 +224,232 @@ Mravel không chỉ là một ứng dụng đặt phòng mà là người bạn 
 </p>
 `;
 
+  /* ─ SHORT CONTENT (EN) ─ */
+  const shortHtmlEn = `
+<p>
+  Mravel is one of the leading online travel platforms in Southeast Asia, providing everything you need for a complete trip with key products including: Flights, Hotels, Bus tickets, and Travel activities such as attraction tickets and tours.
+</p>
+<p>
+  With a network of more than 1 million hotels worldwide, Mravel offers countless options to suit every need and preference. From budget hotels near you to luxurious stays with stunning views, everything is easy to find thanks to smart filters. In particular, booking online on Mravel comes with conveniences such as flexible payment and 24/7 support, helping you enjoy your trip with peace of mind.
+</p>
+`;
+
+  /* ─ FULL CONTENT (EN) ─ */
+  const fullHtmlEn = `
+${shortHtmlEn}
+
+<p><strong>Why should you book hotels on Mravel?</strong></p>
+<p>
+  To enjoy a fast booking experience, reasonable prices, and countless attractive deals, Mravel is the top choice for you. So why book through Mravel? Let's find out right away!
+</p>
+
+<p><strong>1. A wide range of accommodation options</strong></p>
+<p>
+  When planning a trip, choosing where to stay is one of the most important factors. So is booking hotels on Mravel reliable? The answer is absolutely yes! With more than 1 million domestic and international hotel partners, along with clear customer protection policies, Mravel brings absolute peace of mind and trust to every trip.
+</p>
+
+<p><strong>Types of accommodation:</strong> Mravel offers you an incredibly rich and diverse range of options. From luxurious 5-star resorts, holiday villas, to cozy homestays, premium cruises, convenient hotels, friendly campsites, the nearest guesthouse rooms, or comfortable apartments, you can always find a type of accommodation that suits your needs and budget. You can also explore homestays at famous domestic destinations such as</p>
+
+<ul>
+  <li>Da Lat homestays</li>
+  <li>Vung Tau homestays</li>
+  <li>Da Nang homestays</li>
+  <li>Hanoi homestays</li>
+  <li>Ho Chi Minh City homestays</li>
+</ul>
+
+<p><strong>Domestic hotels:</strong> If you love traveling within the country, Mravel offers countless room options at famous destinations such as Da Lat, Vung Tau, Phan Thiet, Hue, Hoi An, and many other provinces and cities. The hotel system here is extremely rich, from 1 to 5 stars, with flexible pricing - helping you easily choose a place to stay that fits your budget while still fully enjoying your vacation.</p>
+
+<p><strong>International hotels:</strong> Not stopping within the country, Mravel also expands its accommodation network to many countries such as Thailand, Singapore, China, Japan, and many other attractive destinations. The international hotels on the platform are also diverse, from budget to high-end (1-5 stars), meeting every need, whether you are traveling on a budget or enjoying a luxurious vacation.</p>
+
+<p>You can refer to a few hotel categories in Thailand below:</p>
+<ul>
+  <li>5-star Bangkok hotels</li>
+  <li>4-star Bangkok hotels</li>
+  <li>3-star Bangkok hotels</li>
+  <li>Budget Bangkok hotels</li>
+</ul>
+
+<p>Some hotel categories in Singapore you can refer to:</p>
+<ul>
+  <li>5-star Singapore hotels</li>
+  <li>4-star Singapore hotels</li>
+  <li>3-star Singapore hotels</li>
+  <li>Budget Singapore hotels</li>
+  <li>Singapore hotels near MRT</li>
+</ul>
+
+<p>In Japan, you can refer to some of the following hotels:</p>
+<ul>
+  <li>Budget Tokyo hotels</li>
+  <li>Budget Kyoto hotels</li>
+  <li>Budget Osaka hotels</li>
+</ul>
+
+<p>When traveling to China, you can refer to hotels in major cities:</p>
+<ul>
+  <li>Beijing hotels</li>
+  <li>Shanghai hotels</li>
+  <li>Guangzhou hotels</li>
+</ul>
+
+<p><strong>Search options based on your preferences:</strong> Mravel offers a flexible and personalized room-finding experience with a detailed filter system, helping you easily choose the ideal place to stay according to your exact preferences and needs. You can search by specific criteria such as your favorite room view (city view, garden view, sea view), room area in square meters, the hotel location nearest to you or close to your desired destination. In particular, you also have the chance to enjoy a free room upgrade depending on room availability, bringing a more comfortable and complete stay experience.</p>
+
+<p>If you are looking for hotels with beautiful views, you can refer to the following categories:</p>
+<ul>
+  <li>Hotels with Mount Fuji views</li>
+  <li>Da Lat hotels with cloud-hunting views</li>
+  <li>Da Lat hotels with pine forest views</li>
+</ul>
+
+<p><strong>VAT invoices:</strong> For business trips, Mravel also supports choosing hotels that provide full VAT invoices, helping you save time and making it easier to handle payments and settle business expenses.</p>
+
+<p><strong>2. A smooth booking experience</strong></p>
+
+<p><strong>2.1. Easy price comparison</strong><br/>
+When finding a place to stay for your trip, the ability to compare prices and hunt for deals is essential. On Mravel, you will experience a smooth booking process that saves time and makes it easy to make the right choice. The price comparison feature helps you quickly compare prices between hotels in the same area. At the same time, Mravel clearly displays attractive deals and promotions such as last-minute offers, helping you easily choose a hotel that fits your budget. With Mravel, booking becomes simple, seamless, and extremely convenient.</p>
+
+<p><strong>2.2. Manage transactions with just a few taps</strong><br/>
+One of the reasons Mravel has become a top choice for booking hotels is the smooth booking experience and the extremely convenient transaction management. After completing your booking, you will immediately receive a confirmation voucher via both the app and email, helping you always stay on top of your itinerary information and feel more secure about your upcoming trip.</p>
+
+<p>The friendly interface of the Mravel app allows you to easily look up your bookings with just a few taps. Simply go to the "My Bookings" section, and you will see all the information from the hotel name, length of stay, booking code to the included services - all clearly arranged, easy to track and manage.</p>
+
+<p>In addition, the confirmation email from Mravel is also very detailed, including: the hotel name, check-in/check-out times, payment information, cancellation policy, and additional services. Everything is transparent and complete, helping you easily control your transactions without worrying about missing anything.</p>
+
+<p><strong>2.3. Safe and secure</strong><br/>
+When booking hotels through Mravel, you not only enjoy convenience but also have complete peace of mind with the highest level of security for every transaction. Mravel is committed to absolutely protecting users' personal and financial information through modern 256-bit encryption technology, helping prevent any risk of external attacks. This multi-layered security system ensures safety not only for credit card information but also closely monitors and supervises the entire payment process.</p>
+
+<p>In particular, Mravel does not directly store your credit card information. Instead, the data is encrypted and stored as a "token key" by a leading online payment service provider, giving you absolute peace of mind when transacting.</p>
+
+<p>In addition, Mravel's intelligent fraud management system operates continuously to detect and promptly prevent suspicious activities, protecting your account from unwanted risks.</p>
+
+<p><strong>2.4. Online customer care service</strong><br/>
+One of the factors that makes for a great hotel booking experience on Mravel is the professional and convenient online customer care service.</p>
+
+<p>If you have any questions during the booking process - from check-in times, included services, to cancellation policies - simply open the Mravel app and select the chatbox icon in the "Chat with us" section. Here, the smart virtual assistant will help you quickly answer basic questions. If the issue is more complex, the system will automatically connect you with a customer care specialist, always ready to support you 24/7.</p>
+
+<p>With Mravel, every question is resolved quickly, giving you absolute peace of mind throughout the booking process and helping you fully enjoy your trip.</p>
+
+<p><strong>3. Review hotels, earn Mravel coins</strong></p>
+<p>
+  On Mravel, sharing reviews about the hotels you have experienced not only helps the travel community gain more reliable information but also brings attractive rewards to you. What's special is that only those who have booked and completed their stay through Mravel can write reviews. This ensures that every review comes from real experience, helping increase the reliability and quality of each comment.
+</p>
+<p>
+  Leaving a hotel review is also extremely simple: you just need to write a review of at least 30 characters, attach a real photo, and you will immediately receive a reward into your Mravel account. This is a quick and easy reward format that encourages users to share genuine experiences while creating an objective and useful review community for everyone.
+</p>
+
+<p><strong>4. Attractive hotel promotions</strong></p>
+
+<p><strong>4.1 Offers for new customers</strong><br/>
+The first-time Mravel discount code will help you save significant costs when booking hotels or using other services such as flights, entertainment, airport transfers, etc. This is a great opportunity for you to experience convenient, fast, and money-saving service right from your first time with Mravel!</p>
+
+<p><strong>4.2 Offers from partners</strong><br/>
+You will also receive special offers from Mravel's partners such as travel organizations or banking partners. These Mravel booking discount codes bring you the opportunity to save when booking hotels or using other services on the platform.</p>
+
+<p><strong>4.3 Exclusive offers for Mravel Priority Members</strong><br/>
+If you are a travel enthusiast and frequently use Mravel's services, then now is the time to grab exclusive offers from the Mravel Priority Membership program! Not only does it bring you wonderful trips, but Mravel also helps you save significantly thanks to discount codes exclusively for members. Every time you book a hotel, you accumulate Priority points - used to level up and unlock attractive benefits. In particular, when booking, you will see the accumulated points displayed right on the screen, helping you easily track your upgrade progress.</p>
+
+<p><strong>Mravel Priority Membership tiers:</strong></p>
+<ul>
+  <li>Bronze</li>
+  <li>Silver</li>
+  <li>Gold</li>
+  <li>Platinum</li>
+  <li>Diamond</li>
+</ul>
+
+<p><strong>Notable benefits of joining Mravel Priority:</strong></p>
+<ul>
+  <li>Exclusive discount codes for each membership tier</li>
+  <li>Priority access to early promotion information</li>
+  <li>Easy point accumulation &amp; gift redemption</li>
+  <li>Special offers at premium hotels &amp; services</li>
+</ul>
+
+<p><strong>4.4 Where to hunt for Mravel hotel discount codes?</strong><br/>
+To always stay updated with the latest offers, simply visit the Mravel Discount Codes page - where all ongoing promotions are gathered, from discount codes for new customers, offers by membership tier, to seasonal and holiday discount programs.</p>
+
+<p>Not stopping there, you can also learn the details of how to apply codes on the Mravel Discount Code usage guide page. Here, you will be guided step by step: from how to choose the right offer, how to enter the code at checkout, to tips for maximum savings.</p>
+
+<p>A standout feature of using Mravel is that after successfully booking a flight, you will receive a discount code to continue booking other services such as hotels, entertainment tickets, airport transfers, and car rentals. This not only helps you save costs but also creates a complete, easy, and optimized journey.</p>
+
+<p><strong>5. Diverse payment methods</strong></p>
+<p>
+  When booking hotels on Mravel, you will enjoy a fast, smooth, and flexible payment experience thanks to the variety of supported payment methods. To optimize the payment process, you can save your card information in advance, making subsequent payments just a single tap to complete - saving time and being extremely convenient.
+</p>
+<p>
+  Mravel supports up to 8 popular payment methods, helping you easily choose according to your needs and habits, including: Viet QR code, bank transfer, e-wallet, domestic ATM card, credit card, buy-now-pay-later service, and direct payment at the hotel.
+</p>
+<p>
+  A small note when making a bank transfer is that you need to transfer the exact amount required, because if it is wrong, the transaction will not be completed and may cause a payment error.
+</p>
+
+<p><strong>6. Diverse hotel booking suggestions</strong></p>
+<p>
+  On Mravel's hotel page, you will easily find great suggestions for your next trip, thanks to the smart suggestion system and information that is always kept up to date. Below are 3 outstanding types of suggestions that help you plan your travel easily and economically:
+</p>
+
+<p><strong>6.1. Suggestions based on trending domestic and international destinations</strong><br/>
+Mravel continuously updates the list of hottest destinations, from outstanding domestic locations such as Da Nang, Phu Quoc, Da Lat to popular international destinations such as Bali, Bangkok, Singapore…</p>
+
+<p><strong>6.2. Suggestions for top-rated budget hotels</strong><br/>
+Mravel suggests budget hotels that are highly rated by the user community, helping you optimize costs while still ensuring quality of stay.</p>
+
+<p><strong>6.3. Suggestions based on current offers</strong><br/>
+You will always see ongoing promotion programs right on the hotel page, from discount codes, combos to seasonal offers.</p>
+
+<p><strong>Frequently asked questions when booking hotels</strong></p>
+
+<p><strong>1. Can I bring pets into the hotel?</strong><br/>
+Bringing pets into a hotel depends on each hotel's policy. When booking a hotel through Mravel, you can check the information in the "Amenities" section or contact the hotel directly to confirm before booking.</p>
+
+<p><strong>2. When are the hotel check-in and check-out times?</strong><br/>
+Check-in and check-out times depend on each hotel's regulations, usually there are two check-in time slots at 12:00 and 14:00. When searching for hotels on Mravel, you can fully check this information in the hotel details section.</p>
+
+<p><strong>3. How do I know the best room price?</strong><br/>
+To know the best room price when booking a hotel, you can use the price comparison feature on Mravel, view available offers, and apply discount codes. A suggestion is to find hotels near where people want to stay, and check the promotions and partner offers section to save as much as possible.</p>
+
+<p><strong>4. How do I know what amenities a hotel has?</strong><br/>
+With Mravel, you can easily view the full list of amenities in the hotel description or the "Amenities" section, helping you clearly understand the information and quickly choose the most suitable place to stay.</p>
+
+<p><strong>5. Can I pay later when booking a hotel?</strong><br/>
+Some hotels on Mravel allow payment later at the reception desk. You just need to check the payment method clearly displayed in the booking details before confirming.</p>
+
+<p><strong>6. Is Mravel reliable?</strong><br/>
+Mravel is one of the leading travel platforms in the region, trusted by millions of customers, with a system for booking hotels, flights, entertainment tickets, and many other services, along with transparent pricing and 24/7 customer support.</p>
+
+<p><strong>7. Guide on how to book a room on Mravel</strong><br/>
+Step 1: Access Mravel via the website or app.<br/>
+Step 2: Enter your destination, check-in/check-out dates, and number of guests.<br/>
+Step 3: View the hotel list, use filters to find a suitable room.<br/>
+Step 4: Choose a hotel, check the detailed information, and click "Book now".<br/>
+Step 5: Enter your booking information and choose a suitable payment method.<br/>
+Step 6: Confirm payment, receive the electronic voucher via email/app.
+</p>
+
+<p><strong>8. How many payment methods are there on Mravel?</strong><br/>
+Mravel supports many popular payment methods, flexible for all your needs: Viet QR code, bank transfer, e-wallet, domestic ATM card, buy-now-pay-later service, international payment card, and direct payment at the hotel.</p>
+
+<p><strong>9. Where to hunt for Mravel hotel discount codes?</strong><br/>
+You can visit the Mravel promotions page, follow the official media channels, or sign up to receive notifications via email.</p>
+
+<p><strong>10. Does Mravel have a loyalty program?</strong><br/>
+Mravel Priority operates on a tier system (Bronze, Silver, Gold, Platinum, Diamond), based on your total spending on the platform. The more you use, the easier it is to level up and receive more benefits.
+</p>
+
+<p>
+Mravel is not just a booking app but an ideal travel companion, bringing a convenient and diverse experience. Experience a wonderful journey from A to Z with just a single app. Go traveling, book Mravel!
+</p>
+`;
+
+  const isEn = i18n.language === "en";
+  const shortHtml = isEn ? shortHtmlEn : shortHtmlVi;
+  const fullHtml = isEn ? fullHtmlEn : fullHtmlVi;
+
   return (
     <section className="max-w-4xl mx-auto px-6 py-10">
       <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-        Đặt phòng khách sạn tại Việt Nam trên Mravel
+        {t("hotel.intro_heading")}
       </h2>
 
       {/* CONTENT */}
@@ -251,7 +475,7 @@ Mravel không chỉ là một ứng dụng đặt phòng mà là người bạn 
           onClick={() => setExpanded(!expanded)}
           className="px-5 py-2 rounded-lg text-sky-600 font-semibold hover:underline"
         >
-          {expanded ? "Thu gọn" : "Xem thêm"}
+          {expanded ? t("common.collapse") : t("common.see_more")}
         </button>
       </div>
     </section>

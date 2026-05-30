@@ -1,4 +1,5 @@
 // src/features/booking/services/openingHoursUtils.js
+import i18n from "../../../i18n";
 
 /* DayOfWeek -> 1..7 */
 const DAY_INDEX = {
@@ -11,14 +12,14 @@ const DAY_INDEX = {
   SUNDAY: 7,
 };
 
-const VN_DAYS = {
-  1: "Thứ hai",
-  2: "Thứ ba",
-  3: "Thứ tư",
-  4: "Thứ năm",
-  5: "Thứ sáu",
-  6: "Thứ bảy",
-  7: "Chủ nhật",
+const VN_DAY_KEYS = {
+  1: "booking.day_monday",
+  2: "booking.day_tuesday",
+  3: "booking.day_wednesday",
+  4: "booking.day_thursday",
+  5: "booking.day_friday",
+  6: "booking.day_saturday",
+  7: "booking.day_sunday",
 };
 
 const z = (n) => String(n).padStart(2, "0");
@@ -190,8 +191,10 @@ export function getOpeningLabelForDate(openingHours, date) {
   const ranges = byDay.get(dayIdx) ?? [];
 
   const today = new Date();
-  const prefix = isSameDate(d, today) ? "Hôm nay" : VN_DAYS[dayIdx] || "Ngày chọn";
+  const prefix = isSameDate(d, today)
+    ? i18n.t("booking.opening_today")
+    : (VN_DAY_KEYS[dayIdx] ? i18n.t(VN_DAY_KEYS[dayIdx]) : i18n.t("booking.opening_selected_day"));
 
-  if (!ranges.length) return `${prefix}: Đóng cửa`;
+  if (!ranges.length) return `${prefix}: ${i18n.t("booking.opening_closed")}`;
   return `${prefix}: ${ranges.map((r) => r.text).join(", ")}`;
 }

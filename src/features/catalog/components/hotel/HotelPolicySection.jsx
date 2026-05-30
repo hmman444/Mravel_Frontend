@@ -1,5 +1,6 @@
 // src/features/hotels/components/hotel/HotelPolicySection.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Clock,
   FileText,
@@ -12,8 +13,9 @@ import {
 } from "lucide-react";
 
 export default function HotelPolicySection({ hotel }) {
+    const { t } = useTranslation();
     // state show / hide extra policies
-    const [showAll, setShowAll] = useState(false);  
+    const [showAll, setShowAll] = useState(false);
     if (!hotel || !hotel.policy) return null;
 
   const { policy, generalInfo } = hotel;
@@ -94,7 +96,7 @@ export default function HotelPolicySection({ hotel }) {
         {/* LEFT PANEL */}
         <div className="bg-gradient-to-b from-[#dbeeff] to-[#f4f9ff] px-6 py-6 md:py-8">
           <h2 className="text-base font-semibold leading-relaxed text-gray-900 dark:text-gray-100 md:text-lg">
-            Chính sách và những thông tin liên quan của{" "}
+            {t("hotel.policy_section_title")}{" "}
             <span className="block md:inline">{hotel.name}</span>
           </h2>
         </div>
@@ -109,10 +111,10 @@ export default function HotelPolicySection({ hotel }) {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Chính sách lưu trú
+                  {t("hotel.stay_policy")}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                  Thời gian nhận phòng / trả phòng tiêu chuẩn tại cơ sở lưu trú.
+                  {t("hotel.stay_policy_desc")}
                 </p>
               </div>
             </div>
@@ -121,21 +123,21 @@ export default function HotelPolicySection({ hotel }) {
           {/*  Thời gian nhận / trả phòng  */}
           <PolicyCard
             icon={<Clock className="h-4 w-4" />}
-            title={checkinItem?.title || "Thời gian nhận phòng/trả phòng"}
+            title={checkinItem?.title || t("hotel.checkin_checkout_time")}
           >
             <div className="grid gap-y-1 text-sm text-gray-700 dark:text-gray-300 md:grid-cols-2">
               <div className="flex gap-1.5">
                 <span className="font-semibold text-gray-900 dark:text-gray-100">
-                  Giờ nhận phòng:
+                  {t("hotel.checkin_time_label")}
                 </span>
-                <span>{checkInTime ? `Từ ${checkInTime}` : "Theo quy định"}</span>
+                <span>{checkInTime ? t("hotel.from_time", { time: checkInTime }) : t("hotel.as_per_regulation")}</span>
               </div>
               <div className="flex gap-1.5">
                 <span className="font-semibold text-gray-900 dark:text-gray-100">
-                  Giờ trả phòng:
+                  {t("hotel.checkout_time_label")}
                 </span>
                 <span>
-                  {checkOutTime ? `Trước ${checkOutTime}` : "Theo quy định"}
+                  {checkOutTime ? t("hotel.before_time", { time: checkOutTime }) : t("hotel.as_per_regulation")}
                 </span>
               </div>
             </div>
@@ -169,7 +171,7 @@ export default function HotelPolicySection({ hotel }) {
               onClick={() => setShowAll((v) => !v)}
               className="inline-flex items-center gap-1 text-xs font-semibold text-[#0064d2] hover:underline"
             >
-              {showAll ? "Thu gọn" : "Đọc tất cả"}
+              {showAll ? t("common.collapse") : t("hotel.read_all")}
               <ChevronRight className="h-3 w-3" />
             </button>
           )}
@@ -192,75 +194,75 @@ export default function HotelPolicySection({ hotel }) {
             <div className="mt-4 border border-gray-200 dark:border-gray-700">
               <div className="border-b border-gray-200 dark:border-gray-700 bg-[#f4f7ff] px-4 py-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Thông tin chung
+                  {t("hotel.general_info")}
                 </h3>
               </div>
               <dl className="divide-y divide-gray-100 text-sm bg-white dark:bg-gray-800">
                 {generalInfo.mainFacilitiesSummary && (
                   <InfoRow
-                    label="Tiện ích chung"
+                    label={t("hotel.main_facilities")}
                     value={generalInfo.mainFacilitiesSummary}
                   />
                 )}
 
                 <InfoRow
-                  label="Thời gian nhận/trả phòng"
+                  label={t("hotel.checkin_checkout_short")}
                   value={
                     checkInTime && checkOutTime
-                      ? `Từ ${checkInTime} - đến ${checkOutTime}`
+                      ? t("hotel.from_to_time", { from: checkInTime, to: checkOutTime })
                       : checkinItem?.content
                   }
                 />
 
                 {generalInfo.distanceToCityCenterKm != null && (
                   <InfoRow
-                    label="Khoảng cách đến trung tâm thành phố"
+                    label={t("hotel.distance_to_city_center")}
                     value={`${generalInfo.distanceToCityCenterKm} km`}
                   />
                 )}
 
                 {generalInfo.popularAreaSummary && (
                   <InfoRow
-                    label="Điểm đến phổ biến"
+                    label={t("hotel.popular_area")}
                     value={generalInfo.popularAreaSummary}
                   />
                 )}
 
                 {typeof hasBreakfast === "boolean" && (
                   <InfoRow
-                    label="Có ăn sáng"
+                    label={t("hotel.has_breakfast")}
                     value={
                       hasBreakfast
-                        ? "Có, khách sạn có phòng cung cấp bữa sáng"
-                        : "Không có thông tin ăn sáng"
+                        ? t("hotel.breakfast_available")
+                        : t("hotel.breakfast_no_info")
                     }
                   />
                 )}
 
                 {generalInfo.totalRooms != null && (
                   <InfoRow
-                    label={`Số phòng còn trống tại ${hotel.name}`}
+                    label={t("hotel.available_rooms_at", { name: hotel.name })}
                     value={String(generalInfo.totalRooms)}
                   />
                 )}
 
                 {generalInfo.totalFloors != null && (
                   <InfoRow
-                    label={`Số lầu tại ${hotel.name}`}
+                    label={t("hotel.total_floors_at", { name: hotel.name })}
                     value={String(generalInfo.totalFloors)}
                   />
                 )}
 
                 {generalInfo.otherHighlightFacilities && (
                   <InfoRow
-                    label={`Những tiện nghi khác tại ${hotel.name}`}
+                    label={t("hotel.other_facilities_at", { name: hotel.name })}
                     value={generalInfo.otherHighlightFacilities}
                   />
                 )}
 
                 {generalInfo.interestingPlacesSummary && (
                   <InfoRow
-                    label="Những địa điểm thú vị gần đó"
+                    label={t("hotel.interesting_places_nearby")}
                     value={generalInfo.interestingPlacesSummary}
                   />
                 )}

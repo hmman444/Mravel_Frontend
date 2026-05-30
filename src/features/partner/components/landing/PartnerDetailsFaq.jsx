@@ -1,27 +1,29 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ShieldCheck, FileText, TrendingUp, Lock, EyeOff, BadgeCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function PartnerDetailsFaq() {
+  const { t } = useTranslation();
   const faqs = useMemo(
     () => [
       {
-        q: "Vì sao dịch vụ của tôi khi đăng lên lại ở trạng thái pending?",
-        a: "Vì Mravel có cơ chế kiểm duyệt. Dịch vụ mới hoặc chỉnh sửa quan trọng sẽ chuyển về pending để Admin duyệt, nhằm đảm bảo thông tin hiển thị cho khách là chính xác và nhất quán.",
+        q: t("partner.faq.q1.question"),
+        a: t("partner.faq.q1.answer"),
       },
       {
-        q: "Trong lúc pending thì khách có thấy dịch vụ của tôi không?",
-        a: "Trong lúc pending, dịch vụ sẽ bị ẩn khỏi trang người dùng để tránh khách đặt nhầm theo thông tin chưa được duyệt. Khi quản trị viên duyệt thì tự động hiển thị lại.",
+        q: t("partner.faq.q2.question"),
+        a: t("partner.faq.q2.answer"),
       },
       {
-        q: "Tôi có thể tạm dừng nhận khách không?",
-        a: "Có. Bạn có thể tạm khóa dịch vụ khi hết phòng/hết bàn hoặc cần bảo trì. Tạm khóa không làm mất dữ liệu và bạn có thể mở lại bất cứ lúc nào.",
+        q: t("partner.faq.q3.question"),
+        a: t("partner.faq.q3.answer"),
       },
       {
-        q: "Khi tôi xóa dịch vụ là xóa hẳn hay sao?",
-        a: "Đúng vậy, khi xóa thì dịch vụ không hiển thị với cả các nhóm người dùng, nhưng vẫn giữ lịch sử để đảm bảo không ảnh hưởng các đơn đặt và lịch trình liên quan.",
+        q: t("partner.faq.q4.question"),
+        a: t("partner.faq.q4.answer"),
       },
     ],
-    []
+    [t]
   );
 
   return (
@@ -32,46 +34,46 @@ export default function PartnerDetailsFaq() {
           <InfoBlock
             id="safe"
             icon={<ShieldCheck className="w-5 h-5" />}
-            title="Vận hành an tâm"
-            subtitle="Trạng thái rõ ràng, kiểm soát hiển thị"
+            title={t("partner.info.safe.title")}
+            subtitle={t("partner.info.safe.subtitle")}
             bullets={[
-              { icon: <Lock className="w-4 h-4" />, text: "Tạo mới/chỉnh sửa → chuyển về pending để Admin duyệt." },
-              { icon: <EyeOff className="w-4 h-4" />, text: "Trong lúc chờ duyệt có thể ẩn khỏi phía người dùng để tránh sai thông tin." },
-              { icon: <BadgeCheck className="w-4 h-4" />, text: "Có thể tạm khóa/mở lại dịch vụ khi hết phòng/hết bàn mà không mất dữ liệu." },
+              { icon: <Lock className="w-4 h-4" />, text: t("partner.info.safe.bullet1") },
+              { icon: <EyeOff className="w-4 h-4" />, text: t("partner.info.safe.bullet2") },
+              { icon: <BadgeCheck className="w-4 h-4" />, text: t("partner.info.safe.bullet3") },
             ]}
-            desc="Cách tổ chức này giúp bạn demo cực rõ trong báo cáo: phân quyền (partner/admin), vòng đời dịch vụ (pending/approved/locked), và tính nhất quán dữ liệu."
+            desc={t("partner.info.safe.desc")}
           />
 
           <InfoBlock
             id="start"
             icon={<FileText className="w-5 h-5" />}
-            title="Đăng dịch vụ chuẩn"
-            subtitle="Ảnh – mô tả – tiện ích – giờ hoạt động"
+            title={t("partner.info.start.title")}
+            subtitle={t("partner.info.start.subtitle")}
             bullets={[
-              { icon: <span className="w-4 h-4 rounded-full bg-sky-600" />, text: "Form nhập dữ liệu có cấu trúc: tên, địa chỉ, mô tả, ảnh, amenities." },
-              { icon: <span className="w-4 h-4 rounded-full bg-indigo-600" />, text: "Khách sạn: có thể mở rộng loại phòng, số lượng, giá theo ngày, chính sách." },
-              { icon: <span className="w-4 h-4 rounded-full bg-cyan-600" />, text: "Quán ăn: giờ mở cửa, danh mục, mức giá, bàn/đặt cọc (nếu cần)." },
+              { icon: <span className="w-4 h-4 rounded-full bg-sky-600" />, text: t("partner.info.start.bullet1") },
+              { icon: <span className="w-4 h-4 rounded-full bg-indigo-600" />, text: t("partner.info.start.bullet2") },
+              { icon: <span className="w-4 h-4 rounded-full bg-cyan-600" />, text: t("partner.info.start.bullet3") },
             ]}
-            desc="Mục tiêu là làm trang dịch vụ ‘đủ thông tin để khách ra quyết định’, đồng thời đủ logic để thuyết trình quy trình kiểm duyệt – cập nhật."
+            desc={t("partner.info.start.desc")}
           />
 
           <InfoBlock
             id="reach"
             icon={<TrendingUp className="w-5 h-5" />}
-            title="Tăng cơ hội có khách"
-            subtitle="Hiển thị trong tìm kiếm & gợi ý theo lịch trình"
+            title={t("partner.info.reach.title")}
+            subtitle={t("partner.info.reach.subtitle")}
             bullets={[
-              { icon: <span className="w-4 h-4 rounded-full bg-emerald-600" />, text: "Dịch vụ xuất hiện trong kết quả tìm kiếm theo địa điểm, giá, đánh giá, bộ lọc." },
-              { icon: <span className="w-4 h-4 rounded-full bg-amber-500" />, text: "Gợi ý theo plan: khách lập lịch trình → hệ thống đề xuất dịch vụ phù hợp theo ngày." },
-              { icon: <span className="w-4 h-4 rounded-full bg-rose-500" />, text: "Tiếp cận đúng nhu cầu (đi theo lịch trình), không chỉ chờ khách tự tìm." },
+              { icon: <span className="w-4 h-4 rounded-full bg-emerald-600" />, text: t("partner.info.reach.bullet1") },
+              { icon: <span className="w-4 h-4 rounded-full bg-amber-500" />, text: t("partner.info.reach.bullet2") },
+              { icon: <span className="w-4 h-4 rounded-full bg-rose-500" />, text: t("partner.info.reach.bullet3") },
             ]}
-            desc="Đây là điểm ăn điểm ‘giá trị ứng dụng’: partner được hưởng lợi trực tiếp từ tính năng quản lý lịch trình của Mravel."
+            desc={t("partner.info.reach.desc")}
           />
         </div>
 
         {/* RIGHT: FAQ accordion */}
         <div id="faq" className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
-          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">Câu hỏi thường gặp</h3>
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">{t("partner.faq.title")}</h3>
 
           <div className="mt-5 space-y-3">
             {faqs.map((f, idx) => (

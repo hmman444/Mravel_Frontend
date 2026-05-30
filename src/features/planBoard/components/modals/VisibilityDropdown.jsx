@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaChevronDown } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const OPTIONS = [
-  { value: "PRIVATE", label: "Riêng tư" },
-  { value: "FRIENDS", label: "Bạn bè" },
-  { value: "PUBLIC", label: "Công khai" },
+  { value: "PRIVATE", labelKey: "plan.visibility.private" },
+  { value: "FRIENDS", labelKey: "plan.visibility.friends" },
+  { value: "PUBLIC", labelKey: "plan.visibility.public" },
 ];
 
 export default function VisibilityDropdown({ value, onChange }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [posReady, setPosReady] = useState(false);
@@ -83,7 +85,7 @@ export default function VisibilityDropdown({ value, onChange }) {
                   }
                 `}
               >
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             ))}
           </div>,
@@ -106,7 +108,10 @@ export default function VisibilityDropdown({ value, onChange }) {
           transition
         "
       >
-        {OPTIONS.find((o) => o.value === value)?.label}
+        {(() => {
+          const sel = OPTIONS.find((o) => o.value === value);
+          return sel ? t(sel.labelKey) : null;
+        })()}
         <FaChevronDown
           className={`text-xs transition-transform ${open ? "rotate-180" : ""}`}
         />

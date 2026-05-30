@@ -1,5 +1,6 @@
 // src/features/hotels/components/hotel/HotelMainInfoPanel.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import {
@@ -15,6 +16,7 @@ import { FiCheckCircle, FiClock } from "react-icons/fi";
 import FavoriteButton from "../../../../components/FavoriteButton";
 
 export default function HotelMainInfoPanel({ hotel }) {
+  const { t } = useTranslation();
   const [showAllNearby, setShowAllNearby] = useState(false);
   const [showFullOverview, setShowFullOverview] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -141,20 +143,9 @@ export default function HotelMainInfoPanel({ hotel }) {
     return `${km.toFixed(2)} km`;
   };
 
-  const typeLabel = (() => {
-    switch (hotelType) {
-      case "VILLA":
-        return "Biệt thự";
-      case "HOTEL":
-        return "Khách sạn";
-      case "HOMESTAY":
-        return "Homestay";
-      case "HOSTEL":
-        return "Hostel";
-      default:
-        return hotelType || "";
-    }
-  })();
+  const typeLabel = hotelType
+    ? t(`enum.hotelType.${hotelType}`, hotelType)
+    : "";
 
   /* == GALLERY == */
   const galleryImages = (images && images.length ? images : []).map(
@@ -248,7 +239,9 @@ export default function HotelMainInfoPanel({ hotel }) {
     : description;
 
   const overviewTitle =
-    name && name.length ? `Giới thiệu ${name}` : "Giới thiệu chỗ nghỉ";
+    name && name.length
+      ? t("hotel.about_hotel_named", { name })
+      : t("hotel.about_property");
 
   const descriptionText = description || "";
   const shouldShowOverviewButton =
@@ -323,7 +316,7 @@ export default function HotelMainInfoPanel({ hotel }) {
                 onClick={() => openGalleryAt(0)}
                 className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white text-sm font-semibold gap-1"
               >
-                Xem tất cả hình ảnh
+                {t("hotel.see_all_images")}
               </button>
             </div>
           </div>
@@ -365,7 +358,7 @@ export default function HotelMainInfoPanel({ hotel }) {
           {hasOnlineCheckin && (
             <div className="mt-2 flex items-center gap-2 text-sm text-[#007b39] font-semibold">
               <FiCheckCircle className="w-4 h-4" />
-              <span>Đã có Check-in Trực Tuyến</span>
+              <span>{t("hotel.online_checkin_available")}</span>
             </div>
           )}
 
@@ -390,7 +383,7 @@ export default function HotelMainInfoPanel({ hotel }) {
                 </span>
               )}
               <span className="text-gray-500 dark:text-gray-400">
-                ({reviews} đánh giá)
+                {t("hotel.reviews_count", { count: reviews })}
               </span>
             </div>
           )}
@@ -398,9 +391,9 @@ export default function HotelMainInfoPanel({ hotel }) {
 
         {/* Right: giá + nút chọn phòng */}
         <div className="text-right self-start md:self-center">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Giá/phòng/đêm từ</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{t("hotel.price_per_room_per_night_from")}</div>
           <div className="text-xl md:text-2xl font-bold text-[#ff5a00]">
-            {price ? `${price} ${currency}` : "Liên hệ"}
+            {price ? `${price} ${currency}` : t("hotel.contact_for_price")}
           </div>
           <button
             type="button"
@@ -412,7 +405,7 @@ export default function HotelMainInfoPanel({ hotel }) {
             }}
             className="mt-2 inline-flex items-center justify-center rounded-lg bg-[#ff5a00] px-4 py-2 text-sm font-semibold text-white hover:bg-[#ff6a1a] transition"
           >
-            Chọn phòng
+            {t("hotel.select_room")}
           </button>
         </div>
       </div>
@@ -424,8 +417,10 @@ export default function HotelMainInfoPanel({ hotel }) {
             <FiClock className="w-4 h-4" />
           </div>
           <p>
-            <span className="font-semibold">Dừng khoảng chừng là 2 giây!</span> Chỉ còn{" "}
-            <span className="font-semibold">1 phòng</span> có giá thấp nhất này!
+            <span className="font-semibold">{t("hotel.low_availability_title")}</span>{" "}
+            {t("hotel.low_availability_prefix")}{" "}
+            <span className="font-semibold">{t("hotel.low_availability_rooms")}</span>{" "}
+            {t("hotel.low_availability_suffix")}
           </p>
         </div>
       )}
@@ -451,18 +446,18 @@ export default function HotelMainInfoPanel({ hotel }) {
                 </div>
               )}
               <button className="text-[#0064d2] hover:underline">
-                {reviews} đánh giá
+                {t("hotel.reviews_count_short", { count: reviews })}
               </button>
             </div>
           </div>
 
           <div className="mt-1 text-sm font-semibold text-gray-800 dark:text-gray-200">
-            Khách nói gì về kỳ nghỉ của họ
+            {t("hotel.what_guests_say")}
           </div>
 
           {topKeywords.length === 0 && topReviews.length === 0 ? (
             <p className="text-xs text-gray-400 dark:text-gray-500 italic">
-              Chưa có đánh giá nào.
+              {t("hotel.no_reviews_yet")}
             </p>
           ) : (
             <div className="space-y-2">
@@ -493,12 +488,12 @@ export default function HotelMainInfoPanel({ hotel }) {
                           r.userAvatar ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(r.userFullname || "U")}&background=dbeafe&color=1d4ed8&size=32&bold=true`
                         }
-                        alt={r.userFullname || "Khách"}
+                        alt={r.userFullname || t("hotel.guest")}
                         className="w-8 h-8 rounded-full object-cover shrink-0"
                       />
                       <div className="min-w-0">
                         <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate block">
-                          {r.userFullname || "Khách"}
+                          {r.userFullname || t("hotel.guest")}
                         </span>
                         <StarRating value={r.rating} readonly size={13} />
                         {r.content && (
@@ -519,7 +514,7 @@ export default function HotelMainInfoPanel({ hotel }) {
         <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-gray-800 dark:text-gray-200">
-              Trong khu vực
+              {t("hotel.in_the_area")}
             </div>
             <button
               type="button"
@@ -531,7 +526,7 @@ export default function HotelMainInfoPanel({ hotel }) {
               }}
               className="text-xs font-semibold text-[#0064d2] hover:underline"
             >
-              Xem bản đồ
+              {t("hotel.view_map")}
             </button>
           </div>
           <div className="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
@@ -540,7 +535,7 @@ export default function HotelMainInfoPanel({ hotel }) {
               <div>{locationText}</div>
               {distanceKm && (
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Cách trung tâm khoảng {distanceKm} km
+                  {t("hotel.distance_to_center", { distance: distanceKm })}
                 </div>
               )}
             </div>
@@ -548,7 +543,7 @@ export default function HotelMainInfoPanel({ hotel }) {
 
           {generalInfo?.popularAreaSummary && (
             <div className="inline-flex items-center rounded-full bg-[#e5f4ff] text-[#00529b] px-2.5 py-1 text-xs font-semibold">
-              Gần khu vui chơi giải trí
+              {t("hotel.near_entertainment_area")}
             </div>
           )}
 
@@ -577,7 +572,7 @@ export default function HotelMainInfoPanel({ hotel }) {
               onClick={() => setShowAllNearby((v) => !v)}
               className="mt-1 self-start text-xs font-semibold text-[#0064d2] hover:underline"
             >
-              {showAllNearby ? "Thu gọn" : "Xem thêm >"}
+              {showAllNearby ? t("common.collapse") : `${t("common.see_more")} >`}
             </button>
           )}
         </div>
@@ -586,7 +581,7 @@ export default function HotelMainInfoPanel({ hotel }) {
         <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-gray-800 dark:text-gray-200">
-              Tiện ích chính
+              {t("hotel.main_amenities")}
             </div>
             <button
               type="button"
@@ -598,7 +593,7 @@ export default function HotelMainInfoPanel({ hotel }) {
               }}
               className="text-xs font-semibold text-[#0064d2] hover:underline"
             >
-              Xem thêm
+              {t("common.see_more")}
             </button>
           </div>
           <div className="space-y-2 text-sm text-gray-800 dark:text-gray-200">
@@ -616,15 +611,15 @@ export default function HotelMainInfoPanel({ hotel }) {
               <>
                 <div className="flex items-center gap-2">
                   <FaSnowflake className="w-4 h-4" />
-                  <span>Máy lạnh</span>
+                  <span>{t("hotel.amenity_air_conditioning")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaWifi className="w-4 h-4" />
-                  <span>WiFi miễn phí</span>
+                  <span>{t("hotel.amenity_free_wifi")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaUtensils className="w-4 h-4" />
-                  <span>Nhà hàng</span>
+                  <span>{t("hotel.amenity_restaurant")}</span>
                 </div>
               </>
             )}
@@ -646,7 +641,7 @@ export default function HotelMainInfoPanel({ hotel }) {
                   onClick={() => setShowFullOverview(true)}
                   className="mt-1 text-sm font-semibold text-[#0064d2] hover:underline"
                 >
-                  Xem thêm &gt;
+                  {`${t("common.see_more")} >`}
                 </button>
               )}
             </>
@@ -699,7 +694,7 @@ export default function HotelMainInfoPanel({ hotel }) {
                 onClick={() => setShowFullOverview(false)}
                 className="mt-2 text-sm font-semibold text-[#0064d2] hover:underline"
               >
-                Thu gọn
+                {t("common.collapse")}
               </button>
             </>
           )}

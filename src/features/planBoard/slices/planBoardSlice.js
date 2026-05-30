@@ -42,6 +42,7 @@ import {
   normalizeBoardPayload,
   normalizeCardTimes,
 } from "../utils/timeUtils";
+import i18n from "../../../i18n";
 
 const initialState = {
   board: null,
@@ -65,7 +66,7 @@ export const loadBoard = createAsyncThunk(
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
-        "Không thể tải kế hoạch";
+        i18n.t("plan.error.load_board");
 
       return rejectWithValue({ status, message });
     }
@@ -233,7 +234,7 @@ export const reorder = createAsyncThunk(
           );
 
           if (!sourceList || !destList) {
-            throw new Error("Không tìm thấy danh sách để sắp xếp thẻ");
+            throw new Error(i18n.t("plan.error.list_not_found_reorder"));
           }
 
           // Cross-list move still uses legacy endpoint to avoid inconsistent
@@ -318,7 +319,7 @@ export const sendAccessRequest = createAsyncThunk(
       const message =
         err?.response?.data?.message ||
         err?.message ||
-        "Không thể gửi yêu cầu truy cập";
+        i18n.t("plan.error.send_access_request");
 
       return rejectWithValue({ status, code, message });
     }
@@ -673,7 +674,7 @@ const planBoardSlice = createSlice({
       })
       .addCase(loadBoard.rejected, (s, a) => {
         s.loading = false;
-        s.error = a.payload?.message || a.error?.message || "Không thể tải kế hoạch";
+        s.error = a.payload?.message || a.error?.message || i18n.t("plan.error.load_board");
         s.errorStatus = a.payload?.status || null; 
       })
 

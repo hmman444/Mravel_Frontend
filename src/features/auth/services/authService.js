@@ -1,5 +1,6 @@
 // src/features/auth/services/authService.js
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 /**
  * POST /auth/login
@@ -16,7 +17,7 @@ export const login = async (email, password) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -41,7 +42,7 @@ export const getCurrentUser = async () => {
       error.response?.data || error.message
     );
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -57,7 +58,7 @@ export const socialLogin = async (provider, token) => {
     return res.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -74,7 +75,7 @@ export const register = async (fullname, email, password) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -87,7 +88,7 @@ export const verifyOtp = async (email, otpCode) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -100,7 +101,7 @@ export const requestForgotPassword = async (email) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -117,7 +118,7 @@ export const resetPassword = async (email, otpCode, newPassword) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };
 
@@ -130,6 +131,6 @@ export const logout = async (refreshToken) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("auth.connection_error") };
   }
 };

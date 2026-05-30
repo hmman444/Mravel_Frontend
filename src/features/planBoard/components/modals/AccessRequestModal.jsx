@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FaTimes, FaLock, FaEye, FaEdit, FaCheckCircle } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function AccessRequestModal({
   isOpen,
@@ -15,6 +16,7 @@ export default function AccessRequestModal({
   // optional: khóa không cho click ra ngoài để đóng
   lockBackdropClose = true,
 }) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [sent, setSent] = useState({ VIEW: false, EDIT: false });
 
@@ -27,13 +29,13 @@ export default function AccessRequestModal({
 
   const isPublic = visibility === "PUBLIC";
 
-  const title = "Yêu cầu quyền truy cập";
+  const title = t("plan.access.title");
   const description = useMemo(() => {
     if (isPublic) {
-      return "Kế hoạch công khai: bạn có thể xem, nhưng cần xin quyền để chỉnh sửa.";
+      return t("plan.access.desc_public");
     }
-    return "Bạn chưa có quyền truy cập. Hãy gửi yêu cầu xin quyền xem hoặc chỉnh sửa, chủ sở hữu sẽ xem xét.";
-  }, [isPublic]);
+    return t("plan.access.desc_private");
+  }, [isPublic, t]);
 
   if (!isOpen) return null;
 
@@ -119,8 +121,8 @@ export default function AccessRequestModal({
               text-gray-600 dark:text-gray-300
               hover:bg-red-500 hover:text-white transition
             "
-            aria-label="Đóng"
-            title="Đóng"
+            aria-label={t("common.close")}
+            title={t("common.close")}
           >
             <FaTimes size={14} />
           </button>
@@ -131,10 +133,10 @@ export default function AccessRequestModal({
           {!isPublic && (
             <div className="mb-4 rounded-xl border border-gray-200/70 dark:border-gray-700/70 bg-gray-50/70 dark:bg-gray-800/40 p-3">
               <p className="text-xs text-gray-600 dark:text-gray-300">
-                • <span className="font-semibold">Quyền xem</span>: chỉ xem lịch trình.
+                • <span className="font-semibold">{t("plan.access.view_perm_label")}</span>: {t("plan.access.view_perm_desc")}
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-300">
-                • <span className="font-semibold">Quyền chỉnh sửa</span>: thêm/sửa/xóa nội dung.
+                • <span className="font-semibold">{t("plan.access.edit_perm_label")}</span>: {t("plan.access.edit_perm_desc")}
               </p>
             </div>
           )}
@@ -144,11 +146,11 @@ export default function AccessRequestModal({
             <div className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200/70 dark:border-emerald-700/40 bg-emerald-50/70 dark:bg-emerald-900/10 p-3">
               <FaCheckCircle className="mt-0.5 text-emerald-600 dark:text-emerald-400" />
               <div className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
-                Bạn đã gửi{" "}
+                {t("plan.access.sent_prefix")}{" "}
                 <span className="font-semibold">
-                  {sent.EDIT ? "yêu cầu quyền chỉnh sửa" : "yêu cầu quyền xem"}
+                  {sent.EDIT ? t("plan.access.sent_edit_request") : t("plan.access.sent_view_request")}
                 </span>
-                . Modal sẽ giữ nguyên để bạn theo dõi trạng thái.
+                {t("plan.access.sent_suffix")}
               </div>
             </div>
           )}
@@ -170,10 +172,10 @@ export default function AccessRequestModal({
               >
                 <FaEye className="text-gray-500 dark:text-gray-400" />
                 {loadingType === "VIEW"
-                  ? "Đang gửi..."
+                  ? t("plan.access.sending")
                   : sent.VIEW
-                  ? "Đã gửi quyền xem"
-                  : "Yêu cầu quyền xem"}
+                  ? t("plan.access.view_sent")
+                  : t("plan.access.request_view")}
               </button>
             )}
 
@@ -192,15 +194,15 @@ export default function AccessRequestModal({
             >
               <FaEdit />
               {loadingType === "EDIT"
-                ? "Đang gửi..."
+                ? t("plan.access.sending")
                 : sent.EDIT
-                ? "Đã gửi quyền sửa"
-                : "Yêu cầu quyền chỉnh sửa"}
+                ? t("plan.access.edit_sent")
+                : t("plan.access.request_edit")}
             </button>
           </div>
 
           <p className="mt-4 text-[11px] text-gray-500 dark:text-gray-400">
-            Yêu cầu sẽ được gửi đến chủ sở hữu. Bạn sẽ được thông báo khi có phản hồi.
+            {t("plan.access.footer_note")}
           </p>
         </div>
       </div>

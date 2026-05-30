@@ -1,11 +1,13 @@
 // src/features/restaurants/components/restaurant/RestaurantIntroSection.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function RestaurantIntroSection() {
+  const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   // ─ SHORT CONTENT: 3 đoạn mở đầu ─
-  const shortHtml = `
+  const shortHtmlVi = `
 <p>
   Vào năm 2025, Mravel ra mắt dịch vụ <strong>đặt bàn nhà hàng trực tuyến</strong> ngay trên website và ứng dụng của mình. Dịch vụ này giúp người dùng dễ dàng tìm kiếm và giữ chỗ tại các nhà hàng yêu thích mà không cần phải gọi điện nhiều nơi hay mất thời gian đến trực tiếp để đặt chỗ.
 </p>
@@ -19,9 +21,23 @@ export default function RestaurantIntroSection() {
 </p>
 `;
 
+  const shortHtmlEn = `
+<p>
+  In 2025, Mravel launched its <strong>online restaurant reservation</strong> service right on its website and app. This service helps users easily search for and reserve a spot at their favorite restaurants without having to call many places or spend time going there in person to book a table.
+</p>
+
+<p>
+  Currently, Mravel's reservation system has partnered with many well-known restaurant chains, eateries, and cafés across Vietnam, from street food stalls, hotpot and grill spots, and buffets to upscale restaurants serving Asian and European cuisine. You can find a wide variety of culinary styles such as Vietnamese, Korean, Japanese, Thai, European, BBQ, hotpot and grill… suitable for many different occasions: a date, meeting friends, a company party, or a family meal.
+</p>
+
+<p>
+  Beyond basic conveniences like quick table booking, Mravel also offers many other benefits that make your dining experience more complete. Below are the reasons why you should <strong>book restaurants online through Mravel</strong>.
+</p>
+`;
+
   // ─ FULL CONTENT: toàn bộ phần còn lại ─
-  const fullHtml = `
-${shortHtml}
+  const fullHtmlVi = `
+${shortHtmlVi}
 
 <p><strong>1. Chọn – Đặt – Thưởng thức</strong></p>
 <p>
@@ -66,12 +82,62 @@ ${shortHtml}
 </p>
 `;
 
+  const fullHtmlEn = `
+${shortHtmlEn}
+
+<p><strong>1. Choose – Book – Enjoy</strong></p>
+<p>
+  Booking a table through Mravel is easier than ever. All you need to do is open the Mravel website or app, choose a location, date and time, number of guests, and your favorite restaurant. The entire reservation process takes only a few steps, quick and secure, helping you avoid having to call multiple times or wait at the restaurant during peak hours.
+</p>
+<p>
+  If any issue arises during the booking process, Mravel's <strong>24/7 customer support</strong> team is always ready to assist you via chat, email, or phone, giving you greater peace of mind for every meal.
+</p>
+
+<p><strong>2. Unlimited options</strong></p>
+<p>
+  Mravel partners with hundreds of restaurants and eateries in many major tourist cities such as Hanoi, Da Nang, Nha Trang, Da Lat, Ho Chi Minh City… as well as other famous destinations. You can easily search by <strong>area, cuisine type, price range, ambiance style</strong>, or user reviews.
+</p>
+<p>
+  As a result, you always have plenty of choices, from affordable, good-value eateries to high-end restaurants, suitable for every budget and culinary experience you desire.
+</p>
+
+<p><strong>3. Complete information</strong></p>
+<p>
+  When booking through Mravel, you can view <strong>complete information about the restaurant</strong> such as the address, directions map, operating hours, reference prices, sample menus, ambiance photos, reservation policies, and detailed reviews from customers who have used the service.
+</p>
+<p>
+  Thanks to this information, you can easily compare restaurants and make the choice that best fits your preferences and expectations in just a few steps.
+</p>
+
+<p><strong>4. Diverse payment methods</strong></p>
+<p>
+  Mravel supports many flexible payment options: <strong>online payment</strong> via bank card or e-wallet, or <strong>reserve first – pay at the restaurant</strong> (depending on each partner's policy). All transactions are kept secure thanks to connections with reputable payment gateways and banks.
+</p>
+
+<p><strong>5. Attractive deals</strong></p>
+<p>
+  Mravel regularly offers <strong>discount codes, deal combos, and golden-hour promotions</strong> for users who book online. As a result, you can enjoy quality meals at more economical prices than the usual listed rates at the restaurant.
+</p>
+
+<p><strong>6. Guaranteed official reservations</strong></p>
+<p>
+  Mravel establishes official partnerships with the restaurants and eateries on its system. All information about <strong>your reservation is synced directly</strong> to the restaurant. You only need to present the confirmation code or e-ticket on Mravel to be seated.
+</p>
+<p>
+  In the rare event of an incident such as a booking mix-up, seating overload, or a sudden change from the restaurant's side, Mravel is always ready to work again with the partner or suggest a suitable alternative for you. Harness the power of technology so that every meal of yours is <strong>faster, more convenient, and more complete</strong> with Mravel.
+</p>
+`;
+
+  const isEn = i18n.language === "en";
+  const shortHtml = isEn ? shortHtmlEn : shortHtmlVi;
+  const fullHtml = isEn ? fullHtmlEn : fullHtmlVi;
+
   return (
     <section className="w-full bg-white dark:bg-gray-800">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-12">
         {/* Tiêu đề */}
         <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Đặt Bàn Nhà Hàng Trực Tuyến Tại Mravel Với Giá Tốt
+          {t('restaurant.intro_title')}
         </h2>
 
         {/* CONTENT giống HotelIntroSection */}
@@ -97,7 +163,7 @@ ${shortHtml}
             onClick={() => setExpanded(!expanded)}
             className="px-5 py-2 rounded-lg text-sky-600 font-semibold hover:underline"
           >
-            {expanded ? "Thu gọn" : "Xem thêm"}
+            {expanded ? t('common.collapse') : t('common.see_more')}
           </button>
         </div>
       </div>

@@ -107,7 +107,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
             <button
               onClick={() => conv && setAvatarMenuOpen((v) => !v)}
               className="rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1"
-              aria-label="Tuỳ chọn"
+              aria-label={t("chat.options")}
             >
               <Avatar src={conv?.avatarUrl} name={conv?.name} size="md" />
             </button>
@@ -131,7 +131,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
                         className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-700"
                       >
                         <UserIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        Xem trang cá nhân
+                        {t("chat.view_profile")}
                       </button>
                       <button
                         onClick={() => {
@@ -141,7 +141,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
                         className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-700"
                       >
                         <UserGroupIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        Tạo nhóm với
+                        {t("chat.create_group_with")}
                       </button>
                     </>
                   )}
@@ -154,7 +154,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
                       className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-50 text-gray-700"
                     >
                       <InformationCircleIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      Thông tin nhóm
+                      {t("chat.group_info")}
                     </button>
                   )}
                 </div>
@@ -165,7 +165,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm truncate">{conv?.name}</p>
             {isGroup && (
-              <p className="text-xs text-gray-400">{conv?.memberCount} thành viên</p>
+              <p className="text-xs text-gray-400">{t("chat.member_count", { count: conv?.memberCount })}</p>
             )}
           </div>
 
@@ -183,7 +183,7 @@ export default function ChatPanel({ conversationId, compact = false, onClose }) 
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label="Đóng"
+                aria-label={t("common.close")}
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>

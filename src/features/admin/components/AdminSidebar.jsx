@@ -183,7 +183,7 @@ export default function AdminSidebar() {
         }}
         animate={{ left: sidebarWidth }}
         transition={{ type: "spring", stiffness: 260, damping: 26 }}
-        title={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
+        title={collapsed ? t("admin.expand_sidebar") : t("admin.collapse_sidebar")}
       >
         {collapsed ? <ChevronRightIcon className="h-5 w-5" /> : <ChevronLeftIcon className="h-5 w-5" />}
       </motion.button>

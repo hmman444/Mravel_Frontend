@@ -1,8 +1,10 @@
 // src/features/user/components/AccountInfoCard.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import PersonalInfoForm from "./PersonalInfoForm";
 
 export default function AccountInfoCard() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("info");
 
   return (
@@ -20,7 +22,7 @@ export default function AccountInfoCard() {
                 : "border-transparent text-slate-500 hover:text-slate-700",
             ].join(" ")}
           >
-            Thông tin tài khoản
+            {t("user.account_info_tab")}
           </button>
           <button
             type="button"
@@ -32,7 +34,7 @@ export default function AccountInfoCard() {
                 : "border-transparent text-slate-500 hover:text-slate-700",
             ].join(" ")}
           >
-            Mật khẩu &amp; Bảo mật
+            {t("user.password_security_tab")}
           </button>
         </div>
       </div>
@@ -43,14 +45,11 @@ export default function AccountInfoCard() {
           <PersonalInfoForm />
         ) : (
           <div className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
-            <p>
-              Khu vực <strong>Mật khẩu &amp; Bảo mật</strong> sẽ được kết nối
-              với API sau. Hiện tại đây chỉ là layout mẫu.
-            </p>
+            <p>{t("user.security_placeholder_note")}</p>
             <ul className="list-disc pl-5">
-              <li>Đổi mật khẩu đăng nhập</li>
-              <li>Thiết lập xác thực 2 bước</li>
-              <li>Quản lý thiết bị đăng nhập</li>
+              <li>{t("user.security_change_password")}</li>
+              <li>{t("user.security_two_factor")}</li>
+              <li>{t("user.security_manage_devices")}</li>
             </ul>
           </div>
         )}

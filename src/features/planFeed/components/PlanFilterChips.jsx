@@ -1,11 +1,12 @@
 import { X, SlidersHorizontal } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const SORT_LABELS = {
-  RELEVANCE:   "Liên quan",
-  NEWEST:      "Mới nhất",
-  MOST_VIEWED: "Xem nhiều",
-  BUDGET_ASC:  "Ngân sách ↑",
-  BUDGET_DESC: "Ngân sách ↓",
+const SORT_LABEL_KEYS = {
+  RELEVANCE:   "feed.filter.sort.relevance",
+  NEWEST:      "feed.filter.sort.newest",
+  MOST_VIEWED: "feed.filter.sort.mostViewed",
+  BUDGET_ASC:  "feed.filter.sort.budgetAsc",
+  BUDGET_DESC: "feed.filter.sort.budgetDesc",
 };
 
 function formatBudget(val) {
@@ -26,16 +27,20 @@ function formatBudget(val) {
  *   activeCount   number
  */
 export default function PlanFilterChips({ filters, onRemove }) {
+  const { t } = useTranslation();
   if (!filters) return null;
 
   const chips = [];
 
   // Sort (only show if not default)
   if (filters.sortBy && filters.sortBy !== "RELEVANCE") {
+    const sortLabel = SORT_LABEL_KEYS[filters.sortBy]
+      ? t(SORT_LABEL_KEYS[filters.sortBy])
+      : filters.sortBy;
     chips.push(
       <Chip
         key="sort"
-        label={`Sắp xếp: ${SORT_LABELS[filters.sortBy] ?? filters.sortBy}`}
+        label={t("feed.filter.chip.sort", { value: sortLabel })}
         onRemove={() => onRemove("sortBy", "RELEVANCE")}
       />
     );
@@ -46,10 +51,10 @@ export default function PlanFilterChips({ filters, onRemove }) {
   const bMax = formatBudget(filters.budgetMax);
   if (bMin || bMax) {
     const label = bMin && bMax
-      ? `Ngân sách: ${bMin} – ${bMax}`
+      ? t("feed.filter.chip.budgetRange", { min: bMin, max: bMax })
       : bMin
-        ? `Ngân sách ≥ ${bMin}`
-        : `Ngân sách ≤ ${bMax}`;
+        ? t("feed.filter.chip.budgetMin", { min: bMin })
+        : t("feed.filter.chip.budgetMax", { max: bMax });
     chips.push(
       <Chip key="budget" label={label} onRemove={() => onRemove("budget")} />
     );
@@ -60,10 +65,10 @@ export default function PlanFilterChips({ filters, onRemove }) {
   const dMax = filters.daysMax;
   if (dMin || dMax) {
     const label = dMin && dMax
-      ? `${dMin}–${dMax} ngày`
+      ? t("feed.filter.chip.daysRange", { min: dMin, max: dMax })
       : dMin
-        ? `≥ ${dMin} ngày`
-        : `≤ ${dMax} ngày`;
+        ? t("feed.filter.chip.daysMin", { min: dMin })
+        : t("feed.filter.chip.daysMax", { max: dMax });
     chips.push(
       <Chip key="days" label={label} onRemove={() => onRemove("days")} />
     );
@@ -74,8 +79,8 @@ export default function PlanFilterChips({ filters, onRemove }) {
     const label = filters.startDateFrom && filters.startDateTo
       ? `${filters.startDateFrom} → ${filters.startDateTo}`
       : filters.startDateFrom
-        ? `Từ ${filters.startDateFrom}`
-        : `Đến ${filters.startDateTo}`;
+        ? t("feed.filter.chip.dateFrom", { date: filters.startDateFrom })
+        : t("feed.filter.chip.dateTo", { date: filters.startDateTo });
     chips.push(
       <Chip key="dates" label={label} onRemove={() => onRemove("dates")} />
     );

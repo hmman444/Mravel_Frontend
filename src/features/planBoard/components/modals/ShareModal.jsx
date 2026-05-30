@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaCopy, FaUserCircle, FaShareAlt } from "react-icons/fa";
 import { showSuccess, showError } from "../../../../utils/toastUtils";
 import AccessRow from "./AccessRow";
@@ -11,6 +12,7 @@ import { usePlanBoard } from "../../hooks/usePlanBoard";
 import LoadingOverlay from "../../../../components/LoadingOverlay";
 
 export default function ShareModal({ isOpen, onClose, planName, planId }) {
+  const { t } = useTranslation();
   const {
     share,
     loadShare,
@@ -94,13 +96,15 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     setVisibility(share.visibility);
 
     const ROLE_UI = {
-      OWNER: "Chủ sở hữu",
-      EDITOR: "Người chỉnh sửa",
-      VIEWER: "Người xem",
+      OWNER: t("plan.share.role_owner"),
+      EDITOR: t("plan.share.role_editor"),
+      VIEWER: t("plan.share.role_viewer"),
     };
 
     const buildName = (m) =>
-      m.isCurrentUser ? `${m.fullname || m.email} (Bạn)` : m.fullname || m.email;
+      m.isCurrentUser
+        ? `${m.fullname || m.email} ${t("plan.share.you_suffix")}`
+        : m.fullname || m.email;
 
     const owner = share.members?.find((m) => m.role === "OWNER");
 
@@ -146,13 +150,13 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
   const handleSendInvite = async () => {
     try {
       await invite({ emails: [emailInput], role: inviteRole.toUpperCase() });
-      showSuccess("Đã gửi lời mời!");
+      showSuccess(t("plan.share.invite_sent"));
       setEmailInput("");
       setInviteRole("editor");
       setPhase("default");
       loadShare();
     } catch {
-      showError("Không gửi được lời mời");
+      showError(t("plan.share.invite_failed"));
     }
   };
 
@@ -160,7 +164,10 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     if (!canManageMembers) return;
     if (user.pending || user.owner) return;
 
-    const map = { "Người xem": "VIEWER", "Người chỉnh sửa": "EDITOR" };
+    const map = {
+      [t("plan.share.role_viewer")]: "VIEWER",
+      [t("plan.share.role_editor")]: "EDITOR",
+    };
     const backend = map[newDisplayRole];
     if (!backend) return;
 
@@ -174,9 +181,9 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
           u.email === user.email ? { ...u, role: newDisplayRole } : u
         )
       );
-      showSuccess("Đã cập nhật quyền");
+      showSuccess(t("plan.share.role_updated"));
     } catch {
-      showError("Không thể cập nhật quyền");
+      showError(t("plan.share.role_update_failed"));
     }
   };
 
@@ -190,10 +197,10 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     try {
       await removeMember(userToRemove.userId);
       setAccessList((x) => x.filter((u) => u.email !== userToRemove.email));
-      showSuccess("Đã xoá thành viên");
+      showSuccess(t("plan.share.member_removed"));
       setConfirmRemoveOpen(false);
     } catch {
-      showError("Không thể xoá thành viên");
+      showError(t("plan.share.member_remove_failed"));
     }
   };
 
@@ -204,7 +211,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       await updateVisibility(v);
     } catch {
       setVisibility(share?.visibility || "PRIVATE");
-      showError("Không thể cập nhật hiển thị");
+      showError(t("plan.share.visibility_update_failed"));
     }
   };
 
@@ -213,7 +220,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       await navigator.clipboard.writeText(
         `${window.location.origin}/plans/${planId}`
       );
-      showSuccess("Đã sao chép liên kết!");
+      showSuccess(t("plan.share.link_copied"));
     } catch {
       // ignore
     }
@@ -224,7 +231,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       await requestAccess("VIEW");
       onClose();
     } catch {
-      showError("Lỗi khi gửi yêu cầu");
+      showError(t("plan.share.request_failed"));
     }
   };
 
@@ -233,7 +240,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       await requestAccess("EDIT");
       onClose();
     } catch {
-      showError("Lỗi khi gửi yêu cầu");
+      showError(t("plan.share.request_failed"));
     }
   };
 
@@ -263,7 +270,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
             ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-3 scale-95"}
           `}
         >
-          <LoadingOverlay open={actionLoading} message="Đang xử lý..." />
+          <LoadingOverlay open={actionLoading} message={t("common.processing")} />
 
           {/* Close button */}
           <button
@@ -289,13 +296,13 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-                    Chia sẻ lịch trình
+                    {t("plan.share.title")}
                     <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                       {planName}
                     </span>
                   </h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Quản lý quyền truy cập, hiển thị và lời mời tham gia lịch trình.
+                    {t("plan.share.subtitle")}
                   </p>
                 </div>
               </div>
@@ -305,10 +312,10 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
             {phase === "default" && isGuestViewer && (
               <div className="mb-4 rounded-xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/80 dark:bg-amber-900/10 p-3">
                 <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
-                  Bạn đang xem ở chế độ chỉ xem
+                  {t("plan.share.guest_banner_title")}
                 </p>
                 <p className="text-xs text-amber-700/80 dark:text-amber-200/70 mt-1">
-                  Lịch trình này cho phép xem (Public/Friends) nhưng bạn không phải thành viên, nên không thể chỉnh sửa hoặc quản lý chia sẻ.
+                  {t("plan.share.guest_banner_desc")}
                 </p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -321,7 +328,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       transition
                     "
                   >
-                    Yêu cầu trở thành thành viên (Xem)
+                    {t("plan.share.request_membership_view")}
                   </button>
 
                 </div>
@@ -336,19 +343,19 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   className="text-xs text-blue-600 hover:text-blue-500 flex items-center gap-1 mb-3"
                 >
                   <span className="text-base leading-none">←</span>
-                  <span>Quay lại chia sẻ</span>
+                  <span>{t("plan.share.back_to_share")}</span>
                 </button>
 
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-2">
-                  Mời tham gia “{planName}”
+                  {t("plan.share.invite_to_plan", { name: planName })}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                  Xác nhận email &amp; chọn quyền trước khi gửi lời mời.
+                  {t("plan.share.invite_confirm_hint")}
                 </p>
 
                 <div className="space-y-3 mb-4">
                   <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                    Email được mời
+                    {t("plan.share.invited_email")}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <input
@@ -373,8 +380,8 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                           shadow-sm
                         "
                       >
-                        <option value="viewer">Người xem</option>
-                        <option value="editor">Người chỉnh sửa</option>
+                        <option value="viewer">{t("plan.share.role_viewer")}</option>
+                        <option value="editor">{t("plan.share.role_editor")}</option>
                       </select>
                     </div>
                   </div>
@@ -392,7 +399,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       transition
                     "
                   >
-                    Hủy
+                    {t("common.cancel")}
                   </button>
 
                   <button
@@ -404,7 +411,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       transition
                     "
                   >
-                    Gửi lời mời
+                    {t("plan.share.send_invite")}
                   </button>
                 </div>
               </div>
@@ -418,17 +425,17 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex flex-col gap-0.5">
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                        Quyền hiển thị
+                        {t("plan.share.visibility_label")}
                       </span>
                       <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Ai có thể tìm và xem lịch trình này.
+                        {t("plan.share.visibility_hint")}
                       </span>
                     </div>
 
                     {/*  nếu không phải owner => disable thật sự */}
                     <div
                       className={!canChangeVisibility ? "opacity-60 pointer-events-none" : ""}
-                      title={!canChangeVisibility ? "Chỉ chủ sở hữu mới đổi quyền hiển thị" : ""}
+                      title={!canChangeVisibility ? t("plan.share.visibility_owner_only") : ""}
                     >
                       <VisibilityDropdown value={visibility} onChange={handleVisibilityChange} />
                     </div>
@@ -438,7 +445,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   {canInvite && (
                     <div className="mt-2">
                       <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                        Mời bằng email
+                        {t("plan.share.invite_by_email")}
                       </label>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <div className="flex-1 relative">
@@ -449,7 +456,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                               setEmailValid(true);
                             }}
                             onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
-                            placeholder="Nhập email người được mời..."
+                            placeholder={t("plan.share.email_placeholder")}
                             className={`
                               w-full px-4 py-2.5 rounded-xl text-sm
                               bg-slate-50/90 dark:bg-slate-900/80
@@ -461,7 +468,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                           />
                           {!emailValid && (
                             <p className="text-[11px] text-rose-500 mt-1">
-                              Email không hợp lệ.
+                              {t("plan.share.email_invalid")}
                             </p>
                           )}
                         </div>
@@ -478,7 +485,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                             transition
                           "
                         >
-                          Mời
+                          {t("plan.share.invite")}
                         </button>
                       </div>
                     </div>
@@ -487,7 +494,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   {/*  Nếu là guest, show tip */}
                   {isGuestViewer && (
                     <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-                      Bạn có thể sao chép liên kết để chia sẻ. Quản lý thành viên/chia sẻ chỉ dành cho thành viên của lịch trình.
+                      {t("plan.share.guest_copy_tip")}
                     </div>
                   )}
                 </div>
@@ -505,7 +512,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                           : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}
                       `}
                     >
-                      Thành viên ({share ? accessList.length : "—"})
+                      {t("plan.share.tab_members", { count: share ? accessList.length : "—" })}
                     </button>
 
                     {/*  chỉ owner mới có tab requests */}
@@ -520,7 +527,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                             : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}
                         `}
                       >
-                        Yêu cầu
+                        {t("plan.share.tab_requests")}
                         {requests?.length ? (
                           <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-rose-500 text-[10px] text-white">
                             {requests.length}
@@ -537,19 +544,19 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                     {/*  fallback khi loadShare fail */}
                     {!share && shareError && (
                       <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                        Không thể tải danh sách thành viên. Bạn vẫn có thể sao chép liên kết hoặc gửi yêu cầu quyền.
+                        {t("plan.share.members_load_failed")}
                       </div>
                     )}
 
                     {!share && !shareError && (
                       <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                        Đang tải danh sách thành viên...
+                        {t("plan.share.members_loading")}
                       </div>
                     )}
 
                     {share && accessList.length === 0 && (
                       <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
-                        Chưa có thành viên nào.
+                        {t("plan.share.no_members")}
                       </div>
                     )}
 
@@ -596,7 +603,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                   <div className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/70 p-3 space-y-3 mb-5">
                     {requests?.length === 0 && (
                       <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Không có yêu cầu nào.
+                        {t("plan.share.no_requests")}
                       </p>
                     )}
 
@@ -630,7 +637,9 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                           <p className="text-xs text-slate-500 truncate">{r.email}</p>
                           <p className="mt-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
                             <span className="text-[10px]">•</span>
-                            Yêu cầu quyền {r.type === "EDIT" ? "chỉnh sửa" : "xem"}
+                            {r.type === "EDIT"
+                              ? t("plan.share.request_edit_access")
+                              : t("plan.share.request_view_access")}
                           </p>
                         </div>
 
@@ -664,7 +673,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                         transition
                       "
                     >
-                      {loading ? "Đang gửi yêu cầu..." : "Yêu cầu quyền chỉnh sửa"}
+                      {loading ? t("plan.share.sending_request") : t("plan.share.request_edit_permission")}
                     </button>
                   )}
 
@@ -680,7 +689,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                         transition
                       "
                     >
-                      Yêu cầu quyền chỉnh sửa
+                      {t("plan.share.request_edit_permission")}
                     </button>
                   )}
 
@@ -697,7 +706,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                     "
                   >
                     <FaCopy />
-                    Sao chép liên kết
+                    {t("plan.share.copy_link")}
                   </button>
 
                   <button
@@ -710,7 +719,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
                       transition
                     "
                   >
-                    Xong
+                    {t("plan.share.done")}
                   </button>
                 </div>
               </>
@@ -722,9 +731,9 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       {confirmRemoveOpen && (
         <ConfirmModal
           open={confirmRemoveOpen}
-          title="Xoá thành viên"
-          message={`Bạn có chắc muốn xoá ${userToRemove?.name}?`}
-          confirmText="Xoá"
+          title={t("plan.share.remove_member_title")}
+          message={t("plan.share.remove_member_confirm", { name: userToRemove?.name })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmRemoveOpen(false)}
           onConfirm={confirmRemove}
         />
@@ -733,11 +742,15 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       {confirmRequest && confirmAction === "REJECT" && (
         <ConfirmModal
           open
-          title="Từ chối yêu cầu"
-          message={`Từ chối yêu cầu ${
-            confirmRequest.type === "EDIT" ? "quyền chỉnh sửa" : "quyền xem"
-          } của ${confirmRequest.fullname || confirmRequest.email}?`}
-          confirmText="Từ chối"
+          title={t("plan.share.reject_request_title")}
+          message={t("plan.share.reject_request_confirm", {
+            permission:
+              confirmRequest.type === "EDIT"
+                ? t("plan.share.edit_permission")
+                : t("plan.share.view_permission"),
+            name: confirmRequest.fullname || confirmRequest.email,
+          })}
+          confirmText={t("plan.share.reject")}
           onClose={() => {
             setConfirmRequest(null);
             setConfirmAction(null);
@@ -767,14 +780,15 @@ function RequestAction({
   setConfirmRequest,
   setConfirmAction,
 }) {
+  const { t } = useTranslation();
   const [roleOpen, setRoleOpen] = useState(false);
 
   const currentRole =
     requestRoles[request.id] || (request.type === "EDIT" ? "EDITOR" : "VIEWER");
 
   const ROLE_LABEL = {
-    VIEWER: "Quyền xem",
-    EDITOR: "Quyền chỉnh sửa",
+    VIEWER: t("plan.share.view_permission"),
+    EDITOR: t("plan.share.edit_permission"),
   };
 
   return (
@@ -818,7 +832,7 @@ function RequestAction({
                 : "text-slate-700 dark:text-slate-200"}
             `}
           >
-            Quyền xem
+            {t("plan.share.view_permission")}
           </button>
 
           <button
@@ -834,7 +848,7 @@ function RequestAction({
                 : "text-slate-700 dark:text-slate-200"}
             `}
           >
-            Quyền chỉnh sửa
+            {t("plan.share.edit_permission")}
           </button>
         </div>
       )}
@@ -853,17 +867,17 @@ function RequestAction({
             transition
           "
         >
-          Từ chối
+          {t("plan.share.reject")}
         </button>
 
         <button
           onClick={async () => {
             try {
               await decideRequest(request.id, "APPROVE", currentRole);
-              showSuccess("Đã chấp nhận yêu cầu");
+              showSuccess(t("plan.share.request_approved"));
               loadRequests();
             } catch {
-              showError("Không thể chấp nhận yêu cầu");
+              showError(t("plan.share.request_approve_failed"));
             }
           }}
           className="
@@ -874,7 +888,7 @@ function RequestAction({
             transition
           "
         >
-          Chấp nhận
+          {t("plan.share.approve")}
         </button>
       </div>
     </div>

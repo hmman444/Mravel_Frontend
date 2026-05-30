@@ -1,4 +1,5 @@
 import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { ui } from "./uiTokens";
 
 import BlockHeading from "./blocks/BlockHeading";
@@ -23,6 +24,7 @@ export default function PlaceBlockRow({
   onGalleryRemoveItem,
   onUploadGalleryItem,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl border border-slate-200/80 p-4 dark:border-slate-800/80">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -34,13 +36,13 @@ export default function PlaceBlockRow({
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" className={`${ui.btn} ${ui.btnGhost} px-3`} disabled={isLockedReadOnly} onClick={() => onMove(idx, -1)} title="Lên">
+          <button type="button" className={`${ui.btn} ${ui.btnGhost} px-3`} disabled={isLockedReadOnly} onClick={() => onMove(idx, -1)} title={t("admin.block_move_up")}>
             <ChevronUpIcon className="h-5 w-5" />
           </button>
-          <button type="button" className={`${ui.btn} ${ui.btnGhost} px-3`} disabled={isLockedReadOnly} onClick={() => onMove(idx, 1)} title="Xuống">
+          <button type="button" className={`${ui.btn} ${ui.btnGhost} px-3`} disabled={isLockedReadOnly} onClick={() => onMove(idx, 1)} title={t("admin.block_move_down")}>
             <ChevronDownIcon className="h-5 w-5" />
           </button>
-          <button type="button" className={`${ui.btn} ${ui.btnGhost} px-3`} disabled={isLockedReadOnly} onClick={() => onRemove(idx)} title="Xóa block">
+          <button type="button" className={`${ui.btn} ${ui.btnGhost} px-3`} disabled={isLockedReadOnly} onClick={() => onRemove(idx)} title={t("admin.block_delete")}>
             <TrashIcon className="h-5 w-5" />
           </button>
         </div>

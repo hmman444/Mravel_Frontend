@@ -40,7 +40,7 @@ export default function AmenityTable({
           <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-950">
             <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
               <th className="px-4 py-3 w-[64px] text-center">#</th>
-              <th className="px-4 py-3 w-[360px]">Tiện nghi</th>
+              <th className="px-4 py-3 w-[360px]">{t("admin.amenity")}</th>
               <th className="px-4 py-3">Code</th>
               <th className="px-4 py-3">Scope</th>
               <th className="px-4 py-3">Group</th>
@@ -87,7 +87,7 @@ export default function AmenityTable({
                             {a.description}
                           </div>
                         ) : (
-                          <div className="mt-0.5 text-xs italic text-slate-400">Chưa có mô tả</div>
+                          <div className="mt-0.5 text-xs italic text-slate-400">{t("admin.no_description")}</div>
                         )}
                       </div>
                     </div>
@@ -150,7 +150,7 @@ export default function AmenityTable({
                           onClick={() => onDeactivate?.(a.id)}
                           disabled={deleting}
                           className="rounded-lg p-2 hover:bg-amber-50 disabled:opacity-50 dark:hover:bg-slate-800"
-                          title="Tắt tiện ích"
+                          title={t("admin.deactivate_amenity")}
                         >
                           <NoSymbolIcon className="h-5 w-5 text-amber-600" />
                         </button>
@@ -159,7 +159,7 @@ export default function AmenityTable({
                           onClick={() => onActivate?.(a.id)}
                           disabled={deleting}
                           className="rounded-lg p-2 hover:bg-emerald-50 disabled:opacity-50 dark:hover:bg-slate-800"
-                          title="Bật tiện ích"
+                          title={t("admin.activate_amenity")}
                         >
                           <PowerIcon className="h-5 w-5 text-emerald-600" />
                         </button>

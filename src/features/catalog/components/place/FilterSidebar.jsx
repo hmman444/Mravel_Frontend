@@ -1,16 +1,10 @@
 import { useState } from "react";
-
-const PRICE_LEVEL_LABELS = {
-  FREE: "Miễn phí",
-  CHEAP: "Bình dân",
-  MODERATE: "Tầm trung",
-  EXPENSIVE: "Cao cấp",
-  LUXURY: "Hạng sang",
-};
+import { useTranslation } from "react-i18next";
 
 const EMPTY = { categorySlugs: [], priceLevel: null };
 
 export default function FilterSidebar({ onApply, facets }) {
+  const { t } = useTranslation();
   const [pending, setPending] = useState(EMPTY);
 
   const toggleCategory = (value) =>
@@ -38,7 +32,7 @@ export default function FilterSidebar({ onApply, facets }) {
         {/* Categories — dynamic from ES */}
         {facets?.categories?.length > 0 && (
           <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 p-4">
-            <div className="font-semibold mb-2">Danh mục</div>
+            <div className="font-semibold mb-2">{t("place.filter_categories")}</div>
             {facets.categories.map(({ slug, name, count }) => (
               <label
                 key={slug}
@@ -59,7 +53,7 @@ export default function FilterSidebar({ onApply, facets }) {
         {/* Price levels — dynamic from ES, radio single-select */}
         {facets?.priceLevels?.length > 0 && (
           <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 p-4">
-            <div className="font-semibold mb-2">Mức giá</div>
+            <div className="font-semibold mb-2">{t("place.filter_price")}</div>
             {facets.priceLevels.map(({ slug, count }) => (
               <label
                 key={slug}
@@ -71,7 +65,7 @@ export default function FilterSidebar({ onApply, facets }) {
                   checked={pending.priceLevel === slug}
                   onChange={() => togglePriceLevel(slug)}
                 />
-                <span className="flex-1">{PRICE_LEVEL_LABELS[slug] || slug}</span>
+                <span className="flex-1">{t(`enum.priceLevel.${slug}`, slug)}</span>
                 <span className="text-gray-400 text-xs">({count})</span>
               </label>
             ))}
@@ -92,7 +86,7 @@ export default function FilterSidebar({ onApply, facets }) {
         {!hasAnyFacets && facets !== null && (
           <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 p-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Không có bộ lọc khả dụng cho điểm đến này.
+              {t("place.filter_none")}
             </p>
           </div>
         )}
@@ -110,7 +104,7 @@ export default function FilterSidebar({ onApply, facets }) {
               transition-all duration-200
             "
           >
-            Đặt lại
+            {t("common.reset")}
           </button>
           <button
             onClick={() => onApply(pending)}
@@ -122,7 +116,7 @@ export default function FilterSidebar({ onApply, facets }) {
               transition-all duration-200
             "
           >
-            Áp dụng
+            {t("common.apply")}
           </button>
         </div>
 

@@ -2,6 +2,7 @@
 "use client";
 
 import { FaClock, FaPlus } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { HOURS, toDateOnly } from "../../utils/calendarUtils";
 
 export default function PlanCalendarWeekGrid({
@@ -17,6 +18,7 @@ export default function PlanCalendarWeekGrid({
   onClickCreateSlot,
   onOpenEvent,
 }) {
+  const { t } = useTranslation();
   const inRangeDay = (raw) =>
     planStart &&
     planEnd &&
@@ -101,7 +103,7 @@ export default function PlanCalendarWeekGrid({
                         }}
                       >
                         <FaPlus size={8} />
-                        <span>Tạo</span>
+                        <span>{t("common.add")}</span>
                       </button>
                     )}
                   </div>

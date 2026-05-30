@@ -1,40 +1,44 @@
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
+
 const items = [
   {
     id: 1,
     icon:
       "https://ik.imagekit.io/tvlk/image/imageResource/2023/02/13/1676271014827-66a85fef46fbb06a6143f6011b6d0151.png?tr=q-75",
-    title: "Tiện lợi",
-    desc: "Đặt bàn mọi lúc, mọi nơi với Mravel mà không cần phải gọi điện hay đến trực tiếp nhà hàng. Chỉ vài thao tác là giữ chỗ xong.",
+    title: i18n.t("restaurant.why_us_convenient_title"),
+    desc: i18n.t("restaurant.why_us_convenient_desc"),
   },
   {
     id: 2,
     icon:
       "https://ik.imagekit.io/tvlk/image/imageResource/2023/04/13/1681374757603-3023eeea63594c91ac6cc0f8c0322bb9.webp?tr=q-75",
-    title: "Chăm sóc khách hàng 24/7",
-    desc: "Khi có vấn đề về đặt chỗ, thanh toán hoặc thay đổi thời gian, đội ngũ hỗ trợ của Mravel luôn sẵn sàng trợ giúp bạn.",
+    title: i18n.t("restaurant.why_us_support_title"),
+    desc: i18n.t("restaurant.why_us_support_desc"),
   },
   {
     id: 3,
     icon:
       "https://ik.imagekit.io/tvlk/image/imageResource/2023/04/13/1681374760363-fa047511b3aab4913d3eedd195092fda.webp?tr=q-75",
-    title: "Thông tin đầy đủ, minh bạch",
-    desc: "Xem trước menu, hình ảnh, vị trí, khung giờ đông khách, review thực tế… giúp bạn chọn được nhà hàng phù hợp nhất.",
+    title: i18n.t("restaurant.why_us_transparent_title"),
+    desc: i18n.t("restaurant.why_us_transparent_desc"),
   },
   {
     id: 4,
     icon:
       "https://ik.imagekit.io/tvlk/image/imageResource/2023/04/13/1681374762931-6f7c4778fd58363e7de9f940b8d1b611.webp?tr=q-75",
-    title: "Thanh toán dễ dàng",
-    desc: "Hỗ trợ nhiều phương thức: thanh toán online, giữ chỗ trước và trả tại nhà hàng, voucher/ưu đãi… linh hoạt theo nhu cầu của bạn.",
+    title: i18n.t("restaurant.why_us_payment_title"),
+    desc: i18n.t("restaurant.why_us_payment_desc"),
   },
 ];
 
 export default function RestaurantWhyUs() {
+  const { t } = useTranslation();
   return (
     <section className="w-full bg-white dark:bg-gray-800">
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-10">
         <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Tại sao bạn nên đặt nhà hàng trực tuyến tại Mravel?
+          {t("restaurant.why_us_heading")}
         </h2>
 
         <div className="mt-8 space-y-8">

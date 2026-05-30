@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 import {
   MapContainer,
   TileLayer,
@@ -159,7 +161,7 @@ function extractLocationForMap(card) {
     data.placeName ||
     card.text ||
     card.title ||
-    "Hoạt động";
+    i18n.t("plan.map.default_activity");
 
   const address =
     loc.address ||
@@ -181,6 +183,7 @@ function extractLocationForMap(card) {
 }
 
 export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
+  const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
 
   const { points, segments, sequentialSegments, center, bounds } = useMemo(() => {
@@ -211,14 +214,14 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
           (fromLoc && (fromLoc.label || fromLoc.name)) ||
           card.text ||
           card.title ||
-          "Điểm đi";
+          i18n.t("plan.map.origin");
 
         const toName =
           data.toPlace ||
           (toLoc && (toLoc.label || toLoc.name)) ||
           card.text ||
           card.title ||
-          "Điểm đến";
+          i18n.t("plan.map.destination");
 
         const fromAddress =
           (fromLoc &&
@@ -428,7 +431,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
 
   if (!open || !list) return null;
 
-  const title = list.title || `Ngày ${dayIndex + 1}`;
+  const title = list.title || t("plan.map.day", { n: dayIndex + 1 });
   const formatTime = (t) =>
     t ? String(t).split(":").slice(0, 2).join(":") : "";
 
@@ -463,7 +466,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
               </div>
               <div className="min-w-0">
                 <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-50 truncate">
-                  Bản đồ trong ngày
+                  {t("plan.map.title")}
                 </h3>
                 <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[11px] text-slate-600 dark:text-slate-400">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
@@ -471,7 +474,12 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                     {title}
                   </span>
                   <span>
-                    Có <b>{locationActivityCount} hoạt động</b> có vị trí trên bản đồ.
+                    <b>
+                      {t("plan.map.activity_count", {
+                        count: locationActivityCount,
+                      })}
+                    </b>{" "}
+                    {t("plan.map.activity_count_suffix")}
                   </span>
                 </div>
               </div>
@@ -579,8 +587,12 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                               displayPoint.type === "TRANSPORT_TO") && (
                               <div className="mt-0.5 text-[10px] text-slate-500">
                                 {displayPoint.type === "TRANSPORT_FROM"
-                                  ? `Điểm đi: ${displayPoint.title}`
-                                  : `Điểm đến: ${displayPoint.title}`}
+                                  ? t("plan.map.origin_label", {
+                                      name: displayPoint.title,
+                                    })
+                                  : t("plan.map.destination_label", {
+                                      name: displayPoint.title,
+                                    })}
                               </div>
                             )}
 
@@ -615,8 +627,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
             {/* LIST ACTIVITIES */}
             <div className="flex-1 flex flex-col bg-slate-50/60 dark:bg-slate-950/80">
               <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                <span>Chạm vào từng hoạt động để làm nổi bật trên bản đồ. Đường xanh: chặng di chuyển, đường xám nét đứt: nối tuần tự
-                    giữa các hoạt động.</span>
+                <span>{t("plan.map.legend_hint")}</span>
               </div>
 
               <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
@@ -635,7 +646,8 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                   const p = points.find((pt) => pt.parentId === card.id);
 
                   // Tiêu đề card: nếu là TRANSPORT thì A → B
-                  let mainTitle = card.text || card.title || "Hoạt động";
+                  let mainTitle =
+                    card.text || card.title || t("plan.map.default_activity");
                   let routeLabel = null;
 
                   if (card.activityType === "TRANSPORT") {
@@ -645,12 +657,12 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                     const fromName =
                       data.fromPlace ||
                       (fromLoc && (fromLoc.label || fromLoc.name)) ||
-                      "Điểm A";
+                      t("plan.map.point_a");
 
                     const toName =
                       data.toPlace ||
                       (toLoc && (toLoc.label || toLoc.name)) ||
-                      "Điểm B";
+                      t("plan.map.point_b");
 
                     routeLabel = `${fromName} → ${toName}`;
                   }
@@ -702,8 +714,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
 
                         {!hasLoc && (
                           <div className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">
-                            Hoạt động này chưa có toạ độ — sẽ không hiển thị trên
-                            bản đồ.
+                            {t("plan.map.no_coordinates")}
                           </div>
                         )}
                       </div>

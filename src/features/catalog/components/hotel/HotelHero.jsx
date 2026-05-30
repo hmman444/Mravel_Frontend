@@ -1,35 +1,37 @@
 import { useMemo, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function HotelHero() {
+  const { t } = useTranslation();
   const banners = useMemo(
     () => [
       {
         id: "bn1",
         img: "https://ik.imagekit.io/tvlk/image/imageResource/2025/12/22/1766383097281-9677b44f656fe03e7b07d9cc906cac30.jpeg?tr=h-230,q-75,w-472",
-        title: "Thấy vé rẻ hơn, Mravel tặng gấp đôi",
-        sub: "Siêu ưu đãi cho bạn",
+        title: t("hotel.banner1_title"),
+        sub: t("hotel.banner1_sub"),
       },
       {
         id: "bn2",
         img: "https://ik.imagekit.io/tvlk/image/imageResource/2025/12/14/1765729430496-56dcb18f1fa0c5ca306e5596a0f0db43.jpeg?tr=h-230,q-75,w-472",
-        title: "Mã giảm đến 1 triệu",
-        sub: "Áp dụng cho khách sạn chọn lọc",
+        title: t("hotel.banner2_title"),
+        sub: t("hotel.banner2_sub"),
       },
       {
         id: "bn3",
         img: "https://ik.imagekit.io/tvlk/image/imageResource/2025/07/09/1752036510252-61e121867314d3e385fb91d0fb67c371.jpeg?tr=dpr-2,h-230,q-75,w-472",
-        title: "Ưu đãi khai trương",
-        sub: "Chỉ từ 2.292.000 VND/đêm",
+        title: t("hotel.banner3_title"),
+        sub: t("hotel.banner3_sub"),
       },
       {
         id: "bn4",
         img: "https://ik.imagekit.io/tvlk/image/imageResource/2025/11/13/1763015291415-ccfd305c295d62161ff7165aed9659e4.jpeg?tr=dpr-2,q-75",
-        title: "Trọn gói nghỉ dưỡng 2N1Đ",
-        sub: "Chỉ từ 1.250.000 VND/gói",
+        title: t("hotel.banner4_title"),
+        sub: t("hotel.banner4_sub"),
       },
     ],
-    []
+    [t]
   );
 
   const n = banners.length;
@@ -97,10 +99,10 @@ export default function HotelHero() {
         {/* MOBILE */}
         <div className="md:hidden mb-4">
           <h1 className="text-2xl font-bold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.25)]">
-            Tìm &amp; đặt phòng khách sạn giá tốt chỉ với 3 bước đơn giản!
+            {t("hotel.hero_heading")}
           </h1>
           <p className="mt-2 text-white/90 text-sm drop-shadow-[0_1px_10px_rgba(0,0,0,0.20)]">
-            Tìm ưu đãi khách sạn chất lượng trên Mravel
+            {t("hotel.hero_sub")}
           </p>
 
           {/* Mobile: 1 banner (vẫn vòng lặp) */}
@@ -130,10 +132,10 @@ export default function HotelHero() {
           {/* TEXT BÊN TRÁI */}
           <div className="basis-[38%]">
             <h1 className="text-3xl font-bold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.25)]">
-              Tìm &amp; đặt phòng khách sạn giá tốt chỉ với 3 bước đơn giản!
+              {t("hotel.hero_heading")}
             </h1>
             <p className="mt-2 text-white/90 text-base drop-shadow-[0_1px_10px_rgba(0,0,0,0.20)]">
-              Tìm ưu đãi khách sạn chất lượng trên Mravel
+              {t("hotel.hero_sub")}
             </p>
           </div>
 
@@ -181,14 +183,14 @@ export default function HotelHero() {
                 ? "text-white hover:scale-110"
                 : "text-white/40 cursor-not-allowed",
             ].join(" ")}
-            aria-label="Quay lại"
-            title="Quay lại"
+            aria-label={t("common.back")}
+            title={t("common.back")}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
           <span className="cursor-pointer hover:opacity-80 select-none">
-            Xem thêm khuyến mãi
+            {t("hotel.see_more_promotions")}
           </span>
 
           <button
@@ -201,8 +203,8 @@ export default function HotelHero() {
                 ? "text-white hover:scale-110"
                 : "text-white/40 cursor-not-allowed",
             ].join(" ")}
-            aria-label="Xem tiếp"
-            title="Xem tiếp"
+            aria-label={t("hotel.next")}
+            title={t("hotel.next")}
           >
             <ChevronRight className="w-5 h-5" />
           </button>

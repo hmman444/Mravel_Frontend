@@ -1,3 +1,5 @@
+import i18n from "../../../i18n";
+
 // trả về [ { lat, lng, role } ] cho 1 card
 export function getPointsFromCard(card) {
   if (!card.activityDataJson) return [];
@@ -66,7 +68,7 @@ export function buildMapItemsForList(list) {
         listId: list.id,
         listLabel: list.title || "",
         activityType: card.activityType,
-        title: card.text || "Hoạt động",
+        title: card.text || i18n.t("plan.card.default_title"),
         subtitle: (() => {
           if (!dataSafe(card)) return "";
           const d = JSON.parse(card.activityDataJson || "{}");

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
@@ -11,6 +12,7 @@ import LoadingOverlay from "../../../components/LoadingOverlay";
 import { validatePassword, validateConfirmPassword, validateOtp } from "../../../utils/validators";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const email =
     searchParams.get("email") || localStorage.getItem("partner_last_fp_email") || "";
@@ -48,22 +50,22 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthLayout>
-      <LoadingOverlay show={loading} text="Đang xử lý..." />
+      <LoadingOverlay show={loading} text={t("common.processing")} />
 
       <Link to="/partner/login" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Về đăng nhập đối tác
+        ← {t("partnerAuth.reset_password.back_to_login")}
       </Link>
 
-      <AuthCard title="Đặt lại mật khẩu" subtitle={`Nhập mã OTP được gửi tới email: ${email}`}>
+      <AuthCard title={t("partnerAuth.reset_password.title")} subtitle={t("partnerAuth.reset_password.subtitle", { email })}>
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <AuthInput
-              label="Mã OTP"
+              label={t("partnerAuth.reset_password.otp_label")}
               icon={KeyIcon}
               type="text"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              placeholder="Nhập mã OTP"
+              placeholder={t("partnerAuth.reset_password.otp_placeholder")}
             />
             {inputErrors.otp && <p className="text-red-500 text-sm">{inputErrors.otp}</p>}
 
@@ -77,29 +79,29 @@ export default function ResetPasswordPage() {
                 }`}
               >
                 <ArrowPathIcon className="w-4 h-4" />
-                {cooldown > 0 ? `Gửi lại sau ${cooldown}s` : "Gửi lại mã OTP"}
+                {cooldown > 0 ? t("partnerAuth.reset_password.resend_cooldown", { cooldown }) : t("partnerAuth.reset_password.resend_otp")}
               </button>
             </div>
           </div>
 
           <div>
             <PasswordInput
-              label="Mật khẩu mới"
+              label={t("partnerAuth.reset_password.new_password_label")}
               icon={LockClosedIcon}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu mới"
+              placeholder={t("partnerAuth.reset_password.new_password_placeholder")}
             />
             {inputErrors.password && <p className="text-red-500 text-sm">{inputErrors.password}</p>}
           </div>
 
           <div>
             <PasswordInput
-              label="Nhập lại mật khẩu"
+              label={t("partnerAuth.reset_password.confirm_password_label")}
               icon={LockClosedIcon}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Xác nhận mật khẩu"
+              placeholder={t("partnerAuth.reset_password.confirm_password_placeholder")}
             />
             {inputErrors.confirm && <p className="text-red-500 text-sm">{inputErrors.confirm}</p>}
           </div>
@@ -109,7 +111,7 @@ export default function ResetPasswordPage() {
             disabled={loading}
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold disabled:opacity-60"
           >
-            Xác nhận
+            {t("common.confirm")}
           </button>
 
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
@@ -117,7 +119,7 @@ export default function ResetPasswordPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
           <Link to="/partner/login" className="text-blue-500">
-            Quay lại đăng nhập
+            {t("partnerAuth.reset_password.back_to_login_link")}
           </Link>
         </p>
       </AuthCard>

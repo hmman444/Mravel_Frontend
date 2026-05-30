@@ -1,8 +1,10 @@
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 const REVIEW_PREFIX = "/reviews";
 
-const toError = (error, fallback = "Lỗi kết nối đến server") => {
+const toError = (error, fallback) => {
+  fallback = fallback || i18n.t("review.error.connection");
   if (error?.response?.data) {
     const msg =
       error.response.data.message || error.response.data.error || fallback;
@@ -18,7 +20,7 @@ export const getReviews = async ({ targetType, targetId, page = 0, size = 5 }) =
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được danh sách đánh giá");
+    return toError(error, i18n.t("review.error.load_reviews"));
   }
 };
 
@@ -29,7 +31,7 @@ export const getReviewSummary = async ({ targetType, targetId }) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được thống kê đánh giá");
+    return toError(error, i18n.t("review.error.load_summary"));
   }
 };
 
@@ -40,7 +42,7 @@ export const getMyReview = async ({ targetType, targetId }) => {
     });
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không tải được đánh giá của bạn");
+    return toError(error, i18n.t("review.error.load_my_review"));
   }
 };
 
@@ -49,7 +51,7 @@ export const createReview = async (payload) => {
     const res = await api.post(REVIEW_PREFIX, payload);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không gửi được đánh giá");
+    return toError(error, i18n.t("review.error.create"));
   }
 };
 
@@ -58,7 +60,7 @@ export const updateReview = async (reviewId, payload) => {
     const res = await api.put(`${REVIEW_PREFIX}/${reviewId}`, payload);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không cập nhật được đánh giá");
+    return toError(error, i18n.t("review.error.update"));
   }
 };
 
@@ -67,7 +69,7 @@ export const deleteReview = async (reviewId) => {
     const res = await api.delete(`${REVIEW_PREFIX}/${reviewId}`);
     return { success: true, data: res.data?.data };
   } catch (error) {
-    return toError(error, "Không xóa được đánh giá");
+    return toError(error, i18n.t("review.error.delete"));
   }
 };
 
@@ -76,6 +78,6 @@ export const getAspectDefinitions = async (category) => {
     const res = await api.get(`${REVIEW_PREFIX}/aspects`, { params: { category } });
     return { success: true, data: res.data?.data ?? [] };
   } catch (error) {
-    return toError(error, "Không tải được danh sách tiêu chí");
+    return toError(error, i18n.t("review.error.load_aspects"));
   }
 };

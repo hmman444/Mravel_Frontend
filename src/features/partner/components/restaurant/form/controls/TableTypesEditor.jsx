@@ -1,6 +1,7 @@
 // src/features/partner/components/restaurant/form/controls/TableTypesEditor.jsx
 import { PlusIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   asArray,
   asString,
@@ -10,9 +11,9 @@ import {
   parseIntList,
 } from "../../../../utils/restaurantFormUtils";
 
-const DurationsHint = "Nhập dạng: 60, 90, 120 (phút).";
-
 export default function TableTypesEditor({ value = [], onChange, disabled }) {
+  const { t: tr } = useTranslation();
+  const DurationsHint = tr("partner.table_types.durations_hint");
   const list = useMemo(() => asArray(value).map(normalizeTableType), [value]);
 
   const emit = (next) => {
@@ -67,9 +68,9 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
     <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Loại bàn</div>
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{tr("partner.table_types.title")}</div>
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Mỗi loại bàn tương ứng cấu hình số người / số bàn / tiền cọc / thời lượng.
+            {tr("partner.table_types.subtitle")}
           </div>
         </div>
 
@@ -80,12 +81,12 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
           className="px-3 py-2 rounded-xl border hover:bg-gray-50 flex items-center gap-2 text-sm disabled:opacity-50"
         >
           <PlusIcon className="h-4 w-4" />
-          Thêm loại bàn
+          {tr("partner.table_types.add")}
         </button>
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa có loại bàn.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{tr("partner.table_types.empty")}</div>
       ) : (
         <div className="space-y-3">
           {list.map((t, idx) => (
@@ -93,10 +94,10 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-gray-100">
-                    Loại bàn #{idx + 1} — {t.name || "(chưa đặt tên)"}
+                    {tr("partner.table_types.item_title", { index: idx + 1, name: t.name || tr("partner.table_types.unnamed") })}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    Mã loại bàn: {t.id || "để trống (tự tạo)"}
+                    {tr("partner.table_types.code_label", { code: t.id || tr("partner.table_types.code_auto") })}
                   </div>
                 </div>
 
@@ -105,7 +106,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                     type="button"
                     onClick={() => move(idx, -1)}
                     className="p-2 rounded-lg hover:bg-gray-100"
-                    title="Đưa lên"
+                    title={tr("partner.table_types.move_up")}
                     disabled={disabled}
                   >
                     <ChevronUpIcon className="h-5 w-5" />
@@ -114,7 +115,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                     type="button"
                     onClick={() => move(idx, 1)}
                     className="p-2 rounded-lg hover:bg-gray-100"
-                    title="Đưa xuống"
+                    title={tr("partner.table_types.move_down")}
                     disabled={disabled}
                   >
                     <ChevronDownIcon className="h-5 w-5" />
@@ -123,7 +124,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                     type="button"
                     onClick={() => remove(idx)}
                     className="p-2 rounded-lg hover:bg-red-50"
-                    title="Xóa loại bàn"
+                    title={tr("partner.table_types.delete")}
                     disabled={disabled}
                   >
                     <TrashIcon className="h-5 w-5 text-red-600" />
@@ -133,23 +134,23 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label className="text-sm">
-                  <div className="font-medium mb-1">Tên loại bàn *</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.name_label")}</div>
                   <input
                     value={asString(t.name)}
                     onChange={(e) => patch(idx, { name: e.target.value })}
                     className="w-full border rounded-xl px-3 py-2"
-                    placeholder="Ví dụ: Bàn 2 người / Bàn VIP..."
+                    placeholder={tr("partner.table_types.name_placeholder")}
                     disabled={disabled}
                   />
                 </label>
 
                 <label className="text-sm">
-                  <div className="font-medium mb-1">Mã loại bàn (để trống = tự tạo)</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.code_input_label")}</div>
                   <input
                     value={asString(t.id)}
                     onChange={(e) => patch(idx, { id: e.target.value })}
                     className="w-full border rounded-xl px-3 py-2"
-                    placeholder="Không bắt buộc"
+                    placeholder={tr("partner.table_types.code_input_placeholder")}
                     disabled={disabled}
                   />
                 </label>
@@ -157,7 +158,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <label className="text-sm md:col-span-3">
-                  <div className="font-medium mb-1">Số chỗ ngồi</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.seats_label")}</div>
                   <input
                     inputMode="numeric"
                     value={asString(t.seats)}
@@ -169,7 +170,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 </label>
 
                 <label className="text-sm md:col-span-3">
-                  <div className="font-medium mb-1">Số người tối thiểu</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.min_people_label")}</div>
                   <input
                     inputMode="numeric"
                     value={asString(t.minPeople)}
@@ -181,7 +182,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 </label>
 
                 <label className="text-sm md:col-span-3">
-                  <div className="font-medium mb-1">Số người tối đa</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.max_people_label")}</div>
                   <input
                     inputMode="numeric"
                     value={asString(t.maxPeople)}
@@ -193,7 +194,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 </label>
 
                 <label className="text-sm md:col-span-3">
-                  <div className="font-medium mb-1">Tổng số bàn</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.total_tables_label")}</div>
                   <input
                     inputMode="numeric"
                     value={asString(t.totalTables)}
@@ -211,10 +212,10 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 const max = Number(t.maxPeople);
                 const issues = [];
                 if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > 0 && min > max) {
-                  issues.push("Số người tối thiểu đang lớn hơn số người tối đa.");
+                  issues.push(tr("partner.table_types.err_min_gt_max"));
                 }
                 if (Number.isFinite(max) && Number.isFinite(seats) && max > 0 && seats > 0 && max > seats) {
-                  issues.push("Số người tối đa đang lớn hơn số chỗ ngồi.");
+                  issues.push(tr("partner.table_types.err_max_gt_seats"));
                 }
                 if (!issues.length) return null;
                 return (
@@ -228,7 +229,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <label className="text-sm md:col-span-4">
-                  <div className="font-medium mb-1">Tiền cọc (nếu có)</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.deposit_label")}</div>
                   <input
                     inputMode="decimal"
                     value={asString(t.depositPrice)}
@@ -240,7 +241,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 </label>
 
                 <label className="text-sm md:col-span-4">
-                  <div className="font-medium mb-1">Đơn vị tiền tệ</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.currency_label")}</div>
                   <input
                     value={asString(t.currencyCode || "VND")}
                     onChange={(e) => patch(idx, { currencyCode: e.target.value })}
@@ -248,7 +249,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                     placeholder="VND"
                     disabled={disabled}
                   />
-                  <div className="text-[11px] text-gray-400 mt-1">Để trống hệ thống sẽ mặc định là VND.</div>
+                  <div className="text-[11px] text-gray-400 mt-1">{tr("partner.table_types.currency_hint")}</div>
                 </label>
 
                 <label className="text-sm md:col-span-2 flex items-center gap-2 mt-6">
@@ -258,7 +259,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                     onChange={(e) => patch(idx, { vip: e.target.checked })}
                     disabled={disabled}
                   />
-                  <span className="font-medium">Bàn VIP</span>
+                  <span className="font-medium">{tr("partner.table_types.vip")}</span>
                 </label>
 
                 <label className="text-sm md:col-span-2 flex items-center gap-2 mt-6">
@@ -268,13 +269,13 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                     onChange={(e) => patch(idx, { privateRoom: e.target.checked })}
                     disabled={disabled}
                   />
-                  <span className="font-medium">Phòng riêng</span>
+                  <span className="font-medium">{tr("partner.table_types.private_room")}</span>
                 </label>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <label className="text-sm md:col-span-8">
-                  <div className="font-medium mb-1">Thời lượng cho phép (phút)</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.allowed_durations_label")}</div>
                   <input
                     value={Array.isArray(t.allowedDurationsMinutes) ? t.allowedDurationsMinutes.join(", ") : ""}
                     onChange={(e) => setDurations(idx, e.target.value)}
@@ -286,7 +287,7 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
                 </label>
 
                 <label className="text-sm md:col-span-4">
-                  <div className="font-medium mb-1">Thời lượng mặc định (phút)</div>
+                  <div className="font-medium mb-1">{tr("partner.table_types.default_duration_label")}</div>
                   <input
                     inputMode="numeric"
                     value={asString(t.defaultDurationMinutes)}
@@ -299,12 +300,12 @@ export default function TableTypesEditor({ value = [], onChange, disabled }) {
               </div>
 
               <label className="text-sm">
-                <div className="font-medium mb-1">Ghi chú</div>
+                <div className="font-medium mb-1">{tr("partner.table_types.note_label")}</div>
                 <textarea
                   value={asString(t.note)}
                   onChange={(e) => patch(idx, { note: e.target.value })}
                   className="w-full border rounded-xl px-3 py-2 min-h-[90px]"
-                  placeholder="Ví dụ: loại bàn này chỉ nhận khách sau 18h..."
+                  placeholder={tr("partner.table_types.note_placeholder")}
                   disabled={disabled}
                 />
               </label>

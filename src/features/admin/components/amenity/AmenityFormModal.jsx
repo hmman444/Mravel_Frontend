@@ -75,9 +75,9 @@ export default function AmenityFormModal({
 
   const sub = useMemo(() => {
     return isEdit
-      ? "Cập nhật thông tin hiển thị. Code + Scope không nên trùng trong cùng scope."
-      : "Tạo tiện nghi mới. Code khuyến nghị dạng UPPER_SNAKE (ví dụ: WIFI_FREE).";
-  }, [isEdit]);
+      ? t("admin.amenity_edit_subtitle")
+      : t("admin.amenity_add_subtitle");
+  }, [isEdit, t]);
 
   const Required = () => <span className={ui.req}>*</span>;
 
@@ -147,7 +147,7 @@ export default function AmenityFormModal({
                 <div className={ui.errorBox} role="alert" aria-live="polite">
                   <ExclamationTriangleIcon className="h-5 w-5 flex-none" />
                   <div className="min-w-0">
-                    <div className="font-semibold">Không thể lưu</div>
+                    <div className="font-semibold">{t("admin.amenity_save_failed")}</div>
                     <div className="mt-0.5 break-words">{apiError}</div>
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default function AmenityFormModal({
                     className={ui.input}
                     required
                   />
-                  <div className={ui.hint}>Unique theo (code + scope). Khuyến nghị UPPER_SNAKE.</div>
+                  <div className={ui.hint}>{t("admin.amenity_code_hint")}</div>
                 </div>
 
                 {/* Icon (optional) */}
@@ -178,7 +178,7 @@ export default function AmenityFormModal({
                     placeholder="wifi / parking / 🍳 ..."
                     className={ui.input}
                   />
-                  <div className={ui.hint}>Có thể nhập key (wifi, parking...) hoặc emoji.</div>
+                  <div className={ui.hint}>{t("admin.amenity_icon_hint")}</div>
                 </div>
 
                 {/* Name * */}
@@ -189,7 +189,7 @@ export default function AmenityFormModal({
                   <input
                     name="name"
                     defaultValue={editing?.name || ""}
-                    placeholder="Wi-Fi miễn phí"
+                    placeholder={t("admin.amenity_name_placeholder")}
                     className={ui.input}
                     required
                   />
@@ -201,7 +201,7 @@ export default function AmenityFormModal({
                   <textarea
                     name="description"
                     defaultValue={editing?.description || ""}
-                    placeholder="Mô tả ngắn gọn để hiển thị..."
+                    placeholder={t("admin.amenity_desc_placeholder")}
                     className={ui.textarea}
                   />
                 </div>

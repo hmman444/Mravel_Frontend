@@ -5,6 +5,7 @@ import {
   BuildingOffice2Icon,
   HomeModernIcon,
 } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 import Badge from "./Badge";
 import {
@@ -24,7 +25,7 @@ import {
   pickUsedEnd,
 } from "../utils/partnerBookingUtils";
 
-function renderWhen(b) {
+function renderWhen(b, t) {
   const type = b?.__type;
   const usedStart = pickUsedStart(b, type);
   const usedEnd = pickUsedEnd(b, type);
@@ -43,25 +44,26 @@ function renderWhen(b) {
   return (
     <div className="text-sm">
       <div className="text-gray-900 dark:text-gray-100 font-medium">{fmtDT(usedStart)}</div>
-      <div className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">Thời gian đặt</div>
+      <div className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{t("partner.bookings.booking_time")}</div>
     </div>
   );
 }
 
 export default function PartnerBookingsTable({ items, canCancel, onDetail, onCancel }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
             <tr className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400">
-              <th className="px-4 py-3 whitespace-nowrap">Loại</th>
-              <th className="px-4 py-3 whitespace-nowrap">Dịch vụ</th>
-              <th className="px-4 py-3 whitespace-nowrap">Khách</th>
-              <th className="px-4 py-3 whitespace-nowrap">Thời gian</th>
-              <th className="px-4 py-3 whitespace-nowrap text-right">Số tiền</th>
-              <th className="px-4 py-3 whitespace-nowrap">Trạng thái</th>
-              <th className="px-4 py-3 whitespace-nowrap text-right">Thao tác</th>
+              <th className="px-4 py-3 whitespace-nowrap">{t("partner.bookings.col_type")}</th>
+              <th className="px-4 py-3 whitespace-nowrap">{t("partner.bookings.col_service")}</th>
+              <th className="px-4 py-3 whitespace-nowrap">{t("partner.bookings.col_customer")}</th>
+              <th className="px-4 py-3 whitespace-nowrap">{t("partner.bookings.col_time")}</th>
+              <th className="px-4 py-3 whitespace-nowrap text-right">{t("partner.bookings.col_amount")}</th>
+              <th className="px-4 py-3 whitespace-nowrap">{t("partner.bookings.col_status")}</th>
+              <th className="px-4 py-3 whitespace-nowrap text-right">{t("partner.bookings.col_actions")}</th>
             </tr>
           </thead>
 
@@ -93,7 +95,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                         <BuildingOffice2Icon className="w-5 h-5 text-emerald-600" />
                       )}
                       <Badge
-                        text={type === "HOTEL" ? "Khách sạn" : "Quán ăn"}
+                        text={type === "HOTEL" ? t("partner.bookings.type_hotel") : t("partner.bookings.type_restaurant")}
                         className={type === "HOTEL" ? "bg-blue-50 text-blue-700" : "bg-emerald-50 text-emerald-700"}
                       />
                     </div>
@@ -111,7 +113,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                         {service?.city || ""}
                         {service?.softDeleted ? (
                           <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">
-                            Ẩn
+                            {t("partner.bookings.hidden")}
                           </span>
                         ) : null}
                       </div>
@@ -135,7 +137,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                   </td>
 
                   {/* When */}
-                  <td className="px-4 py-3 whitespace-nowrap">{renderWhen(b)}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{renderWhen(b, t)}</td>
 
                   {/* Amount */}
                   <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -158,7 +160,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                         className="px-3 py-2 rounded-md border text-sm hover:bg-white bg-white dark:bg-gray-800 flex items-center gap-2"
                       >
                         <EyeIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                        Chi tiết
+                        {t("partner.bookings.detail")}
                       </button>
 
                       {/*  luôn render, nhưng nếu không được hủy thì invisible để giữ chỗ */}
@@ -166,11 +168,11 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
                         onClick={() => showCancel && onCancel(b)}
                         className={`px-3 py-2 rounded-md text-sm flex items-center gap-2 border border-red-600 text-red-600 hover:bg-red-50
                           ${showCancel ? "" : "invisible pointer-events-none"}`}
-                        title="Hủy đơn"
+                        title={t("partner.bookings.cancel_booking")}
                         type="button"
                       >
                         <XCircleIcon className="w-5 h-5" />
-                        Hủy
+                        {t("common.cancel")}
                       </button>
                     </div>
                   </td>
@@ -181,7 +183,7 @@ export default function PartnerBookingsTable({ items, canCancel, onDetail, onCan
         </table>
       </div>
 
-      {items.length === 0 ? <div className="p-10 text-center text-gray-500 dark:text-gray-400">Không có đơn phù hợp.</div> : null}
+      {items.length === 0 ? <div className="p-10 text-center text-gray-500 dark:text-gray-400">{t("partner.bookings.empty")}</div> : null}
     </div>
   );
 }

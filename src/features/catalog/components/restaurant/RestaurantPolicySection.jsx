@@ -1,5 +1,7 @@
 // src/features/catalog/components/restaurant/RestaurantPolicySection.jsx
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 
 function formatVND(n) {
   if (n == null) return null;
@@ -12,7 +14,7 @@ function formatVND(n) {
 
 function minuteText(m) {
   if (!m && m !== 0) return null;
-  return `${m} phút`;
+  return i18n.t("restaurant.minutes_value", { m });
 }
 
 function groupBlackoutDays(blackoutRules = []) {
@@ -30,7 +32,9 @@ function groupBlackoutDays(blackoutRules = []) {
     .map(([month, daysSet]) => {
       const days = [...daysSet].sort((a, b) => a - b);
       const dayStr =
-        days.length === 1 ? `Ngày ${days[0]}` : `Ngày ${days.join(", ")}`;
+        days.length === 1
+          ? i18n.t("restaurant.day_value", { days: days[0] })
+          : i18n.t("restaurant.day_value", { days: days.join(", ") });
       return { month, dayStr };
     });
 
@@ -38,6 +42,7 @@ function groupBlackoutDays(blackoutRules = []) {
 }
 
 export default function RestaurantPolicySection({ restaurant }) {
+  const { t } = useTranslation();
   const policy = restaurant?.policy;
   const blackoutByMonth = useMemo(
     () => groupBlackoutDays(policy?.blackoutRules ?? []),
@@ -48,74 +53,77 @@ export default function RestaurantPolicySection({ restaurant }) {
 
   const depositLine =
     policy.depositRequired && policy.depositAmount
-      ? `Với booking từ ${policy.depositMinGuests || 0} khách trở lên và các booking yêu cầu đặc biệt về decoration, vui lòng đặt cọc trước: ${formatVND(policy.depositAmount)}vnđ`
+      ? t("restaurant.deposit_line", {
+          guests: policy.depositMinGuests || 0,
+          amount: formatVND(policy.depositAmount),
+        })
       : null;
 
   const invoiceVat =
     policy.vatInvoiceAvailable === true
-      ? "Nhà hàng có xuất hóa đơn VAT, chỉ khi khách hàng yêu cầu. Mức phí VAT theo quy định của pháp luật Việt Nam."
-      : "Nhà hàng không xuất hóa đơn VAT.";
+      ? t("restaurant.vat_invoice_available")
+      : t("restaurant.vat_invoice_unavailable");
 
   const invoiceDirect =
     policy.directInvoiceAvailable === true
-      ? "Nhà hàng có xuất hóa đơn trực tiếp."
-      : "Nhà hàng không xuất hóa đơn trực tiếp.";
+      ? t("restaurant.direct_invoice_available")
+      : t("restaurant.direct_invoice_unavailable");
 
   const allowFood =
     policy.allowOutsideFood === true
-      ? "ĐƯỢC mang thức ăn từ ngoài vào."
-      : "KHÔNG được mang thức ăn từ ngoài vào.";
+      ? t("restaurant.outside_food_allowed")
+      : t("restaurant.outside_food_not_allowed");
 
   const allowDrink =
     policy.allowOutsideDrink === true
-      ? "ĐƯỢC PHÉP mang vào và có tính phụ phí như sau:"
-      : "KHÔNG được mang đồ uống từ ngoài vào.";
+      ? t("restaurant.outside_drink_allowed")
+      : t("restaurant.outside_drink_not_allowed");
 
   return (
     <section className="px-5 md:px-6 pt-5 pb-6">
       <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">
-        Quy định
+        {t("restaurant.policy_title")}
       </h2>
 
       <div className="mt-4 rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-5 md:p-6 leading-relaxed text-gray-900 dark:text-gray-100">
         <div className="space-y-6">
           <div>
-            <h3 className="font-bold text-lg">1. Quy định về đặt cọc:</h3>
+            <h3 className="font-bold text-lg">{t("restaurant.deposit_heading")}</h3>
             {depositLine && <p className="mt-2">- {depositLine}</p>}
           </div>
 
           <div>
             <h3 className="font-bold text-lg">
-              2. Quy định về ưu đãi: <span className="font-bold">Có</span>, cụ thể như sau:
+              {t("restaurant.promotion_heading")} <span className="font-bold">{t("restaurant.yes")}</span>{t("restaurant.specifically_as_follows")}
             </h3>
             <div className="mt-2 space-y-2">
               <p>
-                - Ưu đãi <span className="font-bold">KHÔNG</span> được áp dụng vào các ngày lễ, tết sau:{" "}
+                {t("restaurant.promotion_not_applied_prefix")} <span className="font-bold">{t("restaurant.no_uppercase")}</span> {t("restaurant.promotion_not_applied_suffix")}{" "}
                 {blackoutByMonth.length > 0 ? (
                   <span className="text-red-600 font-semibold">
                     {blackoutByMonth
-                      .map((x) => `Tháng ${x.month} (${x.dayStr})`)
+                      .map((x) => t("restaurant.month_blackout", { month: x.month, days: x.dayStr }))
                       .join(", ")}
                   </span>
                 ) : (
-                  " (không có dữ liệu ngày chặn)"
+                  t("restaurant.no_blackout_data")
                 )}
               </p>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-lg">3. Quy định về thời gian nhận khách PasGo</h3>
-            <p className="mt-2">- Nhà hàng luôn nhận khách PasGo.</p>
+            <h3 className="font-bold text-lg">{t("restaurant.pasgo_receive_heading")}</h3>
+            <p className="mt-2">{t("restaurant.pasgo_always_receive")}</p>
           </div>
 
           <div>
             <h3 className="font-bold text-lg">
-              4. Quy định về Thời gian đặt chỗ trước: <span className="font-bold">Có</span>, cụ thể như sau:
+              {t("restaurant.lead_time_heading")} <span className="font-bold">{t("restaurant.yes")}</span>{t("restaurant.specifically_as_follows")}
             </h3>
             {policy.minBookingLeadTimeMinutes != null && (
               <p className="mt-2">
-                - Thời gian đặt chỗ trước tối thiểu:{" "}
+                {t("restaurant.min_lead_time_label")}{" "}
                 <span className="font-semibold">{minuteText(policy.minBookingLeadTimeMinutes)}.</span>
               </p>
             )}
@@ -123,54 +131,54 @@ export default function RestaurantPolicySection({ restaurant }) {
 
           <div>
             <h3 className="font-bold text-lg">
-              5. Quy định về Thời gian giữ chỗ tối đa: <span className="font-bold">Có</span>, cụ thể như sau:
+              {t("restaurant.max_hold_time_heading")} <span className="font-bold">{t("restaurant.yes")}</span>{t("restaurant.specifically_as_follows")}
             </h3>
             {policy.maxHoldTimeMinutes != null && (
               <p className="mt-2">
-                - Thời gian nhà hàng giữ chỗ tối đa:{" "}
+                {t("restaurant.max_hold_time_label")}{" "}
                 <span className="font-semibold">{minuteText(policy.maxHoldTimeMinutes)}.</span>
               </p>
             )}
           </div>
 
           <div>
-            <h3 className="font-bold text-lg">6. Quy định về số khách tối thiểu trên mỗi lượt đặt bàn:</h3>
+            <h3 className="font-bold text-lg">{t("restaurant.min_guests_heading")}</h3>
             <p className="mt-2">
-              {policy.minGuestsPerBooking ? `- Tối thiểu ${policy.minGuestsPerBooking} khách.` : "- Không quy định"}
+              {policy.minGuestsPerBooking ? t("restaurant.min_guests_value", { guests: policy.minGuestsPerBooking }) : t("restaurant.no_regulation")}
             </p>
           </div>
 
           <div>
             <h3 className="font-bold text-lg">
-              7. Quy định về Hoá đơn: <span className="font-bold">Có</span>, cụ thể như sau:
+              {t("restaurant.invoice_heading")} <span className="font-bold">{t("restaurant.yes")}</span>{t("restaurant.specifically_as_follows")}
             </h3>
             <div className="mt-2 space-y-1">
-              <p>- Hóa đơn VAT: {invoiceVat}</p>
-              <p>- Hóa đơn trực tiếp: {invoiceDirect}</p>
+              <p>{t("restaurant.vat_invoice_label")} {invoiceVat}</p>
+              <p>{t("restaurant.direct_invoice_label")} {invoiceDirect}</p>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-lg">8. Quy định về phí phục vụ:</h3>
+            <h3 className="font-bold text-lg">{t("restaurant.service_charge_heading")}</h3>
             <p className="mt-2">
-              {policy.serviceChargePercent ? `- Phí phục vụ: ${policy.serviceChargePercent}%` : "- Không quy định"}
+              {policy.serviceChargePercent ? t("restaurant.service_charge_value", { percent: policy.serviceChargePercent }) : t("restaurant.no_regulation")}
             </p>
           </div>
 
           <div>
             <h3 className="font-bold text-lg">
-              9. Quy định về phí mang đồ vào:{" "}
+              {t("restaurant.outside_item_fee_heading")}{" "}
               <span className="font-bold">
-                {policy.allowOutsideFood || policy.allowOutsideDrink ? "Có" : "Không"}
+                {policy.allowOutsideFood || policy.allowOutsideDrink ? t("restaurant.yes_short") : t("restaurant.no_short")}
               </span>
-              , cụ thể như sau:
+              {t("restaurant.specifically_as_follows")}
             </h3>
 
             <div className="mt-2 space-y-2">
-              <p>- Nhà hàng quy định {allowFood}</p>
+              <p>{t("restaurant.restaurant_regulates")} {allowFood}</p>
 
               <div>
-                <p>- Đối với đồ uống, {allowDrink}</p>
+                <p>{t("restaurant.for_drinks")} {allowDrink}</p>
                 {policy.allowOutsideDrink &&
                   Array.isArray(policy.outsideDrinkFees) &&
                   policy.outsideDrinkFees.length > 0 && (
@@ -178,13 +186,13 @@ export default function RestaurantPolicySection({ restaurant }) {
                       {policy.outsideDrinkFees.map((f, i) => {
                         const label =
                           f?.drinkType === "SPIRITS"
-                            ? "Rượu mạnh"
+                            ? t("restaurant.drink_spirits")
                             : f?.drinkType === "WINE"
-                            ? "Rượu vang"
-                            : "Đồ uống";
+                            ? t("restaurant.drink_wine")
+                            : t("restaurant.drink_other");
                         return (
                           <li key={i}>
-                            {label}: {formatVND(f?.feeAmount)}đ/chai
+                            {label}: {t("restaurant.fee_per_bottle", { amount: formatVND(f?.feeAmount) })}
                           </li>
                         );
                       })}

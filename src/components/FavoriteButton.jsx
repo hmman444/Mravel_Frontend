@@ -3,6 +3,7 @@ import { FaHeart } from "react-icons/fa";
 import { FiHeart } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getFavoriteSummary, toggleFavorite } from "../features/catalog/services/favoriteService";
 import { showError, showSuccess } from "../utils/toastUtils";
 
@@ -33,6 +34,7 @@ export default function FavoriteButton({
   showCount = false,
   variant = "card"
 }) {
+  const { t } = useTranslation();
   const { accessToken } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
@@ -84,17 +86,17 @@ export default function FavoriteButton({
         setFavorited(res.data.favorited);
         setCount(res.data.favoriteCount);
         if (res.data.favorited) {
-          showSuccess("Đã thêm vào yêu thích");
+          showSuccess(t("common.favorite_added"));
         }
       } else {
         setFavorited(prevFavorited);
         setCount(prevCount);
-        showError(res?.message || "Không thể thực hiện yêu thích");
+        showError(res?.message || t("common.favorite_failed"));
       }
     } catch (err) {
       setFavorited(prevFavorited);
       setCount(prevCount);
-      showError("Lỗi kết nối");
+      showError(t("common.connection_error"));
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,7 @@ export default function FavoriteButton({
         onClick={handleToggle}
         className={buttonStyles}
         disabled={loading}
-        title={favorited ? "Bỏ yêu thích" : "Yêu thích"}
+        title={favorited ? t("common.unfavorite") : t("common.favorite")}
       >
         {favorited ? (
           <FaHeart className={`${iconStyles} drop-shadow-sm animate-heart-beat`} />

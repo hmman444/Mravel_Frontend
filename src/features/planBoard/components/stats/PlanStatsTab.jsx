@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Wallet, CalendarDays, PieChart, TrendingUp, Users, ShieldAlert, Info } from "lucide-react";
 
 import CollapsibleCard from "./CollapsibleCard";
@@ -18,6 +19,7 @@ import { usePlanStats } from "../../hooks/usePlanStats"
 import { getAccuracyBadge, getHealthBadge } from "../../utils/planStatsUtils"
 
 export default function PlanStatsTab({ board, planMembers }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState({
     health: true,
     budget: true,
@@ -45,7 +47,7 @@ export default function PlanStatsTab({ board, planMembers }) {
     return (
       <div className="rounded-3xl border border-slate-200/70 bg-white dark:bg-gray-800 p-5 dark:border-slate-800/70 dark:bg-slate-900">
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Không có dữ liệu để thống kê.
+          {t('plan.stats.no_data')}
         </p>
       </div>
     );
@@ -60,8 +62,8 @@ export default function PlanStatsTab({ board, planMembers }) {
       <div className="grid gap-4 md:grid-cols-3">
         {/* Health */}
         <CollapsibleCard
-          title="Tiến độ hoàn thành kế hoạch"
-          subtitle="Độ chuẩn chi phí + dữ liệu + tiến độ"
+          title={t('plan.stats.health.title')}
+          subtitle={t('plan.stats.health.subtitle')}
           right={
             <span
               className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${healthBadge.className}`}
@@ -92,10 +94,10 @@ export default function PlanStatsTab({ board, planMembers }) {
             <div className="flex flex-col items-end gap-2">
               <span
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${accuracyBadge.className}`}
-                title="Mức độ khớp giữa dự toán và thực chi"
+                title={t('plan.stats.health.accuracy_hint')}
               >
                 {accuracyBadge.icon}
-                Chuẩn chi phí: {stats.health.costAccuracy}%
+                {t('plan.stats.health.cost_accuracy', { value: stats.health.costAccuracy })}
               </span>
 
               <span
@@ -104,58 +106,58 @@ export default function PlanStatsTab({ board, planMembers }) {
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200"
                     : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200"
                 }`}
-                title="Tỷ lệ hoạt động đã hoàn thành"
+                title={t('plan.stats.health.done_hint')}
               >
-                Hoàn thành: {stats.coverage.donePct}%
+                {t('plan.stats.health.done', { value: stats.coverage.donePct })}
               </span>
             </div>
           </div>
 
           <div className="my-4 h-px w-full bg-slate-200/70 dark:bg-slate-800/70" />
 
-          <MiniMetric label="Đủ thời gian" value={stats.coverage.timePct} />
+          <MiniMetric label={t('plan.stats.coverage.time')} value={stats.coverage.timePct} />
           <div className="mt-3" />
-          <MiniMetric label="Đủ thông tin chi phí" value={stats.coverage.costPct} />
+          <MiniMetric label={t('plan.stats.coverage.cost')} value={stats.coverage.costPct} />
           <div className="mt-3" />
-          <MiniMetric label="Đủ người tham gia" value={stats.coverage.participantsPct} />
+          <MiniMetric label={t('plan.stats.coverage.participants')} value={stats.coverage.participantsPct} />
         </CollapsibleCard>
 
         {/* Budget vs Actual */}
         <CollapsibleCard
-          title="Ngân sách & Chi tiêu"
-          subtitle={`So sánh Ngân sách / Dự toán / Thực chi (${stats.currency})`}
+          title={t('plan.stats.budget.title')}
+          subtitle={t('plan.stats.budget.subtitle', { currency: stats.currency })}
           right={<Wallet className="h-5 w-5 text-slate-400" />}
           open={open.budget}
           onToggle={() => setOpen((s) => ({ ...s, budget: !s.budget }))}
         >
           <div className="space-y-3">
             <KpiRow
-              label="Ngân sách"
+              label={t('plan.stats.budget.budget')}
               value={stats.fmtMoney(stats.totals.budget)}
-              hint={stats.totals.budget > 0 ? "Ngân sách tổng của kế hoạch" : "Chưa đặt ngân sách (hoặc đang demo)"}
+              hint={stats.totals.budget > 0 ? t('plan.stats.budget.budget_hint') : t('plan.stats.budget.budget_hint_empty')}
             />
             <KpiRow
-              label="Dự toán"
+              label={t('plan.stats.budget.estimated')}
               value={stats.fmtMoney(stats.totals.estimated)}
-              hint={`Tổng dự toán (${stats.totals.activities} hoạt động)`}
+              hint={t('plan.stats.budget.estimated_hint', { count: stats.totals.activities })}
             />
             <KpiRow
-              label="Thực chi"
+              label={t('plan.stats.budget.actual')}
               value={stats.fmtMoney(stats.totals.actual)}
-              hint={`Extra đã ghi nhận: ${stats.fmtMoney(stats.totals.extraActual)}`}
+              hint={t('plan.stats.budget.actual_hint', { value: stats.fmtMoney(stats.totals.extraActual) })}
               strong
             />
 
             <div className="my-4 h-px w-full bg-slate-200/70 dark:bg-slate-800/70" />
 
             <DeltaBox
-              label="Chênh lệch (Thực chi - Dự toán)"
+              label={t('plan.stats.budget.delta_estimated')}
               delta={stats.totals.actual - stats.totals.estimated}
               fmtSignedMoney={stats.fmtSignedMoney}
             />
             <div className="mt-3" />
             <DeltaBox
-              label="Vượt ngân sách (Thực chi - Ngân sách)"
+              label={t('plan.stats.budget.delta_budget')}
               delta={stats.totals.actual - stats.totals.budget}
               fmtSignedMoney={stats.fmtSignedMoney}
             />
@@ -164,26 +166,26 @@ export default function PlanStatsTab({ board, planMembers }) {
 
         {/* Progress & Days */}
         <CollapsibleCard
-          title="Tiến độ & Theo ngày"
+          title={t('plan.stats.progress.title')}
           subtitle={`${board?.startDate || "?"} → ${board?.endDate || "?"}`}
           right={<CalendarDays className="h-5 w-5 text-slate-400" />}
           open={open.progress}
           onToggle={() => setOpen((s) => ({ ...s, progress: !s.progress }))}
         >
           <div className="space-y-3">
-            <KpiRow label="Số ngày" value={`${stats.days.length}`} hint="Tính từ các list DAY" />
-            <KpiRow label="Số hoạt động" value={`${stats.totals.activities}`} hint="Không tính thùng rác" />
+            <KpiRow label={t('plan.stats.progress.days')} value={`${stats.days.length}`} hint={t('plan.stats.progress.days_hint')} />
+            <KpiRow label={t('plan.stats.progress.activities')} value={`${stats.totals.activities}`} hint={t('plan.stats.progress.activities_hint')} />
             <KpiRow
-              label="Cảnh báo/Lỗi"
+              label={t('plan.stats.progress.issues')}
               value={`${stats.issues.length}`}
-              hint={stats.issues.length === 0 ? "Không phát hiện vấn đề lớn" : "Có vấn đề cần rà soát"}
+              hint={stats.issues.length === 0 ? t('plan.stats.progress.issues_hint_none') : t('plan.stats.progress.issues_hint_has')}
               strong={stats.issues.length > 0}
             />
 
             <div className="my-4 h-px w-full bg-slate-200/70 dark:bg-slate-800/70" />
 
             <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thực chi theo ngày
+              {t('plan.stats.progress.actual_by_day')}
             </p>
 
             <div className="space-y-2">
@@ -199,7 +201,7 @@ export default function PlanStatsTab({ board, planMembers }) {
               ))}
               {stats.days.length > 6 && (
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  +{stats.days.length - 6} ngày nữa…
+                  {t('plan.stats.progress.more_days', { count: stats.days.length - 6 })}
                 </p>
               )}
             </div>
@@ -210,8 +212,8 @@ export default function PlanStatsTab({ board, planMembers }) {
       {/* Breakdown: ActivityType + Top spends */}
       <div className="grid gap-4 lg:grid-cols-2">
         <CollapsibleCard
-          title="Chi phí theo loại hoạt động"
-          subtitle="Dự toán vs Thực chi"
+          title={t('plan.stats.by_type.title')}
+          subtitle={t('plan.stats.by_type.subtitle')}
           right={<PieChart className="h-5 w-5 text-slate-400" />}
           open={open.byType}
           onToggle={() => setOpen((s) => ({ ...s, byType: !s.byType }))}
@@ -232,15 +234,15 @@ export default function PlanStatsTab({ board, planMembers }) {
             ))}
             {stats.byType.length === 0 && (
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Chưa có dữ liệu thống kê theo loại hoạt động.
+                {t('plan.stats.by_type.empty')}
               </p>
             )}
           </div>
         </CollapsibleCard>
 
         <CollapsibleCard
-          title="Top hoạt động chi nhiều"
-          subtitle="Sắp xếp theo tổng thực chi (thực chi + extra)"
+          title={t('plan.stats.top_spend.title')}
+          subtitle={t('plan.stats.top_spend.subtitle')}
           right={<TrendingUp className="h-5 w-5 text-slate-400" />}
           open={open.topSpend}
           onToggle={() => setOpen((s) => ({ ...s, topSpend: !s.topSpend }))}
@@ -257,8 +259,8 @@ export default function PlanStatsTab({ board, planMembers }) {
       {/* Members + Issues */}
       <div className="grid gap-4 lg:grid-cols-2">
         <CollapsibleCard
-          title="Thành viên & mức độ tham gia"
-          subtitle="Dựa trên số hoạt động tham gia / tổng hoạt động"
+          title={t('plan.stats.members.title')}
+          subtitle={t('plan.stats.members.subtitle')}
           right={<Users className="h-5 w-5 text-slate-400" />}
           open={open.members}
           onToggle={() => setOpen((s) => ({ ...s, members: !s.members }))}

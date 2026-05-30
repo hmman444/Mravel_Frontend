@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import {
   fetchAmenities,
   fetchGroupedAmenities,
@@ -80,8 +81,8 @@ const apiMessage = (err) => {
     err?.response?.data?.error ||
     err?.message;
 
-  if (err?.response?.status === 401) return "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
-  return msg || "Có lỗi xảy ra";
+  if (err?.response?.status === 401) return i18n.t("admin.error_unauthenticated");
+  return msg || i18n.t("admin.error_generic");
 };
 
 const adminAmenitySlice = createSlice({

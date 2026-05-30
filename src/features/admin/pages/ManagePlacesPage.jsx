@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../i18n";
 import AdminLayout from "../components/AdminLayout";
 import ConfirmModal from "../../../components/ConfirmModal";
 import { showError, showSuccess } from "../../../utils/toastUtils";
@@ -27,7 +29,7 @@ const toastErr = (e) => {
       : e?.response?.data?.message ||
         e?.response?.data?.error ||
         e?.message ||
-        "Có lỗi xảy ra";
+        i18n.t("admin.error_occurred");
   showError(msg);
 };
 
@@ -43,6 +45,7 @@ const soft = {
 };
 
 function KindBadge({ kind }) {
+  const { t } = useTranslation();
   const cls =
     kind === "DESTINATION"
       ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-200 dark:border-sky-900"
@@ -51,23 +54,29 @@ function KindBadge({ kind }) {
       : "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-200 dark:border-violet-900";
 
   const label =
-    kind === "DESTINATION" ? "Điểm đến" : kind === "POI" ? "Địa điểm" : "Cơ sở";
+    kind === "DESTINATION"
+      ? t("admin.place_kind_destination")
+      : kind === "POI"
+      ? t("admin.place_kind_poi")
+      : t("admin.place_kind_facility");
 
   return <span className={`${soft.badge} ${cls}`}>{label}</span>;
 }
 
 function StatusPill({ active }) {
+  const { t } = useTranslation();
   const cls = active
     ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-200 dark:border-emerald-900"
     : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800";
   return (
     <span className={`${soft.pill} ${cls}`}>
-      {active ? "Đang hoạt động" : "Đã khóa"}
+      {active ? t("admin.status_active") : t("admin.status_locked")}
     </span>
   );
 }
 
 export default function ManagePlacesPage() {
+  const { t } = useTranslation();
   const nav = useNavigate();
 
   const {
@@ -182,21 +191,21 @@ export default function ManagePlacesPage() {
         if (!pendingDelete?.id) return;
         setBusyId(pendingDelete.id);
         await remove(pendingDelete.id); // hard delete
-        showSuccess("Đã xóa");
+        showSuccess(t("admin.place_deleted"));
       }
 
       if (confirmMode === "LOCK") {
         if (!pendingRow?.id) return;
         setBusyId(pendingRow.id);
         await lock(pendingRow.id);
-        showSuccess("Đã khóa");
+        showSuccess(t("admin.place_locked"));
       }
 
       if (confirmMode === "UNLOCK") {
         if (!pendingRow?.id) return;
         setBusyId(pendingRow.id);
         await unlock(pendingRow.id);
-        showSuccess("Đã mở khóa");
+        showSuccess(t("admin.place_unlocked"));
       }
 
       // refresh list
@@ -211,20 +220,24 @@ export default function ManagePlacesPage() {
 
   const confirmTitle =
     confirmMode === "DELETE"
-      ? "Xóa địa điểm"
+      ? t("admin.delete_place_title")
       : confirmMode === "LOCK"
-      ? "Khóa địa điểm"
-      : "Mở khóa địa điểm";
+      ? t("admin.lock_place_title")
+      : t("admin.unlock_place_title");
 
   const confirmMessage =
     confirmMode === "DELETE"
-      ? `Xóa sẽ không thể khôi phục. Bạn có chắc muốn xóa "${pendingDelete?.name || ""}" không?`
+      ? t("admin.delete_place_confirm", { name: pendingDelete?.name || "" })
       : confirmMode === "LOCK"
-      ? `Bạn có chắc muốn khóa "${pendingRow?.name || ""}" không? (Trạng thái active=false)`
-      : `Bạn có chắc muốn mở khóa "${pendingRow?.name || ""}" không? (Trạng thái active=true)`;
+      ? t("admin.lock_place_confirm", { name: pendingRow?.name || "" })
+      : t("admin.unlock_place_confirm", { name: pendingRow?.name || "" });
 
   const confirmText =
-    confirmMode === "DELETE" ? "Xóa" : confirmMode === "LOCK" ? "Khóa" : "Mở khóa";
+    confirmMode === "DELETE"
+      ? t("common.delete")
+      : confirmMode === "LOCK"
+      ? t("admin.lock")
+      : t("admin.unlock");
 
   /* = render = */
   return (
@@ -238,7 +251,7 @@ export default function ManagePlacesPage() {
                 type="button"
                 onClick={goBack}
                 className={`${soft.btn} ${soft.btnGhost} px-3`}
-                title="Quay lại"
+                title={t("common.back")}
               >
                 <ArrowLeftIcon className="h-5 w-5" />
               </button>
@@ -247,14 +260,16 @@ export default function ManagePlacesPage() {
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                 {mode === "DESTINATION"
-                  ? "Quản lý điểm đến"
-                  : `Quản lý địa điểm ở: ${parent?.name || parent?.slug || ""}`}
+                  ? t("admin.manage_destinations_title")
+                  : t("admin.manage_places_at", {
+                      name: parent?.name || parent?.slug || "",
+                    })}
               </h1>
 
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
                 {mode === "DESTINATION"
-                  ? "Hiển thị DESTINATION (bao gồm cả đang hoạt động và đã khóa)."
-                  : "Hiển thị cấp con (POI) thuộc điểm đến."}
+                  ? t("admin.manage_destinations_subtitle")
+                  : t("admin.manage_children_subtitle")}
               </p>
             </div>
           </div>
@@ -267,7 +282,7 @@ export default function ManagePlacesPage() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Tìm theo tên / slug / vị trí..."
+                placeholder={t("admin.search_places_placeholder")}
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
               />
             </div>
@@ -278,10 +293,10 @@ export default function ManagePlacesPage() {
               onClick={refresh}
               className={`${soft.btn} ${soft.btnGhost} gap-2`}
               disabled={loading}
-              title="Tải lại"
+              title={t("admin.reload")}
             >
               <ArrowPathIcon className="h-5 w-5" />
-              Tải lại
+              {t("admin.reload")}
             </button>
 
             {/* Create */}
@@ -289,10 +304,10 @@ export default function ManagePlacesPage() {
               type="button"
               onClick={() => nav("/admin/places/new")}
               className={`${soft.btn} ${soft.btnPrimary} gap-2`}
-              title="Tạo địa điểm"
+              title={t("admin.create_place")}
             >
               <PlusIcon className="h-5 w-5" />
-              Tạo địa điểm
+              {t("admin.create_place")}
             </button>
           </div>
         </div>
@@ -311,7 +326,7 @@ export default function ManagePlacesPage() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không có dữ liệu phù hợp.
+            {t("admin.no_matching_data")}
           </p>
         </div>
       ) : (
@@ -320,12 +335,12 @@ export default function ManagePlacesPage() {
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold">Tên</th>
-                  <th className="px-4 py-3 text-left font-semibold">Loại</th>
-                  <th className="px-4 py-3 text-left font-semibold">Trạng thái</th>
-                  <th className="px-4 py-3 text-left font-semibold">Slug</th>
-                  <th className="px-4 py-3 text-left font-semibold">Vị trí</th>
-                  <th className="px-4 py-3 text-center font-semibold">Thao tác</th>
+                  <th className="px-4 py-3 text-left font-semibold">{t("admin.col_name")}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{t("admin.col_kind")}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{t("admin.col_status")}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{t("admin.col_slug")}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{t("admin.col_location")}</th>
+                  <th className="px-4 py-3 text-center font-semibold">{t("admin.col_actions")}</th>
                 </tr>
               </thead>
 
@@ -376,7 +391,7 @@ export default function ManagePlacesPage() {
                             onClick={() => nav(`/admin/places/${row.slug}`)}
                           >
                             <EyeIcon className="h-4 w-4" />
-                            Chi tiết
+                            {t("admin.detail")}
                           </button>
 
                           {mode === "DESTINATION" && (
@@ -386,7 +401,7 @@ export default function ManagePlacesPage() {
                               onClick={() => openChildren(row)}
                             >
                               <MapPinIcon className="h-4 w-4" />
-                              Địa điểm con
+                              {t("admin.child_places")}
                             </button>
                           )}
 
@@ -395,17 +410,17 @@ export default function ManagePlacesPage() {
                             className={`${soft.btn} ${soft.btnGhost} gap-2 px-3`}
                             disabled={busy}
                             onClick={() => requestToggleLock(row)}
-                            title={row.active ? "Khóa" : "Mở khóa"}
+                            title={row.active ? t("admin.lock") : t("admin.unlock")}
                           >
                             {row.active ? (
                               <>
                                 <LockClosedIcon className="h-4 w-4" />
-                                Khóa
+                                {t("admin.lock")}
                               </>
                             ) : (
                               <>
                                 <LockOpenIcon className="h-4 w-4" />
-                                Mở
+                                {t("admin.open")}
                               </>
                             )}
                           </button>
@@ -415,10 +430,10 @@ export default function ManagePlacesPage() {
                             className={`${soft.btn} ${soft.btnDanger} gap-2 px-3`}
                             disabled={busy}
                             onClick={() => requestDelete(row)}
-                            title="Xóa"
+                            title={t("common.delete")}
                           >
                             <TrashIcon className="h-4 w-4" />
-                            Xóa
+                            {t("common.delete")}
                           </button>
                         </div>
                       </td>
@@ -437,7 +452,7 @@ export default function ManagePlacesPage() {
         title={confirmTitle}
         message={confirmMessage}
         confirmText={confirmText}
-        cancelText="Hủy"
+        cancelText={t("common.cancel")}
         onClose={closeConfirm}
         onConfirm={confirmAction}
       />

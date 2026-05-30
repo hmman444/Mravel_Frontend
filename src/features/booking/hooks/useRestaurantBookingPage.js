@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import { fetchCurrentUser } from "../../auth/slices/authSlice";
 import { fetchRestaurantDetail } from "../../catalog/slices/catalogSlice";
@@ -32,6 +33,7 @@ const calcMinTables = (people, seats) => {
 
 
 export function useRestaurantBookingPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const dispatch = useDispatch();
 
@@ -161,13 +163,13 @@ export function useRestaurantBookingPage() {
   }, [dispatch, restaurant?.id, tableTypeId, date, time, tablesCount]);
 
   const remainingText = useMemo(() => {
-    if (availability?.loading) return "Đang kiểm tra bàn trống...";
+    if (availability?.loading) return t("booking.checking_table_availability");
     if (availability?.error) return availability.error;
     const rem = availability?.data?.remainingTablesMin;
-    if (rem == null) return "Đang kiểm tra bàn trống...";
-    if (rem <= 0) return "Hết bàn";
-    return `Chỉ còn ${rem} bàn`;
-  }, [availability?.loading, availability?.error, availability?.data]);
+    if (rem == null) return t("booking.checking_table_availability");
+    if (rem <= 0) return t("booking.no_tables_left");
+    return t("booking.tables_remaining", { count: rem });
+  }, [availability?.loading, availability?.error, availability?.data, t]);
 
   const isEnough = availability?.data?.isEnough ?? true;
   const DEFAULT_DURATION_MINUTES = 90;
@@ -177,8 +179,8 @@ export function useRestaurantBookingPage() {
     if (!restaurant || !tableTypeId || !date || !time) return;
 
     // optional: chặn sớm để khỏi “Uncaught”
-    if (!tableTypeId) throw new Error("Chưa chọn loại bàn");
-    if (!tablesCount || tablesCount <= 0) throw new Error("Số bàn không hợp lệ");
+    if (!tableTypeId) throw new Error(t("booking.no_table_type_selected"));
+    if (!tablesCount || tablesCount <= 0) throw new Error(t("booking.invalid_table_count"));
 
     const payload = {
       userId, // null nếu guest
@@ -220,7 +222,7 @@ export function useRestaurantBookingPage() {
     }
   }, [
     dispatch, restaurant, tableTypeId, date, time, people, tablesCount,
-    userId, contactName, contactPhone, contactEmail, note, tableType?.name, tableType?.seats, tableType?.depositPrice
+    userId, contactName, contactPhone, contactEmail, note, tableType?.name, tableType?.seats, tableType?.depositPrice, t
   ]);
 
   // helper nếu bạn sợ float
@@ -229,7 +231,7 @@ export function useRestaurantBookingPage() {
     return Math.round(x); // VND
   }
 
-  const restaurantName = restaurant?.name || restaurantSlug || "Nhà hàng của bạn";
+  const restaurantName = restaurant?.name || restaurantSlug || t("booking.your_restaurant");
 
     const seatsPerTable = useMemo(
     () => Number(tableType?.seats || 0),
@@ -268,8 +270,8 @@ export function useRestaurantBookingPage() {
     if (!tableTypeId) return "";
     if (!seatsPerTable || seatsPerTable <= 0) return "";
     if (totalSeats >= people) return "";
-    return `Không đủ chỗ ngồi: ${people} khách nhưng ${tablesCount} bàn chỉ ${totalSeats} chỗ.`;
-  }, [tableTypeId, seatsPerTable, totalSeats, people, tablesCount]);
+    return t("booking.not_enough_seats_detail", { people, tables: tablesCount, seats: totalSeats });
+  }, [tableTypeId, seatsPerTable, totalSeats, people, tablesCount, t]);
 
   return {
     loading,

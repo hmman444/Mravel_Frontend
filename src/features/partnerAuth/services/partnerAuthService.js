@@ -1,5 +1,6 @@
 // src/features/partnerAuth/services/partnerAuthService.js
 import partnerApi from "../../../utils/partnerAxiosInstance";
+import i18n from "../../../i18n";
 
 const AUTH_BASE = "/auth";                 //  logout/refresh/... (chung)
 const PARTNER_AUTH_BASE = "/auth/partner"; //  login/register/verify/social
@@ -15,7 +16,7 @@ export const partnerLogin = async (email, password) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };
 
@@ -27,7 +28,7 @@ export const getCurrentPartner = async () => {
     return { success: true, data: body };
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Không lấy được thông tin đối tác" };
+    return { success: false, message: i18n.t("partnerAuth.error.fetch_partner_failed") };
   }
 };
 
@@ -37,7 +38,7 @@ export const partnerSocialLogin = async (provider, token) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };
 
@@ -47,7 +48,7 @@ export const partnerRegister = async (fullname, email, password) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };
 
@@ -57,7 +58,7 @@ export const partnerVerifyOtp = async (email, otpCode) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };
 
@@ -67,7 +68,7 @@ export const partnerRequestForgotPassword = async (email) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };
 
@@ -81,7 +82,7 @@ export const partnerResetPassword = async (email, otpCode, newPassword) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };
 
@@ -92,6 +93,6 @@ export const partnerLogout = async (refreshToken) => {
     return res.data;
   } catch (error) {
     if (error.response?.data) return error.response.data;
-    return { success: false, message: "Lỗi kết nối đến server" };
+    return { success: false, message: i18n.t("partnerAuth.error.connection") };
   }
 };

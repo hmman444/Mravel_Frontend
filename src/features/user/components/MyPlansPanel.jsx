@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useMyPlans } from "../hooks/useMyPlans";
 import PlanPostCard from "../../planFeed/components/PlanPostCard";
 import PostSkeleton from "../../planFeed/components/PostSkeleton"
 
 export default function MyPlansPanel() {
+  const { t } = useTranslation();
   const { user } = useSelector((s) => s.auth);
   const { items, loading, hasMore, fetchNext, reload } = useMyPlans();
 
@@ -32,7 +34,7 @@ export default function MyPlansPanel() {
   }, [hasMore, loading]);
 
   if (!loading && items.length === 0)
-    return <p className="text-gray-500 dark:text-gray-400">Bạn chưa có lịch trình nào.</p>;
+    return <p className="text-gray-500 dark:text-gray-400">{t("user.no_plans_yet")}</p>;
 
   return (
     <div className="space-y-5">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { CheckCheck, Loader2 } from "lucide-react";
 import NotificationItem from "./NotificationItem";
 
@@ -13,6 +14,7 @@ export default function NotificationDropdown({
   markAllRead,
   markRead,
 }) {
+  const { t } = useTranslation();
   const topItems = useMemo(() => items.slice(0, 8), [items]);
 
   return (
@@ -29,11 +31,11 @@ export default function NotificationDropdown({
     >
       <div className="px-4 py-3 border-b border-gray-200/70 dark:border-gray-800/70 flex items-center justify-between">
         <div>
-          <p className="font-bold text-sm">Thông báo</p>
+          <p className="font-bold text-sm">{t("notification.title")}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {unreadCount > 0
-              ? `Bạn có ${unreadCount} thông báo chưa đọc`
-              : "Không có thông báo chưa đọc"}
+              ? t("notification.unread_count", { n: unreadCount })
+              : t("notification.no_unread")}
           </p>
         </div>
 
@@ -55,7 +57,7 @@ export default function NotificationDropdown({
           ) : (
             <CheckCheck className="w-4 h-4" />
           )}
-          Đọc tất cả
+          {t("notification.mark_all_read")}
         </button>
       </div>
 
@@ -63,13 +65,13 @@ export default function NotificationDropdown({
         {loading ? (
           <div className="p-4 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            Đang tải...
+            {t("common.loading")}
           </div>
         ) : topItems.length === 0 ? (
           <div className="p-6 text-center">
-            <p className="text-sm font-semibold">Chưa có thông báo</p>
+            <p className="text-sm font-semibold">{t("notification.empty")}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Khi có hoạt động mới, Mravel sẽ báo ngay tại đây.
+              {t("notification.empty_hint")}
             </p>
           </div>
         ) : (
@@ -103,7 +105,7 @@ export default function NotificationDropdown({
             transition
           "
         >
-          Xem tất cả thông báo
+          {t("notification.see_all")}
         </button>
       </div>
     </div>

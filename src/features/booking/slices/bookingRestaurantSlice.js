@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import {
   getRestaurantAvailability,
   createRestaurantBookingAndPay,
@@ -9,7 +10,7 @@ export const fetchRestaurantAvailability = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await getRestaurantAvailability(params);
     if (res.success) return { data: res.data, params };
-    return rejectWithValue(res.message || "Lỗi kiểm tra bàn trống");
+    return rejectWithValue(res.message || i18n.t("booking.error_check_table_availability"));
   }
 );
 
@@ -18,7 +19,7 @@ export const createRestaurantPayment = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     const res = await createRestaurantBookingAndPay(payload);
     if (res.success) return res.data; // { bookingCode, payUrl, ... }
-    return rejectWithValue(res.message || "Lỗi tạo thanh toán");
+    return rejectWithValue(res.message || i18n.t("booking.error_create_payment"));
   }
 );
 
@@ -48,7 +49,7 @@ const slice = createSlice({
     });
     b.addCase(fetchRestaurantAvailability.rejected, (s, a) => {
       s.availability.loading = false;
-      s.availability.error = a.payload || "Lỗi kiểm tra bàn trống";
+      s.availability.error = a.payload || i18n.t("booking.error_check_table_availability");
     });
 
     b.addCase(createRestaurantPayment.pending, (s) => {
@@ -62,7 +63,7 @@ const slice = createSlice({
     });
     b.addCase(createRestaurantPayment.rejected, (s, a) => {
       s.payment.loading = false;
-      s.payment.error = a.payload || "Lỗi tạo thanh toán";
+      s.payment.error = a.payload || i18n.t("booking.error_create_payment");
     });
   },
 });

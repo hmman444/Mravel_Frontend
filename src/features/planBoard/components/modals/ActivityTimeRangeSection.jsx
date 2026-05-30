@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaClock } from "react-icons/fa";
 import TimePicker from "../../../../components/TimePicker";
 import { computeDurationMinutes } from "../../utils/costUtils";
@@ -14,9 +15,9 @@ import { computeDurationMinutes } from "../../utils/costUtils";
  */
 export default function ActivityTimeRangeSection({
   // UI label
-  sectionLabel = "Thời gian",
-  startLabel = "Bắt đầu",
-  endLabel = "Kết thúc",
+  sectionLabel,
+  startLabel,
+  endLabel,
 
   /**
    * color: dùng cho TimePicker (accent nội bộ)
@@ -40,8 +41,15 @@ export default function ActivityTimeRangeSection({
   onDurationChange, // fn(number|null) | undefined
 
   // text prefix cho dòng "Thời lượng ..."
-  durationHintPrefix = "Thời lượng ước tính",
+  durationHintPrefix,
 }) {
+  const { t } = useTranslation();
+  const sectionLabelText = sectionLabel ?? t("plan.time_range.section");
+  const startLabelText = startLabel ?? t("plan.time_range.start");
+  const endLabelText = endLabel ?? t("plan.time_range.end");
+  const durationHintPrefixText =
+    durationHintPrefix ?? t("plan.time_range.duration_hint");
+
   const durationMinutes = useMemo(
     () => computeDurationMinutes(startTime, endTime),
     [startTime, endTime]
@@ -73,9 +81,9 @@ export default function ActivityTimeRangeSection({
 
   return (
     <div className="mt-3">
-      {sectionLabel && (
+      {sectionLabelText && (
         <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-          {sectionLabel}
+          {sectionLabelText}
         </label>
       )}
 
@@ -84,7 +92,7 @@ export default function ActivityTimeRangeSection({
         <div className={`${containerBase} ${errorActive ? containerError : ""}`}>
           <FaClock className={errorActive ? "text-rose-500" : iconClassName} />
           <span className="text-xs text-slate-600 dark:text-slate-300">
-            {startLabel}
+            {startLabelText}
           </span>
           <div className="flex-1 flex justify-end">
             <TimePicker
@@ -100,7 +108,7 @@ export default function ActivityTimeRangeSection({
         <div className={`${containerBase} ${errorActive ? containerError : ""}`}>
           <FaClock className={errorActive ? "text-rose-500" : iconClassName} />
           <span className="text-xs text-slate-600 dark:text-slate-300">
-            {endLabel}
+            {endLabelText}
           </span>
           <div className="flex-1 flex justify-end">
             <TimePicker
@@ -119,8 +127,10 @@ export default function ActivityTimeRangeSection({
 
       {durationMinutes != null && !errorActive && (
         <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-          {durationHintPrefix}:{" "}
-          <span className="font-semibold">{durationMinutes} phút</span>
+          {durationHintPrefixText}:{" "}
+          <span className="font-semibold">
+            {t("plan.time_range.minutes", { n: durationMinutes })}
+          </span>
         </p>
       )}
     </div>

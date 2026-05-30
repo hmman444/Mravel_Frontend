@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FaTimes,
   FaShoppingBag,
@@ -33,11 +34,11 @@ import {
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
-const EXTRA_TYPES = [
-  { value: "SHIPPING", label: "Phí ship" },
-  { value: "BAG", label: "Túi / bao bì" },
-  { value: "SERVICE_FEE", label: "Phụ thu / dịch vụ" },
-  { value: "OTHER", label: "Khác" },
+const buildExtraTypes = (t) => [
+  { value: "SHIPPING", label: t("plan.shopping.extra_type_shipping") },
+  { value: "BAG", label: t("plan.shopping.extra_type_bag") },
+  { value: "SERVICE_FEE", label: t("plan.shopping.extra_type_service_fee") },
+  { value: "OTHER", label: t("plan.shopping.extra_type_other") },
 ];
 
 function safeJsonParse(str) {
@@ -57,6 +58,8 @@ export default function ShoppingActivityModal({
   planMembers = [],
   readOnly,
 }) {
+  const { t } = useTranslation();
+  const EXTRA_TYPES = useMemo(() => buildExtraTypes(t), [t]);
   const [title, setTitle] = useState("");
   const [storeName, setStoreName] = useState("");
   const [address, setAddress] = useState("");
@@ -118,7 +121,7 @@ export default function ShoppingActivityModal({
         const baseMaybe = Math.max(0, Number(cost.estimatedCost) - Number(extraTotalLoaded || 0));
         setItems([
           {
-            name: "Mua sắm",
+            name: t("plan.shopping.default_item_name"),
             price: String(baseMaybe > 0 ? baseMaybe : Number(cost.estimatedCost)),
           },
         ]);
@@ -287,10 +290,10 @@ export default function ShoppingActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!storeName.trim()) newErrors.storeName = "Vui lòng nhập hoặc chọn cửa hàng / địa điểm mua sắm.";
+    if (!storeName.trim()) newErrors.storeName = t("plan.shopping.error_store_required");
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.shopping.error_end_after_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -304,8 +307,8 @@ export default function ShoppingActivityModal({
 
     onSubmit?.({
       type: "SHOPPING",
-      title: title || `Mua sắm: ${storeName}`,
-      text: title || `Mua sắm: ${storeName}`,
+      title: title || t("plan.shopping.default_title", { store: storeName }),
+      text: title || t("plan.shopping.default_title", { store: storeName }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -339,13 +342,13 @@ export default function ShoppingActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Mua sắm"
+      labelPrefix={t("plan.shopping.label_prefix")}
       name={storeName}
-      emptyLabelText="Điền/chọn cửa hàng để lưu hoạt động mua sắm."
+      emptyLabelText={t("plan.shopping.footer_empty")}
       locationText={effectiveShoppingLocation?.fullAddress || address || ""}
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.shopping.time_range", { start: startTime, end: endTime, minutes: durationMinutes })
           : ""
       }
     />
@@ -362,14 +365,14 @@ export default function ShoppingActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động mua sắm"}
+      submitLabel={editingCard ? t("plan.shopping.submit_edit") : t("plan.shopping.submit_create")}
       submitClassName="bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg shadow-pink-500/30"
     />
   );
@@ -380,9 +383,9 @@ export default function ShoppingActivityModal({
         open={open}
         onClose={onClose}
         icon={{ main: <FaShoppingBag />, close: <FaTimes size={14} />, bg: "from-pink-500 to-rose-500" }}
-        title="Hoạt động mua sắm"
+        title={t("plan.shopping.title")}
         typeLabel="Shopping"
-        subtitle="Ghi lại món đồ đã mua và chi phí để chia tiền cho nhóm."
+        subtitle={t("plan.shopping.subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -390,26 +393,26 @@ export default function ShoppingActivityModal({
         {/* THÔNG TIN CHUNG */}
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Thông tin chung</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.shopping.general_info")}</label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Cửa hàng + địa chỉ + thời gian
+              {t("plan.shopping.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Tên hoạt động (tuỳ chọn)</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">{t("plan.shopping.activity_name_label")}</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Mua quà lưu niệm..."
+                placeholder={t("plan.shopping.activity_name_placeholder")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
 
             {/* MAP PICKER */}
             <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Cửa hàng / địa chỉ trên bản đồ</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">{t("plan.shopping.store_map_label")}</label>
 
               <button
                 type="button"
@@ -438,7 +441,7 @@ export default function ShoppingActivityModal({
                   {effectiveShoppingLocation || address || storeName ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {getLocDisplayLabel(effectiveShoppingLocation, storeName || "Địa điểm đã chọn")}
+                        {getLocDisplayLabel(effectiveShoppingLocation, storeName || t("plan.shopping.selected_place"))}
                       </p>
 
                       {(effectiveShoppingLocation?.fullAddress || address) && (
@@ -449,7 +452,7 @@ export default function ShoppingActivityModal({
 
                       <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
+                          {t("plan.shopping.selected_on_map")}
                         </span>
                         {effectiveShoppingLocation?.lat != null && effectiveShoppingLocation?.lng != null && (
                           <span className="px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
@@ -461,10 +464,10 @@ export default function ShoppingActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn địa điểm mua sắm trên bản đồ
+                        {t("plan.shopping.pick_place_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn chợ / mall / cửa hàng bạn sẽ tới.
+                        {t("plan.shopping.pick_place_hint")}
                       </p>
                     </>
                   )}
@@ -474,7 +477,7 @@ export default function ShoppingActivityModal({
                   className="hidden md:inline-flex items-center text-[11px] font-medium
                     text-pink-500 group-hover:text-pink-600 dark:text-pink-300 dark:group-hover:text-pink-200"
                 >
-                  Mở bản đồ
+                  {t("plan.shopping.open_map")}
                 </span>
               </button>
 
@@ -484,9 +487,9 @@ export default function ShoppingActivityModal({
             {/* TIME */}
             <div className="mt-3">
               <ActivityTimeRangeSection
-                sectionLabel="Thời gian mua sắm"
-                startLabel="Bắt đầu"
-                endLabel="Kết thúc"
+                sectionLabel={t("plan.shopping.time_section")}
+                startLabel={t("plan.shopping.time_start")}
+                endLabel={t("plan.shopping.time_end")}
                 color="pink"
                 iconClassName="text-pink-500"
                 startTime={startTime}
@@ -496,7 +499,7 @@ export default function ShoppingActivityModal({
                 error={errors.time}
                 onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
-                durationHintPrefix="Thời lượng ước tính"
+                durationHintPrefix={t("plan.shopping.duration_hint")}
               />
             </div>
           </div>
@@ -505,13 +508,13 @@ export default function ShoppingActivityModal({
         {/* ITEMS & COST */}
         <section className="space-y-3">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Danh sách món hàng & chi phí</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.shopping.items_section")}</label>
             <button
               type="button"
               onClick={handleAddItem}
               className="flex items-center gap-1 text-[11px] text-pink-600 dark:text-pink-300 hover:text-pink-500"
             >
-              <FaPlus className="text-[10px]" /> Thêm món
+              <FaPlus className="text-[10px]" /> {t("plan.shopping.add_item")}
             </button>
           </div>
 
@@ -519,7 +522,7 @@ export default function ShoppingActivityModal({
             {/* Items */}
             <div>
               {items.length === 0 && (
-                <p className="text-[11px] text-slate-400 dark:text-slate-500">Nhập từng món đã mua và giá tiền.</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">{t("plan.shopping.items_empty")}</p>
               )}
 
               <div className="space-y-2 mt-1">
@@ -528,7 +531,7 @@ export default function ShoppingActivityModal({
                     <input
                       value={it.name}
                       onChange={(e) => handleChangeItem(idx, "name", e.target.value)}
-                      placeholder={`Món hàng ${idx + 1}`}
+                      placeholder={t("plan.shopping.item_placeholder", { index: idx + 1 })}
                       className={`${inputBase} flex-1`}
                     />
 
@@ -539,7 +542,7 @@ export default function ShoppingActivityModal({
                         min="0"
                         value={it.price}
                         onChange={(e) => handleChangeItem(idx, "price", e.target.value)}
-                        placeholder="Giá"
+                        placeholder={t("plan.shopping.price_placeholder")}
                         className={`${inputBase} w-28`}
                       />
                       <span className="text-xs text-slate-500">đ</span>
@@ -565,14 +568,14 @@ export default function ShoppingActivityModal({
               updateExtraCost={updateExtraCost}
               removeExtraCost={removeExtraCost}
               extraTypes={EXTRA_TYPES}
-              label="Chi phí phụ (ship, túi, phụ thu...)"
+              label={t("plan.shopping.extra_costs_label")}
             />
 
             {/* Actual + Budget */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho lần mua sắm (nếu có)
+                  {t("plan.shopping.actual_cost_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -581,19 +584,19 @@ export default function ShoppingActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền lại sau khi thanh toán"
+                    placeholder={t("plan.shopping.actual_cost_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>tổng giá món</b> + <b>phát sinh</b> để chia tiền.
+                  {t("plan.shopping.actual_cost_hint_prefix")} <b>{t("plan.shopping.items_total_label")}</b> + <b>{t("plan.shopping.extra_total_label")}</b> {t("plan.shopping.actual_cost_hint_suffix")}
                 </p>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho lần mua sắm (tuỳ chọn)
+                  {t("plan.shopping.budget_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-pink-500" />
@@ -602,7 +605,7 @@ export default function ShoppingActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 2000000"
+                    placeholder={t("plan.shopping.budget_placeholder")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -613,15 +616,15 @@ export default function ShoppingActivityModal({
             {/* Summary */}
             <div className="rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 px-4 py-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Tổng giá món:{" "}
+                {t("plan.shopping.summary_items_total")}{" "}
                 <span className="font-semibold">{totalItemCost.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh:{" "}
+                {t("plan.shopping.summary_extra")}{" "}
                 <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến (món + phát sinh):{" "}
+                {t("plan.shopping.summary_estimated")}{" "}
                 <span className="font-semibold text-pink-600 dark:text-pink-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
@@ -629,7 +632,7 @@ export default function ShoppingActivityModal({
 
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b>:{" "}
+                  {t("plan.shopping.summary_using_actual_prefix")} <b>{t("plan.shopping.summary_actual_label")}</b>:{" "}
                   <span className="font-semibold text-pink-600 dark:text-pink-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -638,7 +641,7 @@ export default function ShoppingActivityModal({
 
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.shopping.summary_budget")}{" "}
                   <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
@@ -677,14 +680,14 @@ export default function ShoppingActivityModal({
         {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm thông tin nhỏ cho cả nhóm</span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.shopping.note_label")}</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("plan.shopping.note_hint")}</span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: Mua làm quà cho gia đình..."
+            placeholder={t("plan.shopping.note_placeholder")}
             className={`${inputBase} w-full`}
           />
         </section>

@@ -1,4 +1,5 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { ui } from "./uiTokens";
 import { BLOCK_TYPES } from "./blockTypes";
 import PlaceBlockRow from "./PlaceBlockRow";
@@ -16,11 +17,12 @@ export default function PlaceContentCard({
   onGalleryRemoveItem,
   onUploadGalleryItem,
 }) {
+  const { t } = useTranslation();
   return (
     <div className={ui.card}>
       <div className={ui.cardHeader}>
         <div>
-          <div className={ui.title}>Nội dung (Content blocks)</div>
+          <div className={ui.title}>{t("admin.place_content_title")}</div>
           <div className={ui.sub}>Heading/Paragraph/Quote/Image/Gallery/Info/Divider/Map</div>
         </div>
 
@@ -40,7 +42,7 @@ export default function PlaceContentCard({
               <summary className={`${ui.btn} ${ui.btnPrimary} cursor-pointer list-none`}>
                 <span className="inline-flex items-center gap-2">
                   <PlusIcon className="h-5 w-5" />
-                  Thêm khác
+                  {t("admin.place_content_add_other")}
                 </span>
               </summary>
 
@@ -65,7 +67,7 @@ export default function PlaceContentCard({
       <div className={ui.cardBody}>
         {!blocks || blocks.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-6 text-sm text-slate-600 dark:text-slate-400 dark:border-slate-700 dark:text-slate-300">
-            Chưa có nội dung. Hãy thêm Heading/Paragraph để bắt đầu.
+            {t("admin.place_content_empty")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -89,7 +91,7 @@ export default function PlaceContentCard({
         )}
 
         <div className="mt-5 rounded-xl bg-slate-50 dark:bg-gray-900 p-4 text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
-          <b>Gợi ý seed-style:</b> Heading → Quote → Paragraph → Image → Paragraph → Gallery → Info → Divider → Map.
+          <b>{t("admin.place_content_seed_hint")}</b> Heading → Quote → Paragraph → Image → Paragraph → Gallery → Info → Divider → Map.
         </div>
       </div>
     </div>

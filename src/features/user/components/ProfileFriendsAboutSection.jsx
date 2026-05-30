@@ -1,6 +1,7 @@
 "use client";
 
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AboutBlock from "./AboutBlock";
 import PlanMedia from "../../planFeed/components/PlanMedia";
 export default function ProfileFriendsAboutSection({
@@ -12,12 +13,13 @@ export default function ProfileFriendsAboutSection({
   photosFromPlans = [],
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const renderAboutSection = () => (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Giới thiệu
+          {t("user.about_intro_title")}
         </h3>
       </div>
 
@@ -29,16 +31,17 @@ export default function ProfileFriendsAboutSection({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Ảnh từ các lịch trình du lịch
+          {t("user.photos_from_plans_title")}
         </h3>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          {userView?.totalPhotos ?? photosFromPlans.length} ảnh được tổng hợp từ
-          các chuyến đi công khai.
+          {t("user.photos_from_plans_count", {
+            count: userView?.totalPhotos ?? photosFromPlans.length,
+          })}
         </p>
       </div>
 
       {photosFromPlans.length === 0 && !loading ? (
-        <p className="text-sm text-slate-400">Chưa có ảnh nào để hiển thị.</p>
+        <p className="text-sm text-slate-400">{t("user.no_photos")}</p>
       ) : (
         <PlanMedia images={photosFromPlans} full />
       )}
@@ -51,11 +54,11 @@ export default function ProfileFriendsAboutSection({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-              Bạn bè
+              {t("user.friends_title")}
             </h3>
           </div>
           <p className="text-sm text-slate-400">
-            Chưa có danh sách bạn bè để hiển thị.
+            {t("user.no_friends")}
           </p>
         </div>
       );
@@ -66,22 +69,29 @@ export default function ProfileFriendsAboutSection({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-              Bạn bè của {userView?.fullname || "người dùng"}
+              {t("user.friends_of", {
+                name: userView?.fullname || t("user.default_user"),
+              })}
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              {userView?.totalFriends ?? 0} bạn ·{" "}
-              {userView?.mutualFriends ?? 0} bạn chung
+              {t("user.friends_count", { count: userView?.totalFriends ?? 0 })} ·{" "}
+              {t("user.mutual_friends_count", {
+                count: userView?.mutualFriends ?? 0,
+              })}
             </p>
           </div>
           <button className="text-xs sm:text-sm text-sky-600 dark:text-sky-300 hover:underline">
-            Quản lý danh sách bạn bè
+            {t("user.manage_friends_list")}
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
           {(friendsPreview || []).map((friend) => {
             const name =
-              friend.fullname || friend.fullName || friend.name || "Người dùng";
+              friend.fullname ||
+              friend.fullName ||
+              friend.name ||
+              t("user.default_user");
             const avatar = friend.avatar || null;
             const mutual = friend.mutualFriends ?? 0;
 
@@ -106,7 +116,7 @@ export default function ProfileFriendsAboutSection({
                     {name}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {mutual} bạn chung
+                    {t("user.mutual_friends_count", { count: mutual })}
                   </p>
                 </div>
               </div>

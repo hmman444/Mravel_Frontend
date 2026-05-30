@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "../../../components/Navbar";
 import SidebarPlans from "./SidebarPlans";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -17,6 +18,7 @@ export default function PlanLayout({
   onRemoveRecentPlan,
   onDeletePlan,
 }) {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
 
@@ -90,11 +92,11 @@ export default function PlanLayout({
       {confirmDeletePlan && (
         <ConfirmModal
           open={true}
-          title="Xoá lịch trình"
-          message={`Xác nhận xoá "${
-            confirmDeletePlan.title || "Chưa đặt tên"
-          }"? Hành động này không thể hoàn tác.`}
-          confirmText="Xoá"
+          title={t("plan.delete.title")}
+          message={t("plan.delete.confirm_message", {
+            name: confirmDeletePlan.title || t("plan.untitled"),
+          })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmDeletePlan(null)}
           onConfirm={async () => {
             try {

@@ -1,5 +1,6 @@
 // src/features/booking/components/hotel/HotelBookingForm.jsx
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Phone, Mail } from "lucide-react";
 import HotelStayDateRangePicker from "./HotelStayDateRangePicker";
 import "../../../../styles/datepicker.css";
@@ -24,13 +25,14 @@ export default function HotelBookingForm({
   onStayChange,
   onRoomsChange,
 }) {
+  const { t } = useTranslation();
   const [nameError, setNameError] = useState("");
   const NOTE_MAX = 200;
 
   const handleNameBlur = () => {
-    if (!contactName?.trim()) return setNameError("Vui lòng nhập họ tên.");
+    if (!contactName?.trim()) return setNameError(t("booking.name_required"));
     const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
-    setNameError(nameRegex.test(contactName.trim()) ? "" : "Rất tiếc, vui lòng chỉ nhập chữ (a-z).");
+    setNameError(nameRegex.test(contactName.trim()) ? "" : t("booking.name_letters_only"));
   };
 
   // Tính số ngày hiển thị từ checkIn/checkOut:
@@ -61,10 +63,10 @@ export default function HotelBookingForm({
         </div>
         <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-            Liên hệ đặt chỗ
+            {t("booking.contact_title")}
           </h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
-            Thêm liên hệ để nhận xác nhận đặt chỗ.
+            {t("booking.contact_subtitle")}
           </p>
         </div>
       </div>
@@ -74,7 +76,7 @@ export default function HotelBookingForm({
         {/* Họ tên */}
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-            Họ tên <span className="text-red-500">*</span>
+            {t("booking.full_name")} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -88,7 +90,7 @@ export default function HotelBookingForm({
                 : "border-gray-300 dark:border-gray-700 focus:border-blue-500",
               "transition",
             ].join(" ")}
-            placeholder="Ví dụ: Nguyễn Văn A"
+            placeholder={t("booking.full_name_placeholder")}
           />
           {nameError && (
             <p className="mt-1 text-xs text-red-500">{nameError}</p>
@@ -100,7 +102,7 @@ export default function HotelBookingForm({
           {/* Phone */}
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-              Số điện thoại <span className="text-red-500">*</span>
+              {t("booking.phone")} <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Phone className="mr-2 h-3.5 w-3.5 text-gray-400" />
@@ -109,11 +111,11 @@ export default function HotelBookingForm({
                 value={contactPhone}
                 onChange={(e) => onContactPhoneChange?.(e.target.value)}
                 className="h-9 w-full border-none bg-transparent text-sm outline-none md:h-10"
-                placeholder="VD: 0901234567"
+                placeholder={t("booking.phone_placeholder")}
               />
             </div>
             <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-              Vui lòng nhập số điện thoại di động tại Việt Nam.
+              {t("booking.phone_hint")}
             </p>
           </div>
 
@@ -141,7 +143,7 @@ export default function HotelBookingForm({
             {/* Thời gian lưu trú (thu hẹp) */}
             <div className="flex-1 min-w-0">
               <div className="mb-1 text-[13px] font-semibold text-gray-700 dark:text-gray-300">
-                Thời gian lưu trú
+                {t("booking.stay_duration")}
               </div>
               <HotelStayDateRangePicker
                 checkIn={checkIn}
@@ -153,7 +155,7 @@ export default function HotelBookingForm({
             {/* Số phòng */}
             <div className="w-full md:w-36">
               <label className="mb-1 block text-[13px] font-semibold text-gray-700 dark:text-gray-300">
-                Số phòng
+                {t("booking.rooms_count")}
               </label>
 
               <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800">
@@ -176,12 +178,11 @@ export default function HotelBookingForm({
           </div>
 
           <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-            Ngày nhận và trả phòng sẽ được gửi kèm trong thông tin đặt chỗ của
-            bạn.
+            {t("booking.checkin_checkout_hint")}
           </p>
           {nights > 0 && stayDays > 0 && (
             <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              Bạn đã chọn {stayDays} ngày {nights} đêm.
+              {t("booking.selected_days_nights", { days: stayDays, nights })}
             </p>
           )}
         </div>
@@ -189,7 +190,7 @@ export default function HotelBookingForm({
         {/* GHI CHÚ */}
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
-            Ghi chú (tối đa {NOTE_MAX} ký tự)
+            {t("booking.note_label", { max: NOTE_MAX })}
           </label>
 
           <textarea
@@ -203,12 +204,12 @@ export default function HotelBookingForm({
               "transition",
               note.length >= NOTE_MAX ? "border-orange-400 focus:border-orange-500" : "",
             ].join(" ")}
-            placeholder="Ví dụ: Nhận phòng muộn, yêu cầu dọn vệ sinh trước, cần hóa đơn VAT..."
+            placeholder={t("booking.note_placeholder")}
           />
 
           <div className="mt-1 flex items-center justify-between">
             <p className="text-[11px] text-gray-500 dark:text-gray-400">
-              Ghi chú này sẽ được gửi kèm cho khách sạn (không đảm bảo đáp ứng).
+              {t("booking.note_hint")}
             </p>
             <span className="text-[11px] text-gray-500 dark:text-gray-400">
               {note.length}/{NOTE_MAX}

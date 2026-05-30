@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   X,
   SlidersHorizontal,
@@ -12,11 +13,11 @@ import {
 } from "lucide-react";
 
 const SORT_OPTIONS = [
-  { value: "RELEVANCE",   label: "Độ liên quan" },
-  { value: "NEWEST",      label: "Mới nhất" },
-  { value: "MOST_VIEWED", label: "Xem nhiều nhất" },
-  { value: "BUDGET_ASC",  label: "Ngân sách tăng dần" },
-  { value: "BUDGET_DESC", label: "Ngân sách giảm dần" },
+  { value: "RELEVANCE",   labelKey: "feed.filter.sort.relevance" },
+  { value: "NEWEST",      labelKey: "feed.filter.sort.newest" },
+  { value: "MOST_VIEWED", labelKey: "feed.filter.sort.mostViewed" },
+  { value: "BUDGET_ASC",  labelKey: "feed.filter.sort.budgetAsc" },
+  { value: "BUDGET_DESC", labelKey: "feed.filter.sort.budgetDesc" },
 ];
 
 const POPULAR_DESTINATIONS = [
@@ -123,6 +124,7 @@ export default function PlanFilterSidebar({
   onReset,
   activeCount = 0,
 }) {
+  const { t } = useTranslation();
   const set = useCallback(
     (key, val) => onChange({ ...filters, [key]: val }),
     [filters, onChange]
@@ -155,7 +157,7 @@ export default function PlanFilterSidebar({
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-5 h-5 text-sky-500" />
-          <span className="font-semibold text-gray-900 dark:text-gray-50">Bộ lọc nâng cao</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-50">{t("feed.filter.title")}</span>
           {activeCount > 0 && (
             <span className="h-5 px-2 rounded-full bg-sky-500 text-white text-[11px] font-bold flex items-center">
               {activeCount}
@@ -175,7 +177,7 @@ export default function PlanFilterSidebar({
       <div className="flex-1 px-5 py-4 space-y-0">
 
         {/* Sort */}
-        <Section title="Sắp xếp" icon={ArrowUpDown}>
+        <Section title={t("feed.filter.sort.label")} icon={ArrowUpDown}>
           <div className="grid grid-cols-1 gap-1.5">
             {SORT_OPTIONS.map((opt) => (
               <label
@@ -206,17 +208,17 @@ export default function PlanFilterSidebar({
                     <span className="w-1.5 h-1.5 rounded-full bg-white" />
                   )}
                 </span>
-                {opt.label}
+                {t(opt.labelKey)}
               </label>
             ))}
           </div>
         </Section>
 
         {/* Budget range */}
-        <Section title="Ngân sách (VND)" icon={Wallet}>
+        <Section title={t("feed.filter.budget.title")} icon={Wallet}>
           <RangeInputs
-            labelMin="Tối thiểu"
-            labelMax="Tối đa"
+            labelMin={t("feed.filter.min")}
+            labelMax={t("feed.filter.max")}
             valMin={filters.budgetMin}
             valMax={filters.budgetMax}
             onMin={(v) => set("budgetMin", v)}
@@ -225,13 +227,13 @@ export default function PlanFilterSidebar({
           {/* Quick presets */}
           <div className="mt-3 flex flex-wrap gap-2">
             {[
-              { label: "< 5tr",   min: "",          max: "5000000"  },
-              { label: "5–20tr",  min: "5000000",   max: "20000000" },
-              { label: "20–50tr", min: "20000000",  max: "50000000" },
-              { label: "> 50tr",  min: "50000000",  max: ""         },
+              { labelKey: "feed.filter.budget.preset.lt5m",   min: "",          max: "5000000"  },
+              { labelKey: "feed.filter.budget.preset.5to20m",  min: "5000000",   max: "20000000" },
+              { labelKey: "feed.filter.budget.preset.20to50m", min: "20000000",  max: "50000000" },
+              { labelKey: "feed.filter.budget.preset.gt50m",  min: "50000000",  max: ""         },
             ].map((p) => (
               <button
-                key={p.label}
+                key={p.labelKey}
                 type="button"
                 onClick={() => onChange({ ...filters, budgetMin: p.min, budgetMax: p.max })}
                 className={`
@@ -242,17 +244,17 @@ export default function PlanFilterSidebar({
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-sky-300 hover:text-sky-600 dark:hover:border-sky-600"}
                 `}
               >
-                {p.label}
+                {t(p.labelKey)}
               </button>
             ))}
           </div>
         </Section>
 
         {/* Duration */}
-        <Section title="Số ngày đi" icon={Clock}>
+        <Section title={t("feed.filter.duration.title")} icon={Clock}>
           <RangeInputs
-            labelMin="Tối thiểu"
-            labelMax="Tối đa"
+            labelMin={t("feed.filter.min")}
+            labelMax={t("feed.filter.max")}
             valMin={filters.daysMin}
             valMax={filters.daysMax}
             onMin={(v) => set("daysMin", v)}
@@ -261,13 +263,13 @@ export default function PlanFilterSidebar({
           />
           <div className="mt-3 flex flex-wrap gap-2">
             {[
-              { label: "1–3 ngày", min: "1", max: "3"  },
-              { label: "4–7 ngày", min: "4", max: "7"  },
-              { label: "1–2 tuần", min: "7", max: "14" },
-              { label: "> 2 tuần", min: "14", max: ""  },
+              { labelKey: "feed.filter.duration.preset.1to3", min: "1", max: "3"  },
+              { labelKey: "feed.filter.duration.preset.4to7", min: "4", max: "7"  },
+              { labelKey: "feed.filter.duration.preset.1to2w", min: "7", max: "14" },
+              { labelKey: "feed.filter.duration.preset.gt2w", min: "14", max: ""  },
             ].map((p) => (
               <button
-                key={p.label}
+                key={p.labelKey}
                 type="button"
                 onClick={() => onChange({ ...filters, daysMin: p.min, daysMax: p.max })}
                 className={`
@@ -278,17 +280,17 @@ export default function PlanFilterSidebar({
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-sky-300 hover:text-sky-600 dark:hover:border-sky-600"}
                 `}
               >
-                {p.label}
+                {t(p.labelKey)}
               </button>
             ))}
           </div>
         </Section>
 
         {/* Date range */}
-        <Section title="Ngày khởi hành" icon={Calendar} defaultOpen={false}>
+        <Section title={t("feed.filter.date.title")} icon={Calendar} defaultOpen={false}>
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] text-gray-500 dark:text-gray-400 mb-1 block">Từ ngày</label>
+              <label className="text-[11px] text-gray-500 dark:text-gray-400 mb-1 block">{t("feed.filter.date.from")}</label>
               <input
                 type="date"
                 value={filters.startDateFrom}
@@ -304,7 +306,7 @@ export default function PlanFilterSidebar({
               />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 dark:text-gray-400 mb-1 block">Đến ngày</label>
+              <label className="text-[11px] text-gray-500 dark:text-gray-400 mb-1 block">{t("feed.filter.date.to")}</label>
               <input
                 type="date"
                 value={filters.startDateTo}
@@ -323,7 +325,7 @@ export default function PlanFilterSidebar({
         </Section>
 
         {/* Destinations */}
-        <Section title="Điểm đến" icon={MapPin} defaultOpen={false}>
+        <Section title={t("feed.filter.destination.title")} icon={MapPin} defaultOpen={false}>
           <div className="flex flex-wrap gap-2">
             {POPULAR_DESTINATIONS.map((dest) => {
               const active = filters.destinations.includes(dest);
@@ -371,7 +373,7 @@ export default function PlanFilterSidebar({
             transition-all duration-150
           "
         >
-          Xoá bộ lọc
+          {t("feed.filter.reset")}
         </button>
         <button
           type="button"
@@ -384,7 +386,7 @@ export default function PlanFilterSidebar({
             hover:-translate-y-0.5 transition-all duration-150
           "
         >
-          Áp dụng
+          {t("feed.filter.apply")}
         </button>
       </div>
     </div>
@@ -435,6 +437,7 @@ export default function PlanFilterSidebar({
 
 // Small sub-component: lets user type a custom destination and add it
 function DestinationInput({ onAdd }) {
+  const { t } = useTranslation();
   const [val, setVal] = useState("");
   const submit = () => {
     const trimmed = val.trim();
@@ -450,7 +453,7 @@ function DestinationInput({ onAdd }) {
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }}
-        placeholder="Thêm điểm đến..."
+        placeholder={t("feed.filter.destination.addPlaceholder")}
         className="
           flex-1 h-9 px-3 rounded-lg text-xs
           bg-white dark:bg-gray-900

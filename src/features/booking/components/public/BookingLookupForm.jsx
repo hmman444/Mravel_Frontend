@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, Mail, Phone, Hash } from "lucide-react";
 
 export default function BookingLookupForm({
@@ -24,6 +25,7 @@ export default function BookingLookupForm({
   detailScope = "PUBLIC",
   lookupCreds
 }) {
+  const { t } = useTranslation();
   const canSubmit = useMemo(() => {
     const codeOk = bookingCode?.trim()?.length >= 6;
     const last4Ok = phoneLast4?.trim()?.length === 4;
@@ -39,10 +41,10 @@ export default function BookingLookupForm({
           </div>
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-              Tra cứu đơn đặt
+              {t("booking.lookup_title")}
             </h2>
             <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
-              Nhập <b>mã booking</b> + <b>4 số cuối SĐT</b>. Email là tuỳ chọn (nếu bạn đã nhập email lúc đặt).
+              {t("booking.lookup_hint_enter")} <b>{t("booking.booking_code")}</b> + <b>{t("booking.phone_last4")}</b>. {t("booking.lookup_hint_email_optional")}
             </p>
           </div>
         </div>
@@ -65,14 +67,14 @@ export default function BookingLookupForm({
           {/* bookingCode */}
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
-              Mã booking <span className="text-red-500">*</span>
+              {t("booking.booking_code")} <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Hash className="mr-2 h-4 w-4 text-gray-400" />
               <input
                 value={bookingCode}
                 onChange={(e) => onBookingCodeChange?.(e.target.value)}
-                placeholder="VD: BK-AFCD3775"
+                placeholder={t("booking.booking_code_placeholder")}
                 className="h-10 w-full bg-transparent text-sm outline-none"
               />
             </div>
@@ -81,7 +83,7 @@ export default function BookingLookupForm({
           {/* last4 */}
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
-              4 số cuối SĐT <span className="text-red-500">*</span>
+              {t("booking.phone_last4")} <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Phone className="mr-2 h-4 w-4 text-gray-400" />
@@ -91,7 +93,7 @@ export default function BookingLookupForm({
                   const v = e.target.value.replace(/\D/g, "").slice(0, 4);
                   onPhoneLast4Change?.(v);
                 }}
-                placeholder="VD: 4567"
+                placeholder={t("booking.phone_last4_placeholder")}
                 className="h-10 w-full bg-transparent text-sm outline-none"
               />
             </div>
@@ -100,7 +102,7 @@ export default function BookingLookupForm({
           {/* email optional */}
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
-              Email (tuỳ chọn)
+              {t("booking.email_optional")}
             </label>
             <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
               <Mail className="mr-2 h-4 w-4 text-gray-400" />
@@ -122,7 +124,7 @@ export default function BookingLookupForm({
                 canSubmit ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed",
               ].join(" ")}
             >
-              {loading ? "Đang tra cứu..." : "Tra cứu"}
+              {loading ? t("booking.looking_up") : t("common.search")}
             </button>
 
             {result ? (
@@ -131,7 +133,7 @@ export default function BookingLookupForm({
                 onClick={onClearResult}
                 className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition hover:border-blue-400 hover:text-blue-700"
               >
-                Xoá kết quả
+                {t("booking.clear_result")}
               </button>
             ) : null}
           </div>
@@ -147,7 +149,7 @@ export default function BookingLookupForm({
       {result ? (
         <div className="space-y-3">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 md:text-sm">
-            Đã tìm thấy đơn. Bạn nên <b>copy/chụp lại mã booking</b> để tra cứu lần sau nếu lỡ xoá dữ liệu trình duyệt.
+            {t("booking.lookup_found_prefix")} <b>{t("booking.lookup_found_save_code")}</b> {t("booking.lookup_found_suffix")}
           </div>
           {ResultCard ? (
             <ResultCard

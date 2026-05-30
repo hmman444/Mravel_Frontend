@@ -72,7 +72,8 @@ export default function PartnerHeader() {
   }, []);
 
   const p = partner || {};
-  const partnerName = p.fullname || p.name || p.displayName || p.username || "Đối tác";
+  const partnerName =
+    p.fullname || p.name || p.displayName || p.username || t("partner.default_name");
   const partnerEmail = p.email || "";
   const partnerAvatar =
     p.avatar || p.avatarUrl || p.photoUrl || p.imageUrl || FALLBACK_AVATAR;
@@ -234,7 +235,7 @@ export default function PartnerHeader() {
                         <Store className="w-4 h-4" />
                       </span>
                       <span className="font-medium">
-                        {t("partner_account") || "Tài khoản đối tác"}
+                        {t("partner.partner_account")}
                       </span>
                     </button>
 
@@ -253,7 +254,7 @@ export default function PartnerHeader() {
                       "
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>{t("logout") || "Đăng xuất"}</span>
+                      <span>{t("common.logout")}</span>
                     </button>
                   </div>
                 </div>
@@ -270,7 +271,7 @@ export default function PartnerHeader() {
                 hover:bg-gray-50 dark:hover:bg-gray-800 transition
               "
             >
-              {t("partner_login") || "Đăng nhập đối tác"}
+              {t("partner.partner_login")}
             </Link>
           )}
         </div>

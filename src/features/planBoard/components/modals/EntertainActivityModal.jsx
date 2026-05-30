@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaGamepad, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
@@ -26,13 +27,6 @@ import {
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
-const EXTRA_TYPES = [
-  { value: "RENTAL", label: "Thuê đồ" },
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ thu" },
-  { value: "OTHER", label: "Khác" },
-];
-
 function safeJsonParse(str) {
   try {
     return str ? JSON.parse(str) : {};
@@ -49,6 +43,15 @@ export default function EntertainActivityModal({
   planMembers = [],
   readOnly,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = [
+    { value: "RENTAL", label: t("plan.extra.type_rental") },
+    { value: "SERVICE_FEE", label: t("plan.extra.type_service_fee") },
+    { value: "SURCHARGE", label: t("plan.extra.type_surcharge") },
+    { value: "OTHER", label: t("plan.extra.type_other") },
+  ];
+
   const [title, setTitle] = useState("");
   const [placeName, setPlaceName] = useState("");
   const [address, setAddress] = useState("");
@@ -244,11 +247,11 @@ export default function EntertainActivityModal({
     const newErrors = {};
 
     if (!placeName.trim()) {
-      newErrors.placeName = "Vui lòng nhập hoặc chọn địa điểm vui chơi.";
+      newErrors.placeName = t("plan.entertain.error_place_required");
     }
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.entertain.error_end_after_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -262,8 +265,8 @@ export default function EntertainActivityModal({
 
     onSubmit?.({
       type: "ENTERTAIN",
-      title: title || `Vui chơi: ${placeName}`,
-      text: title || `Vui chơi: ${placeName}`,
+      title: title || t("plan.entertain.default_title", { name: placeName }),
+      text: title || t("plan.entertain.default_title", { name: placeName }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -298,13 +301,17 @@ export default function EntertainActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Vui chơi"
+      labelPrefix={t("plan.entertain.footer_prefix")}
       name={placeName}
-      emptyLabelText="Điền/chọn địa điểm vui chơi để lưu hoạt động."
+      emptyLabelText={t("plan.entertain.footer_empty")}
       locationText={effectiveEntertainLocation?.fullAddress || address || ""}
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.entertain.time_range", {
+              start: startTime,
+              end: endTime,
+              minutes: durationMinutes,
+            })
           : ""
       }
     />
@@ -321,14 +328,14 @@ export default function EntertainActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động vui chơi"}
+      submitLabel={editingCard ? t("plan.entertain.submit_edit") : t("plan.entertain.submit_create")}
       submitClassName="bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30"
     />
   );
@@ -343,9 +350,9 @@ export default function EntertainActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-emerald-500 to-teal-500",
         }}
-        title="Hoạt động vui chơi"
+        title={t("plan.entertain.modal_title")}
         typeLabel="Entertain"
-        subtitle="Công viên, trò chơi, khu giải trí, thuê đồ chơi..."
+        subtitle={t("plan.entertain.modal_subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -354,22 +361,22 @@ export default function EntertainActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.entertain.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Địa điểm + địa chỉ + thời gian
+              {t("plan.entertain.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
+                {t("plan.entertain.activity_name")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Chơi moto nước, công viên nước..."
+                placeholder={t("plan.entertain.activity_name_ph")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
@@ -377,7 +384,7 @@ export default function EntertainActivityModal({
             {/* ĐỊA CHỈ - chọn trên bản đồ */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa chỉ / vị trí trên bản đồ
+                {t("plan.entertain.address_label")}
               </label>
 
               <button
@@ -409,7 +416,7 @@ export default function EntertainActivityModal({
                   {effectiveEntertainLocation || address ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {getLocDisplayLabel(effectiveEntertainLocation, placeName || "Địa điểm đã chọn")}
+                        {getLocDisplayLabel(effectiveEntertainLocation, placeName || t("plan.entertain.selected_place"))}
                       </p>
 
                       {(effectiveEntertainLocation?.fullAddress || address) && (
@@ -420,7 +427,7 @@ export default function EntertainActivityModal({
 
                       <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
+                          {t("plan.entertain.picked_on_map")}
                         </span>
                         {effectiveEntertainLocation?.lat != null &&
                           effectiveEntertainLocation?.lng != null && (
@@ -433,10 +440,10 @@ export default function EntertainActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn địa điểm vui chơi trên bản đồ
+                        {t("plan.entertain.pick_place_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn khu vui chơi / công viên / bãi biển.
+                        {t("plan.entertain.pick_place_hint")}
                       </p>
                     </>
                   )}
@@ -447,7 +454,7 @@ export default function EntertainActivityModal({
                     text-emerald-500 group-hover:text-emerald-600 dark:text-emerald-300
                     dark:group-hover:text-emerald-200"
                 >
-                  Mở bản đồ
+                  {t("plan.entertain.open_map")}
                 </span>
               </button>
 
@@ -459,9 +466,9 @@ export default function EntertainActivityModal({
             {/* Thời gian */}
             <div className="mt-3">
               <ActivityTimeRangeSection
-                sectionLabel="Thời gian vui chơi"
-                startLabel="Bắt đầu"
-                endLabel="Kết thúc"
+                sectionLabel={t("plan.entertain.time_section")}
+                startLabel={t("plan.entertain.start_label")}
+                endLabel={t("plan.entertain.end_label")}
                 color="emerald"
                 iconClassName="text-emerald-500"
                 startTime={startTime}
@@ -471,7 +478,7 @@ export default function EntertainActivityModal({
                 error={errors.time}
                 onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
                 onDurationChange={(mins) => setDurationMinutes(mins)}
-                durationHintPrefix="Thời lượng ước tính"
+                durationHintPrefix={t("plan.entertain.duration_hint")}
               />
             </div>
           </div>
@@ -481,10 +488,10 @@ export default function EntertainActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí vui chơi
+              {t("plan.entertain.cost_section")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Giá vé / lượt + phát sinh + ngân sách + chi phí thực tế
+              {t("plan.entertain.cost_section_hint")}
             </span>
           </div>
 
@@ -493,7 +500,7 @@ export default function EntertainActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Giá vé / lượt
+                  {t("plan.entertain.ticket_price")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -502,7 +509,7 @@ export default function EntertainActivityModal({
                     min="0"
                     value={ticketPrice}
                     onChange={(e) => setTicketPrice(e.target.value)}
-                    placeholder="VD: 150.000"
+                    placeholder={t("plan.entertain.ticket_price_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -511,7 +518,7 @@ export default function EntertainActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Số lượt / người tham gia
+                  {t("plan.entertain.ticket_count")}
                 </label>
                 <input
                   type="number"
@@ -536,7 +543,7 @@ export default function EntertainActivityModal({
               {/* Chi phí thực tế */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho hoạt động này (nếu có)
+                  {t("plan.entertain.actual_cost")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -545,20 +552,23 @@ export default function EntertainActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền sau khi chơi và thanh toán xong"
+                    placeholder={t("plan.entertain.actual_cost_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>chi phí vé</b> + <b>phát sinh</b> để chia tiền.
+                  {t("plan.entertain.actual_cost_note_1")}{" "}
+                  <b>{t("plan.entertain.actual_cost_note_ticket")}</b> +{" "}
+                  <b>{t("plan.entertain.actual_cost_note_extra")}</b>{" "}
+                  {t("plan.entertain.actual_cost_note_2")}
                 </p>
               </div>
 
               {/* Ngân sách */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho hoạt động (tuỳ chọn)
+                  {t("plan.entertain.budget")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-teal-500" />
@@ -567,7 +577,7 @@ export default function EntertainActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 500.000"
+                    placeholder={t("plan.entertain.budget_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -578,13 +588,13 @@ export default function EntertainActivityModal({
             {/* Tóm tắt chi phí */}
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Chi phí vé: <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
+                {t("plan.entertain.summary_ticket")} <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh: <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
+                {t("plan.entertain.summary_extra")} <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến (vé + phát sinh):{" "}
+                {t("plan.entertain.summary_estimated")}{" "}
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
@@ -592,7 +602,7 @@ export default function EntertainActivityModal({
 
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                  {t("plan.entertain.summary_using_actual_1")} <b>{t("plan.entertain.summary_using_actual_b")}</b> {t("plan.entertain.summary_using_actual_2")}{" "}
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -601,7 +611,7 @@ export default function EntertainActivityModal({
 
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.entertain.summary_budget")}{" "}
                   <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
@@ -641,17 +651,17 @@ export default function EntertainActivityModal({
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
+              {t("plan.entertain.note")}
             </label>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm thông tin nhỏ cho cả nhóm
+              {t("plan.entertain.note_hint")}
             </span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: nên thuê phao, đồ bảo hộ, tới sớm để xếp hàng..."
+            placeholder={t("plan.entertain.note_ph")}
             className={`${inputBase} w-full`}
           />
         </section>

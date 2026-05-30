@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FaPlus, FaTrash, FaCopy, FaMinus } from "react-icons/fa";
 
 import PlanLayout from "../components/PlanLayout";
@@ -66,19 +67,6 @@ const fmtDay = (d) => `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}`;
 const fmtVN = (d) =>
   d ? parseDateSmart(d)?.toLocaleDateString("vi-VN") || "" : "";
 
-const roleLabels = {
-  OWNER: "Chủ sở hữu",
-  EDITOR: "Chỉnh sửa",
-  VIEWER: "Chỉ xem",
-};
-
-const statusLabels = {
-  DRAFT: "Bản nháp",
-  ACTIVE: "Đang diễn ra",
-  COMPLETED: "Hoàn thành",
-  CANCELLED: "Đã hủy",
-};
-
 //  sidebar muốn Hoàn thành + Đã hủy lên trên cùng
 const STATUS_ORDER = ["COMPLETED", "CANCELLED", "ACTIVE", "DRAFT"];
 
@@ -104,7 +92,21 @@ const statusPillStyle = {
 };
 
 export default function PlanTimeLinePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const roleLabels = {
+    OWNER: t("plan.member.role_owner"),
+    EDITOR: t("plan.member.role_editor"),
+    VIEWER: t("plan.member.role_viewer"),
+  };
+
+  const statusLabels = {
+    DRAFT: t("plan.status.draft"),
+    ACTIVE: t("plan.status.active"),
+    COMPLETED: t("plan.status.completed"),
+    CANCELLED: t("plan.status.cancelled"),
+  };
 
   const [openNewPlan, setOpenNewPlan] = useState(false);
   const [confirmDeletePlan, setConfirmDeletePlan] = useState(null);
@@ -181,28 +183,28 @@ export default function PlanTimeLinePage() {
     try {
       const copied = await copyPlanApi(plan.id);
       if (copied?.id) {
-        showSuccess("Đã tạo bản sao lịch trình");
+        showSuccess(t("plan.toast.copy_success"));
         await reloadMyPlans?.();
         await reloadRecent?.();
         navigate(`/plans/${copied.id}`);
       } else {
-        showError("Không thể tạo bản sao lịch trình");
+        showError(t("plan.toast.copy_error"));
       }
     } catch (e) {
       console.error(e);
-      showError("Không thể tạo bản sao lịch trình");
+      showError(t("plan.toast.copy_error"));
     }
   };
 
   const handleDeletePlan = async (plan) => {
     try {
       await deletePlanApi(plan.id);
-      showSuccess("Đã xoá lịch trình");
+      showSuccess(t("plan.toast.delete_success"));
       await reloadMyPlans?.();
       await reloadRecent?.();
     } catch (e) {
       console.error(e);
-      showError("Không thể xoá lịch trình");
+      showError(t("plan.toast.delete_error"));
     }
   };
 
@@ -236,10 +238,10 @@ export default function PlanTimeLinePage() {
       <div className="flex items-center justify-between mb-4 gap-3">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Timeline lịch trình
+            {t("plan.timeline.title")}
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Cột kế hoạch cố định • phần lịch cuộn ngang • cuộn dọc theo trang
+            {t("plan.timeline.subtitle")}
           </p>
         </div>
 
@@ -247,18 +249,18 @@ export default function PlanTimeLinePage() {
           <div className="hidden sm:flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/70 backdrop-blur px-2 py-1">
             <button
               type="button"
-              title="Thu nhỏ"
+              title={t("plan.timeline.zoom_out")}
               onClick={() => setDayWidth((v) => clampDayWidth(v - 6))}
               className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 grid place-items-center"
             >
               <FaMinus className="text-[12px]" />
             </button>
             <div className="text-xs text-gray-600 dark:text-gray-300 px-1 min-w-[70px] text-center">
-              {dayWidth}px/ngày
+              {t("plan.timeline.px_per_day", { n: dayWidth })}
             </div>
             <button
               type="button"
-              title="Phóng to"
+              title={t("plan.timeline.zoom_in")}
               onClick={() => setDayWidth((v) => clampDayWidth(v + 6))}
               className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 grid place-items-center"
             >
@@ -277,7 +279,7 @@ export default function PlanTimeLinePage() {
               transition-all
             "
           >
-            <FaPlus size={12} /> Tạo kế hoạch
+            <FaPlus size={12} /> {t("plan.timeline.create_plan")}
           </button>
         </div>
       </div>
@@ -291,11 +293,11 @@ export default function PlanTimeLinePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                    Kế hoạch
+                    {t("plan.timeline.plan_column")}
                   </div>
                   <div className="text-[11px] text-gray-500 dark:text-gray-400">
                     {(normalizedPlansAll?.length || 0)} plan
-                    {statusFilter ? ` • lọc: ${statusLabels[statusFilter] || statusFilter}` : ""} •{" "}
+                    {statusFilter ? ` • ${t("plan.timeline.filter_label", { status: statusLabels[statusFilter] || statusFilter })}` : ""} •{" "}
                     {range.start ? fmtDay(range.start) : "--/--"} →{" "}
                     {range.end ? fmtDay(range.end) : "--/--"}
                   </div>
@@ -306,9 +308,9 @@ export default function PlanTimeLinePage() {
                     type="button"
                     onClick={() => setStatusFilter("")}
                     className="text-[11px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
-                    title="Bỏ lọc"
+                    title={t("plan.timeline.clear_filter")}
                   >
-                    Bỏ lọc
+                    {t("plan.timeline.clear_filter")}
                   </button>
                 )}
               </div>
@@ -335,7 +337,7 @@ export default function PlanTimeLinePage() {
                         ${statusPillStyle[st] || "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-gray-800 dark:text-gray-200"}
                         hover:brightness-[0.98] dark:hover:brightness-110
                       `}
-                      title={active ? "Bấm để bỏ lọc" : "Bấm để lọc"}
+                      title={active ? t("plan.timeline.click_to_unfilter") : t("plan.timeline.click_to_filter")}
                     >
                       <span>{statusLabels[st] || st}</span>
                       <span className="text-[11px] font-normal opacity-80">
@@ -349,15 +351,15 @@ export default function PlanTimeLinePage() {
 
             {loading && (
               <div className="p-6 text-sm text-gray-600 dark:text-gray-300">
-                Đang tải...
+                {t("common.loading")}
               </div>
             )}
 
             {!loading && !normalizedPlans.length && (
               <div className="p-6 text-sm text-gray-600 dark:text-gray-300">
                 {statusFilter
-                  ? "Không có lịch trình nào thuộc trạng thái đang lọc."
-                  : "Chưa có lịch trình nào để hiển thị."}
+                  ? t("plan.timeline.empty_filtered")
+                  : t("plan.timeline.empty")}
               </div>
             )}
 
@@ -376,7 +378,7 @@ export default function PlanTimeLinePage() {
                     {list.map((p) => {
                       const canDelete = p.myRole === "OWNER";
                       const roleVN = roleLabels[p.myRole] || p.myRole || "";
-                      const statusVN = statusLabels[p.status] || p.status || "Bản nháp";
+                      const statusVN = statusLabels[p.status] || p.status || t("plan.status.draft");
 
                       return (
                         <div
@@ -402,7 +404,7 @@ export default function PlanTimeLinePage() {
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0 pr-20">
                                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                        {p.title || "Không có tiêu đề"}
+                                        {p.title || t("plan.timeline.untitled")}
                                     </div>
 
                                     <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
@@ -410,7 +412,7 @@ export default function PlanTimeLinePage() {
                                     </div>
 
                                     <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 truncate">
-                                        {p.owner || "Chưa rõ chủ sở hữu"} • {p.members || 1} thành viên
+                                        {p.owner || t("plan.timeline.unknown_owner")} • {t("plan.timeline.member_count", { n: p.members || 1 })}
                                     </div>
 
                                     {!!roleVN && (
@@ -423,7 +425,7 @@ export default function PlanTimeLinePage() {
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
-                                title="Sao chép"
+                                title={t("plan.timeline.copy")}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -443,7 +445,7 @@ export default function PlanTimeLinePage() {
                               <button
                                 type="button"
                                 title={
-                                  canDelete ? "Xoá lịch trình" : "Chỉ chủ sở hữu được xoá"
+                                  canDelete ? t("plan.timeline.delete_plan") : t("plan.timeline.only_owner_can_delete")
                                 }
                                 disabled={!canDelete}
                                 onClick={(e) => {
@@ -535,7 +537,7 @@ export default function PlanTimeLinePage() {
                           const widthPx = Math.max(18, rawWidth - innerPad * 2);
 
                           const roleVN = roleLabels[p.myRole] || p.myRole || "";
-                          const statusVN = statusLabels[p.status] || p.status || "Bản nháp";
+                          const statusVN = statusLabels[p.status] || p.status || t("plan.status.draft");
 
                           const tiny = widthPx < 180;
                           const showDates = widthPx >= 320;
@@ -576,7 +578,7 @@ export default function PlanTimeLinePage() {
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="min-w-0">
                                     <div className="text-sm font-semibold truncate leading-5">
-                                      {p.title || "Không có tiêu đề"}
+                                      {p.title || t("plan.timeline.untitled")}
                                     </div>
 
                                     <div className="text-[11px] opacity-90 truncate leading-4">
@@ -623,9 +625,9 @@ export default function PlanTimeLinePage() {
       {confirmDeletePlan && (
         <ConfirmModal
           open={true}
-          title="Xoá lịch trình"
-          message={`Xác nhận xoá "${confirmDeletePlan.title}"? Hành động này không thể hoàn tác.`}
-          confirmText="Xoá"
+          title={t("plan.timeline.delete_plan")}
+          message={t("plan.timeline.delete_confirm", { title: confirmDeletePlan.title })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmDeletePlan(null)}
           onConfirm={async () => {
             const plan = confirmDeletePlan;

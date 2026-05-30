@@ -2,6 +2,7 @@ import {
   ChatBubbleLeftRightIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import ReactionPicker from "./ReactionPicker";
 import ReactionSummaryPopupTrigger from "./ReactionSummaryPopupTrigger";
 
@@ -13,6 +14,7 @@ export default function PlanActions({
   onCommentFocus,
   onShare,
 }) {
+  const { t } = useTranslation();
   const handleReact = (type) => onReact(type);
 
   return (
@@ -41,7 +43,7 @@ export default function PlanActions({
             transition-colors duration-150
           "
         >
-          <ChatBubbleLeftRightIcon className="w-4 h-4" /> Bình luận
+          <ChatBubbleLeftRightIcon className="w-4 h-4" /> {t("feed.comment.label")}
         </button>
 
         <button
@@ -56,7 +58,7 @@ export default function PlanActions({
             transition-colors duration-150
           "
         >
-          <ShareIcon className="w-4 h-4" /> Chia sẻ
+          <ShareIcon className="w-4 h-4" /> {t("feed.share")}
         </button>
       </div>
     </div>

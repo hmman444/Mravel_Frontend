@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import ReasonModal from "../components/services/ReasonModal";
@@ -16,6 +17,7 @@ import BookingConfigSection from "../../partner/components/hotel/form/sections/B
 import PolicySection from "../../partner/components/hotel/form/sections/PolicySection";
 import ImagesSection from "../../partner/components/hotel/form/sections/ImagesSection";
 import ContentBlocksSection from "../../partner/components/hotel/form/sections/ContentBlocksSection";
+import FaqsSection from "../../partner/components/hotel/form/sections/FaqsSection";
 import AmenityMultiSelect from "../../partner/components/hotel/form/controls/AmenityMultiSelect";
 import RoomTypesEditor from "../../partner/components/hotel/form/controls/RoomTypesEditor";
 
@@ -32,6 +34,7 @@ const soft = {
 };
 
 export default function AdminHotelReviewPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -46,7 +49,7 @@ export default function AdminHotelReviewPage() {
   useEffect(() => {
     if (!id) return;
     loadHotelDetail(id).catch((e) =>
-      showError(typeof e === "string" ? e : "Không tải được chi tiết hotel")
+      showError(typeof e === "string" ? e : t("admin.hotel_detail_load_failed"))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -69,10 +72,10 @@ export default function AdminHotelReviewPage() {
   const onApprove = async () => {
     try {
       await act({ mode: "HOTEL", action: "APPROVE", id });
-      showSuccess("Đã approve");
+      showSuccess(t("admin.hotel_approve_success"));
       await loadHotelDetail(id);
     } catch (e) {
-      showError(typeof e === "string" ? e : "Approve thất bại");
+      showError(typeof e === "string" ? e : t("admin.hotel_approve_failed"));
     }
   };
 
@@ -84,21 +87,21 @@ export default function AdminHotelReviewPage() {
   const onConfirmReason = async (reason) => {
     try {
       await act({ mode: "HOTEL", action: reasonMode, id, reason });
-      showSuccess(reasonMode === "REJECT" ? "Đã reject" : "Đã block");
+      showSuccess(reasonMode === "REJECT" ? t("admin.hotel_reject_success") : t("admin.hotel_block_success"));
       setReasonOpen(false);
       await loadHotelDetail(id);
     } catch (e) {
-      showError(typeof e === "string" ? e : "Thao tác thất bại");
+      showError(typeof e === "string" ? e : t("admin.action_failed"));
     }
   };
 
   const onUnblock = async () => {
     try {
       await act({ mode: "HOTEL", action: "UNBLOCK", id });
-      showSuccess("Đã unblock");
+      showSuccess(t("admin.hotel_unblock_success"));
       await loadHotelDetail(id);
     } catch (e) {
-      showError(typeof e === "string" ? e : "Unblock thất bại");
+      showError(typeof e === "string" ? e : t("admin.hotel_unblock_failed"));
     }
   };
 
@@ -116,7 +119,7 @@ export default function AdminHotelReviewPage() {
           <div className="min-w-0">
             <div className="text-xs text-slate-500">Hotel ID: {id}</div>
             <h1 className="mt-1 truncate text-xl font-bold text-slate-900 dark:text-white">
-              {hotel?.name || (detailLoading ? "Đang tải..." : "—")}
+              {form?.name || (detailLoading ? t("common.loading") : "—")}
             </h1>
 
             <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-200">
@@ -133,12 +136,12 @@ export default function AdminHotelReviewPage() {
 
             {mod?.rejectionReason ? (
               <div className="mt-2 text-sm text-amber-700 dark:text-amber-300">
-                Lý do bị từ chối: {mod.rejectionReason}
+                {t("admin.rejection_reason_label")}: {mod.rejectionReason}
               </div>
             ) : null}
             {mod?.blockedReason ? (
               <div className="mt-2 text-sm text-rose-700 dark:text-rose-300">
-                Lý do bị chặn: {mod.blockedReason}
+                {t("admin.blocked_reason_label")}: {mod.blockedReason}
               </div>
             ) : null}
           </div>
@@ -150,7 +153,7 @@ export default function AdminHotelReviewPage() {
               onClick={() => navigate(-1)}
               disabled={acting}
             >
-              Quay lại
+              {t("common.back")}
             </button>
 
             <button
@@ -201,7 +204,7 @@ export default function AdminHotelReviewPage() {
         </div>
       ) : !hotel ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
-          <p className="text-sm text-slate-600 dark:text-slate-300">Không tìm thấy hotel.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300">{t("admin.hotel_not_found")}</p>
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4 dark:bg-slate-900 dark:border-slate-800">
@@ -215,8 +218,8 @@ export default function AdminHotelReviewPage() {
           <PolicySection form={form} setField={setField} disabled />
 
           <AmenityMultiSelect
-            title="Tiện ích khách sạn"
-            hint={hotelAmenity.loading ? "Đang tải tiện ích..." : "Chọn tiện ích thuộc khách sạn."}
+            title={t("admin.hotel_amenities_title")}
+            hint={hotelAmenity.loading ? t("admin.amenities_loading") : t("admin.hotel_amenities_hint")}
             items={hotelAmenity.flat || []}
             value={form.amenities || []}
             onChange={() => {}}
@@ -247,12 +250,14 @@ export default function AdminHotelReviewPage() {
             onPickBlockImage={() => {}}
             disabled
           />
+
+          <FaqsSection form={form} setField={setField} disabled />
         </div>
       )}
 
       <ReasonModal
         open={reasonOpen}
-        title={reasonMode === "REJECT" ? "Từ chối dịch vụ" : "Chặn dịch vụ"}
+        title={reasonMode === "REJECT" ? t("admin.reject_service_title") : t("admin.block_service_title")}
         confirmText={reasonMode === "REJECT" ? "Reject" : "Block"}
         loading={acting}
         onClose={() => setReasonOpen(false)}

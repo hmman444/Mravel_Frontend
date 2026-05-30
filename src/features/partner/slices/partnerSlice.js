@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import {
   getPartnerMe,
 
@@ -38,7 +39,7 @@ export const fetchPartnerMe = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const res = await getPartnerMe();
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Không lấy được thông tin đối tác");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_partner_info"));
   }
 );
 
@@ -48,7 +49,7 @@ export const fetchPartnerHotels = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await listPartnerHotels(params);
     if (res.success) return { data: res.data, params };
-    return rejectWithValue(res.message || "Không tải được khách sạn");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_hotels"));
   }
 );
 
@@ -57,7 +58,7 @@ export const fetchPartnerRestaurants = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await listPartnerRestaurants(params);
     if (res.success) return { data: res.data, params };
-    return rejectWithValue(res.message || "Không tải được quán ăn");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_restaurants"));
   }
 );
 
@@ -67,7 +68,7 @@ export const partnerCreateHotel = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     const res = await createPartnerHotel(payload);
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Tạo khách sạn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.create_hotel"));
   }
 );
 
@@ -76,7 +77,7 @@ export const partnerUpdateHotel = createAsyncThunk(
   async ({ id, payload }, { rejectWithValue }) => {
     const res = await updatePartnerHotel(id, payload);
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Cập nhật khách sạn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.update_hotel"));
   }
 );
 
@@ -85,7 +86,7 @@ export const partnerDeleteHotel = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const res = await softDeletePartnerHotel(id);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Xóa khách sạn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.delete_hotel"));
   }
 );
 
@@ -94,7 +95,7 @@ export const partnerPauseHotel = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const res = await pausePartnerHotel(id);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Tạm khóa khách sạn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.pause_hotel"));
   }
 );
 
@@ -103,7 +104,7 @@ export const partnerResumeHotel = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const res = await resumePartnerHotel(id);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Mở lại khách sạn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.resume_hotel"));
   }
 );
 
@@ -112,7 +113,7 @@ export const partnerUnlockHotel = createAsyncThunk(
   async ({ id, reason }, { rejectWithValue }) => {
     const res = await requestUnlockPartnerHotel(id, reason);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Gửi yêu cầu mở khóa thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.unlock_request"));
   }
 );
 
@@ -122,7 +123,7 @@ export const partnerCreateRestaurant = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     const res = await createPartnerRestaurant(payload);
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Tạo quán ăn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.create_restaurant"));
   }
 );
 
@@ -131,7 +132,7 @@ export const partnerUpdateRestaurant = createAsyncThunk(
   async ({ id, payload }, { rejectWithValue }) => {
     const res = await updatePartnerRestaurant(id, payload);
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Cập nhật quán ăn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.update_restaurant"));
   }
 );
 
@@ -140,7 +141,7 @@ export const partnerDeleteRestaurant = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const res = await softDeletePartnerRestaurant(id);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Xóa quán ăn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.delete_restaurant"));
   }
 );
 
@@ -149,7 +150,7 @@ export const partnerPauseRestaurant = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const res = await pausePartnerRestaurant(id);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Tạm khóa quán ăn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.pause_restaurant"));
   }
 );
 
@@ -158,7 +159,7 @@ export const partnerResumeRestaurant = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const res = await resumePartnerRestaurant(id);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Mở lại quán ăn thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.resume_restaurant"));
   }
 );
 
@@ -167,7 +168,7 @@ export const partnerUnlockRestaurant = createAsyncThunk(
   async ({ id, reason }, { rejectWithValue }) => {
     const res = await requestUnlockPartnerRestaurant(id, reason);
     if (res.success) return { id };
-    return rejectWithValue(res.message || "Gửi yêu cầu mở khóa thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.unlock_request"));
   }
 );
 
@@ -177,7 +178,7 @@ export const fetchPartnerHotelBookings = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await listPartnerHotelBookings(params);
     if (res.success) return { data: res.data, params };
-    return rejectWithValue(res.message || "Không tải được booking khách sạn");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_hotel_bookings"));
   }
 );
 
@@ -186,7 +187,7 @@ export const fetchPartnerRestaurantBookings = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await listPartnerRestaurantBookings(params);
     if (res.success) return { data: res.data, params };
-    return rejectWithValue(res.message || "Không tải được booking quán ăn");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_restaurant_bookings"));
   }
 );
 
@@ -196,7 +197,7 @@ export const fetchPartnerBookingDetail = createAsyncThunk(
     const fn = type === "HOTEL" ? getPartnerHotelBookingDetail : getPartnerRestaurantBookingDetail;
     const res = await fn(code);
     if (res.success) return { type, data: res.data };
-    return rejectWithValue(res.message || "Không tải được chi tiết booking");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_booking_detail"));
   }
 );
 
@@ -206,7 +207,7 @@ export const cancelPartnerBooking = createAsyncThunk(
     const fn = type === "HOTEL" ? cancelPartnerHotelBooking : cancelPartnerRestaurantBooking;
     const res = await fn(code, reason);
     if (res.success) return { type, code };
-    return rejectWithValue(res.message || "Hủy booking thất bại");
+    return rejectWithValue(res.message || i18n.t("partner.error.cancel_booking"));
   }
 );
 
@@ -216,7 +217,7 @@ export const fetchPartnerStatsByStatus = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await getPartnerStatsByStatus(params);
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Không tải được stats status");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_stats_status"));
   }
 );
 
@@ -225,7 +226,7 @@ export const fetchPartnerRevenue = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     const res = await getPartnerRevenue(params);
     if (res.success) return res.data;
-    return rejectWithValue(res.message || "Không tải được stats revenue");
+    return rejectWithValue(res.message || i18n.t("partner.error.load_stats_revenue"));
   }
 );
 
@@ -294,7 +295,7 @@ const partnerSlice = createSlice({
         s.me.loading = false; s.me.data = a.payload ?? null;
       })
       .addCase(fetchPartnerMe.rejected, (s, a) => {
-        s.me.loading = false; s.me.error = a.payload || "Không lấy được thông tin";
+        s.me.loading = false; s.me.error = a.payload || i18n.t("partner.error.load_info");
       });
 
     // HOTELS list
@@ -314,7 +315,7 @@ const partnerSlice = createSlice({
       })
       .addCase(fetchPartnerHotels.rejected, (s, a) => {
         s.hotels.loading = false;
-        s.hotels.error = a.payload || "Không tải được dữ liệu";
+        s.hotels.error = a.payload || i18n.t("partner.error.load_data");
       });
 
     // RESTAURANTS list
@@ -334,7 +335,7 @@ const partnerSlice = createSlice({
       })
       .addCase(fetchPartnerRestaurants.rejected, (s, a) => {
         s.restaurants.loading = false;
-        s.restaurants.error = a.payload || "Không tải được dữ liệu";
+        s.restaurants.error = a.payload || i18n.t("partner.error.load_data");
       });
 
     // BOOKINGS list
@@ -354,7 +355,7 @@ const partnerSlice = createSlice({
       })
       .addCase(fetchPartnerHotelBookings.rejected, (s, a) => {
         s.hotelBookings.loading = false;
-        s.hotelBookings.error = a.payload || "Không tải được booking";
+        s.hotelBookings.error = a.payload || i18n.t("partner.error.load_bookings");
       });
 
     builder
@@ -373,7 +374,7 @@ const partnerSlice = createSlice({
       })
       .addCase(fetchPartnerRestaurantBookings.rejected, (s, a) => {
         s.restaurantBookings.loading = false;
-        s.restaurantBookings.error = a.payload || "Không tải được booking";
+        s.restaurantBookings.error = a.payload || i18n.t("partner.error.load_bookings");
       });
 
     // BOOKING detail
@@ -387,7 +388,7 @@ const partnerSlice = createSlice({
       })
       .addCase(fetchPartnerBookingDetail.rejected, (s, a) => {
         s.bookingDetail.loading = false;
-        s.bookingDetail.error = a.payload || "Không tải được chi tiết";
+        s.bookingDetail.error = a.payload || i18n.t("partner.error.load_detail");
       });
 
     // STATS
@@ -399,7 +400,7 @@ const partnerSlice = createSlice({
         s.statsByStatus.loading = false; s.statsByStatus.data = a.payload ?? null;
       })
       .addCase(fetchPartnerStatsByStatus.rejected, (s, a) => {
-        s.statsByStatus.loading = false; s.statsByStatus.error = a.payload || "Lỗi thống kê";
+        s.statsByStatus.loading = false; s.statsByStatus.error = a.payload || i18n.t("partner.error.stats");
       });
 
     builder
@@ -410,7 +411,7 @@ const partnerSlice = createSlice({
         s.revenue.loading = false; s.revenue.data = a.payload ?? null;
       })
       .addCase(fetchPartnerRevenue.rejected, (s, a) => {
-        s.revenue.loading = false; s.revenue.error = a.payload || "Lỗi thống kê doanh thu";
+        s.revenue.loading = false; s.revenue.error = a.payload || i18n.t("partner.error.stats_revenue");
       });
 
     // ACTION (mutations) — gom chung loading/error
@@ -428,7 +429,7 @@ const partnerSlice = createSlice({
       });
       builder.addCase(th.rejected, (s, a) => {
         s.action.loading = false;
-        s.action.error = a.payload || "Thao tác thất bại";
+        s.action.error = a.payload || i18n.t("partner.error.action_failed");
       });
     });
   },

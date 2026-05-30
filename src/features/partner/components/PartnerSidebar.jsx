@@ -12,17 +12,19 @@ import {
 } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function PartnerSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
 
   const menuItems = useMemo(
     () => [
-      { to: "/partner/dashboard", label: "Tổng quan", icon: HomeIcon },
-      { to: "/partner/services", label: "Dịch vụ của tôi", icon: BuildingStorefrontIcon },
-      { to: "/partner/bookings", label: "Đơn đặt", icon: ClipboardDocumentListIcon },
+      { to: "/partner/dashboard", label: t("partner.sidebar.overview"), icon: HomeIcon },
+      { to: "/partner/services", label: t("partner.sidebar.my_services"), icon: BuildingStorefrontIcon },
+      { to: "/partner/bookings", label: t("partner.sidebar.bookings"), icon: ClipboardDocumentListIcon },
     ],
-    []
+    [t]
   );
 
   const [collapsed, setCollapsed] = useState(() => {
@@ -181,7 +183,7 @@ export default function PartnerSidebar() {
         }}
         animate={{ left: sidebarWidth }}
         transition={{ type: "spring", stiffness: 260, damping: 26 }}
-        title={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
+        title={collapsed ? t("partner.sidebar.expand") : t("partner.sidebar.collapse")}
       >
         {collapsed ? (
           <ChevronRightIcon className="h-5 w-5" />

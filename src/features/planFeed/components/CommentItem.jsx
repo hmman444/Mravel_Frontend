@@ -1,5 +1,6 @@
 // CommentItem.jsx
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { timeAgo } from "../utils/utils";
 import { REACTIONS, reactionsMeta } from "../utils/reactionsMeta";
@@ -30,6 +31,7 @@ function ReactionBadge({ reactions, reactionUsers = [] }) {
 }
 
 function MiniReactionPicker({ value, onChange }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const timerRef = useRef(null);
 
@@ -63,7 +65,7 @@ function MiniReactionPicker({ value, onChange }) {
           }
         `}
       >
-        {current ? `${current.emoji} ${current.label}` : "Thích"}
+        {current ? `${current.emoji} ${current.label}` : t("feed.reaction.like")}
       </button>
 
       <div
@@ -97,6 +99,7 @@ function MiniReactionPicker({ value, onChange }) {
 }
 
 function ReplyItem({ reply, parentUser, onClickReply, onReact, connectorStyle }) {
+  const { t } = useTranslation();
   const [showSubReplies, setShowSubReplies] = useState(false);
   const [myReaction, setMyReaction] = useState(reply.myReaction ?? null);
   useEffect(() => {
@@ -104,10 +107,10 @@ function ReplyItem({ reply, parentUser, onClickReply, onReact, connectorStyle })
   }, [reply.myReaction]);
 
   const user = reply.user || {};
-  const name = user.name || reply.userName || "Người dùng";
+  const name = user.name || reply.userName || t("feed.user.default");
   const avatar =
     user.avatar || reply.userAvatar || reply.avatar || parentUser?.avatar || "/default-avatar.png";
-  const parentName = parentUser?.name || parentUser?.userName || "người dùng";
+  const parentName = parentUser?.name || parentUser?.userName || t("feed.user.default");
 
   const directSubReplies = reply.replies || [];
   const hasSubReplies = directSubReplies.length > 0;
@@ -129,7 +132,7 @@ function ReplyItem({ reply, parentUser, onClickReply, onReact, connectorStyle })
           <Link
             to={`/profile/${user.id}`}
             onClick={(e) => e.stopPropagation()}
-            title={`Xem trang cá nhân ${name}`}
+            title={t("feed.user.viewProfileOf", { name })}
           >
             <img
               src={avatar}
@@ -184,7 +187,7 @@ function ReplyItem({ reply, parentUser, onClickReply, onReact, connectorStyle })
             onClick={() => onClickReply(reply)}
             className="font-semibold hover:underline text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
-            Trả lời
+            {t("feed.comment.reply")}
           </button>
           <ReactionBadge reactions={reply.reactions} reactionUsers={reply.reactionUsers} />
         </div>
@@ -195,7 +198,7 @@ function ReplyItem({ reply, parentUser, onClickReply, onReact, connectorStyle })
             onClick={() => setShowSubReplies(true)}
             className="mt-1 text-xs text-sky-600 dark:text-sky-400 hover:underline"
           >
-            Xem phản hồi ({directSubReplies.length})
+            {t("feed.comment.viewReplies", { count: directSubReplies.length })}
           </button>
         )}
 
@@ -219,6 +222,7 @@ function ReplyItem({ reply, parentUser, onClickReply, onReact, connectorStyle })
 }
 
 export default function CommentItem({ comment, me, onReply, onReact }) {
+  const { t } = useTranslation();
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [replyParent, setReplyParent] = useState(null);
@@ -237,7 +241,7 @@ export default function CommentItem({ comment, me, onReply, onReact }) {
   const rootUser = comment.user || {};
   const rootAvatar =
     rootUser.avatar || comment.userAvatar || comment.avatar || "/default-avatar.png";
-  const rootName = rootUser.name || comment.userName || "Người dùng";
+  const rootName = rootUser.name || comment.userName || t("feed.user.default");
 
   const directReplies = comment.replies || [];
   const hasReplies = directReplies.length > 0;
@@ -272,7 +276,7 @@ export default function CommentItem({ comment, me, onReply, onReact }) {
             if (!rootUser?.id) e.preventDefault();
             e.stopPropagation();
           }}
-          title={rootUser?.id ? `Xem trang cá nhân ${rootName}` : ""}
+          title={rootUser?.id ? t("feed.user.viewProfileOf", { name: rootName }) : ""}
         >
           <img
             src={rootAvatar}
@@ -310,7 +314,7 @@ export default function CommentItem({ comment, me, onReply, onReact }) {
             onClick={() => openReplyTo(comment.id, rootUser)}
             className="font-semibold hover:underline text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
-            Trả lời
+            {t("feed.comment.reply")}
           </button>
           <ReactionBadge reactions={comment.reactions} reactionUsers={comment.reactionUsers} />
         </div>
@@ -321,7 +325,7 @@ export default function CommentItem({ comment, me, onReply, onReact }) {
             onClick={() => setShowReplies(true)}
             className="mt-1 text-xs text-sky-600 dark:text-sky-400 hover:underline"
           >
-            Xem phản hồi ({directReplies.length})
+            {t("feed.comment.viewReplies", { count: directReplies.length })}
           </button>
         )}
 
@@ -352,13 +356,13 @@ export default function CommentItem({ comment, me, onReply, onReact }) {
                   />
                   <div>
                     <div className="mb-1 text-xs text-sky-600 dark:text-sky-400 font-semibold">
-                      Đang trả lời{" "}
+                      {t("feed.comment.replyingTo")}{" "}
                       {replyParent.user?.id ? (
                         <Link to={`/profile/${replyParent.user.id}`} className="hover:underline">
                           @{replyParent.user.name}
                         </Link>
                       ) : (
-                        `@${replyParent.user?.name || "người dùng"}`
+                        `@${replyParent.user?.name || t("feed.user.default")}`
                       )}
                     </div>
                     <form onSubmit={handleReplySubmit} className="flex gap-2 items-center">
@@ -371,7 +375,7 @@ export default function CommentItem({ comment, me, onReply, onReact }) {
                         ref={replyInputRef}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Phản hồi..."
+                        placeholder={t("feed.comment.replyPlaceholder")}
                         className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 text-sm outline-none focus:ring-2 focus:ring-sky-400"
                       />
                     </form>

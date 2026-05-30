@@ -1,6 +1,7 @@
 // src/features/planBoard/components/PlanCalendar.jsx
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { usePlanCalendarLogic } from "../../hooks/usePlanCalendarLogic";
 import PlanCalendarSidebar from "./PlanCalendarSidebar";
 import PlanCalendarWeekGrid from "./PlanCalendarWeekGrid";
@@ -14,6 +15,7 @@ export default function PlanCalendar({
   createActivityCard,
   updateActivityCard,
 }) {
+  const { t } = useTranslation();
   const {
     selectedDate,
     visibleMonth,
@@ -63,10 +65,10 @@ export default function PlanCalendar({
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Thời gian biểu
+              {t("plan.calendar.timetable_title")}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Hiển thị & chỉnh sửa hoạt động theo ngày/giờ từ PlanBoard.
+              {t("plan.calendar.timetable_desc")}
             </p>
           </div>
         </div>

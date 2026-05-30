@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaRoute, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import { haversineDistanceKm } from "../../../planBoard/utils/distance";
@@ -29,25 +30,25 @@ import {
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
 const TRANSPORT_METHODS = [
-  { value: "taxi", label: "Taxi" },
-  { value: "motorbike taxi", label: "Xe ôm" },
-  { value: "motorbike", label: "Xe máy" },
-  { value: "car", label: "Ô tô riêng" },
-  { value: "coach", label: "Xe khách" },
-  { value: "plane", label: "Máy bay" },
-  { value: "bus", label: "Xe buýt" },
-  { value: "walk", label: "Đi bộ" },
-  { value: "shift", label: "Tàu thuyền" },
-  { value: "train", label: "Tàu điện" },
-  { value: "other", label: "Khác" },
+  { value: "taxi", labelKey: "plan.transport.method_options.taxi" },
+  { value: "motorbike taxi", labelKey: "plan.transport.method_options.motorbike_taxi" },
+  { value: "motorbike", labelKey: "plan.transport.method_options.motorbike" },
+  { value: "car", labelKey: "plan.transport.method_options.car" },
+  { value: "coach", labelKey: "plan.transport.method_options.coach" },
+  { value: "plane", labelKey: "plan.transport.method_options.plane" },
+  { value: "bus", labelKey: "plan.transport.method_options.bus" },
+  { value: "walk", labelKey: "plan.transport.method_options.walk" },
+  { value: "shift", labelKey: "plan.transport.method_options.boat" },
+  { value: "train", labelKey: "plan.transport.method_options.train" },
+  { value: "other", labelKey: "plan.transport.method_options.other" },
 
 ];
 
 const EXTRA_TYPES = [
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ thu" },
-  { value: "TAX", label: "Thuế" },
-  { value: "OTHER", label: "Khác" },
+  { value: "SERVICE_FEE", labelKey: "plan.extra_cost.service_fee" },
+  { value: "SURCHARGE", labelKey: "plan.extra_cost.surcharge" },
+  { value: "TAX", labelKey: "plan.extra_cost.tax" },
+  { value: "OTHER", labelKey: "plan.extra_cost.other" },
 ];
 
 function safeJsonParse(str) {
@@ -67,6 +68,8 @@ export default function TransportActivityModal({
   planMembers = [],
   readOnly = false,
 }) {
+  const { t } = useTranslation();
+
   const [title, setTitle] = useState("");
 
   // Fallback text (data cũ / user gõ tay)
@@ -325,11 +328,11 @@ export default function TransportActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!fromPlaceText.trim()) newErrors.from = "Vui lòng chọn điểm đi.";
-    if (!toPlaceText.trim()) newErrors.to = "Vui lòng chọn điểm đến.";
+    if (!fromPlaceText.trim()) newErrors.from = t("plan.transport.error_from_required");
+    if (!toPlaceText.trim()) newErrors.to = t("plan.transport.error_to_required");
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.transport.error_end_after_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -343,8 +346,8 @@ export default function TransportActivityModal({
 
     onSubmit?.({
       type: "TRANSPORT",
-      title: title || `Di chuyển: ${fromPlaceText} → ${toPlaceText}`,
-      text: title || `Di chuyển: ${fromPlaceText} → ${toPlaceText}`,
+      title: title || t("plan.transport.default_title", { from: fromPlaceText, to: toPlaceText }),
+      text: title || t("plan.transport.default_title", { from: fromPlaceText, to: toPlaceText }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -381,15 +384,17 @@ export default function TransportActivityModal({
   const footerName =
     fromPlaceText && toPlaceText
       ? `${fromPlaceText} → ${toPlaceText}${
-          distanceKm != null ? ` (Khoảng cách ước tính: ${distanceKm.toFixed(1)} km)` : ""
+          distanceKm != null
+            ? ` (${t("plan.transport.estimated_distance", { km: distanceKm.toFixed(1) })})`
+            : ""
         }`
       : "";
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Di chuyển"
+      labelPrefix={t("plan.transport.footer_prefix")}
       name={footerName}
-      emptyLabelText="Điền đầy đủ điểm đi và điểm đến để lưu hoạt động."
+      emptyLabelText={t("plan.transport.footer_empty")}
       locationText={
         effectiveFromLocation?.fullAddress || effectiveToLocation?.fullAddress
           ? `${effectiveFromLocation?.fullAddress || ""} → ${effectiveToLocation?.fullAddress || ""}`
@@ -397,7 +402,7 @@ export default function TransportActivityModal({
       }
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.transport.time_range", { start: startTime, end: endTime, minutes: durationMinutes })
           : ""
       }
     />
@@ -414,14 +419,14 @@ export default function TransportActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động di chuyển"}
+      submitLabel={editingCard ? t("common.save_edit") : t("plan.transport.submit_create")}
       submitClassName="bg-gradient-to-r from-sky-500 via-sky-500 to-indigo-500 shadow-lg shadow-sky-500/30"
     />
   );
@@ -449,9 +454,9 @@ export default function TransportActivityModal({
         open={open}
         onClose={onClose}
         icon={{ main: <FaRoute />, close: <FaTimes size={14} />, bg: "from-sky-500 to-indigo-500" }}
-        title="Hoạt động di chuyển"
+        title={t("plan.transport.title")}
         typeLabel="Transport"
-        subtitle="Ghi lại quãng đường, thời gian, chi phí và chia tiền cho nhóm."
+        subtitle={t("plan.transport.subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -459,20 +464,20 @@ export default function TransportActivityModal({
         {/* THÔNG TIN CHUNG */}
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Thông tin chung</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.transport.general_info")}</label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Tên + điểm đi/đến + điểm ghé
+              {t("plan.transport.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Tên hoạt động (tuỳ chọn)</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">{t("plan.transport.activity_name")}</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className={`${inputBase} w-full mt-1`}
-                placeholder="VD: Taxi từ khách sạn về phố đi bộ"
+                placeholder={t("plan.transport.activity_name_placeholder")}
               />
             </div>
 
@@ -480,7 +485,7 @@ export default function TransportActivityModal({
               {/* FROM */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Đi từ <span className="text-red-500 align-middle">*</span>
+                  {t("plan.transport.from")} <span className="text-red-500 align-middle">*</span>
                 </label>
 
                 <button
@@ -514,7 +519,7 @@ export default function TransportActivityModal({
                     {effectiveFromLocation || fromPlaceText ? (
                       <>
                         <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                          {getLocDisplayLabel(effectiveFromLocation, fromPlaceText || "Điểm xuất phát")}
+                          {getLocDisplayLabel(effectiveFromLocation, fromPlaceText || t("plan.transport.from_default_label"))}
                         </p>
 
                         {effectiveFromLocation?.fullAddress && (
@@ -532,7 +537,7 @@ export default function TransportActivityModal({
                         {effectiveFromLocation?.lat != null && effectiveFromLocation?.lng != null && (
                           <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                             <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                              Đã chọn trên bản đồ
+                              {t("plan.transport.picked_on_map")}
                             </span>
                             <span className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
                               {effectiveFromLocation.lat.toFixed(4)}, {effectiveFromLocation.lng.toFixed(4)}
@@ -543,10 +548,10 @@ export default function TransportActivityModal({
                     ) : (
                       <>
                         <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                          Chọn điểm xuất phát trên bản đồ
+                          {t("plan.transport.from_pick_title")}
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                          Nhấn để mở Map, chọn địa điểm làm điểm đi.
+                          {t("plan.transport.from_pick_hint")}
                         </p>
                       </>
                     )}
@@ -556,7 +561,7 @@ export default function TransportActivityModal({
                     className="hidden md:inline-flex items-center text-[11px] font-medium
                       text-sky-500 group-hover:text-sky-600 dark:text-sky-300 dark:group-hover:text-sky-200"
                   >
-                    Mở bản đồ
+                    {t("plan.transport.open_map")}
                   </span>
                 </button>
 
@@ -566,7 +571,7 @@ export default function TransportActivityModal({
               {/* TO */}
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Đến <span className="text-red-500 align-middle">*</span>
+                  {t("plan.transport.to")} <span className="text-red-500 align-middle">*</span>
                 </label>
 
                 <button
@@ -600,7 +605,7 @@ export default function TransportActivityModal({
                     {effectiveToLocation || toPlaceText ? (
                       <>
                         <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                          {getLocDisplayLabel(effectiveToLocation, toPlaceText || "Điểm đến")}
+                          {getLocDisplayLabel(effectiveToLocation, toPlaceText || t("plan.transport.to_default_label"))}
                         </p>
 
                         {effectiveToLocation?.fullAddress && (
@@ -618,7 +623,7 @@ export default function TransportActivityModal({
                         {effectiveToLocation?.lat != null && effectiveToLocation?.lng != null && (
                           <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                             <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                              Đã chọn trên bản đồ
+                              {t("plan.transport.picked_on_map")}
                             </span>
                             <span className="px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">
                               {effectiveToLocation.lat.toFixed(4)}, {effectiveToLocation.lng.toFixed(4)}
@@ -629,10 +634,10 @@ export default function TransportActivityModal({
                     ) : (
                       <>
                         <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                          Chọn điểm đến trên bản đồ
+                          {t("plan.transport.to_pick_title")}
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                          Nhấn để mở Map, chọn địa điểm làm điểm đến.
+                          {t("plan.transport.to_pick_hint")}
                         </p>
                       </>
                     )}
@@ -642,7 +647,7 @@ export default function TransportActivityModal({
                     className="hidden md:inline-flex items-center text-[11px] font-medium
                       text-emerald-500 group-hover:text-emerald-600 dark:text-emerald-300 dark:group-hover:text-emerald-200"
                   >
-                    Mở bản đồ
+                    {t("plan.transport.open_map")}
                   </span>
                 </button>
 
@@ -661,7 +666,7 @@ export default function TransportActivityModal({
                       dark:hover:bg-sky-900/60"
                   >
                     <FaRoute size={11} />
-                    <span>Mở chỉ đường trên Google Maps</span>
+                    <span>{t("plan.transport.open_directions")}</span>
                   </button>
                 </div>
               )}
@@ -670,13 +675,13 @@ export default function TransportActivityModal({
             {/* STOPS */}
             <div className="pt-1 mt-2">
               <div className="flex items-center justify-between gap-2">
-                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Ghé ngang</label>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">{t("plan.transport.stops")}</label>
                 <button
                   onClick={addStop}
                   type="button"
                   className="flex items-center gap-1 text-[11px] font-medium text-sky-600 dark:text-sky-300 hover:text-sky-500"
                 >
-                  + Thêm điểm dừng
+                  {t("plan.transport.add_stop")}
                 </button>
               </div>
 
@@ -688,7 +693,7 @@ export default function TransportActivityModal({
                         value={s}
                         onChange={(e) => changeStop(e.target.value, i)}
                         className={`${inputBase} flex-1`}
-                        placeholder={`Điểm dừng ${i + 1}`}
+                        placeholder={t("plan.transport.stop_placeholder", { index: i + 1 })}
                       />
                       <button
                         onClick={() => removeStop(i)}
@@ -709,13 +714,13 @@ export default function TransportActivityModal({
         {/* METHOD & TIME */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Phương tiện & Thời gian</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Chọn cách đi + giờ đi/đến</span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.transport.method_time")}</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("plan.transport.method_time_hint")}</span>
           </div>
 
           <div className={sectionCard + " space-y-3"}>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Phương tiện</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">{t("plan.transport.method")}</label>
               <div className="flex flex-wrap gap-2 mt-1.5">
                 {TRANSPORT_METHODS.map((m) => (
                   <button
@@ -728,16 +733,16 @@ export default function TransportActivityModal({
                         : "bg-white/80 border-slate-200/80 dark:bg-slate-900/70 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    {m.label}
+                    {t(m.labelKey)}
                   </button>
                 ))}
               </div>
             </div>
 
             <ActivityTimeRangeSection
-              sectionLabel="Thời gian di chuyển"
-              startLabel="Bắt đầu"
-              endLabel="Kết thúc"
+              sectionLabel={t("plan.transport.travel_time")}
+              startLabel={t("plan.transport.start_time")}
+              endLabel={t("plan.transport.end_time")}
               color="sky"
               iconClassName="text-sky-500"
               startTime={startTime}
@@ -747,7 +752,7 @@ export default function TransportActivityModal({
               error={errors.time}
               onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
               onDurationChange={(mins) => setDurationMinutes(mins)}
-              durationHintPrefix="Thời lượng dự kiến"
+              durationHintPrefix={t("plan.transport.duration_hint_prefix")}
             />
           </div>
         </section>
@@ -755,15 +760,15 @@ export default function TransportActivityModal({
         {/* COST */}
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ngân sách & chi phí</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Ước lượng + phát sinh + thực tế</span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.transport.budget_cost")}</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("plan.transport.budget_cost_hint")}</span>
           </div>
 
           <div className={sectionCard + " space-y-4"}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Chi phí ước lượng (cước chính)
+                  {t("plan.transport.estimated_base")}
                 </label>
                 <div className="flex items-center gap-2 mt-1">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -773,7 +778,7 @@ export default function TransportActivityModal({
                     value={estimatedCostInput}
                     onChange={(e) => setEstimatedCostInput(e.target.value)}
                     className={`${inputBase} flex-1`}
-                    placeholder="VD: 50000"
+                    placeholder={t("plan.transport.estimated_base_placeholder")}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
@@ -781,7 +786,7 @@ export default function TransportActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Ngân sách cho hoạt động (tuỳ chọn)
+                  {t("plan.transport.budget_amount")}
                 </label>
                 <div className="flex items-center gap-2 mt-1">
                   <FaMoneyBillWave className="text-indigo-500" />
@@ -790,7 +795,7 @@ export default function TransportActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="Không bắt buộc"
+                    placeholder={t("plan.transport.optional")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -803,12 +808,12 @@ export default function TransportActivityModal({
               addExtraCost={addExtraCost}
               updateExtraCost={updateExtraCost}
               removeExtraCost={removeExtraCost}
-              extraTypes={EXTRA_TYPES}
+              extraTypes={EXTRA_TYPES.map((e) => ({ value: e.value, label: t(e.labelKey) }))}
             />
 
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tổng chi phí thực tế cho chuyến này (nếu có)
+                {t("plan.transport.actual_cost")}
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <FaMoneyBillWave className="text-emerald-500" />
@@ -817,27 +822,27 @@ export default function TransportActivityModal({
                   min="0"
                   value={actualCost}
                   onChange={(e) => setActualCost(e.target.value)}
-                  placeholder="Điền lại sau khi thanh toán"
+                  placeholder={t("plan.transport.actual_cost_placeholder")}
                   className={`${inputBase} flex-1`}
                 />
                 <span className="text-xs text-slate-500">đ</span>
               </div>
               <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                Nếu để trống, hệ thống sẽ dùng <b>chi phí ước lượng</b> + <b>phát sinh</b> để chia tiền.
+                {t("plan.transport.actual_cost_note")}
               </p>
             </div>
 
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Cước chính ước lượng:{" "}
+                {t("plan.transport.summary_base")}{" "}
                 <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh:{" "}
+                {t("plan.transport.summary_extra")}{" "}
                 <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến:{" "}
+                {t("plan.transport.summary_estimated_total")}{" "}
                 <span className="font-semibold text-sky-600 dark:text-sky-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
@@ -845,7 +850,7 @@ export default function TransportActivityModal({
 
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b>:{" "}
+                  {t("plan.transport.summary_using_actual")}{" "}
                   <span className="font-semibold text-sky-600 dark:text-sky-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -854,7 +859,7 @@ export default function TransportActivityModal({
 
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.transport.summary_budget")}{" "}
                   <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
@@ -893,15 +898,15 @@ export default function TransportActivityModal({
         {/* NOTE */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm thông tin nhỏ cho cả nhóm</span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.transport.note")}</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("plan.transport.note_hint")}</span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             className={`${inputBase} w-full`}
-            placeholder="VD: Nhớ mang tiền lẻ, nhắn trước cho tài xế..."
+            placeholder={t("plan.transport.note_placeholder")}
           />
         </section>
       </ActivityModalShell>

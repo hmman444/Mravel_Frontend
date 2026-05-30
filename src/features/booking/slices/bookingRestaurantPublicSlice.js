@@ -5,6 +5,7 @@ import {
   lookupGuestRestaurantBooking,
   clearGuestRestaurantBookings,
 } from "../services/restaurantBookingPublicService";
+import i18n from "../../../i18n";
 
 export const fetchGuestMyRestaurantBookings = createAsyncThunk(
   "bookingRestaurantPublic/fetchGuestMyRestaurantBookings",
@@ -12,7 +13,7 @@ export const fetchGuestMyRestaurantBookings = createAsyncThunk(
     try {
       return await getMyGuestRestaurantBookings();
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Không tải được danh sách đơn đặt bàn");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.load_restaurant_bookings_failed"));
     }
   }
 );
@@ -24,7 +25,7 @@ export const lookupRestaurantBookingPublic = createAsyncThunk(
       const result = await lookupGuestRestaurantBooking(payload);
       return { result, scope: "LOOKUP" }; // hoặc PUBLIC
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Tra cứu thất bại");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.lookup_failed"));
     }
   }
 );
@@ -36,7 +37,7 @@ export const clearRestaurantGuestDevice = createAsyncThunk(
       await clearGuestRestaurantBookings();
       return true;
     } catch (e) {
-      return rejectWithValue(e?.response?.data?.message || "Xoá thất bại");
+      return rejectWithValue(e?.response?.data?.message || i18n.t("booking.clear_failed"));
     }
   }
 );

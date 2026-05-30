@@ -1,5 +1,8 @@
 // src/features/restaurants/components/restaurant/RestaurantHero.jsx
+import { useTranslation } from "react-i18next";
+
 export default function RestaurantHero() {
+  const { t } = useTranslation();
   const banner =
     "https://ik.imagekit.io/tvlk/image/imageResource/2025/05/22/1747889814840-c3994b87577ea07541413dace0a20193.jpeg?tr=h-329,q-75,w-1305";
 
@@ -10,7 +13,7 @@ export default function RestaurantHero() {
           {/* Ảnh nền full width, KHÔNG làm tối nữa */}
           <img
             src={banner}
-            alt="Nhà hàng, quán ăn"
+            alt={t("restaurant.hero_image_alt")}
             className="w-full h-full object-cover"
           />
 
@@ -18,11 +21,10 @@ export default function RestaurantHero() {
           <div className="absolute inset-x-0 bottom-0 pb-5 md:pb-7">
             <div className="px-6 md:px-10 max-w-xl text-white">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-snug drop-shadow">
-                Tìm & đặt quán ăn với Mravel
+                {t("restaurant.hero_title")}
               </h1>
               <p className="mt-2 md:mt-3 text-sm md:text-base text-white/95 drop-shadow">
-                Đặt bàn trước cho chuyến đi của bạn: quán ăn địa phương,
-                nhà hàng sang trọng hay quán nhậu tụ họp cùng bạn bè.
+                {t("restaurant.hero_subtitle")}
               </p>
             </div>
           </div>

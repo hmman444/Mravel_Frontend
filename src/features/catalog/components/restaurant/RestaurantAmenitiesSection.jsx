@@ -1,5 +1,6 @@
 // src/features/catalog/components/restaurant/RestaurantAmenitiesSection.jsx
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 
 
@@ -32,6 +33,7 @@ function CheckIcon({ ok }) {
 }
 
 export default function RestaurantAmenitiesSection({ restaurant }) {
+  const { t } = useTranslation();
   const amenityCodes = Array.isArray(restaurant?.amenityCodes) ? restaurant.amenityCodes : [];
   const amenitiesFromBe = Array.isArray(restaurant?.amenities) ? restaurant.amenities : [];
 
@@ -67,7 +69,7 @@ export default function RestaurantAmenitiesSection({ restaurant }) {
 
   return (
     <section className="px-5 md:px-6 pt-5 pb-6">
-      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">Tiện ích</h2>
+      <h2 className="text-2xl md:text-[26px] font-extrabold text-gray-900 dark:text-gray-100">{t('restaurant.amenities')}</h2>
 
       <div className="mt-4 rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-5 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4">

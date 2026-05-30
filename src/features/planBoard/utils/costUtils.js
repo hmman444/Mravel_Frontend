@@ -1,6 +1,8 @@
 // src/features/planBoard/utils/costUtils.js
 
-// EXTRA COSTS 
+import i18n from "../../../i18n";
+
+// EXTRA COSTS
 
 /**
  * Build extraCosts state khi LOAD CARD (edit) từ activityData + cost
@@ -10,7 +12,7 @@ export function buildInitialExtraCosts(activityData = {}, cost = {}) {
   // 1) Ưu tiên cost.extraCosts (nguồn chuẩn)
   if (Array.isArray(cost.extraCosts) && cost.extraCosts.length > 0) {
     return cost.extraCosts.map((e) => ({
-      reason: e.reason || "Chi phí phụ",
+      reason: e.reason || i18n.t("plan.cost.extra_default_reason"),
       type: e.type || "OTHER",
       estimatedAmount: null,
       actualAmount:
@@ -25,7 +27,7 @@ export function buildInitialExtraCosts(activityData = {}, cost = {}) {
   // 2) Fallback: activityData.extraItems (legacy / format cũ)
   if (Array.isArray(activityData.extraItems) && activityData.extraItems.length > 0) {
     return activityData.extraItems.map((it) => ({
-      reason: it.reason || it.note || "Chi phí phụ",
+      reason: it.reason || it.note || i18n.t("plan.cost.extra_default_reason"),
       type: it.type || "OTHER",
       estimatedAmount: null,
       actualAmount:
@@ -41,7 +43,7 @@ export function buildInitialExtraCosts(activityData = {}, cost = {}) {
   if (activityData.extraSpend != null) {
     return [
       {
-        reason: "Chi phí phụ",
+        reason: i18n.t("plan.cost.extra_default_reason"),
         type: "OTHER",
         estimatedAmount: null,
         actualAmount: Number(activityData.extraSpend) || 0,
@@ -58,7 +60,7 @@ export function buildInitialExtraCosts(activityData = {}, cost = {}) {
 export function normalizeExtraCosts(extraCosts = []) {
   return extraCosts
     .map((e) => ({
-      reason: e.reason || "Chi phí phụ",
+      reason: e.reason || i18n.t("plan.cost.extra_default_reason"),
       type: e.type || "OTHER",
       estimatedAmount: null,
       actualAmount:

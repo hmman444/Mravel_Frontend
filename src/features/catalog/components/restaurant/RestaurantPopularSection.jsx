@@ -1,6 +1,7 @@
 // src/features/restaurants/components/restaurant/RestaurantPopularSection.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
@@ -30,6 +31,7 @@ const SkeletonCard = () => (
 );
 
 export default function RestaurantPopularSection() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { items, loading, error, fetchRestaurants } = useCatalogRestaurants();
   const [activeKey, setActiveKey] = useState(null);
@@ -53,7 +55,7 @@ export default function RestaurantPopularSection() {
     items.forEach((r) => {
       const key = r.destinationSlug || r.cityName || "other";
       const label =
-        r.cityName || r.destinationName || r.destinationSlug || "Khác";
+        r.cityName || r.destinationName || r.destinationSlug || t('restaurant.other_destination');
 
       if (!map.has(key)) {
         map.set(key, { key, label, restaurants: [] });
@@ -94,7 +96,7 @@ export default function RestaurantPopularSection() {
       {/* TITLE */}
       <div className="flex items-center gap-2 mb-4">
         <span className="text-2xl">🍽️</span>
-        <h2 className="text-2xl font-semibold">Quán ăn phổ biến</h2>
+        <h2 className="text-2xl font-semibold">{t('restaurant.popular_restaurants')}</h2>
       </div>
 
       {/* TABS ĐIỂM ĐẾN */}
@@ -160,7 +162,7 @@ export default function RestaurantPopularSection() {
       {/* lỗi */}
       {error && (
         <p className="mt-2 text-sm text-red-600">
-          Không tải được danh sách quán ăn:{" "}
+          {t('restaurant.load_restaurants_failed')}{" "}
           {typeof error === "string" ? error : ""}
         </p>
       )}
@@ -171,6 +173,7 @@ export default function RestaurantPopularSection() {
 /*  CARD NHỎ KIỂU PASGO (KHÔNG KM, KHÔNG BUTTON ĐẶT, CHỈ "GIÁ CHỈ TỪ")  */
 
 function RestaurantMiniCard({ restaurant, onClick }) {
+  const { t } = useTranslation();
   const {
     name,
     slug,
@@ -204,8 +207,8 @@ function RestaurantMiniCard({ restaurant, onClick }) {
 
   const basePriceText = basePrice ? formatCurrencyVND(basePrice) : null;
   const priceText = basePriceText
-    ? `Giá chỉ từ ${basePriceText} ${currencyCode || "VND"}/người`
-    : "Giá tham khảo tại nhà hàng";
+    ? t('restaurant.price_from_per_person', { price: basePriceText, currency: currencyCode || "VND" })
+    : t('restaurant.reference_price_at_restaurant');
 
   const score =
     typeof avgRating === "number" ? avgRating.toFixed(1) : null;
@@ -267,7 +270,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
           {/* phần trên: tên + địa chỉ + thể loại */}
           <div>
             <h3 className="font-semibold text-[15px] leading-snug line-clamp-2">
-              {name || slug || "Nhà hàng chưa đặt tên"}
+              {name || slug || t('restaurant.unnamed_restaurant')}
             </h3>
 
             {addressText && (
@@ -308,7 +311,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
                   )}
                 </>
               ) : (
-                <span className="text-[11px] text-gray-500 dark:text-gray-400">Mới</span>
+                <span className="text-[11px] text-gray-500 dark:text-gray-400">{t('restaurant.new')}</span>
               )}
 
               {priceLevelText && (

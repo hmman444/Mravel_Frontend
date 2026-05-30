@@ -1,8 +1,10 @@
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { TEXT } from "./roomTypes.text";
 import { asArray, asString, normalizeRatePlan, sanitizeNumberStr } from "./roomTypes.utils";
 
 export default function RatePlansEditor({ ratePlans = [], onChange }) {
+  const { t } = useTranslation();
   const list = asArray(ratePlans).map(normalizeRatePlan);
 
   const emit = (next) => {
@@ -163,7 +165,7 @@ export default function RatePlansEditor({ ratePlans = [], onChange }) {
                 if (Number.isFinite(p) && Number.isFinite(r) && p > 0 && r > 0 && p > r) {
                   return (
                     <div className="md:col-span-12 text-xs text-red-600">
-                      Giá thực tế đang lớn hơn giá tham chiếu — sẽ ra phần trăm giảm âm.
+                      {t("partner.rate_plans.actual_price_exceeds_reference_warning")}
                     </div>
                   );
                 }

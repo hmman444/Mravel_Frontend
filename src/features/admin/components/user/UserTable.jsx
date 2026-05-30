@@ -8,6 +8,7 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import { ROLE_LABEL, STATUS_LABEL, STATUS_BADGE } from "./userTerms";
+import { useTranslation } from "react-i18next";
 
 const fadeUp = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 8 } };
 
@@ -17,6 +18,7 @@ export default function UserTable({
   onLock,             // (id) => ...
   onUnlock,           // (id) => ...
 }) {
+  const { t } = useTranslation();
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 shadow-sm dark:bg-slate-900 dark:border-slate-800">
       <div className="max-h-[72vh] overflow-auto">
@@ -25,10 +27,10 @@ export default function UserTable({
             <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
               <th className="px-4 py-3 w-[64px] text-center">#</th>
               <th className="px-4 py-3 w-[280px]">Email</th>
-              <th className="px-4 py-3 w-[280px]">Họ tên</th>
+              <th className="px-4 py-3 w-[280px]">{t("admin.user_fullname")}</th>
               <th className="px-4 py-3">Role</th>
               <th className="px-4 py-3">OTP</th>
-              <th className="px-4 py-3">Trạng thái</th>
+              <th className="px-4 py-3">{t("admin.user_status")}</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -64,7 +66,7 @@ export default function UserTable({
 
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900 dark:text-white">
-                        {u.fullname || <span className="italic text-slate-400">Chưa có</span>}
+                        {u.fullname || <span className="italic text-slate-400">{t("admin.user_no_fullname")}</span>}
                       </div>
                     </td>
 
@@ -78,10 +80,10 @@ export default function UserTable({
                       {u.enabled ? (
                         <span className="inline-flex items-center gap-1 text-emerald-600">
                           <ShieldCheckIcon className="h-5 w-5" />
-                          Đã xác thực
+                          {t("admin.user_otp_verified")}
                         </span>
                       ) : (
-                        <span className="text-slate-500">Chưa OTP</span>
+                        <span className="text-slate-500">{t("admin.user_otp_unverified")}</span>
                       )}
                     </td>
 
@@ -98,7 +100,7 @@ export default function UserTable({
                             onClick={() => onUnlock?.(u.id)}
                             disabled={busy || isAdmin}
                             className="rounded-lg p-2 hover:bg-emerald-50 disabled:opacity-50 dark:hover:bg-slate-800"
-                            title={isAdmin ? "Không thao tác ADMIN" : "Mở khóa"}
+                            title={isAdmin ? t("admin.user_no_admin_action") : t("admin.user_unlock")}
                           >
                             <LockOpenIcon className="h-5 w-5 text-emerald-600" />
                           </button>
@@ -107,7 +109,7 @@ export default function UserTable({
                             onClick={() => onLock?.(u.id)}
                             disabled={busy || isAdmin}
                             className="rounded-lg p-2 hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-slate-800"
-                            title={isAdmin ? "Không thao tác ADMIN" : "Khóa"}
+                            title={isAdmin ? t("admin.user_no_admin_action") : t("admin.user_lock")}
                           >
                             <LockClosedIcon className="h-5 w-5 text-rose-600" />
                           </button>

@@ -1,19 +1,21 @@
 // src/features/user/components/LinkedAccountsCard.jsx
 import { Link2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const PROVIDERS = ["Facebook", "Google", "Apple"];
 
 export default function LinkedAccountsCard() {
+  const { t } = useTranslation();
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-4">
       <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-slate-200 dark:border-slate-700">
         <div>
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Link2 className="w-4 h-4 text-sky-500" />
-            Tài khoản đã liên kết
+            {t("user.linked_accounts_title")}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Liên kết tài khoản mạng xã hội để đăng nhập Mravel dễ dàng
+            {t("user.linked_accounts_desc")}
           </p>
         </div>
       </div>
@@ -31,7 +33,7 @@ export default function LinkedAccountsCard() {
               <span>{provider}</span>
             </div>
             <button className="text-xs font-medium text-sky-600 hover:underline">
-              Liên kết
+              {t("user.link_account")}
             </button>
           </div>
         ))}

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { inputBase, pillBtn, sectionCard } from "../../utils/activityStyles";
 import { usePlanBoard } from "../../hooks/usePlanBoard";
@@ -38,6 +39,7 @@ export default function SplitMoneySection({
   selectedMemberIds: selectedMemberIdsProp,
   setSelectedMemberIds: setSelectedMemberIdsProp,
 }) {
+  const { t } = useTranslation();
   const [payerOpen, setPayerOpen] = useState(false);
 
   // state nội bộ fallback nếu modal chưa truyền prop
@@ -172,15 +174,15 @@ export default function SplitMoneySection({
   };
 
   const getPayerLabel = () => {
-    if (!payerChoice) return "Không chọn";
+    if (!payerChoice) return t("plan.split.payer_none");
 
     if (payerChoice.startsWith("member:")) {
       const id = Number(payerChoice.split(":")[1]);
       const m = planMembers.find((x) => x.userId === id);
-      return m ? getMemberLabel(m) : "Thành viên";
+      return m ? getMemberLabel(m) : t("plan.split.payer_member");
     }
 
-    return "Không chọn";
+    return t("plan.split.payer_none");
   };
 
   const handleSelectPayer = (value) => {
@@ -195,12 +197,12 @@ export default function SplitMoneySection({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-          Chia tiền
+          {t("plan.split.title")}
         </span>
 
         <div className="flex items-center gap-2 text-[11px]">
           <span className="text-slate-500 dark:text-slate-400">
-            {splitEnabled ? "Đang chia" : "Không chia"}
+            {splitEnabled ? t("plan.split.on") : t("plan.split.off")}
           </span>
           <button
             type="button"
@@ -223,7 +225,7 @@ export default function SplitMoneySection({
       <div className={sectionCard}>
         {!splitEnabled && (
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Bật chia tiền để tính số tiền mỗi người cần trả.
+            {t("plan.split.hint_enable")}
           </p>
         )}
 
@@ -233,7 +235,7 @@ export default function SplitMoneySection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="relative">
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Người trả chính (tuỳ chọn)
+                  {t("plan.split.main_payer")}
                 </label>
 
                 <button
@@ -276,7 +278,7 @@ export default function SplitMoneySection({
                         hover:bg-slate-100 dark:hover:bg-slate-800
                       "
                     >
-                      Không chọn
+                      {t("plan.split.payer_none")}
                     </button>
 
                     {planMembers.map((m, idx) => {
@@ -309,11 +311,11 @@ export default function SplitMoneySection({
               {payerChoice === "external" && (
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                    Tên người trả
+                    {t("plan.split.payer_name")}
                   </label>
                   <input
                     className={`${inputBase} w-full mt-1`}
-                    placeholder="VD: Anh tài xế, bạn A..."
+                    placeholder={t("plan.split.payer_name_placeholder")}
                     value={payerExternalName}
                     onChange={(e) => setPayerExternalName(e.target.value)}
                   />
@@ -325,12 +327,12 @@ export default function SplitMoneySection({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium text-slate-600 dark:text-slate-300">
-                  Thành viên tham gia chia tiền
+                  {t("plan.split.participants_label")}
                 </span>
                 <div className="flex items-center gap-2 text-[11px]">
                   <span className="text-slate-500 dark:text-slate-400">
-                    Đang chọn{" "}
-                    <b>{selectedMemberIds?.length || 0} người</b>
+                    {t("plan.split.selecting")}{" "}
+                    <b>{t("plan.split.people_count", { n: selectedMemberIds?.length || 0 })}</b>
                   </span>
                   {planMembers.length > 0 && (
                     <>
@@ -339,14 +341,14 @@ export default function SplitMoneySection({
                         onClick={handleSelectAll}
                         className="underline text-sky-600 dark:text-sky-300"
                       >
-                        Chọn tất cả
+                        {t("plan.split.select_all")}
                       </button>
                       <button
                         type="button"
                         onClick={handleClearAll}
                         className="underline text-slate-500 dark:text-slate-400"
                       >
-                        Bỏ chọn
+                        {t("plan.split.clear_all")}
                       </button>
                     </>
                   )}
@@ -355,8 +357,8 @@ export default function SplitMoneySection({
 
               {planMembers.length === 0 ? (
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Chưa có thành viên nào trong kế hoạch này. Hãy mời thêm ở tab
-                  <b> Thành viên</b>.
+                  {t("plan.split.no_members")}
+                  <b> {t("plan.split.member_tab")}</b>.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -364,7 +366,7 @@ export default function SplitMoneySection({
                   <div className="flex flex-wrap gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/50 px-2.5 py-2">
                     {selectedMembers.length === 0 && (
                       <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                        Chưa chọn ai. Gõ <b>@</b> hoặc tên để thêm.
+                        {t("plan.split.empty_chips_before")} <b>@</b> {t("plan.split.empty_chips_after")}
                       </span>
                     )}
 
@@ -400,7 +402,7 @@ export default function SplitMoneySection({
                   <div className="relative">
                     <input
                       className={`${inputBase} w-full text-xs`}
-                      placeholder="Nhập @ hoặc tên để thêm người chia tiền..."
+                      placeholder={t("plan.split.search_placeholder")}
                       value={memberQuery}
                       onChange={(e) => {
                         setMemberQuery(e.target.value);
@@ -451,7 +453,7 @@ export default function SplitMoneySection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Cách chia
+                  {t("plan.split.method")}
                 </label>
                 <div className="flex gap-2 mt-1.5">
                   <button
@@ -463,7 +465,7 @@ export default function SplitMoneySection({
                         : "bg-white/80 border-slate-200/80 dark:bg-slate-900/70 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    Chia đều
+                    {t("plan.split.method_even")}
                   </button>
                   <button
                     type="button"
@@ -474,7 +476,7 @@ export default function SplitMoneySection({
                         : "bg-white/80 border-slate-200/80 dark:bg-slate-900/70 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    Nhập từng người
+                    {t("plan.split.method_exact")}
                   </button>
                 </div>
               </div>
@@ -505,15 +507,15 @@ export default function SplitMoneySection({
 
                 {parsedActual > 0 && (
                   <p className="text-[11px] mt-1 text-slate-600 dark:text-slate-300">
-                    Tổng chi:{" "}
+                    {t("plan.split.total_spent")}{" "}
                     <b>{parsedActual.toLocaleString("vi-VN")}đ</b>
                     <br />
-                    Mỗi người ~{" "}
+                    {t("plan.split.per_person")}{" "}
                     <b>
                       {(evenShare || 0).toLocaleString("vi-VN")}đ
                     </b>
                     {evenRemainder
-                      ? ` (+1đ cho ${evenRemainder} người đầu)`
+                      ? ` ${t("plan.split.remainder_note", { n: evenRemainder })}`
                       : ""}
                   </p>
                 )}
@@ -541,7 +543,7 @@ export default function SplitMoneySection({
                         })
                       }
                       className={`${inputBase} flex-[0.9]`}
-                      placeholder="Số tiền"
+                      placeholder={t("plan.split.amount_placeholder")}
                     />
 
                     <span className="text-xs text-slate-500">đ</span>
@@ -549,7 +551,7 @@ export default function SplitMoneySection({
                 ))}
 
                 <p className="text-[11px] mt-1">
-                  Tổng đã nhập:{" "}
+                  {t("plan.split.total_entered")}{" "}
                   <b
                     className={
                       totalExact === parsedActual

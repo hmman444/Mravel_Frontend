@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 function labelOfAmenity(a) {
@@ -24,7 +25,7 @@ const norm = (s) =>
     .trim();
 
 export default function AmenityMultiSelect({
-  title = "Tiện ích",
+  title,
   hint,
   items = [],
   value = [],
@@ -33,6 +34,7 @@ export default function AmenityMultiSelect({
   //  ưu tiên code để match DB amenityCodes
   getKey = (a) => a?.code ?? a?.id,
 }) {
+  const { t } = useTranslation();
   const [q, setQ] = useState("");
   const [openAll, setOpenAll] = useState(false);
   const [openSuggest, setOpenSuggest] = useState(false);
@@ -104,7 +106,7 @@ export default function AmenityMultiSelect({
     <div className="rounded-2xl border bg-white dark:bg-gray-800 p-4 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</div>
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title ?? t("partner.amenity.title")}</div>
           {hint ? <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{hint}</div> : null}
         </div>
 
@@ -114,7 +116,7 @@ export default function AmenityMultiSelect({
             onClick={() => setOpenAll(true)}
             className="text-xs px-3 py-1.5 rounded-xl border hover:bg-gray-50"
           >
-            Xem tất cả
+            {t("partner.amenity.view_all")}
           </button>
 
           <button
@@ -122,7 +124,7 @@ export default function AmenityMultiSelect({
             onClick={clearAll}
             className="text-xs px-3 py-1.5 rounded-xl border hover:bg-gray-50"
           >
-            Xóa chọn
+            {t("partner.amenity.clear_selection")}
           </button>
         </div>
       </div>
@@ -144,7 +146,7 @@ export default function AmenityMultiSelect({
             // delay nhẹ để click được item trong dropdown
             setTimeout(closeSuggest, 120);
           }}
-          placeholder="Tìm theo tên / code..."
+          placeholder={t("partner.amenity.search_placeholder")}
           className="w-full pl-10 pr-9 py-2 border rounded-xl outline-none focus:ring focus:border-blue-500"
         />
 
@@ -166,7 +168,7 @@ export default function AmenityMultiSelect({
         {openSuggest && q && (
           <div className="absolute z-40 mt-2 w-full rounded-2xl border bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
             {suggestions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Không tìm thấy tiện ích.</div>
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t("partner.amenity.not_found")}</div>
             ) : (
               <div className="max-h-72 overflow-auto divide-y">
                 {suggestions.map((a) => {
@@ -196,7 +198,7 @@ export default function AmenityMultiSelect({
                           on ? "bg-blue-600 text-white border-blue-600" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                         }`}
                       >
-                        {on ? "Đã chọn" : "Chọn"}
+                        {on ? t("partner.amenity.selected") : t("partner.amenity.select")}
                       </span>
                     </button>
                   );
@@ -208,8 +210,8 @@ export default function AmenityMultiSelect({
             <div className="px-3 py-2 border-t bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {filtered.length > suggestions.length
-                  ? `Còn ${filtered.length - suggestions.length} kết quả khác…`
-                  : `Tổng ${filtered.length} kết quả`}
+                  ? t("partner.amenity.more_results", { n: filtered.length - suggestions.length })
+                  : t("partner.amenity.total_results", { n: filtered.length })}
               </div>
               <button
                 type="button"
@@ -220,7 +222,7 @@ export default function AmenityMultiSelect({
                   setOpenAll(true);
                 }}
               >
-                Mở danh sách
+                {t("partner.amenity.open_list")}
               </button>
             </div>
           </div>
@@ -230,7 +232,7 @@ export default function AmenityMultiSelect({
       {/*  chips đã chọn (hiển thị VI theo code) */}
       <div className="flex flex-wrap gap-2">
         {selectedList.length === 0 ? (
-          <div className="text-xs text-gray-500 dark:text-gray-400">Chưa chọn tiện ích nào.</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{t("partner.amenity.none_selected")}</div>
         ) : (
           selectedList.map((k) => (
             <span
@@ -255,9 +257,9 @@ export default function AmenityMultiSelect({
           <div className="w-full max-w-4xl rounded-3xl bg-white dark:bg-gray-800 border shadow-xl overflow-hidden">
             <div className="px-5 py-3 border-b flex items-center justify-between">
               <div>
-                <div className="text-base font-bold text-gray-900 dark:text-gray-100">Tất cả tiện ích</div>
+                <div className="text-base font-bold text-gray-900 dark:text-gray-100">{t("partner.amenity.all_title")}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Click để chọn/bỏ chọn • Đã chọn: <b>{selectedKeys.size}</b>
+                  {t("partner.amenity.click_to_toggle")} <b>{selectedKeys.size}</b>
                 </div>
               </div>
 
@@ -265,7 +267,7 @@ export default function AmenityMultiSelect({
                 type="button"
                 onClick={() => setOpenAll(false)}
                 className="rounded-xl p-2 hover:bg-gray-100"
-                title="Đóng"
+                title={t("common.close")}
               >
                 <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
@@ -320,7 +322,7 @@ export default function AmenityMultiSelect({
                 onClick={clearAll}
                 className="px-4 py-2 text-sm rounded-xl border bg-white dark:bg-gray-800 hover:bg-gray-50"
               >
-                Xóa hết
+                {t("partner.amenity.clear_all")}
               </button>
 
               <button
@@ -328,7 +330,7 @@ export default function AmenityMultiSelect({
                 onClick={() => setOpenAll(false)}
                 className="px-4 py-2 text-sm rounded-xl bg-blue-600 text-white hover:bg-blue-700"
               >
-                Xong
+                {t("common.done")}
               </button>
             </div>
           </div>

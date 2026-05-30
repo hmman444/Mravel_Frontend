@@ -12,6 +12,7 @@ import { FiMapPin } from "react-icons/fi";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useCatalogPlaces } from "../../../../features/catalog/hooks/useCatalogPlaces";
 import { useCatalogHotels } from "../../../../features/catalog/hooks/useCatalogHotels";
@@ -22,9 +23,9 @@ import {
 } from "../../../../features/catalog/slices/catalogSlice";
 
 const TABS = [
-  { key: "HOTEL", label: "Khách sạn" },
-  { key: "PLACE", label: "Địa điểm tham quan" },
-  { key: "RESTAURANT", label: "Quán ăn" },
+  { key: "HOTEL", labelKey: "plan.place_picker.tab_hotel" },
+  { key: "PLACE", labelKey: "plan.place_picker.tab_place" },
+  { key: "RESTAURANT", labelKey: "plan.place_picker.tab_restaurant" },
 ];
 
 const DEFAULT_CENTER = { lat: 16.047079, lon: 108.20623 };
@@ -52,6 +53,7 @@ export default function PlacePickerModal({
   anchorPoint, // { lat, lng, label? }
   initialLocation, // payload đã chọn trước đó (api/custom)
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const listRef = useRef(null);
@@ -257,29 +259,29 @@ export default function PlacePickerModal({
   // header title / subtitle
   const headerTitle = useMemo(() => {
     if (activityType === "TRANSPORT") {
-      if (field === "from") return "Chọn điểm đi";
-      if (field === "to") return "Chọn điểm đến";
-      return "Chọn địa điểm cho chặng di chuyển";
+      if (field === "from") return t("plan.place_picker.title_from");
+      if (field === "to") return t("plan.place_picker.title_to");
+      return t("plan.place_picker.title_transport");
     }
-    if (activityType === "STAY") return "Chọn khách sạn";
-    if (activityType === "FOOD") return "Chọn quán ăn / nhà hàng";
-    return "Chọn địa điểm cho hoạt động";
-  }, [activityType, field]);
+    if (activityType === "STAY") return t("plan.place_picker.title_stay");
+    if (activityType === "FOOD") return t("plan.place_picker.title_food");
+    return t("plan.place_picker.title_default");
+  }, [activityType, field, t]);
 
   const headerSubtitle = useMemo(() => {
     if (activityType === "TRANSPORT") {
       if (field === "from")
-        return "Tìm khách sạn, điểm tham quan hoặc nhập vị trí để làm điểm xuất phát.";
+        return t("plan.place_picker.subtitle_from");
       if (field === "to")
-        return "Chọn nơi bạn sẽ tới: khách sạn, địa điểm tham quan hoặc một vị trí bất kỳ.";
-      return "Tìm địa điểm hoặc tự nhập vị trí, xem trên bản đồ rồi gắn vào chặng di chuyển.";
+        return t("plan.place_picker.subtitle_to");
+      return t("plan.place_picker.subtitle_transport");
     }
     if (activityType === "STAY")
-      return "Chọn khách sạn hoặc nhập địa chỉ chỗ ở tùy ý.";
+      return t("plan.place_picker.subtitle_stay");
     if (activityType === "FOOD")
-      return "Tìm quán ăn, nhà hàng, quán cafe phù hợp với bữa ăn trong lịch trình, hoặc tự nhập vị trí.";
-    return "Tìm địa điểm phù hợp với hoạt động, hoặc tự nhập vị trí.";
-  }, [activityType, field]);
+      return t("plan.place_picker.subtitle_food");
+    return t("plan.place_picker.subtitle_default");
+  }, [activityType, field, t]);
 
   // base list theo tab
   const baseItems = useMemo(() => {
@@ -477,7 +479,7 @@ export default function PlacePickerModal({
 
   // payload cho vị trí custom
   const buildLocationPayloadFromCustom = () => {
-    const label = customLabel.trim() || customAddress.trim() || "Vị trí tuỳ chọn";
+    const label = customLabel.trim() || customAddress.trim() || t("plan.place_picker.custom_default_label");
     const address = customAddress.trim() || null;
 
     let lat = null;
@@ -542,13 +544,15 @@ export default function PlacePickerModal({
     if (avg) {
       const score = avg.toFixed ? avg.toFixed(1) : avg;
       parts.push(
-        `Được đánh giá ${score}/10${
-          label ? ` - ${label}` : ""
-        }${
-          count
-            ? `, khoảng ${Number(count).toLocaleString("vi-VN")} lượt đánh giá`
-            : ""
-        }`
+        t("plan.place_picker.hotel_summary_rating", {
+          score,
+          label: label ? ` - ${label}` : "",
+          count: count
+            ? t("plan.place_picker.hotel_summary_reviews", {
+                count: Number(count).toLocaleString("vi-VN"),
+              })
+            : "",
+        })
       );
     }
 
@@ -556,16 +560,19 @@ export default function PlacePickerModal({
       Boolean
     );
     if (locBits.length) {
-      parts.push(`vị trí tại ${locBits.join(", ")}`);
+      parts.push(
+        t("plan.place_picker.hotel_summary_location", {
+          location: locBits.join(", "),
+        })
+      );
     }
 
     const tags = selectedItem.highlightTags || selectedItem.tags || [];
     if (tags.length) {
       parts.push(
-        `phù hợp với các tiêu chí như ${tags
-          .slice(0, 3)
-          .join(", ")
-          .toLowerCase()}`
+        t("plan.place_picker.hotel_summary_tags", {
+          tags: tags.slice(0, 3).join(", ").toLowerCase(),
+        })
       );
     }
 
@@ -578,13 +585,16 @@ export default function PlacePickerModal({
 
     if (minPrice) {
       parts.push(
-        `giá tham khảo từ ${Number(minPrice).toLocaleString("vi-VN")} ${currency}/đêm`
+        t("plan.place_picker.hotel_summary_price", {
+          price: Number(minPrice).toLocaleString("vi-VN"),
+          currency,
+        })
       );
     }
 
     if (!parts.length) return "";
     return parts.join(". ") + ".";
-  }, [selectedItem, activeTab, customMode]);
+  }, [selectedItem, activeTab, customMode, t]);
 
   // tóm tắt place
   const placeSummary = useMemo(() => {
@@ -597,34 +607,36 @@ export default function PlacePickerModal({
 
     if (avg) {
       parts.push(
-        `Được nhiều du khách đánh giá cao (khoảng ${
-          avg.toFixed ? avg.toFixed(1) : avg
-        }⭐, ${
-          count ? Number(count).toLocaleString("vi-VN") : "nhiều"
-        } lượt đánh giá)`
+        t("plan.place_picker.place_summary_rating", {
+          avg: avg.toFixed ? avg.toFixed(1) : avg,
+          count: count
+            ? Number(count).toLocaleString("vi-VN")
+            : t("plan.place_picker.summary_many"),
+        })
       );
     }
 
     if (selectedItem.provinceName) {
-      parts.push(`tọa lạc tại ${selectedItem.provinceName}`);
+      parts.push(
+        t("plan.place_picker.place_summary_location", {
+          location: selectedItem.provinceName,
+        })
+      );
     }
 
     const tags = selectedItem.tags || [];
     if (tags.length) {
       parts.push(
-        `nổi bật với trải nghiệm ${tags
-          .slice(0, 3)
-          .join(", ")
-          .toLowerCase()}`
+        t("plan.place_picker.place_summary_tags", {
+          tags: tags.slice(0, 3).join(", ").toLowerCase(),
+        })
       );
     }
 
-    parts.push(
-      "phù hợp để gắn vào các hoạt động tham quan / vui chơi trong kế hoạch."
-    );
+    parts.push(t("plan.place_picker.place_summary_footer"));
 
     return parts.join(". ");
-  }, [selectedItem, activeTab, customMode]);
+  }, [selectedItem, activeTab, customMode, t]);
 
   // tóm tắt restaurant
   const restaurantSummary = useMemo(() => {
@@ -637,40 +649,40 @@ export default function PlacePickerModal({
 
     if (avg) {
       parts.push(
-        `Được nhiều thực khách đánh giá cao (khoảng ${
-          avg.toFixed ? avg.toFixed(1) : avg
-        }⭐, ${
-          count ? Number(count).toLocaleString("vi-VN") : "nhiều"
-        } lượt đánh giá)`
+        t("plan.place_picker.restaurant_summary_rating", {
+          avg: avg.toFixed ? avg.toFixed(1) : avg,
+          count: count
+            ? Number(count).toLocaleString("vi-VN")
+            : t("plan.place_picker.summary_many"),
+        })
       );
     }
 
     if (selectedItem.provinceName || selectedItem.cityName) {
       parts.push(
-        `nằm tại ${
-          selectedItem.districtName
-            ? `${selectedItem.districtName}, `
-            : ""
-        }${selectedItem.cityName || selectedItem.provinceName}`
+        t("plan.place_picker.restaurant_summary_location", {
+          location: `${
+            selectedItem.districtName
+              ? `${selectedItem.districtName}, `
+              : ""
+          }${selectedItem.cityName || selectedItem.provinceName}`,
+        })
       );
     }
 
     const tags = selectedItem.tags || [];
     if (tags.length) {
       parts.push(
-        `phù hợp với các phong cách ẩm thực như ${tags
-          .slice(0, 3)
-          .join(", ")
-          .toLowerCase()}`
+        t("plan.place_picker.restaurant_summary_tags", {
+          tags: tags.slice(0, 3).join(", ").toLowerCase(),
+        })
       );
     }
 
-    parts.push(
-      "thích hợp để gắn vào các hoạt động ăn uống trong kế hoạch."
-    );
+    parts.push(t("plan.place_picker.restaurant_summary_footer"));
 
     return parts.join(". ");
-  }, [selectedItem, activeTab, customMode]);
+  }, [selectedItem, activeTab, customMode, t]);
 
   const canSubmit = customMode ? customValid : !!selectedItem;
 
@@ -791,7 +803,7 @@ export default function PlacePickerModal({
                       {tab.key === "HOTEL" && "🏨"}
                       {tab.key === "PLACE" && "📍"}
                       {tab.key === "RESTAURANT" && "🍽️"}
-                      <span>{tab.label}</span>
+                      <span>{t(tab.labelKey)}</span>
                     </button>
                   ))}
                 </div>
@@ -816,17 +828,17 @@ export default function PlacePickerModal({
                   ].join(" ")}
                 >
                   ✏️
-                  <span>Nhập vị trí tự do</span>
+                  <span>{t("plan.place_picker.custom_mode_btn")}</span>
                 </button>
 
                 <span className="ml-auto text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
                   {customMode
-                    ? "Gõ địa chỉ để được gợi ý giống Google Maps, sau đó có thể chỉnh lại tên / toạ độ."
+                    ? t("plan.place_picker.hint_custom")
                     : activeTab === "HOTEL"
-                    ? "Dữ liệu lấy từ API Catalog/hotels, có thể lọc theo từ khoá."
+                    ? t("plan.place_picker.hint_hotel")
                     : activeTab === "PLACE"
-                    ? "Dữ liệu lấy từ API Catalog/places (POI), có thể lọc theo từ khoá."
-                    : "Dữ liệu lấy từ API Catalog/restaurants, có thể lọc theo từ khoá."}
+                    ? t("plan.place_picker.hint_place")
+                    : t("plan.place_picker.hint_restaurant")}
                 </span>
               </div>
             </div>
@@ -847,40 +859,39 @@ export default function PlacePickerModal({
                           className="flex-1 bg-transparent outline-none text-xs text-slate-900 dark:text-slate-50 placeholder:text-slate-400"
                           placeholder={
                             activeTab === "HOTEL"
-                              ? "Tìm khách sạn theo tên, khu vực..."
+                              ? t("plan.place_picker.search_placeholder_hotel")
                               : activeTab === "RESTAURANT"
-                              ? "Tìm quán ăn, nhà hàng, quán cafe..."
-                              : "Tìm địa điểm tham quan, phố đi bộ..."
+                              ? t("plan.place_picker.search_placeholder_restaurant")
+                              : t("plan.place_picker.search_placeholder_place")
                           }
                         />
                       </div>
                       <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-500">
-                        Hệ thống sẽ lọc danh sách theo tên, địa chỉ, tỉnh / thành
-                        phù hợp với từ khoá bạn nhập.
+                        {t("plan.place_picker.search_hint")}
                       </p>
                     </>
                   ) : (
                     <div className="space-y-2">
                       <div>
                         <label className="text-[11px] font-medium text-slate-600 dark:text-slate-200">
-                          Tên vị trí
+                          {t("plan.place_picker.label_name")}
                         </label>
                         <input
                           value={customLabel}
                           onChange={(e) => setCustomLabel(e.target.value)}
-                          placeholder="VD: Nhà chị Lan, bãi đất trống, quán nước lề đường..."
+                          placeholder={t("plan.place_picker.placeholder_name")}
                           className="mt-1 w-full rounded-xl border bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-700 px-3 py-1.5 text-xs outline-none text-slate-900 dark:text-slate-50 placeholder:text-slate-400"
                         />
                       </div>
                       <div>
                         <label className="text-[11px] font-medium text-slate-600 dark:text-slate-200">
-                          Địa chỉ / mô tả
+                          {t("plan.place_picker.label_address")}
                         </label>
                         <textarea
                           rows={2}
                           value={customAddress}
                           onChange={(e) => setCustomAddress(e.target.value)}
-                          placeholder="Gõ địa chỉ để được gợi ý giống Google Maps, sau đó có thể chỉnh lại chi tiết..."
+                          placeholder={t("plan.place_picker.placeholder_address")}
                           className="mt-1 w-full rounded-xl border bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-700 px-3 py-1.5 text-xs outline-none text-slate-900 dark:text-slate-50 placeholder:text-slate-400 resize-none"
                         />
 
@@ -889,13 +900,13 @@ export default function PlacePickerModal({
                           <div className="mt-2 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 shadow-md max-h-44 overflow-y-auto">
                             {suggestLoading && (
                               <div className="px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400">
-                                Đang gợi ý địa chỉ....
+                                {t("plan.place_picker.suggest_loading")}
                               </div>
                             )}
 
                             {!suggestLoading && suggestItems.length === 0 && (
                               <div className="px-3 py-2 text-[11px] text-slate-400">
-                                Không có gợi ý thêm.
+                                {t("plan.place_picker.suggest_empty")}
                               </div>
                             )}
 
@@ -962,32 +973,31 @@ export default function PlacePickerModal({
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-[11px] font-medium text-slate-600 dark:text-slate-200">
-                            Vĩ độ (lat){" "}
+                            {t("plan.place_picker.label_lat")}{" "}
                             <span className="text-slate-400">(optional)</span>
                           </label>
                           <input
                             value={customLat}
                             onChange={(e) => setCustomLat(e.target.value)}
-                            placeholder="VD: 10.1234"
+                            placeholder={t("plan.place_picker.placeholder_lat")}
                             className="mt-1 w-full rounded-xl border bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-700 px-3 py-1.5 text-xs outline-none text-slate-900 dark:text-slate-50 placeholder:text-slate-400"
                           />
                         </div>
                         <div>
                           <label className="text-[11px] font-medium text-slate-600 dark:text-slate-200">
-                            Kinh độ (lng){" "}
+                            {t("plan.place_picker.label_lng")}{" "}
                             <span className="text-slate-400">(optional)</span>
                           </label>
                           <input
                             value={customLng}
                             onChange={(e) => setCustomLng(e.target.value)}
-                            placeholder="VD: 106.1234"
+                            placeholder={t("plan.place_picker.placeholder_lng")}
                             className="mt-1 w-full rounded-xl border bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-700 px-3 py-1.5 text-xs outline-none text-slate-900 dark:text-slate-50 placeholder:text-slate-400"
                           />
                         </div>
                       </div>
                       <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-500">
-                        Có thể bỏ trống toạ độ. Hệ thống vẫn lưu tên và địa chỉ để
-                        hiển thị trong kế hoạch.
+                        {t("plan.place_picker.coord_optional_hint")}
                       </p>
                     </div>
                   )}
@@ -1001,7 +1011,7 @@ export default function PlacePickerModal({
                   >
                     {isLoading && (
                       <div className="text-xs text-slate-500 dark:text-slate-400 px-2 py-3">
-                        Đang tải dữ liệu từ server...
+                        {t("plan.place_picker.list_loading")}
                       </div>
                     )}
 
@@ -1067,7 +1077,7 @@ export default function PlacePickerModal({
 
                     {!isLoading && !error && !effectiveItems.length && (
                       <div className="text-xs text-slate-500 dark:text-slate-400 px-2 py-4 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-dashed border-slate-200 dark:border-slate-700">
-                        Không tìm thấy kết quả phù hợp với từ khoá hiện tại.
+                        {t("plan.place_picker.list_empty")}
                       </div>
                     )}
                   </div>
@@ -1076,14 +1086,9 @@ export default function PlacePickerModal({
                 {customMode && (
                   <div className="flex-1 px-3 py-3 text-[11px] text-slate-500 dark:text-slate-400">
                     <div className="rounded-xl border border-dashed border-amber-300/70 bg-amber-50/60 dark:bg-amber-900/10 px-3 py-2">
-                      <p>
-                        Chế độ <b>vị trí tự do</b> giúp bạn lưu những điểm không
-                        có trong hệ thống (nhà người quen, bãi đỗ xe tạm, quán
-                        cóc ven đường,...).
-                      </p>
+                      <p>{t("plan.place_picker.custom_info_1")}</p>
                       <p className="mt-1">
-                        Gõ địa chỉ để hệ thống gợi ý giống Google Maps, sau đó có
-                        thể chỉnh lại tên, mô tả hoặc toạ độ theo ý bạn.
+                        {t("plan.place_picker.custom_info_2")}
                       </p>
                     </div>
                   </div>
@@ -1110,9 +1115,9 @@ export default function PlacePickerModal({
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                      <span>Chưa có toạ độ để hiển thị bản đồ.</span>
+                      <span>{t("plan.place_picker.map_no_coord")}</span>
                       <span className="mt-1">
-                        Chọn một địa điểm bên trái hoặc nhập toạ độ để xem vị trí.
+                        {t("plan.place_picker.map_no_coord_hint")}
                       </span>
                     </div>
                   )}
@@ -1123,8 +1128,7 @@ export default function PlacePickerModal({
                         <FiMapPin size={11} />
                       </span>
                       <span className="leading-snug">
-                        Xem vị trí trên Google Maps (embed) dựa trên toạ độ đã
-                        chọn.
+                        {t("plan.place_picker.map_badge")}
                       </span>
                     </div>
                   </div>
@@ -1135,30 +1139,34 @@ export default function PlacePickerModal({
                   {customMode ? (
                     <div className="text-[11px] text-slate-600 dark:text-slate-300 space-y-2">
                       <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                        Vị trí tự nhập
+                        {t("plan.place_picker.preview_custom_title")}
                       </h4>
                       <p>
-                        <b>Tên:</b>{" "}
+                        <b>{t("plan.place_picker.preview_name")}</b>{" "}
                         {customLabel.trim() || (
                           <span className="text-slate-400">
-                            (chưa nhập – hệ thống sẽ dùng địa chỉ hoặc “Vị trí tuỳ
-                            chọn”)
+                            {t("plan.place_picker.preview_name_empty")}
                           </span>
                         )}
                       </p>
                       <p>
-                        <b>Địa chỉ / mô tả:</b>{" "}
+                        <b>{t("plan.place_picker.preview_address")}</b>{" "}
                         {customAddress.trim() || (
-                          <span className="text-slate-400">(chưa nhập)</span>
+                          <span className="text-slate-400">
+                            {t("plan.place_picker.preview_address_empty")}
+                          </span>
                         )}
                       </p>
                       <p>
-                        <b>Toạ độ:</b>{" "}
+                        <b>{t("plan.place_picker.preview_coord")}</b>{" "}
                         {customLat && customLng
                           ? `${customLat}, ${customLng}`
                           : anchorPoint
-                          ? `${anchorPoint.lat}, ${anchorPoint.lng} (mặc định từ anchor)`
-                          : "(chưa có – bản đồ sẽ chỉ hiển thị khu vực mặc định)"}
+                          ? t("plan.place_picker.preview_coord_anchor", {
+                              lat: anchorPoint.lat,
+                              lng: anchorPoint.lng,
+                            })
+                          : t("plan.place_picker.preview_coord_empty")}
                       </p>
                     </div>
                   ) : selectedItem ? (
@@ -1213,8 +1221,7 @@ export default function PlacePickerModal({
                     </>
                   ) : (
                     <div className="h-full flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                      Chọn một kết quả bên trái hoặc bật chế độ "Nhập vị trí tự
-                      do".
+                      {t("plan.place_picker.preview_empty")}
                     </div>
                   )}
                 </div>
@@ -1224,13 +1231,10 @@ export default function PlacePickerModal({
                   <div className="hidden sm:flex flex-col text-[11px] text-slate-500 dark:text-slate-400">
                     <span>
                       {customMode
-                        ? "Vị trí tự do sẽ được lưu như một địa điểm riêng trong thẻ kế hoạch."
-                        : "Bạn có thể phóng to, thu nhỏ hoặc kéo bản đồ để xem khu vực xung quanh."}
+                        ? t("plan.place_picker.footer_custom")
+                        : t("plan.place_picker.footer_map")}
                     </span>
-                    <span>
-                      Khi chọn, hệ thống sẽ lưu toạ độ (nếu có) và thông tin hiển
-                      thị cho hoạt động tương ứng.
-                    </span>
+                    <span>{t("plan.place_picker.footer_save")}</span>
                   </div>
 
                   <div className="flex items-center gap-2 ml-auto">
@@ -1239,7 +1243,7 @@ export default function PlacePickerModal({
                       onClick={onClose}
                       className="px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                     >
-                      Đóng
+                      {t("common.close")}
                     </button>
 
                     {/* NÚT XEM CHI TIẾT */}
@@ -1249,7 +1253,7 @@ export default function PlacePickerModal({
                       onClick={handleOpenDetail}
                       className="px-3 py-1.5 rounded-xl text-xs font-medium border border-sky-200 dark:border-sky-700 bg-sky-50/80 dark:bg-sky-900/30 text-sky-700 dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-800/60 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Xem chi tiết
+                      {t("plan.place_picker.view_detail")}
                     </button>
 
                     <button
@@ -1259,7 +1263,9 @@ export default function PlacePickerModal({
                       className="inline-flex items-center gap-1 px-4 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 via-sky-500 to-indigo-500 text-white text-xs font-semibold shadow-md shadow-sky-500/40 hover:shadow-lg hover:brightness-105 active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <span>
-                        {customMode ? "Dùng vị trí tự nhập" : "Chọn địa điểm này"}
+                        {customMode
+                          ? t("plan.place_picker.submit_custom")
+                          : t("plan.place_picker.submit_select")}
                       </span>
                       <FaChevronRight size={10} />
                     </button>
@@ -1277,6 +1283,7 @@ export default function PlacePickerModal({
 /*  SUB COMPONENTS  */
 
 function HotelPreviewMeta({ hotel }) {
+  const { t } = useTranslation();
   const avg = hotel.avgRating ?? hotel.reviewScore ?? null;
   const label = hotel.ratingLabel ?? hotel.reviewLabel ?? "";
   const count = hotel.reviewsCount ?? hotel.reviewCount ?? null;
@@ -1299,7 +1306,7 @@ function HotelPreviewMeta({ hotel }) {
       )}
       {count != null && (
         <span className="text-slate-500 dark:text-slate-400">
-          ({Number(count).toLocaleString("vi-VN")} đánh giá)
+          ({t("plan.place_picker.reviews_count", { count: Number(count).toLocaleString("vi-VN") })})
         </span>
       )}
     </div>
@@ -1307,6 +1314,7 @@ function HotelPreviewMeta({ hotel }) {
 }
 
 function HotelPriceBlock({ hotel }) {
+  const { t } = useTranslation();
   const minPrice =
     hotel.minNightlyPrice ?? hotel.lowestPrice ?? hotel.priceFrom ?? null;
   const refPrice = hotel.referenceNightlyPrice ?? hotel.originalPrice ?? null;
@@ -1326,7 +1334,7 @@ function HotelPriceBlock({ hotel }) {
           <div className="text-sm font-bold text-[#ff5a00]">
             {Number(minPrice).toLocaleString("vi-VN")} {currency}
           </div>
-          <div className="text-[10px] text-slate-500">/ 1 đêm (tham khảo)</div>
+          <div className="text-[10px] text-slate-500">{t("plan.place_picker.per_night")}</div>
         </>
       )}
     </div>

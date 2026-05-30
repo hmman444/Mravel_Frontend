@@ -29,25 +29,27 @@ import PlanDateInputs from "./PlanDateInputs";
 import PlanMedia from "../../../planFeed/components/PlanMedia";
 import { usePlanGeneral } from "../../hooks/usePlanGeneral";
 import { showSuccess, showError } from "../../../../utils/toastUtils";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 
 // mapping icon + nhãn theo activity type
 const TYPE_CONFIG = {
-  TRANSPORT: { label: "Di chuyển", icon: "🚕" },
-  FOOD: { label: "Ăn uống", icon: "🥘" },
-  STAY: { label: "Nghỉ ngơi", icon: "🛏️" },
-  ENTERTAIN: { label: "Vui chơi", icon: "🎡" },
-  SIGHTSEEING: { label: "Tham quan", icon: "🏛️" },
-  EVENT: { label: "Sự kiện", icon: "🎤" },
-  SHOPPING: { label: "Mua sắm", icon: "🛍️" },
-  CINEMA: { label: "Xem phim", icon: "🎬" },
-  OTHER: { label: "Khác", icon: "📝" },
+  TRANSPORT: { label: i18n.t("plan.type.transport"), icon: "🚕" },
+  FOOD: { label: i18n.t("plan.type.food"), icon: "🥘" },
+  STAY: { label: i18n.t("plan.type.stay"), icon: "🛏️" },
+  ENTERTAIN: { label: i18n.t("plan.type.entertain"), icon: "🎡" },
+  SIGHTSEEING: { label: i18n.t("plan.type.sightseeing"), icon: "🏛️" },
+  EVENT: { label: i18n.t("plan.type.event"), icon: "🎤" },
+  SHOPPING: { label: i18n.t("plan.type.shopping"), icon: "🛍️" },
+  CINEMA: { label: i18n.t("plan.type.cinema"), icon: "🎬" },
+  OTHER: { label: i18n.t("plan.type.other"), icon: "📝" },
 };
 
 const STATUS_OPTIONS = [
-  { value: "DRAFT", label: "Nháp" },
-  { value: "ACTIVE", label: "Đang diễn ra" },
-  { value: "COMPLETED", label: "Hoàn thành" },
-  { value: "CANCELLED", label: "Đã hủy" },
+  { value: "DRAFT", label: i18n.t("plan.status.draft") },
+  { value: "ACTIVE", label: i18n.t("plan.status.active") },
+  { value: "COMPLETED", label: i18n.t("plan.status.completed") },
+  { value: "CANCELLED", label: i18n.t("plan.status.cancelled") },
 ];
 
 // màu dịu, đồng bộ sky/indigo/emerald
@@ -76,6 +78,7 @@ const parseDate = (value) => {
 };
 
 export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
+  const { t } = useTranslation();
   const lists = plan?.lists || [];
 
   const {
@@ -271,7 +274,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       return;
     }
     if (startDate && newEnd < startDate) {
-      showError("Ngày kết thúc không thể trước ngày bắt đầu!");
+      showError(t("plan.dates.end_before_start"));
       return;
     }
     handlePickDates(startDate, newEnd, "end");
@@ -350,9 +353,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     setDescSaving(true);
     try {
       await updateDescription(planId, description.trim()).unwrap();
-      showSuccess("Đã cập nhật mô tả");
+      showSuccess(t("plan.toast.description_updated"));
     } catch {
-      showError("Không thể cập nhật mô tả");
+      showError(t("plan.toast.description_update_failed"));
     } finally {
       setDescSaving(false);
     }
@@ -365,7 +368,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     setDatesSaving(true);
     try {
       await updateDates(planId, formatDate(s), formatDate(e)).unwrap();
-      showSuccess("Đã cập nhật ngày");
+      showSuccess(t("plan.toast.dates_updated"));
 
       if (typeof reloadBoard === "function") {
         reloadBoard();
@@ -374,7 +377,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       originalStartRef.current = s;
       originalEndRef.current = e;
     } catch {
-      showError("Không thể cập nhật ngày");
+      showError(t("plan.toast.dates_update_failed"));
     } finally {
       setDatesSaving(false);
     }
@@ -386,9 +389,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     setStatusSaving(true);
     try {
       await updateStatus(planId, value).unwrap();
-      showSuccess("Đã cập nhật trạng thái");
+      showSuccess(t("plan.toast.status_updated"));
     } catch {
-      showError("Không thể cập nhật trạng thái");
+      showError(t("plan.toast.status_update_failed"));
     } finally {
       setStatusSaving(false);
     }
@@ -405,13 +408,13 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       const url = typeof action === "string" ? action : action?.url || null;
       if (url) {
         setThumbnail(url);
-        showSuccess("Đã cập nhật ảnh bìa");
+        showSuccess(t("plan.toast.cover_updated"));
       } else {
-        showError("Upload thành công nhưng không lấy được URL");
+        showError(t("plan.toast.upload_no_url"));
       }
     } catch (err) {
       console.error(err);
-      showError("Không thể upload ảnh bìa");
+      showError(t("plan.toast.cover_upload_failed"));
     } finally {
       setThumbSaving(false);
       e.target.value = "";
@@ -441,10 +444,10 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         }
       }
 
-      showSuccess("Đã thêm hình ảnh");
+      showSuccess(t("plan.toast.images_added"));
     } catch (err) {
       console.error(err);
-      showError("Không thể upload một số ảnh");
+      showError(t("plan.toast.images_upload_failed"));
     } finally {
       setImagesSaving(false);
       e.target.value = "";
@@ -458,9 +461,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     try {
       await removeImage(planId, url).unwrap();
       setImages((prev) => prev.filter((x) => x !== url));
-      showSuccess("Đã xoá ảnh");
+      showSuccess(t("plan.toast.image_removed"));
     } catch {
-      showError("Không thể xoá ảnh");
+      showError(t("plan.toast.image_remove_failed"));
     } finally {
       setImagesSaving(false);
     }
@@ -478,9 +481,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         const url = typeof action === "string" ? action : action?.url || action;
         if (url) setVideos((prev) => (prev.includes(url) ? prev : [...prev, url]));
       }
-      showSuccess("Đã thêm video");
+      showSuccess(t("plan.toast.video_added"));
     } catch {
-      showError("Không thể upload video");
+      showError(t("plan.toast.video_upload_failed"));
     } finally {
       setVideosSaving(false);
       e.target.value = "";
@@ -493,9 +496,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     try {
       await removeVideo(planId, url).unwrap();
       setVideos((prev) => prev.filter((x) => x !== url));
-      showSuccess("Đã xoá video");
+      showSuccess(t("plan.toast.video_removed"));
     } catch {
-      showError("Không thể xoá video");
+      showError(t("plan.toast.video_remove_failed"));
     } finally {
       setVideosSaving(false);
     }
@@ -518,9 +521,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       setBudgetInput(nextTotal ? String(nextTotal) : "");
       setBudgetPerPersonInput(nextPerPerson ? String(nextPerPerson) : "");
 
-      showSuccess("Đã cập nhật ngân sách");
+      showSuccess(t("plan.toast.budget_updated"));
     } catch {
-      showError("Không thể cập nhật ngân sách");
+      showError(t("plan.toast.budget_update_failed"));
       setBudgetInput(budgetTotalLocal ? String(budgetTotalLocal) : "");
       setBudgetPerPersonInput(
         budgetPerPersonLocal ? String(budgetPerPersonLocal) : ""
@@ -613,7 +616,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       {saving && (
         <div className="mb-1 flex items-center gap-2 text-xs text-sky-600 animate-pulse">
           <FaCircleNotch className="animate-spin" />
-          <span>Đang lưu thay đổi...</span>
+          <span>{t("plan.summary.saving_changes")}</span>
         </div>
       )}
 
@@ -624,10 +627,10 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-50">
-                {plan?.title || "Kế hoạch du lịch"}
+                {plan?.title || t("plan.summary.default_title")}
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Tóm tắt chuyến đi để dễ lặp lại và so sánh với các plan khác.
+                {t("plan.summary.subtitle")}
               </p>
             </div>
 
@@ -635,12 +638,12 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               {participantsCount > 0 && (
                 <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
                   <FaUserFriends className="text-[10px]" />
-                  <span>{participantsCount} người tham gia</span>
+                  <span>{t("plan.summary.participants_count", { count: participantsCount })}</span>
                 </div>
               )}
               {plan?.views != null && (
                 <span className="text-xs text-slate-400">
-                  {plan.views.toLocaleString("vi-VN")} lượt xem
+                  {t("plan.summary.views_count", { count: plan.views.toLocaleString("vi-VN") })}
                 </span>
               )}
             </div>
@@ -660,7 +663,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                     {canEdit && (
                       <label className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/45 opacity-0 group-hover:opacity-100 text-xs text-white cursor-pointer transition-opacity duration-200">
                         <FaCloudUploadAlt className="mb-1" />
-                        <span>Cập nhật ảnh bìa</span>
+                        <span>{t("plan.summary.update_cover")}</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -683,8 +686,8 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                     <FaImage className="text-2xl" />
                     <span>
                       {canEdit
-                        ? "Thêm ảnh bìa để nhận diện nhanh chuyến đi"
-                        : "Chưa có ảnh bìa"}
+                        ? t("plan.summary.add_cover_hint")
+                        : t("plan.summary.no_cover")}
                     </span>
                     {canEdit && (
                       <input
@@ -700,7 +703,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 {thumbSaving && (
                   <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center text-white text-xs gap-2">
                     <FaCircleNotch className="animate-spin" />
-                    <span>Đang lưu...</span>
+                    <span>{t("common.saving")}</span>
                   </div>
                 )}
               </div>
@@ -712,11 +715,11 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Ghi chú / mô tả kế hoạch
+                    {t("plan.summary.description_label")}
                   </h3>
                   {descSaving && (
                     <span className="text-[10px] text-sky-600 flex items-center gap-1">
-                      <FaCircleNotch className="animate-spin" /> Lưu...
+                      <FaCircleNotch className="animate-spin" /> {t("common.saving_short")}
                     </span>
                   )}
                 </div>
@@ -727,8 +730,8 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                   onBlur={handleSaveDescription}
                   placeholder={
                     canEdit
-                      ? "Ví dụ: Đà Nẵng 3N2Đ, ưu tiên ăn uống – biển – cafe view đẹp..."
-                      : "Chưa có mô tả."
+                      ? t("plan.summary.description_placeholder")
+                      : t("plan.summary.no_description")
                   }
                   disabled={!canEdit}
                   className={`w-full mt-2 p-3 rounded-xl border text-sm bg-white/80 dark:bg-slate-950/70 shadow-inner focus:outline-none transition-all duration-200 resize-none
@@ -746,11 +749,11 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    Thời gian dự kiến
+                    {t("plan.summary.expected_time")}
                   </span>
                   {datesSaving && (
                     <span className="text-[10px] text-sky-600 flex items-center gap-1">
-                      <FaCircleNotch className="animate-spin" /> Lưu...
+                      <FaCircleNotch className="animate-spin" /> {t("common.saving_short")}
                     </span>
                   )}
                 </div>
@@ -766,21 +769,21 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 <div className="flex flex-wrap items-start justify-between gap-3 mt-1">
                   <div className="flex flex-col text-xs">
                     <span className="text-slate-500 dark:text-slate-400">
-                      Tổng thời gian & hoạt động
+                      {t("plan.summary.total_time_activities")}
                     </span>
                     <div className="mt-0.5 flex items-baseline gap-2">
                       <span className="font-semibold text-slate-900 dark:text-slate-100">
-                        {totalDays ?? "—"} ngày
+                        {t("plan.summary.days_count", { count: totalDays ?? "—" })}
                       </span>
                       <span className="text-[11px] text-slate-400">
-                        {totalCardsCount} hoạt động
+                        {t("plan.summary.activities_count", { count: totalCardsCount })}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Trạng thái kế hoạch
+                      {t("plan.summary.plan_status")}
                     </span>
 
                     <div className="relative" ref={statusBtnRef}>
@@ -835,10 +838,10 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Ngân sách & chi phí
+                  {t("plan.budget.title")}
                 </h3>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Chỉnh ngân sách, xem tổng quan chi thực tế & mức trung bình.
+                  {t("plan.budget.subtitle")}
                 </p>
               </div>
             </div>
@@ -848,7 +851,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
             {/* input ngân sách tổng */}
             <div className="space-y-1">
               <span className="text-slate-500 dark:text-slate-400">
-                Ngân sách toàn chuyến
+                {t("plan.budget.total_label")}
               </span>
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
@@ -865,7 +868,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                       setBudgetInput(e.target.value.replace(/[^\d]/g, ""))
                     }
                     onBlur={handleBudgetTotalBlur}
-                    placeholder={canEdit ? "VD: 5000000" : "Chưa thiết lập"}
+                    placeholder={canEdit ? t("plan.budget.total_placeholder") : t("plan.budget.not_set")}
                     className={`w-full rounded-full border bg-white/90 dark:bg-slate-950/80 pl-10 pr-3 py-1.5 text-xs focus:outline-none
                       ${
                         canEdit
@@ -880,14 +883,14 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 )}
               </div>
               <p className="text-[11px] text-slate-400">
-                Để trống hoặc nhập 0 nếu không muốn set ngân sách cố định.
+                {t("plan.budget.total_hint")}
               </p>
             </div>
 
             {/* input ngân sách / người */}
             <div className="space-y-1">
               <span className="text-slate-500 dark:text-slate-400">
-                Ngân sách / người (tùy chọn)
+                {t("plan.budget.per_person_label")}
               </span>
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
@@ -908,8 +911,8 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                     onBlur={handleBudgetPerPersonBlur}
                     placeholder={
                       canEdit
-                        ? "VD: 2000000 / người (hoặc để trống)"
-                        : "Chưa thiết lập"
+                        ? t("plan.budget.per_person_placeholder")
+                        : t("plan.budget.not_set")
                     }
                     className={`w-full rounded-full border bg-white/90 dark:bg-slate-950/80 pl-10 pr-3 py-1.5 text-xs focus:outline-none
                       ${
@@ -922,7 +925,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 </div>
               </div>
               <p className="text-[11px] text-slate-400">
-                Nếu bỏ trống, hệ thống sẽ tự ước lượng từ ngân sách tổng.
+                {t("plan.budget.per_person_hint")}
               </p>
             </div>
 
@@ -930,7 +933,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
             <div className="grid grid-cols-2 gap-3 pt-1 sm:grid-cols-2">
               <div className="rounded-xl bg-slate-50 dark:bg-slate-900/80 px-3 py-2.5 flex flex-col">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  TB / ngày
+                  {t("plan.budget.avg_per_day")}
                 </span>
                 <span className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
                   {avgPerDay != null
@@ -940,7 +943,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               </div>
               <div className="rounded-xl bg-slate-50 dark:bg-slate-900/80 px-3 py-2.5 flex flex-col">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Ngân sách / người
+                  {t("plan.budget.per_person_stat")}
                 </span>
                 <span className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
                   {computedBudgetPerPerson != null
@@ -955,7 +958,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               <div className="pt-1">
                 <div className="flex items-center justify-between text-[11px] mb-1">
                   <span className="text-slate-500 dark:text-slate-400">
-                    Đã dùng (thực tế / ước tính)
+                    {t("plan.budget.used_label")}
                   </span>
                   <span
                     className={`font-semibold ${
@@ -966,7 +969,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                   >
                     {used > 0
                       ? `${fmtMoney(used)}${currencySuffix}`
-                      : "Chưa có chi phí"}
+                      : t("plan.budget.no_cost")}
                   </span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
@@ -981,14 +984,14 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
                   <span className="px-2 py-0.5 rounded-full bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
-                    Ước tính:{" "}
+                    {t("plan.budget.estimated")}{" "}
                     <span className="font-semibold">
                       {fmtMoney(totalEstimated)}
                       {currencySuffix}
                     </span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 dark:bg-slate-900 dark:text-slate-200">
-                    Thực tế:{" "}
+                    {t("plan.budget.actual")}{" "}
                     <span className="font-semibold">
                       {fmtMoney(totalActual)}
                       {currencySuffix}
@@ -1003,12 +1006,12 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
                   >
                     {remaining != null
                       ? remaining >= 0
-                        ? `Còn lại: ${fmtMoney(
-                            remaining
-                          )}${currencySuffix}`
-                        : `Vượt: ${fmtMoney(
-                            Math.abs(remaining)
-                          )}${currencySuffix}`
+                        ? t("plan.budget.remaining", {
+                            amount: `${fmtMoney(remaining)}${currencySuffix}`,
+                          })
+                        : t("plan.budget.over", {
+                            amount: `${fmtMoney(Math.abs(remaining))}${currencySuffix}`,
+                          })
                       : "—"}
                   </span>
                 </div>
@@ -1024,17 +1027,16 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Hình ảnh & kỷ niệm
+                {t("plan.media.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Lưu lại quán ăn, homestay, view đẹp... để mở plan là nhớ
-                ngay.
+                {t("plan.media.subtitle")}
               </p>
             </div>
 
             {(imagesSaving || videosSaving) && (
               <span className="text-[10px] text-sky-600 flex items-center gap-1">
-                <FaCircleNotch className="animate-spin" /> Đang xử lý...
+                <FaCircleNotch className="animate-spin" /> {t("common.processing")}
               </span>
             )}
           </div>
@@ -1053,7 +1055,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
             </div>
           ) : (
             <p className="mt-4 text-xs text-slate-500 italic">
-              Chưa có ảnh hoặc video cho kế hoạch này.
+              {t("plan.media.empty")}
             </p>
           )}
 
@@ -1061,7 +1063,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
             <div className="flex flex-wrap gap-2 mt-4">
               <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium cursor-pointer bg-white/80 dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:text-sky-600 dark:hover:border-sky-500 dark:hover:text-sky-300 shadow-sm transition-all duration-200">
                 <FaCloudUploadAlt className="text-sm" />
-                <span>Thêm hình ảnh</span>
+                <span>{t("plan.media.add_image")}</span>
                 <input
                   hidden
                   type="file"
@@ -1072,7 +1074,7 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
               </label>
               <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium cursor-pointer bg-white/80 dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 hover:border-purple-400 hover:text-purple-600 dark:hover:border-purple-500 dark:hover:text-purple-300 shadow-sm transition-all duration-200">
                 <FaVideo className="text-sm" />
-                <span>Thêm video</span>
+                <span>{t("plan.media.add_video")}</span>
                 <input
                   hidden
                   type="file"
@@ -1090,9 +1092,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       {showConfirmDates && (
         <ConfirmModal
           open={showConfirmDates}
-          title="Điều chỉnh thời gian kế hoạch"
-          message="Rút ngắn thời gian sẽ xoá bớt các ngày tương ứng và chuyển các hoạt động trong đó vào thùng rác. Bạn có chắc chắn muốn tiếp tục?"
-          confirmText="Tiếp tục"
+          title={t("plan.dates.confirm_title")}
+          message={t("plan.dates.confirm_message")}
+          confirmText={t("common.continue")}
           onClose={() => {
             setShowConfirmDates(false);
             setPendingDates(null);

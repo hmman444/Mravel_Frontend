@@ -1,6 +1,7 @@
 // src/components/SearchBar.jsx
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
@@ -105,6 +106,7 @@ const VN_DATE = (d) =>
 
 /* ─ Hotel Search Form ─ */
 function HotelSearchForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const destRef = useRef({ text: "", slug: null });
@@ -178,7 +180,7 @@ function HotelSearchForm() {
     const { slug, text, kind } = destRef.current;
     const locationVal = (slug || text || "").trim();
     if (!locationVal) {
-      showError("Vui lòng nhập hoặc chọn Điểm đến.");
+      showError(t("search.error_no_destination"));
       return;
     }
 
@@ -218,10 +220,10 @@ function HotelSearchForm() {
     <form onSubmit={submit} className="space-y-3 md:space-y-4">
       <div className="grid grid-cols-12 gap-3 md:gap-4">
         <div className="col-span-12 md:col-span-5">
-          <RowField label="Điểm đến:">
+          <RowField label={t("search.destination_label")}>
             <DestinationTypeahead
               label={null}
-              placeholder="Thành phố, khách sạn, điểm đến"
+              placeholder={t("search.hotel_dest_placeholder")}
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
               mode="hotel"
@@ -234,7 +236,7 @@ function HotelSearchForm() {
         </div>
 
         <div className="col-span-12 md:col-span-3">
-          <RowField label="Ngày nhận phòng:">
+          <RowField label={t("search.checkin_date")}>
             <FaCalendarAlt className="text-gray-400 mr-2" />
             <MravelDatePicker selected={checkIn} onChange={setCheckIn} />
           </RowField>
@@ -242,14 +244,14 @@ function HotelSearchForm() {
 
         <div className="col-span-12 md:col-span-4">
           <RowField
-            label="Số đêm:"
+            label={t("search.nights_label")}
             onClick={() => !openNights && setOpenNights(true)}
             refBox={nightsBoxRef}
           >
             <FaClock className="text-gray-400 mr-2" />
             <input
               readOnly
-              value={`${nights} đêm`}
+              value={t("search.nights_count", { n: nights })}
               className="w-full bg-transparent outline-none cursor-pointer text-sm text-gray-800 dark:text-gray-100"
             />
             <span className="ml-auto text-gray-400 text-xs">▾</span>
@@ -282,7 +284,7 @@ function HotelSearchForm() {
                             isActive ? "bg-sky-500" : "bg-gray-300"
                           }`}
                         />
-                        <span className="font-medium">{n} đêm</span>
+                        <span className="font-medium">{t("search.nights_count", { n })}</span>
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{VN_DATE(d)}</div>
                     </button>
@@ -299,13 +301,13 @@ function HotelSearchForm() {
         {/* Khách & phòng */}
         <div className="col-span-12 md:col-span-8">
           <RowField
-            label="Khách & phòng:"
+            label={t("search.guests_rooms")}
             onClick={() => !openGuests && setOpenGuests(true)}
             refBox={guestsBoxRef}
           >
             <FaUsers className="text-gray-400 mr-2" />
             <span className="text-gray-800 dark:text-gray-100 text-sm select-none truncate">
-              {adults} người lớn, {children} trẻ em, {rooms} phòng
+              {t("search.guests_summary", { adults, children, rooms })}
             </span>
             <span className="ml-auto text-gray-400 text-xs">▾</span>
 
@@ -324,7 +326,7 @@ function HotelSearchForm() {
                     <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100 dark:bg-gray-800">
                       <FaUsers className="text-gray-600 dark:text-gray-400 text-xs" />
                     </span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">Người lớn</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">{t("search.adults")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -357,7 +359,7 @@ function HotelSearchForm() {
                     <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100 dark:bg-gray-800">
                       👶
                     </span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">Trẻ em</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">{t("search.children")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -390,7 +392,7 @@ function HotelSearchForm() {
                     <span className="w-6 h-6 grid place-items-center rounded-lg bg-gray-100 dark:bg-gray-800">
                       🏠
                     </span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">Phòng</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">{t("search.rooms")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -421,13 +423,13 @@ function HotelSearchForm() {
                 {children > 0 && (
                   <>
                     <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
-                      Điền tuổi của trẻ để giúp chúng tôi gợi ý phòng phù hợp.
+                      {t("search.children_age_hint")}
                     </div>
                     <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {childrenAges.map((age, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <span className="text-xs text-gray-600 dark:text-gray-400">
-                            Trẻ em {idx + 1}
+                            {t("search.child_n", { n: idx + 1 })}
                           </span>
                           <select
                             className="flex-1 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs"
@@ -468,7 +470,7 @@ function HotelSearchForm() {
                       setOpenGuests(false);
                     }}
                   >
-                    Xong
+                    {t("common.done")}
                   </button>
                 </div>
               </div>
@@ -480,7 +482,7 @@ function HotelSearchForm() {
         <div className="col-span-12 md:col-span-4 flex items-end">
           <Button type="submit" className="w-full h-12 rounded-xl text-sm">
             <FaSearch />
-            Tìm khách sạn
+            {t("search.find_hotel")}
           </Button>
         </div>
       </div>
@@ -488,20 +490,21 @@ function HotelSearchForm() {
   );
 }
 
-const CUISINE_OPTIONS = [
-  { value: "", label: "Tất cả ẩm thực" },
-  { value: "VIETNAMESE", label: "Việt Nam" },
-  { value: "ASIAN", label: "Châu Á" },
-  { value: "BUFFET_VIET_ASIAN", label: "Buffet & Việt - Á" },
-  { value: "EUROPEAN", label: "Âu" },
-  { value: "FRENCH", label: "Pháp" },
-  { value: "ITALIAN", label: "Ý" },
-];
-
 /* ─ Restaurant Search Form ─ */
 // trong SearchBar.jsx — giữ nguyên phần khác, chỉ thay RestaurantSearchForm
 function RestaurantSearchForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const CUISINE_OPTIONS = [
+    { value: "", label: t("search.cuisine_all") },
+    { value: "VIETNAMESE", label: t("search.cuisine_vietnamese") },
+    { value: "ASIAN", label: t("search.cuisine_asian") },
+    { value: "BUFFET_VIET_ASIAN", label: t("search.cuisine_buffet_viet_asian") },
+    { value: "EUROPEAN", label: t("search.cuisine_european") },
+    { value: "FRENCH", label: t("search.cuisine_french") },
+    { value: "ITALIAN", label: t("search.cuisine_italian") },
+  ];
 
   const destRef = useRef({ text: "", slug: null });
   const [, setDest] = useState({ text: "", slug: null });
@@ -535,7 +538,7 @@ function RestaurantSearchForm() {
     const { slug, text, kind } = destRef.current;
     const locationVal = (slug || text || "").trim();
     if (!locationVal) {
-      showError("Vui lòng nhập hoặc chọn Điểm đến.");
+      showError(t("search.error_no_destination"));
       return;
     }
 
@@ -562,10 +565,10 @@ function RestaurantSearchForm() {
   return (
     <form onSubmit={submit} className="grid grid-cols-12 gap-3 md:gap-4 items-end">
       <div className="col-span-12 md:col-span-4">
-        <RowField label="Khu vực / Thành phố">
+        <RowField label={t("search.area_city")}>
           <DestinationTypeahead
             label={null}
-            placeholder="TP.HCM, Hà Nội, Đà Nẵng…"
+            placeholder={t("search.restaurant_dest_placeholder")}
             className="flex-1 min-w-0 w-full !max-w-none !mx-0"
             buttonSlot={null}
             mode="restaurant"
@@ -577,7 +580,7 @@ function RestaurantSearchForm() {
       </div>
 
       <div className="col-span-12 md:col-span-3">
-        <RowField label="Ngày dùng bữa">
+        <RowField label={t("search.dining_date")}>
           <FaCalendarAlt className="text-gray-400 mr-2" />
           <MravelDatePicker
             selected={date}
@@ -589,13 +592,13 @@ function RestaurantSearchForm() {
 
       <div className="col-span-12 md:col-span-3">
         <RowField
-          label="Loại ẩm thực"
+          label={t("search.cuisine_type")}
           refBox={cuisineBoxRef}
           onClick={() => !openCuisine && setOpenCuisine(true)}
         >
           <FaUtensils className="text-gray-400 mr-2" />
           <span className={`text-sm ${cuisineCode ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
-            {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || "Chọn loại ẩm thực"}
+            {CUISINE_OPTIONS.find((o) => o.value === cuisineCode)?.label || t("search.choose_cuisine")}
           </span>
           <span className="ml-auto text-gray-400 text-xs">▾</span>
 
@@ -630,7 +633,7 @@ function RestaurantSearchForm() {
       <div className="col-span-12 md:col-span-2 flex items-end">
         <Button type="submit" className="w-full h-12 rounded-xl text-sm">
           <FaSearch />
-          Tìm quán ăn
+          {t("search.find_restaurant")}
         </Button>
       </div>
     </form>
@@ -639,6 +642,7 @@ function RestaurantSearchForm() {
 
 /* ─ Main SearchBar ─ */
 export default function SearchBar() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("hotel");
   const navigate = useNavigate();
   const locationSubmitRef = useRef(null);
@@ -655,22 +659,22 @@ export default function SearchBar() {
   const tabs = [
     {
       key: "hotel",
-      label: "Khách sạn",
+      label: t("search.tab_hotel"),
       icon: <FaHotel className="w-4 h-4 md:w-5 md:h-5" />,
     },
     {
       key: "restaurant",
-      label: "Quán ăn",
+      label: t("search.tab_restaurant"),
       icon: <FaUtensils className="w-4 h-4 md:w-5 md:h-5" />,
     },
     {
       key: "locations",
-      label: "Địa điểm",
+      label: t("search.tab_place"),
       icon: <FaMapMarkerAlt className="w-4 h-4 md:w-5 md:h-5" />,
     },
     {
       key: "plans",
-      label: "Lịch trình",
+      label: t("search.tab_plan"),
       icon: <FaCalendarAlt className="w-4 h-4 md:w-5 md:h-5" />,
     },
   ];
@@ -756,10 +760,10 @@ export default function SearchBar() {
           >
             {/* Ô nhập địa điểm */}
             <div className="col-span-12 md:col-span-10">
-              <RowField label="Địa điểm">
+              <RowField label={t("search.place_label")}>
                 <DestinationTypeahead
                   label={null}
-                  placeholder="Nhập địa điểm muốn tham quan (TP. Hồ Chí Minh, Phú Quốc, Hội An…)"
+                  placeholder={t("search.find_place_placeholder")}
                   className="flex-1 min-w-0 w-full !max-w-none !mx-0"
                   mode="place"
                   onSubmit={goLocations}
@@ -781,7 +785,7 @@ export default function SearchBar() {
                 }}
               >
                 <FaSearch />
-                Tìm địa điểm
+                {t("search.find_place_btn")}
               </Button>
             </div>
           </form>
@@ -797,9 +801,9 @@ export default function SearchBar() {
           >
             <div className="col-span-12 md:col-span-10">
               <TextInput
-                label="Tìm lịch trình hoặc người dùng"
+                label={t("search.find_plan_or_user")}
                 icon={<FaSearch />}
-                placeholder='Ví dụ: "Đà Nẵng", "Hội An", "@luan", "Luân Đỗ"...'
+                placeholder={t("search.plan_search_placeholder")}
                 value={planQuery}
                 onChange={setPlanQuery}
                 onKeyDown={(e) => {
@@ -815,7 +819,7 @@ export default function SearchBar() {
             <div className="col-span-12 md:col-span-2">
               <Button type="submit" className="w-full h-12 rounded-xl text-sm">
                 <FaSearch />
-                Tìm kiếm
+                {t("common.search")}
               </Button>
             </div>
           </form>

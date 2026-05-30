@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { inputBase, sectionCard } from "../../utils/activityStyles";
 
@@ -12,12 +13,13 @@ export default function ExtraCostsSection({
   removeExtraCost,
   extraTypes,
 }) {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState(null);
 
   const getTypeLabel = (value) => {
-    if (!value) return "Loại chi phí";
+    if (!value) return t("plan.extra_cost.type_placeholder");
     const found = extraTypes.find((t) => t.value === value);
-    return found ? found.label : "Loại chi phí";
+    return found ? found.label : t("plan.extra_cost.type_placeholder");
   };
 
   const handleSelectType = (rowIndex, value) => {
@@ -29,7 +31,7 @@ export default function ExtraCostsSection({
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-          Chi phí phát sinh
+          {t("plan.extra_cost.title")}
         </span>
         <button
           onClick={addExtraCost}
@@ -37,7 +39,7 @@ export default function ExtraCostsSection({
           className="flex items-center gap-1 text-[11px] font-medium text-sky-600 dark:text-sky-300 hover:text-sky-500"
         >
           <FaPlus size={9} />
-          Thêm phát sinh
+          {t("plan.extra_cost.add")}
         </button>
       </div>
 
@@ -45,7 +47,7 @@ export default function ExtraCostsSection({
       <div className={sectionCard + " space-y-2"}>
         {extraCosts.length === 0 && (
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Chưa có chi phí phát sinh nào.
+            {t("plan.extra_cost.empty")}
           </p>
         )}
 
@@ -55,7 +57,7 @@ export default function ExtraCostsSection({
               {/* Lý do */}
               <input
                 className={`${inputBase} col-span-4 text-xs`}
-                placeholder="Lý do (ví dụ: phí cầu đường)"
+                placeholder={t("plan.extra_cost.reason_placeholder")}
                 value={c.reason}
                 onChange={(e) => updateExtraCost(i, "reason", e.target.value)}
               />
@@ -132,7 +134,7 @@ export default function ExtraCostsSection({
                   type="number"
                   min="0"
                   className={`${inputBase} flex-1 text-xs`}
-                  placeholder="Số tiền"
+                  placeholder={t("plan.extra_cost.amount_placeholder")}
                   value={c.actualAmount}
                   onChange={(e) =>
                     updateExtraCost(i, "actualAmount", e.target.value)

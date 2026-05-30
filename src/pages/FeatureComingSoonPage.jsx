@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Wrench, Clock, ArrowLeft, Home } from "lucide-react";
 
 import Navbar from "../components/Navbar";
@@ -6,6 +7,7 @@ import Footer from "../components/Footer";
 import FadeInSection from "../components/FadeInSection";
 
 export default function FeatureComingSoonPage() {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7fb]">
       {/* Navbar cố định trên cùng */}
@@ -29,10 +31,10 @@ export default function FeatureComingSoonPage() {
                         <span>Feature in progress</span>
                       </div>
                       <h1 className="mt-3 text-2xl sm:text-3xl font-bold">
-                        Tính năng đang được phát triển
+                        {t("coming_soon.title")}
                       </h1>
                       <p className="mt-1 text-sm sm:text-base text-white/90">
-                        Chúng tôi đang hoàn thiện tính năng này để mang lại trải nghiệm tốt hơn cho bạn.
+                        {t("coming_soon.subtitle")}
                       </p>
                     </div>
                   </div>
@@ -40,14 +42,14 @@ export default function FeatureComingSoonPage() {
                   {/* “Thẻ” nhỏ mô tả tình trạng */}
                   <div className="md:text-right">
                     <p className="text-xs uppercase tracking-wider text-white/70">
-                      Trạng thái
+                      {t("coming_soon.status_label")}
                     </p>
                     <p className="mt-1 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold">
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
                         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-200" />
                       </span>
-                      Đang phát triển
+                      {t("coming_soon.status_value")}
                     </p>
                   </div>
                 </div>
@@ -56,37 +58,36 @@ export default function FeatureComingSoonPage() {
               {/* Nội dung chính */}
               <div className="px-6 sm:px-10 py-8 sm:py-10 space-y-6">
                 <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Tính năng này hiện chưa sẵn sàng sử dụng, nhưng chắc chắn sẽ xuất hiện trong những bản cập nhật tiếp theo.
-                  Đội ngũ phát triển đang làm việc chăm chỉ để hoàn thiện giao diện, tối ưu hiệu năng và đảm bảo mọi thứ hoạt động ổn định.
+                  {t("coming_soon.body")}
                 </p>
 
                 <div className="grid gap-4 sm:gap-5 sm:grid-cols-3">
                   <div className="rounded-2xl border border-indigo-100 bg-indigo-50/80 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-                      Dự kiến
+                      {t("coming_soon.expected_label")}
                     </p>
                     <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
-                      Ra mắt trong các bản cập nhật sắp tới.
+                      {t("coming_soon.expected_value")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
-                      Bạn sẽ nhận được
+                      {t("coming_soon.benefits_label")}
                     </p>
                     <ul className="mt-1 space-y-1.5 text-sm text-gray-800 dark:text-gray-200 list-disc list-inside">
-                      <li>Trải nghiệm mượt mà hơn</li>
-                      <li>Thêm nhiều tiện ích hữu ích</li>
-                      <li>Giao diện thân thiện & rõ ràng</li>
+                      <li>{t("coming_soon.benefit_1")}</li>
+                      <li>{t("coming_soon.benefit_2")}</li>
+                      <li>{t("coming_soon.benefit_3")}</li>
                     </ul>
                   </div>
 
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600">
-                      Góp ý của bạn
+                      {t("coming_soon.feedback_label")}
                     </p>
                     <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
-                      Nếu bạn có ý tưởng hoặc góp ý cho tính năng này, hãy gửi phản hồi để chúng tôi cải thiện tốt hơn.
+                      {t("coming_soon.feedback_value")}
                     </p>
                   </div>
                 </div>
@@ -100,7 +101,7 @@ export default function FeatureComingSoonPage() {
                       className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 transition-colors"
                     >
                       <ArrowLeft className="h-4 w-4" />
-                      Quay lại trang trước
+                      {t("coming_soon.back")}
                     </button>
 
                     <Link
@@ -108,12 +109,12 @@ export default function FeatureComingSoonPage() {
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
                     >
                       <Home className="h-4 w-4" />
-                      Về trang chủ
+                      {t("coming_soon.home")}
                     </Link>
                   </div>
 
                   <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                    Cảm ơn bạn đã trải nghiệm ứng dụng. Tính năng mới sẽ sớm ra mắt ✨
+                    {t("coming_soon.thanks")}
                   </p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 // HotelSearchCard.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import MravelDatePicker from "../../../../components/MravelDatePicker";
 import "../../../../styles/datepicker.css";
@@ -45,6 +46,7 @@ const VN_DATE = (d) =>
 
 /* ─ Main Component ─ */
 export default function HotelSearchCard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   /*  Destination  */
@@ -133,7 +135,7 @@ export default function HotelSearchCard() {
     const { slug, text, kind } = destRef.current;
     const locationVal = (slug || text || "").trim();
     if (!locationVal) {
-      showError("Vui lòng nhập hoặc chọn Điểm đến.");
+      showError(t("hotel.please_enter_destination"));
       return;
     }
 
@@ -179,7 +181,7 @@ export default function HotelSearchCard() {
       {/* Header */}
       <div className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-gray-800 rounded-t-2xl">
         <FaHistory className="text-primary" />
-        <span className="font-semibold text-gray-800 dark:text-gray-200">Khách sạn xem gần đây</span>
+        <span className="font-semibold text-gray-800 dark:text-gray-200">{t("hotel.recently_viewed")}</span>
       </div>
 
       {/* Body */}
@@ -187,12 +189,12 @@ export default function HotelSearchCard() {
         {/* Địa điểm */}
         <div className="mb-4">
           <div className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Thành phố, địa điểm hoặc tên khách sạn:
+            {t("hotel.city_place_or_hotel_name")}
           </div>
           <div className="h-12 rounded-lg px-3 bg-white dark:bg-gray-800 flex items-center border border-gray-300 dark:border-gray-700 w-full">
             <DestinationTypeahead
               label={null}
-              placeholder="Thành phố, khách sạn, điểm đến"
+              placeholder={t("hotel.city_hotel_destination_placeholder")}
               className="flex-1 min-w-0 w-full !max-w-none !mx-0"
               buttonSlot={null}
               mode="hotel"
@@ -208,7 +210,7 @@ export default function HotelSearchCard() {
         <div className="grid grid-cols-12 gap-4">
           {/* Nhận phòng */}
           <div className="col-span-12 md:col-span-4">
-            <RowField label="Nhận phòng:">
+            <RowField label={t("hotel.check_in")}>
               <FaCalendarAlt className="text-gray-400 mr-2" />
               <MravelDatePicker selected={checkIn} onChange={(d) => { setCheckIn(d); setDatesChanged(true); }} />
             </RowField>
@@ -217,14 +219,14 @@ export default function HotelSearchCard() {
           {/* Số đêm */}
           <div className="col-span-12 md:col-span-4">
             <RowField
-              label="Số đêm:"
+              label={t("hotel.nights")}
               onClick={() => !openNights && setOpenNights(true)}
               refBox={nightsBoxRef}
             >
               <FaClock className="text-gray-400 mr-2" />
               <input
                 readOnly
-                value={`${nights} đêm`}
+                value={t("hotel.night_count", { n: nights })}
                 className="w-full bg-transparent outline-none cursor-pointer"
               />
               <span className="ml-auto text-gray-400">▾</span>
@@ -256,7 +258,7 @@ export default function HotelSearchCard() {
                               n === nights ? "bg-blue-500" : "bg-gray-300"
                             }`}
                           />
-                          <span className="font-medium">{n} đêm</span>
+                          <span className="font-medium">{t("hotel.night_count", { n })}</span>
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">{VN_DATE(d)}</div>
                       </button>
@@ -269,14 +271,14 @@ export default function HotelSearchCard() {
 
           {/* Trả phòng */}
           <div className="col-span-12 md:col-span-4">
-            <RowField label="Trả phòng:">
+            <RowField label={t("hotel.check_out")}>
               <FaCalendarAlt className="text-gray-400 mr-2" />
               <input
                 readOnly
                 value={checkOut ? VN_DATE(checkOut) : ""}
                 placeholder="—"
                 className="w-full bg-transparent outline-none"
-                title="Tự tính theo số đêm"
+                title={t("hotel.auto_calculated_by_nights")}
               />
             </RowField>
           </div>
@@ -287,13 +289,13 @@ export default function HotelSearchCard() {
           {/* Khách & Phòng */}
           <div className="col-span-12 md:col-span-8">
             <RowField
-              label="Khách và Phòng:"
+              label={t("hotel.guests_and_rooms")}
               onClick={() => !openGuests && setOpenGuests(true)}
               refBox={guestsBoxRef}
             >
               <FaUsers className="text-gray-400 mr-2" />
               <span className="text-gray-800 dark:text-gray-200 select-none">
-                {adults} người lớn, {children} Trẻ em, {rooms} phòng
+                {t("hotel.guests_rooms_summary", { adults, children, rooms })}
               </span>
               <span className="ml-auto text-gray-400">▾</span>
 
@@ -308,7 +310,7 @@ export default function HotelSearchCard() {
                       <span className="w-5 h-5 grid place-items-center rounded bg-gray-100 dark:bg-gray-800">
                         <FaUsers className="text-gray-600 dark:text-gray-400 text-xs" />
                       </span>
-                      <span className="font-medium">Người lớn</span>
+                      <span className="font-medium">{t("hotel.adults")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -341,7 +343,7 @@ export default function HotelSearchCard() {
                       <span className="w-5 h-5 grid place-items-center rounded bg-gray-100 dark:bg-gray-800">
                         👶
                       </span>
-                      <span className="font-medium">Trẻ em</span>
+                      <span className="font-medium">{t("hotel.children")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -374,7 +376,7 @@ export default function HotelSearchCard() {
                       <span className="w-5 h-5 grid place-items-center rounded bg-gray-100 dark:bg-gray-800">
                         🏠
                       </span>
-                      <span className="font-medium">Phòng</span>
+                      <span className="font-medium">{t("hotel.rooms")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -405,12 +407,12 @@ export default function HotelSearchCard() {
                   {children > 0 && (
                     <>
                       <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                        Điền tuổi của trẻ để giúp chúng tôi tìm được phòng phù hợp
+                        {t("hotel.fill_children_ages_hint")}
                       </div>
                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {childrenAges.map((age, idx) => (
                           <div key={idx} className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Trẻ em {idx + 1}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{t("hotel.child_n", { n: idx + 1 })}</span>
                             <select
                               className="flex-1 border rounded px-2 py-2"
                               value={age}
@@ -445,7 +447,7 @@ export default function HotelSearchCard() {
                         setOpenGuests(false);
                       }}
                     >
-                      Xong
+                      {t("hotel.done")}
                     </button>
                   </div>
                 </div>
@@ -460,7 +462,7 @@ export default function HotelSearchCard() {
               className="w-full h-12 rounded-lg bg-[#ff6a00] hover:bg-[#ff5a00] text-white font-semibold inline-flex items-center justify-center gap-2"
             >
               <FaSearch />
-              Tìm kiếm
+              {t("common.search")}
             </Button>
           </div>
         </div>
@@ -473,7 +475,7 @@ export default function HotelSearchCard() {
               alt=""
               className="inline-block"
             />
-            Thanh Toán Tại Khách Sạn
+            {t("hotel.pay_at_hotel")}
           </button>
         </div>
       </div>

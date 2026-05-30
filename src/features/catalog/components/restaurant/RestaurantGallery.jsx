@@ -1,8 +1,10 @@
 // src/features/catalog/components/restaurant/RestaurantGallery.jsx
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 export default function RestaurantGallery({ restaurant }) {
+  const { t } = useTranslation();
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -99,10 +101,10 @@ export default function RestaurantGallery({ restaurant }) {
                   {/* Ô cuối: overlay "Xem tất cả" */}
                   {isLast && (
                     <div className="absolute inset-0 bg-black/45 flex flex-col items-center justify-center text-white text-sm font-semibold">
-                      <span>Xem tất cả</span>
+                      <span>{t("common.see_all")}</span>
                       {totalImages > 0 && (
                         <span className="mt-0.5 text-xs opacity-90">
-                          {totalImages} hình ảnh
+                          {t("restaurant.image_count", { count: totalImages })}
                         </span>
                       )}
                     </div>
@@ -159,7 +161,7 @@ export default function RestaurantGallery({ restaurant }) {
                 onClick={() => setIsGalleryOpen(false)}
                 className="absolute -top-10 right-0 text-white text-sm font-semibold px-3 py-1 rounded-full bg-black/60"
               >
-                Đóng
+                {t("common.close")}
               </button>
             </div>
 

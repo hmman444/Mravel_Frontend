@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FaFacebookF,
   FaInstagram,
@@ -9,11 +10,6 @@ import {
   FaApple,
 } from "react-icons/fa";
 
-const TRUST_BADGES = [
-  { src: "/assets/iata-logo.png", alt: "IATA" },
-  { src: "/assets/iso27001.png", alt: "ISO 27001" },
-  { src: "/assets/logo-da-dang-ky-bo-cong-thuong.png", alt: "Đã đăng ký Bộ Công Thương" },
-];
 const PAYMENT_PARTNERS = [
   "Mastercard",
   "Visa",
@@ -27,38 +23,6 @@ const PAYMENT_PARTNERS = [
   "VIB",
   "ACB",
   "BIDV",
-];
-
-// Map link hợp lý (bạn đổi lại path theo routing Mravel của bạn)
-const FOOTER_LINKS = [
-  {
-    title: "Về Mravel",
-    items: [
-      { label: "Về chúng tôi", to: "/about" },
-      { label: "Tuyển dụng", to: "/careers" },
-      { label: "Liên hệ", to: "/contact" },
-      { label: "Trung tâm trợ giúp", to: "/help" },
-    ],
-  },
-  {
-    title: "Sản phẩm",
-    items: [
-      { label: "Khách sạn", to: "/hotels" },
-      { label: "Nhà hàng", to: "/restaurants" },
-      { label: "Địa điểm", to: "/places" },
-      { label: "Lịch trình", to: "/plans" },
-      { label: "Đặt dịch vụ", to: "/booking" },
-    ],
-  },
-  {
-    title: "Pháp lý & Chính sách",
-    items: [
-      { label: "Điều khoản & Điều kiện", to: "/terms" },
-      { label: "Chính sách quyền riêng tư", to: "/privacy" },
-      { label: "Chính sách hoàn hủy", to: "/refund" },
-      { label: "Quy chế hoạt động", to: "/policy" },
-    ],
-  },
 ];
 
 const SOCIALS = [
@@ -95,6 +59,45 @@ const SOCIALS = [
 ];
 
 export default function Footer() {
+  const { t } = useTranslation();
+
+  const TRUST_BADGES = [
+    { src: "/assets/iata-logo.png", alt: "IATA" },
+    { src: "/assets/iso27001.png", alt: "ISO 27001" },
+    { src: "/assets/logo-da-dang-ky-bo-cong-thuong.png", alt: t("footer.badge_moit") },
+  ];
+
+  const FOOTER_LINKS = [
+    {
+      title: t("footer.col_about"),
+      items: [
+        { label: t("footer.about_us"), to: "/about" },
+        { label: t("footer.careers"), to: "/careers" },
+        { label: t("footer.contact"), to: "/contact" },
+        { label: t("footer.help_center"), to: "/help" },
+      ],
+    },
+    {
+      title: t("footer.col_products"),
+      items: [
+        { label: t("footer.hotels"), to: "/hotels" },
+        { label: t("footer.restaurants"), to: "/restaurants" },
+        { label: t("footer.places"), to: "/places" },
+        { label: t("footer.plans"), to: "/plans" },
+        { label: t("footer.booking"), to: "/booking" },
+      ],
+    },
+    {
+      title: t("footer.col_legal"),
+      items: [
+        { label: t("footer.terms"), to: "/terms" },
+        { label: t("footer.privacy"), to: "/privacy" },
+        { label: t("footer.refund"), to: "/refund" },
+        { label: t("footer.policy"), to: "/policy" },
+      ],
+    },
+  ];
+
   return (
     <footer className="bg-slate-900 text-slate-200 mt-12">
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 space-y-10">
@@ -110,9 +113,7 @@ export default function Footer() {
               </Link>
 
               <p className="mt-3 text-sm text-slate-400 max-w-md">
-                Nền tảng du lịch giúp bạn tìm kiếm, đặt dịch vụ và quản lý hành
-                trình dễ dàng – từ khách sạn, nhà hàng đến các hoạt động trải
-                nghiệm.
+                {t("footer.brand_desc")}
               </p>
             </div>
 
@@ -134,13 +135,13 @@ export default function Footer() {
               to="/partner"
               className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold transition"
             >
-              🤝 Hợp tác với Mravel
+              🤝 {t("footer.partner_cta")}
             </Link>
 
             {/* Payment partners */}
             <div className="space-y-3">
               <h4 className="text-sm font-semibold tracking-wide">
-                Đối tác thanh toán
+                {t("footer.payment_partners")}
               </h4>
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
                 {PAYMENT_PARTNERS.map((name) => (
@@ -183,7 +184,7 @@ export default function Footer() {
               {/* Social */}
               <div>
                 <h4 className="font-semibold mb-3 text-slate-100">
-                  Theo dõi chúng tôi
+                  {t("footer.follow_us")}
                 </h4>
 
                 <div className="flex flex-wrap gap-4 text-xl">
@@ -208,7 +209,7 @@ export default function Footer() {
               {/* App buttons */}
               <div>
                 <h4 className="font-semibold mb-3 text-slate-100">
-                  Tải ứng dụng Mravel
+                  {t("footer.download_app")}
                 </h4>
 
                 <div className="flex flex-wrap gap-3">
@@ -218,7 +219,7 @@ export default function Footer() {
                   >
                     <FaGooglePlay />
                     <span className="text-left">
-                      Tải trên <br />
+                      {t("footer.download_on")} <br />
                       <span className="font-semibold">Google Play</span>
                     </span>
                   </a>
@@ -229,7 +230,7 @@ export default function Footer() {
                   >
                     <FaApple />
                     <span className="text-left">
-                      Tải trên <br />
+                      {t("footer.download_on")} <br />
                       <span className="font-semibold">App Store</span>
                     </span>
                   </a>

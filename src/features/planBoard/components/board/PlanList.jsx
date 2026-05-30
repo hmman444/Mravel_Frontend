@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 let suppressListMenuOpenUntil = 0;
 const LIST_MENU_SUPPRESS_MS = 700;
@@ -18,65 +19,65 @@ const LIST_MENU_SUPPRESS_MS = 700;
 const ACTIVITY_TYPES = [
   {
     id: "TRANSPORT",
-    label: "Di chuyển",
+    labelKey: "plan.activity_meta.transport.label",
     icon: "🚕",
-    description: "Taxi, xe máy, xe buýt...",
+    descriptionKey: "plan.activity_meta.transport.desc",
     pillClass: "bg-sky-50 text-sky-700 border-sky-200",
   },
   {
     id: "FOOD",
-    label: "Ăn uống",
+    labelKey: "plan.activity_meta.food.label",
     icon: "🥘",
-    description: "Quán ăn, cafe, uống...",
+    descriptionKey: "plan.activity_meta.food.desc",
     pillClass: "bg-orange-50 text-orange-700 border-orange-200",
   },
   {
     id: "STAY",
-    label: "Nghỉ ngơi",
+    labelKey: "plan.activity_meta.stay.label",
     icon: "🛏️",
-    description: "Khách sạn, homestay...",
+    descriptionKey: "plan.activity_meta.stay.desc",
     pillClass: "bg-violet-50 text-violet-700 border-violet-200",
   },
   {
     id: "ENTERTAIN",
-    label: "Vui chơi",
+    labelKey: "plan.activity_meta.entertain.label",
     icon: "🎡",
-    description: "Biển, công viên, trò chơi...",
+    descriptionKey: "plan.activity_meta.entertain.desc",
     pillClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   {
     id: "SIGHTSEEING",
-    label: "Tham quan",
+    labelKey: "plan.activity_meta.sightseeing.label",
     icon: "🏛️",
-    description: "Địa điểm du lịch, chụp ảnh...",
+    descriptionKey: "plan.activity_meta.sightseeing.desc",
     pillClass: "bg-amber-50 text-amber-700 border-amber-200",
   },
   {
     id: "SHOPPING",
-    label: "Mua sắm",
+    labelKey: "plan.activity_meta.shopping.label",
     icon: "🛍️",
-    description: "Chợ, TTTM, quà lưu niệm...",
+    descriptionKey: "plan.activity_meta.shopping.desc",
     pillClass: "bg-pink-50 text-pink-700 border-pink-200",
   },
   {
     id: "CINEMA",
-    label: "Xem phim",
+    labelKey: "plan.activity_meta.cinema.label",
     icon: "🎬",
-    description: "Rạp phim, combo bắp nước...",
+    descriptionKey: "plan.activity_meta.cinema.desc",
     pillClass: "bg-rose-50 text-rose-700 border-rose-200",
   },
   {
     id: "EVENT",
-    label: "Sự kiện",
+    labelKey: "plan.activity_meta.event.label",
     icon: "🎤",
-    description: "Show, hội nghị, gặp mặt...",
+    descriptionKey: "plan.activity_meta.event.desc",
     pillClass: "bg-indigo-50 text-indigo-700 border-indigo-200",
   },
   {
     id: "OTHER",
-    label: "Khác",
+    labelKey: "plan.activity_meta.other.label",
     icon: "📝",
-    description: "Hoạt động khác",
+    descriptionKey: "plan.activity_meta.other.desc",
     pillClass: "bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
   },
 ];
@@ -98,6 +99,7 @@ export default function PlanList({
   onOpenActivityModal,
   onOpenListMap,
 }) {
+  const { t } = useTranslation();
   const [tempTitle, setTempTitle] = useState(list.title || "");
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [isListMenuOpen, setIsListMenuOpen] = useState(false);
@@ -167,7 +169,7 @@ export default function PlanList({
                   className="flex items-center w-full px-3 py-2 text-sm 
                     text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 gap-2"
                 >
-                  <FaCopy className="text-gray-500 dark:text-gray-400" /> Tạo bản sao
+                  <FaCopy className="text-gray-500 dark:text-gray-400" /> {t("plan.list.duplicate")}
                 </button>
                 <button
                   onPointerDown={(e) => {
@@ -181,14 +183,14 @@ export default function PlanList({
                   className="flex items-center w-full px-3 py-2 text-sm 
                     text-red-600 hover:bg-red-50/70 dark:hover:bg-red-900/30 gap-2"
                 >
-                  <FaTimes className="text-red-500" /> Xóa
+                  <FaTimes className="text-red-500" /> {t("common.delete")}
                 </button>
               </>
             )}
 
             {!canEdit && (
               <div className="px-3 py-2 text-sm text-gray-400">
-                Không có quyền chỉnh sửa
+                {t("plan.list.no_edit_permission")}
               </div>
             )}
           </div>,
@@ -225,8 +227,7 @@ export default function PlanList({
         <div className="text-[11px] text-rose-600/80 px-2 py-1.5 leading-snug">
           <span className="flex items-start gap-1.5">
             <span className="text-center">
-              Kéo những hoạt động không dùng nữa vào đây
-              để tạm ẩn khỏi tuyến plan chính.
+              {t("plan.trash.hint")}
             </span>
           </span>
         </div>
@@ -272,7 +273,7 @@ export default function PlanList({
               {/* Empty state */}
               {list.cards?.length === 0 && (
                 <div className="py-6 text-[11px] text-rose-500/70 text-center">
-                  (Trống)
+                  {t("plan.trash.empty")}
                 </div>
               )}
 
@@ -325,7 +326,7 @@ export default function PlanList({
                       onChange={(e) => setTempTitle(e.target.value)}
                       onBlur={handleBlurRename}
                       autoFocus
-                      placeholder="Tên ngày (tuỳ chọn)"
+                      placeholder={t("plan.list.day_name_placeholder")}
                       className="
                         mt-0.5 w-full bg-transparent outline-none
                         text-sm font-medium text-gray-900 dark:text-gray-200
@@ -341,7 +342,9 @@ export default function PlanList({
                           text-left truncate hover:text-blue-600 dark:hover:text-blue-400
                         "
                       >
-                        {list.title}
+                        {list.title === "Danh sách hoạt động"
+                          ? t("plan.default_list_name")
+                          : list.title}
                       </button>
                     )
                   )}
@@ -357,7 +360,7 @@ export default function PlanList({
                     className="p-1.5 rounded-lg text-sky-600 hover:bg-sky-50 dark:text-sky-300 dark:hover:bg-sky-900/40 text-[11px] flex items-center gap-1"
                   >
                     <FaMapMarkerAlt className="text-[11px]" />
-                    <span className="hidden lg:inline">Bản đồ</span>
+                    <span className="hidden lg:inline">{t("plan.list.map")}</span>
                   </button>
 
                 </div>
@@ -434,7 +437,7 @@ export default function PlanList({
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-300">
-                          Chọn loại hoạt động
+                          {t("plan.list.pick_activity_type")}
                         </span>
                         <button
                           onClick={() => setShowTypePicker(false)}
@@ -459,9 +462,9 @@ export default function PlanList({
                               {type.icon}
                             </span>
                             <div className="flex-1">
-                              <div className="font-semibold">{type.label}</div>
+                              <div className="font-semibold">{t(type.labelKey)}</div>
                               <div className="opacity-80 text-[10px]">
-                                {type.description}
+                                {t(type.descriptionKey)}
                               </div>
                             </div>
                           </button>
@@ -477,7 +480,7 @@ export default function PlanList({
                     className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 
                       px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-xl transition w-full justify-center"
                   >
-                    <FaPlus className="text-xs" /> Thêm hoạt động
+                    <FaPlus className="text-xs" /> {t("plan.list.add_activity")}
                   </button>
                 )}
               </div>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaUserMinus } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const ROLE_COLORS = {
   OWNER:
@@ -36,6 +37,7 @@ export default function MemberRow({
   onAskRemove,
   roleLabels,
 }) {
+  const { t } = useTranslation();
   const containerRef = useRef(null);
   const anchorRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -73,10 +75,12 @@ export default function MemberRow({
       mdiff == null
         ? "—"
         : mdiff === 0
-        ? "Đúng ngân sách"
+        ? t("plan.member.budget_on_track")
         : mdiff > 0
-        ? `Vượt ${formatCurrency(mdiff)}`
-        : `Dư ${formatCurrency(Math.abs(mdiff))}`;
+        ? t("plan.member.budget_over", { amount: formatCurrency(mdiff) })
+        : t("plan.member.budget_under", {
+            amount: formatCurrency(Math.abs(mdiff)),
+          });
 
     const cls =
       mdiff == null || mdiff === 0
@@ -91,7 +95,7 @@ export default function MemberRow({
       diffLabel: label,
       diffClass: cls,
     };
-  }, [member, planActualTotal, planBudgetPerPerson]);
+  }, [member, planActualTotal, planBudgetPerPerson, t]);
 
   // DROPDOWN POSITION 
   useEffect(() => {
@@ -191,7 +195,7 @@ export default function MemberRow({
                   }
                 `}
               >
-                Chỉnh sửa
+                {t("plan.member.role_editor")}
               </button>
 
               <button
@@ -212,7 +216,7 @@ export default function MemberRow({
                   }
                 `}
               >
-                Chỉ xem
+                {t("plan.member.role_viewer")}
               </button>
             </div>
 
@@ -228,7 +232,7 @@ export default function MemberRow({
                   "
                 >
                   <FaUserMinus className="text-[10px]" />
-                  Xoá khỏi kế hoạch
+                  {t("plan.member.remove_from_plan")}
                 </button>
               </>
             )}
@@ -263,7 +267,9 @@ export default function MemberRow({
               {member.email}
             </p>
             <p className="text-[11px] text-gray-400 mt-0.5">
-              Tham gia {member.activityCount ?? 0} hoạt động
+              {t("plan.member.joined_activities", {
+                count: member.activityCount ?? 0,
+              })}
             </p>
           </div>
         </div>
@@ -284,21 +290,23 @@ export default function MemberRow({
         <div className="grid grid-cols-2 md:grid-cols-3 gap-10 text-[11px] md:min-w-[340px]">
           <div>
             <p className="text-gray-500 dark:text-gray-400">
-              Phần chi của thành viên
+              {t("plan.member.member_share")}
             </p>
             <p className="font-semibold text-gray-900 dark:text-gray-100">
               {formatCurrency(member.shareActual)}
             </p>
             {percentOfPlan != null && (
               <p className="text-[10px] text-gray-400">
-                {formatPercent(percentOfPlan)} chi phí plan
+                {t("plan.member.percent_of_plan_cost", {
+                  percent: formatPercent(percentOfPlan),
+                })}
               </p>
             )}
           </div>
 
           <div>
             <p className="text-gray-500 dark:text-gray-400">
-              Ngân sách dự kiến
+              {t("plan.member.expected_budget")}
             </p>
             <p className="font-semibold text-gray-900 dark:text-gray-100">
               {budget != null ? formatCurrency(budget) : "—"}
@@ -308,7 +316,7 @@ export default function MemberRow({
 
           <div className="col-span-2 md:col-span-1">
             <p className="text-gray-500 dark:text-gray-400">
-              Tỷ lệ so với nhóm
+              {t("plan.member.ratio_vs_group")}
             </p>
             <div className="mt-1">
               <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
@@ -325,7 +333,9 @@ export default function MemberRow({
               </div>
               {percentOfPlan != null && (
                 <p className="mt-1 text-[10px] text-gray-400">
-                  Đóng góp {formatPercent(percentOfPlan)} 
+                  {t("plan.member.contribution", {
+                    percent: formatPercent(percentOfPlan),
+                  })}
                 </p>
               )}
               

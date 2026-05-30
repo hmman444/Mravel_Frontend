@@ -1,5 +1,6 @@
 // src/components/MravelDatePicker.jsx
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { vi } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,6 +10,7 @@ import { addMonths } from "date-fns";
 registerLocale("vi", vi);
 
 export default function MravelDatePicker({ selected, onChange, ...rest }) {
+  const { t } = useTranslation();
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -76,7 +78,7 @@ export default function MravelDatePicker({ selected, onChange, ...rest }) {
             )}
 
             <span className="mravel-calendar__header-title">
-              Tháng {month} {year}
+              {t("common.month_year", { month, year })}
             </span>
 
             {isLast && (

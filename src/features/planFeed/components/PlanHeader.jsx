@@ -6,29 +6,31 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 const visMeta = (v) => {
   const value = (v || "").toLowerCase();
   if (value === "public")
     return {
       icon: <GlobeAltIcon className="w-3.5 h-3.5" />,
-      label: "Công khai",
+      labelKey: "feed.visibility.public",
       color: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
     };
   if (value === "friends")
     return {
       icon: <UserGroupIcon className="w-3.5 h-3.5" />,
-      label: "Bạn bè",
+      labelKey: "feed.visibility.friends",
       color:
         "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
     };
   return {
     icon: <LockClosedIcon className="w-3.5 h-3.5" />,
-    label: "Riêng tư",
+    labelKey: "feed.visibility.private",
     color: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-gray-800 dark:text-gray-300",
   };
 };
 
 export default function PlanHeader({ author, createdAt, visibility, views }) {
+  const { t } = useTranslation();
   const meta = visMeta(visibility);
 
   return (
@@ -39,7 +41,7 @@ export default function PlanHeader({ author, createdAt, visibility, views }) {
           if (!author?.id) e.preventDefault();
         }}
         className="shrink-0"
-        title={author?.id ? `Xem trang cá nhân ${author.name}` : ""}
+        title={author?.id ? t("feed.viewProfileOf", { name: author.name }) : ""}
       >
         <img
           src={author.avatar}
@@ -53,7 +55,7 @@ export default function PlanHeader({ author, createdAt, visibility, views }) {
           <Link
             to={`/profile/${author.id}`}
             className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
-            title="Xem trang cá nhân"
+            title={t("feed.viewProfile")}
           >
             {author.name}
           </Link>
@@ -70,7 +72,7 @@ export default function PlanHeader({ author, createdAt, visibility, views }) {
             `}
           >
             {meta.icon}
-            <span>{meta.label}</span>
+            <span>{t(meta.labelKey)}</span>
           </span>
           <span className="inline-flex items-center gap-1 font-medium">
             <EyeIcon className="w-3.5 h-3.5" /> {views}

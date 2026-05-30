@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 
 /* DayOfWeek -> 1..7 */
 const DAY_INDEX = {
@@ -6,8 +8,8 @@ const DAY_INDEX = {
   FRIDAY: 5, SATURDAY: 6, SUNDAY: 7,
 };
 const VN_DAYS = {
-  1: "Thứ hai", 2: "Thứ ba", 3: "Thứ tư", 4: "Thứ năm",
-  5: "Thứ sáu", 6: "Thứ bảy", 7: "Chủ nhật",
+  1: "restaurant.day_monday", 2: "restaurant.day_tuesday", 3: "restaurant.day_wednesday", 4: "restaurant.day_thursday",
+  5: "restaurant.day_friday", 6: "restaurant.day_saturday", 7: "restaurant.day_sunday",
 };
 
 /*  helpers  */
@@ -104,8 +106,8 @@ function makeRows(byDay) {
     const ranges = byDay.get(i);
     rows.push({
       dayIdx: i,
-      label: VN_DAYS[i],
-      text: ranges?.length ? ranges.map(r => r.text).join(", ") : "Đóng cửa",
+      label: i18n.t(VN_DAYS[i]),
+      text: ranges?.length ? ranges.map(r => r.text).join(", ") : i18n.t("restaurant.closed"),
       isClosed: !ranges?.length,
     });
   }
@@ -115,7 +117,7 @@ function makeRows(byDay) {
 /** Tính trạng thái hiện tại dựa trên todayRanges */
 function computeStatus(todayRanges, allByDay, today) {
   if (!todayRanges || todayRanges.length === 0) {
-    return { label: "Hiện tại đang đóng cửa", tone: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" };
+    return { label: i18n.t("restaurant.status_currently_closed"), tone: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" };
   }
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
@@ -123,7 +125,7 @@ function computeStatus(todayRanges, allByDay, today) {
   const current = todayRanges.find(r => r.start <= nowMin && nowMin < r.end);
   if (current) {
     return {
-      label: `Đang mở • Đến ${current.text.split(" - ")[1]}`,
+      label: i18n.t("restaurant.status_open_until", { time: current.text.split(" - ")[1] }),
       tone: "bg-green-100 text-green-700",
     };
   }
@@ -131,7 +133,7 @@ function computeStatus(todayRanges, allByDay, today) {
   const next = todayRanges.find(r => r.start > nowMin);
   if (next) {
     return {
-      label: `Đã đóng • Mở lại ${next.text.split(" - ")[0]}`,
+      label: i18n.t("restaurant.status_closed_reopen_at", { time: next.text.split(" - ")[0] }),
       tone: "bg-amber-100 text-amber-700",
     };
   }
@@ -142,15 +144,16 @@ function computeStatus(todayRanges, allByDay, today) {
     const arr = allByDay.get(d);
     if (arr?.length) {
       return {
-        label: `Đã đóng • Mở lại ${VN_DAYS[d]} ${arr[0].text.split(" - ")[0]}`,
+        label: i18n.t("restaurant.status_closed_reopen_on_day", { day: i18n.t(VN_DAYS[d]), time: arr[0].text.split(" - ")[0] }),
         tone: "bg-amber-100 text-amber-700",
       };
     }
   }
-  return { label: "Tạm ngưng phục vụ", tone: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" };
+  return { label: i18n.t("restaurant.status_temporarily_suspended"), tone: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" };
 }
 
 export default function RestaurantOpeningHoursSection({ restaurant }) {
+  const { t } = useTranslation();
   const hours = restaurant?.openingHours;
 
   const js = new Date().getDay();            // 0..6
@@ -169,7 +172,7 @@ export default function RestaurantOpeningHoursSection({ restaurant }) {
     <section className="px-4 md:px-5 pt-4 pb-5">
       {/* Title + status badge */}
       <div className="flex items-center gap-2 flex-wrap">
-        <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-gray-100">Giờ hoạt động</h2>
+        <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-gray-100">{t("restaurant.opening_hours")}</h2>
         <span className={`text-xs md:text-sm px-2.5 py-1 rounded-full font-semibold ${status.tone}`}>
           {status.label}
         </span>

@@ -1,11 +1,12 @@
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 const BASE = "/notifications"; // axiosInstance đã có baseURL gateway hoặc trực tiếp
 
 const ensureOk = (res) => {
   const body = res?.data;
   if (body?.success === false) {
-    const msg = body?.message || "Có lỗi xảy ra";
+    const msg = body?.message || i18n.t("notification.error.generic");
     const err = new Error(msg);
     err.response = { data: body, status: res?.status };
     throw err;

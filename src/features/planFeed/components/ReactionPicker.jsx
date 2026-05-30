@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { REACTIONS } from "../utils/reactionsMeta";
 import { HandThumbUpIcon } from "@heroicons/react/24/outline";
 
 export default function ReactionPicker({ value, onChange }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const hoverTimeout = useRef(null);
 
@@ -63,7 +65,7 @@ export default function ReactionPicker({ value, onChange }) {
         {!current ? (
           <>
             <HandThumbUpIcon className="w-4 h-4 stroke-[2]" />
-            <span>Thích</span>
+            <span>{t("feed.reaction.like")}</span>
           </>
         ) : (
           <>

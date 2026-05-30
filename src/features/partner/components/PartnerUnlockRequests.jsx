@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   LockClosedIcon,
   PaperAirplaneIcon,
@@ -60,23 +61,24 @@ const MOCK_REQUESTS = [
 
 const STATUS_META = {
   PENDING: {
-    label: "Đang chờ duyệt",
+    labelKey: "partner.unlock.status.pending",
     pill: "bg-yellow-100 text-yellow-700",
     icon: ClockIcon,
   },
   APPROVED: {
-    label: "Đã duyệt",
+    labelKey: "partner.unlock.status.approved",
     pill: "bg-green-100 text-green-700",
     icon: CheckCircleIcon,
   },
   REJECTED: {
-    label: "Bị từ chối",
+    labelKey: "partner.unlock.status.rejected",
     pill: "bg-red-100 text-red-700",
     icon: XCircleIcon,
   },
 };
 
 export default function PartnerUnlockRequests() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState("BLOCKED"); // BLOCKED | HISTORY
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
@@ -117,7 +119,7 @@ export default function PartnerUnlockRequests() {
   const openRequestModal = (service) => {
     // rule: chỉ được gửi khi ADMIN_BLOCKED
     if (service.status !== "ADMIN_BLOCKED") {
-      Toast.error("Chỉ gửi yêu cầu khi dịch vụ đang bị ADMIN khóa.");
+      Toast.error(t("partner.unlock.toast.only_admin_blocked"));
       return;
     }
     setModal({ open: true, service, reason: "" });
@@ -126,7 +128,7 @@ export default function PartnerUnlockRequests() {
   const submitUnlockRequest = () => {
     const reason = modal.reason.trim();
     if (!reason) {
-      Toast.error("Vui lòng nhập lý do yêu cầu mở khóa.");
+      Toast.error(t("partner.unlock.toast.reason_required"));
       return;
     }
 
@@ -145,7 +147,7 @@ export default function PartnerUnlockRequests() {
 
     setRequests((prev) => [newReq, ...prev]);
     setModal({ open: false, service: null, reason: "" });
-    Toast.success("Đã gửi yêu cầu mở khóa, vui lòng chờ admin duyệt.");
+    Toast.success(t("partner.unlock.toast.submitted"));
 
     // UX: tự chuyển qua history để partner thấy request vừa gửi
     setTab("HISTORY");
@@ -156,7 +158,7 @@ export default function PartnerUnlockRequests() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Yêu cầu mở khóa</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t("partner.unlock.title")}</h1>
         </div>
       </div>
 
@@ -173,7 +175,7 @@ export default function PartnerUnlockRequests() {
                   : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
               }`}
             >
-              Dịch vụ bị khóa
+              {t("partner.unlock.tab.blocked")}
             </button>
             <button
               onClick={() => setTab("HISTORY")}
@@ -183,7 +185,7 @@ export default function PartnerUnlockRequests() {
                   : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50"
               }`}
             >
-              Lịch sử yêu cầu
+              {t("partner.unlock.tab.history")}
             </button>
           </div>
 
@@ -195,7 +197,7 @@ export default function PartnerUnlockRequests() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên / mã dịch vụ / mã yêu cầu..."
+              placeholder={t("partner.unlock.search_placeholder")}
               className="w-full pl-10 pr-3 py-2 border rounded-md outline-none focus:ring focus:border-blue-500"
             />
           </div>
@@ -208,7 +210,7 @@ export default function PartnerUnlockRequests() {
           >
             {types.map((tp) => (
               <option key={tp} value={tp}>
-                {tp === "All" ? "Tất cả loại" : tp}
+                {tp === "All" ? t("partner.unlock.filter.all_types") : tp}
               </option>
             ))}
           </select>
@@ -241,9 +243,9 @@ export default function PartnerUnlockRequests() {
                     </p>
 
                     <div className="mt-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Bị khóa lúc</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("partner.unlock.blocked_at")}</p>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{s.blockedAt}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-1">Lý do (admin)</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-1">{t("partner.unlock.admin_reason")}</p>
                       <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{s.blockedReason}</p>
                     </div>
                   </div>
@@ -254,13 +256,13 @@ export default function PartnerUnlockRequests() {
                       className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
                     >
                       <PaperAirplaneIcon className="w-5 h-5" />
-                      Gửi yêu cầu mở
+                      {t("partner.unlock.send_request_short")}
                     </button>
 
                     <button
-                      onClick={() => Toast.info("Demo UI: chi tiết service sẽ nằm ở trang quản lý dịch vụ.")}
+                      onClick={() => Toast.info(t("partner.unlock.toast.service_detail_demo"))}
                       className="p-2 rounded-lg border hover:bg-gray-50"
-                      title="Thông tin"
+                      title={t("partner.unlock.info")}
                     >
                       <InformationCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     </button>
@@ -270,7 +272,7 @@ export default function PartnerUnlockRequests() {
             ))
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-10 text-center text-gray-500 dark:text-gray-400 col-span-full">
-              Không có dịch vụ ADMIN_BLOCKED khớp bộ lọc.
+              {t("partner.unlock.empty_blocked")}
             </div>
           )}
         </div>
@@ -296,28 +298,28 @@ export default function PartnerUnlockRequests() {
 
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${meta.pill}`}>
                         <Icon className="w-4 h-4" />
-                        {meta.label}
+                        {t(meta.labelKey)}
                       </span>
                     </div>
 
                     <div className="mt-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Lý do gửi</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("partner.unlock.request_reason")}</p>
                       <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{r.reason}</p>
                     </div>
 
                     <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Gửi lúc</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t("partner.unlock.sent_at")}</p>
                         <p className="text-sm text-gray-700 dark:text-gray-300">{r.createdAt}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Phản hồi</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t("partner.unlock.response")}</p>
                         <p className="text-sm text-gray-700 dark:text-gray-300">
-                          {r.decidedAt ? r.decidedAt : "Chưa có"}
+                          {r.decidedAt ? r.decidedAt : t("partner.unlock.no_response")}
                         </p>
                         {r.note && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Ghi chú: <span className="text-gray-700 dark:text-gray-300">{r.note}</span>
+                            {t("partner.unlock.note_label")} <span className="text-gray-700 dark:text-gray-300">{r.note}</span>
                           </p>
                         )}
                       </div>
@@ -326,10 +328,10 @@ export default function PartnerUnlockRequests() {
 
                   <div className="md:w-56 flex flex-col gap-2">
                     <button
-                      onClick={() => Toast.info("Demo UI: không cho sửa request sau khi gửi để tránh rối nghiệp vụ.")}
+                      onClick={() => Toast.info(t("partner.unlock.toast.no_edit_demo"))}
                       className="w-full px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm"
                     >
-                      Xem quy tắc
+                      {t("partner.unlock.view_rules")}
                     </button>
                     {r.status === "REJECTED" && (
                       <button
@@ -337,14 +339,14 @@ export default function PartnerUnlockRequests() {
                           // demo: mở modal gửi lại dựa trên serviceId nếu còn blocked
                           const svc = blockedServices.find((s) => s.id === r.serviceId);
                           if (!svc) {
-                            Toast.error("Dịch vụ không còn ở trạng thái ADMIN_BLOCKED để gửi lại.");
+                            Toast.error(t("partner.unlock.toast.no_longer_blocked"));
                             return;
                           }
                           openRequestModal(svc);
                         }}
                         className="w-full px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm font-semibold"
                       >
-                        Gửi lại yêu cầu
+                        {t("partner.unlock.resend_request")}
                       </button>
                     )}
                   </div>
@@ -353,7 +355,7 @@ export default function PartnerUnlockRequests() {
             })
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-10 text-center text-gray-500 dark:text-gray-400">
-              Chưa có yêu cầu mở khóa nào.
+              {t("partner.unlock.empty_history")}
             </div>
           )}
         </div>
@@ -365,9 +367,9 @@ export default function PartnerUnlockRequests() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-lg p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Gửi yêu cầu mở khóa</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t("partner.unlock.modal.title")}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Dịch vụ: <span className="font-medium text-gray-800 dark:text-gray-200">{modal.service?.name}</span>
+                  {t("partner.unlock.modal.service_label")} <span className="font-medium text-gray-800 dark:text-gray-200">{modal.service?.name}</span>
                 </p>
               </div>
               <span className="px-2.5 py-1 rounded-full text-xs bg-red-100 text-red-700">
@@ -377,13 +379,13 @@ export default function PartnerUnlockRequests() {
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Lý do yêu cầu mở khóa <span className="text-red-500">*</span>
+                {t("partner.unlock.modal.reason_label")} <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={modal.reason}
                 onChange={(e) => setModal((m) => ({ ...m, reason: e.target.value }))}
                 className="w-full border rounded-lg p-3 h-28 outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ví dụ: Đã bổ sung giấy phép/ảnh/giấy tờ, đã chỉnh sửa nội dung theo góp ý..."
+                placeholder={t("partner.unlock.modal.reason_placeholder")}
                 maxLength={500}
               />
               <p className="text-xs text-gray-400 mt-1">
@@ -396,14 +398,14 @@ export default function PartnerUnlockRequests() {
                 onClick={() => setModal({ open: false, service: null, reason: "" })}
                 className="px-4 py-2 rounded-lg border hover:bg-gray-50"
               >
-                Hủy
+                {t("common.cancel")}
               </button>
               <button
                 onClick={submitUnlockRequest}
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold inline-flex items-center gap-2"
               >
                 <PaperAirplaneIcon className="w-5 h-5" />
-                Gửi yêu cầu
+                {t("partner.unlock.send_request")}
               </button>
             </div>
           </div>

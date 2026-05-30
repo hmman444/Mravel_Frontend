@@ -14,7 +14,7 @@ export default function Navbar() {
   const { accessToken, user } = useSelector((state) => state.auth);
   const { handleLogout } = useLogout();
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const location = useLocation();
   const isTransparentPage =
@@ -41,7 +41,7 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
 
-  const fullname = user?.fullname || user?.fullName || user?.name || user?.username || "Người dùng";
+  const fullname = user?.fullname || user?.fullName || user?.name || user?.username || t("common.user");
   const avatar =
     user?.avatar ||
     user?.picture ||
@@ -99,7 +99,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-[50] transition-all duration-300
+      className={`fixed top-0 w-full z-[100] transition-all duration-300
         ${
           solid
             ? "bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-white/10 shadow-md"
@@ -133,19 +133,19 @@ export default function Navbar() {
         {/* CENTER: Nav */}
         <nav className="hidden md:flex justify-center gap-8 font-medium text-base">
           <Link className="hover:text-sky-500 transition" to="/hotels">
-            Khách sạn
+            {t("nav.hotels")}
           </Link>
           <Link className="hover:text-sky-500 transition" to="/restaurants">
-            Quán ăn
+            {t("nav.restaurants")}
           </Link>
           <Link className="hover:text-sky-500 transition" to="/plans">
-            Lịch trình
+            {t("nav.plans")}
           </Link>
           <Link className="hover:text-sky-500 transition" to="/my-bookings">
-            Đặt dịch vụ
+            {t("nav.bookings")}
           </Link>
           <Link className="hover:text-sky-500 transition" to="/partner">
-            Hợp tác
+            {t("nav.partner")}
           </Link>
         </nav>
 
@@ -204,9 +204,15 @@ export default function Navbar() {
                     <button
                       key={l.code}
                       onClick={() => {
-                        i18n.changeLanguage(l.code);
+                        if (l.code === currentLang?.code) {
+                          setLangOpen(false);
+                          return;
+                        }
                         localStorage.setItem("language", l.code);
+                        i18n.changeLanguage(l.code);
                         setLangOpen(false);
+                        // Reload để data từ API fetch lại với Accept-Language mới
+                        window.location.reload();
                       }}
                       className="
                         w-full flex items-center justify-between px-3 py-2 text-sm
@@ -228,7 +234,7 @@ export default function Navbar() {
           {!accessToken ? (
             <>
               <Link className="font-medium hover:text-sky-600 transition" to="/login">
-                Đăng nhập
+                {t("common.login")}
               </Link>
               <Link
                 to="/register"
@@ -239,7 +245,7 @@ export default function Navbar() {
                   active:scale-[0.98] transition
                 "
               >
-                Đăng ký
+                {t("common.register")}
               </Link>
             </>
           ) : (
@@ -351,7 +357,7 @@ export default function Navbar() {
                     <div className="py-2">
                       <MenuLink
                         icon={<User2 className="w-4 h-4" />}
-                        label="Trang cá nhân"
+                        label={t("common.profile")}
                         onClick={() => {
                           setUserMenuOpen(false);
                           navigate(`/profile/${user?.id}`);
@@ -373,7 +379,7 @@ export default function Navbar() {
                         "
                       >
                         <LogOut className="w-4 h-4" />
-                        <span>Đăng xuất</span>
+                        <span>{t("common.logout")}</span>
                       </button>
                     </div>
                   </div>

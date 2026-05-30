@@ -1,6 +1,8 @@
+import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 
 export default function ServiceDetailModal({ data, onClose }) {
+  const { t } = useTranslation();
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full p-6 relative">
@@ -26,18 +28,17 @@ export default function ServiceDetailModal({ data, onClose }) {
           <span className="text-yellow-500">★ {data.rating}</span>
         </div>
         <p className="mt-4 text-sm text-gray-700 dark:text-gray-200">
-          Đây là mô tả chi tiết về dịch vụ / địa điểm. Người dùng có thể xem
-          hình ảnh, tiện ích và đánh giá để đưa ra quyết định.
+          {t("search.detail_desc")}
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <Button
             onClick={onClose}
             className="bg-gray-300 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-200"
           >
-            Đóng
+            {t("common.close")}
           </Button>
-          {data.type === "restaurant" && <Button>Đặt bàn</Button>}
-          {data.type === "hotel" && <Button>Đặt phòng</Button>}
+          {data.type === "restaurant" && <Button>{t("search.book_table")}</Button>}
+          {data.type === "hotel" && <Button>{t("search.book_room")}</Button>}
         </div>
       </div>
     </div>

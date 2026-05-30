@@ -1,6 +1,7 @@
 // src/features/booking/components/hotel/HotelBookingPriceSummaryCard.jsx
 import { useState, useMemo } from "react";
 import { Tag } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const safeNumber = (v) =>
   typeof v === "number" && !Number.isNaN(v) ? v : 0;
@@ -20,6 +21,7 @@ export default function HotelBookingPriceSummaryCard({
   disabled = false,
   loading = false,
 }) {
+  const { t } = useTranslation();
   const [paymentOption, setPaymentOption] = useState("FULL"); // FULL | DEPOSIT
 
   const isPayAtHotel = paymentType === "PAY_AT_HOTEL";
@@ -57,11 +59,11 @@ export default function HotelBookingPriceSummaryCard({
     : null;
 
   const paymentLabel = useMemo(() => {
-    if (!isPayAtHotel) return "Thanh toán toàn bộ";
+    if (!isPayAtHotel) return t("booking.pay_full");
     return paymentOption === "DEPOSIT"
-      ? `Đặt cọc ${DEPOSIT_PERCENT}%`
-      : "Thanh toán toàn bộ";
-  }, [isPayAtHotel, paymentOption]);
+      ? t("booking.deposit_percent", { percent: DEPOSIT_PERCENT })
+      : t("booking.pay_full");
+  }, [isPayAtHotel, paymentOption, t]);
 
   return (
     <section className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
@@ -70,7 +72,7 @@ export default function HotelBookingPriceSummaryCard({
         <div className="flex items-center gap-2">
           <Tag className="h-4 w-4 text-gray-700 dark:text-gray-300" />
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-            Chi tiết giá
+            {t("booking.price_details")}
           </h2>
         </div>
 
@@ -82,15 +84,15 @@ export default function HotelBookingPriceSummaryCard({
               onChange={(e) => setPaymentOption(e.target.value)}
               className="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-[11px] text-gray-700 dark:text-gray-300 outline-none hover:border-blue-500 focus:border-blue-500 md:text-xs"
             >
-              <option value="FULL">Thanh toán toàn bộ</option>
+              <option value="FULL">{t("booking.pay_full")}</option>
               <option value="DEPOSIT">
-                Đặt cọc {DEPOSIT_PERCENT}% – phần còn lại trả tại khách sạn
+                {t("booking.deposit_pay_rest_at_hotel", { percent: DEPOSIT_PERCENT })}
               </option>
             </select>
           </div>
         ) : (
           <span className="text-[11px] text-gray-500 dark:text-gray-400">
-            Hình thức: Thanh toán toàn bộ
+            {t("booking.payment_method_full")}
           </span>
         )}
       </div>
@@ -99,16 +101,16 @@ export default function HotelBookingPriceSummaryCard({
       <div className="space-y-3 px-4 pb-4 pt-3 md:px-5 md:pb-5">
         <div className="space-y-2 text-xs text-gray-800 dark:text-gray-200 md:text-sm">
           <div className="flex items-center justify-between">
-            <span>Giá phòng</span>
+            <span>{t("booking.room_price")}</span>
             <span>{formattedRoom} VND</span>
           </div>
           <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
             <span>
-              ({roomsCount}x) {roomName} ({displayNights} đêm)
+              {t("booking.room_line_summary", { count: roomsCount, roomName, nights: displayNights })}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Thuế và phí</span>
+            <span>{t("booking.tax_and_fee")}</span>
             <span>{formattedTax} VND</span>
           </div>
         </div>
@@ -120,7 +122,7 @@ export default function HotelBookingPriceSummaryCard({
               <>
                 <span className="line-through">{formattedOriginal} VND</span>
                 <span className="text-[11px] font-semibold text-green-600">
-                  Tiết kiệm {savingAmount} VND
+                  {t("booking.saving_amount", { amount: savingAmount })}
                 </span>
               </>
             ) : (
@@ -129,17 +131,16 @@ export default function HotelBookingPriceSummaryCard({
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 md:text-sm">Tổng cộng ({paymentLabel})</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 md:text-sm">{t("booking.total_with_label", { label: paymentLabel })}</p>
               <p className="text-lg font-bold text-emerald-600 md:text-xl">
                 {formattedFinal} VND
               </p>
               <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                {roomsCount} phòng, {displayNights} đêm · Đã bao gồm thuế và phí
+                {t("booking.rooms_nights_tax_included", { rooms: roomsCount, nights: displayNights })}
               </p>
               {isPayAtHotel && paymentOption === "DEPOSIT" && (
                 <p className="mt-0.5 text-[11px] text-orange-600">
-                  Bạn chỉ thanh toán trước {DEPOSIT_PERCENT}% ({formattedFinal} VND). 
-                  Số tiền còn lại sẽ được thanh toán tại khách sạn.
+                  {t("booking.deposit_note", { percent: DEPOSIT_PERCENT, amount: formattedFinal })}
                 </p>
               )}
             </div>
@@ -156,23 +157,23 @@ export default function HotelBookingPriceSummaryCard({
             disabled || loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#007bff] hover:bg-[#ff6b1a]",
           ].join(" ")}
         >
-          {loading ? "Đang chuyển đến MoMo..." : "Thanh toán"}
+          {loading ? t("booking.redirecting_to_momo") : t("booking.pay")}
         </button>
 
         <p className="mt-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-          Bằng cách tiếp tục thanh toán, bạn đồng ý với{" "}
+          {t("booking.terms_agree_prefix")}{" "}
           <span className="cursor-pointer text-blue-600 hover:underline">
-            Điều khoản &amp; Điều kiện
+            {t("booking.terms_and_conditions")}
           </span>
           ,{" "}
           <span className="cursor-pointer text-blue-600 hover:underline">
-            Chính sách Bảo mật
+            {t("booking.privacy_policy")}
           </span>{" "}
-          và{" "}
+          {t("booking.terms_and")}{" "}
           <span className="cursor-pointer text-blue-600 hover:underline">
-            Quy trình Hoàn tiền lưu trú
+            {t("booking.stay_refund_process")}
           </span>{" "}
-          của Mravel.
+          {t("booking.terms_agree_suffix")}
         </p>
       </div>
     </section>

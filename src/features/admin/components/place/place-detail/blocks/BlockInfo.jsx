@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { ui } from "../uiTokens";
 import { Label } from "../pills";
 
 export default function BlockInfo({ idx, block, isLockedReadOnly, onPatch }) {
+  const { t } = useTranslation();
   return (
     <div>
       <Label>Info box</Label>
@@ -10,7 +12,7 @@ export default function BlockInfo({ idx, block, isLockedReadOnly, onPatch }) {
         disabled={isLockedReadOnly}
         value={block.text || ""}
         onChange={(e) => onPatch(idx, { text: e.target.value })}
-        placeholder="Ví dụ: Mẹo nhỏ: đi sớm 15–20 phút..."
+        placeholder={t("admin.block_info_placeholder")}
       />
     </div>
   );

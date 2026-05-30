@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import PlanLayout from "../components/PlanLayout";
 import PlanSummary from "../components/summary/PlanSummary";
@@ -27,6 +28,7 @@ const GRANULAR_CMDS =
   import.meta.env.VITE_ENABLE_GRANULAR_BOARD_COMMANDS === "true";
 
 export default function PlanDashboardPage() {
+  const { t } = useTranslation();
   const { planId } = useParams();
   const navigate = useNavigate();
 
@@ -130,7 +132,7 @@ export default function PlanDashboardPage() {
 
     try {
       await updateTitle(planId, trimmed).unwrap();
-      showSuccess("Đã cập nhật tiêu đề");
+      showSuccess(t("plan.title.update_success"));
 
       if (reloadMyPlans) {
         await reloadMyPlans();
@@ -139,7 +141,7 @@ export default function PlanDashboardPage() {
         await reloadRecent();
       }
     } catch {
-      showError("Không thể cập nhật tiêu đề");
+      showError(t("plan.title.update_error"));
       setTitleInput(board.planTitle || "");
     }
   };
@@ -148,7 +150,7 @@ export default function PlanDashboardPage() {
     try {
       const copied = await copyPlan(plan.id);
       if (copied?.id){
-        showSuccess("Đã tạo bản sao lịch trình");
+        showSuccess(t("plan.copy.success"));
         if (reloadMyPlans) {
           await reloadMyPlans();
         }
@@ -157,11 +159,11 @@ export default function PlanDashboardPage() {
         }
         navigate(`/plans/${copied.id}`);
       } else {
-        showError("Không thể tạo bản sao lịch trình");
+        showError(t("plan.copy.error"));
       }
     } catch (e) {
       console.error(e);
-      showError("Không thể tạo bản sao lịch trình");
+      showError(t("plan.copy.error"));
     }
   }
 
@@ -219,7 +221,7 @@ export default function PlanDashboardPage() {
       ...rest
     } = activity;
 
-    const finalText = text || title || "Hoạt động";
+    const finalText = text || title || t("plan.activity.default_title");
     const finalDescription = description || note || "";
 
     const parsedEstimated =
@@ -291,10 +293,10 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await createCard(listId, payload);
-      showSuccess("Đã thêm hoạt động");
+      showSuccess(t("plan.activity.add_success"));
     } catch (e) {
       console.error(e);
-      showError("Không thêm được hoạt động");
+      showError(t("plan.activity.add_error"));
       load(); // resync board to remove any phantom WS-applied card on server error
     }
   };
@@ -303,19 +305,19 @@ export default function PlanDashboardPage() {
     try {
       const payload = buildCardPayloadFromActivity(activityPayload);
       await updateCard(listId, cardId, payload);
-      showSuccess("Đã cập nhật hoạt động");
+      showSuccess(t("plan.activity.update_success"));
     } catch (e) {
       console.error(e);
-      showError("Không thể cập nhật hoạt động");
+      showError(t("plan.activity.update_error"));
     }
   };
 
   const handleRemoveCard = async ({ listId, cardId }) => {
     try {
       await deleteCard(listId, cardId);
-      showSuccess("Đã xoá thẻ");
+      showSuccess(t("plan.card.delete_success"));
     } catch {
-      showError("Không thể xoá thẻ");
+      showError(t("plan.card.delete_error"));
     }
   };
 
@@ -340,9 +342,9 @@ export default function PlanDashboardPage() {
   const handleAddList = async () => {
     try {
       await createList({ title: null });
-      showSuccess("Đã thêm danh sách");
+      showSuccess(t("plan.list.add_success"));
     } catch {
-      showError("Không thể thêm danh sách");
+      showError(t("plan.list.add_error"));
     }
   };
 
@@ -369,7 +371,7 @@ export default function PlanDashboardPage() {
   if (loading && !board) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p>Đang tải...</p>
+        <p>{t("common.loading")}</p>
       </div>
     );
   }
@@ -377,7 +379,7 @@ export default function PlanDashboardPage() {
   const handleDeletePlanFromSidebar = async (plan) => {
     try {
       await deletePlan(plan.id);
-      showSuccess("Đã xoá lịch trình");
+      showSuccess(t("plan.delete.success"));
 
       // reload lists
       await reloadMyPlans?.();
@@ -389,7 +391,7 @@ export default function PlanDashboardPage() {
       }
     } catch (e) {
       console.error(e);
-      showError("Không thể xoá lịch trình");
+      showError(t("plan.delete.error"));
     }
   };
 
@@ -464,7 +466,7 @@ export default function PlanDashboardPage() {
                   e.currentTarget.blur();
                 }
               }}
-              placeholder="Tiêu đề kế hoạch..."
+              placeholder={t("plan.title.placeholder")}
               className="
                 w-full text-lg font-semibold
                 bg-transparent border-b border-transparent
@@ -479,7 +481,7 @@ export default function PlanDashboardPage() {
             </h1>
           )}
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Sắp xếp & theo dõi hành trình của bạn trong một nơi.
+            {t("plan.header.subtitle")}
           </p>
         </div>
 
@@ -496,7 +498,7 @@ export default function PlanDashboardPage() {
               active:translate-y-0
             "
           >
-            <span>Chia sẻ</span>
+            <span>{t("plan.header.share")}</span>
           </button>
         )}
       </div>
@@ -510,12 +512,12 @@ export default function PlanDashboardPage() {
       "
       >
         {[
-          { key: "summary", label: "Tổng quan" },
-          { key: "board", label: "Bảng lịch trình" },
-          { key: "calendar", label: "Thời gian biểu" },
-          { key: "members", label: "Thành viên" },
-          { key: "feed", label: "Bài viết" },
-          { key: "stats", label: "Thống kê" }
+          { key: "summary", label: t("plan.tab.summary") },
+          { key: "board", label: t("plan.tab.board") },
+          { key: "calendar", label: t("plan.tab.calendar") },
+          { key: "members", label: t("plan.tab.members") },
+          { key: "feed", label: t("plan.tab.feed") },
+          { key: "stats", label: t("plan.tab.stats") }
         ].map((t) => {
           const ac = activeTab === t.key;
           return (
@@ -637,7 +639,7 @@ export default function PlanDashboardPage() {
                 }
               } catch (e) {
                 console.error(e);
-                showError("Không thể cập nhật hoạt động từ calendar");
+                showError(t("plan.calendar.update_error"));
               }
             }}
           />
@@ -666,9 +668,9 @@ export default function PlanDashboardPage() {
       {confirmDeleteCard && (
         <ConfirmModal
           open={true}
-          title="Xoá thẻ"
-          message={`Xoá thẻ "${confirmDeleteCard.card.text}"?`}
-          confirmText="Xoá"
+          title={t("plan.confirm.delete_card_title")}
+          message={t("plan.confirm.delete_card_message", { name: confirmDeleteCard.card.text })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmDeleteCard(null)}
           onConfirm={() => {
             handleRemoveCard(confirmDeleteCard);
@@ -680,16 +682,16 @@ export default function PlanDashboardPage() {
       {confirmClearTrash && (
         <ConfirmModal
           open={true}
-          title="Xóa toàn bộ thẻ trong thùng rác"
-          message="Hành động này không thể hoàn tác. Xóa toàn bộ thẻ?"
-          confirmText="Xóa hết"
+          title={t("plan.confirm.clear_trash_title")}
+          message={t("plan.confirm.clear_trash_message")}
+          confirmText={t("plan.confirm.clear_trash_confirm")}
           onClose={() => setConfirmClearTrash(false)}
           onConfirm={async () => {
             try {
               await clearTrash();
-              showSuccess("Đã xóa toàn bộ thẻ trong thùng rác");
+              showSuccess(t("plan.trash.clear_success"));
             } catch {
-              showError("Không thể xóa thùng rác");
+              showError(t("plan.trash.clear_error"));
             }
             setConfirmClearTrash(false);
           }}
@@ -699,9 +701,9 @@ export default function PlanDashboardPage() {
       {confirmDeleteList && (
         <ConfirmModal
           open={true}
-          title="Xoá danh sách"
-          message={`Xác nhận xóa "${confirmDeleteList.title}"? Các thẻ của danh sách sẽ được chuyển vào thùng rác!`}
-          confirmText="Xoá"
+          title={t("plan.confirm.delete_list_title")}
+          message={t("plan.confirm.delete_list_message", { name: confirmDeleteList.title })}
+          confirmText={t("common.delete")}
           onClose={() => setConfirmDeleteList(null)}
           onConfirm={async () => {
             await deleteList(confirmDeleteList.id);

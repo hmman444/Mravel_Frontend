@@ -1,5 +1,6 @@
 // src/features/partner/components/hotel/form/PartnerHotelFormPage.jsx
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { usePartnerAmenities } from "../../../hooks/usePartnerAmenities";
 import { usePartnerHotelCreateForm } from "../../../hooks/usePartnerHotelCreateForm";
 
@@ -25,6 +26,7 @@ export default function PartnerHotelFormPage({
   onBack,
   onSubmit, // async (payload) => void
 }) {
+  const { t } = useTranslation();
   const hotelAmenity = usePartnerAmenities("HOTEL");
   const roomAmenity = usePartnerAmenities("ROOM");
 
@@ -49,8 +51,8 @@ export default function PartnerHotelFormPage({
         onReset={fm.reset}
         onSubmit={fm.submit}
         canSubmit={fm.requiredOk}
-        title={mode === "edit" ? "Chỉnh sửa khách sạn" : "Thêm khách sạn"}
-        subtitle={mode === "edit" ? "Cập nhật thông tin và lưu lại." : "Sau khi tạo sẽ về PENDING chờ admin duyệt."}
+        title={mode === "edit" ? t("partner.hotel_form.title_edit") : t("partner.hotel_form.title_create")}
+        subtitle={mode === "edit" ? t("partner.hotel_form.subtitle_edit") : t("partner.hotel_form.subtitle_create")}
       />
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl border p-4 space-y-4">
@@ -63,8 +65,8 @@ export default function PartnerHotelFormPage({
 
         <PolicySection form={fm.form} setField={fm.setField} />
         <AmenityMultiSelect
-          title="Tiện ích khách sạn"
-          hint={hotelAmenity.loading ? "Đang tải tiện ích..." : "Chọn tiện ích thuộc khách sạn."}
+          title={t("partner.hotel_form.hotel_amenities_title")}
+          hint={hotelAmenity.loading ? t("partner.hotel_form.amenities_loading") : t("partner.hotel_form.hotel_amenities_hint")}
           items={hotelAmenity.flat || []}
           value={fm.form.amenities || []}
           onChange={(next) => fm.setField("amenities", next)}

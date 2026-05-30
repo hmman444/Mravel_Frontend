@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
@@ -8,6 +9,7 @@ import { useVerifyOtp } from "../hooks/useVerifyOtp";
 import { validateOtp } from "../../../utils/validators";
 
 export default function VerifyOtpPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const email = searchParams.get("email") || localStorage.getItem("last_reg_email") || "";
   const { handleVerifyOtp, message, loading, error } = useVerifyOtp();
@@ -28,18 +30,18 @@ export default function VerifyOtpPage() {
   return (
     <AuthLayout>
       <Link to="/" className="text-base font-semibold text-white mb-2 inline-block">
-        ← Về Trang chủ Mravel
+        ← {t('auth.back_to_home')}
       </Link>
 
-      <AuthCard title="Xác minh OTP" subtitle={`Nhập mã OTP được gửi đến email: ${email}`}>
+      <AuthCard title={t('auth.verify_otp_title')} subtitle={t('auth.verify_otp_subtitle', { email })}>
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <AuthInput
-            label="Mã OTP"
+            label={t('auth.otp_code')}
             icon={KeyIcon}
             type="text"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            placeholder="Nhập mã OTP"
+            placeholder={t('auth.otp_code_placeholder')}
           />
           {inputError && <p className="text-red-500 text-sm mt-1">{inputError}</p>}
 
@@ -48,7 +50,7 @@ export default function VerifyOtpPage() {
             disabled={loading || !email}
             className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold disabled:opacity-60"
           >
-            {loading ? "Đang xác minh..." : "Xác minh"}
+            {loading ? t('auth.verifying') : t('auth.verify')}
           </button>
 
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
@@ -56,9 +58,9 @@ export default function VerifyOtpPage() {
         </form>
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
-          Chưa nhận được OTP?{" "}
+          {t('auth.otp_not_received')}{" "}
           <Link to="/register" className="text-blue-500">
-            Đăng ký lại
+            {t('auth.register_again')}
           </Link>
         </p>
       </AuthCard>

@@ -2,8 +2,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { verifyOtpUser } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const useVerifyOtp = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
@@ -12,10 +14,10 @@ export const useVerifyOtp = () => {
   const handleVerifyOtp = async (email, otpCode) => {
     const action = await dispatch(verifyOtpUser({ email, otpCode }));
     if (verifyOtpUser.fulfilled.match(action)) {
-      setMessage("Xác thực thành công! Bạn có thể đăng nhập.");
+      setMessage(t("auth.otp_verify_success"));
       setTimeout(() => navigate("/login"), 1000);
     } else {
-      setMessage(action.payload || "OTP không hợp lệ hoặc đã hết hạn!");
+      setMessage(action.payload || t("auth.otp_invalid_or_expired"));
     }
   };
 

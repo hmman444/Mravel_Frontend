@@ -2,6 +2,7 @@
 "use client";
 
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { toDateOnly } from "../../utils/calendarUtils";
 
 export default function PlanCalendarSidebar({
@@ -15,6 +16,7 @@ export default function PlanCalendarSidebar({
   onNextMonth,
   onSelectDate,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="w-64 flex-shrink-0 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 shadow-sm p-3 flex flex-col gap-3">
       {/* header mini calendar */}
@@ -25,10 +27,10 @@ export default function PlanCalendarSidebar({
           </div>
           <div className="text-xs">
             <div className="font-semibold text-slate-800 dark:text-slate-100">
-              Lịch tháng
+              {t("plan.calendar.month_title")}
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400">
-              Chọn tuần / khung ngày
+              {t("plan.calendar.pick_week_or_day")}
             </div>
           </div>
         </div>
@@ -57,7 +59,15 @@ export default function PlanCalendarSidebar({
       {/* mini calendar grid */}
       <div className="rounded-xl bg-slate-50/80 dark:bg-slate-950/40 px-2 py-2">
         <div className="grid grid-cols-7 text-[10px] text-center mb-1 text-slate-500 dark:text-slate-400">
-          {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((w) => (
+          {[
+            t("plan.calendar.weekday_mon"),
+            t("plan.calendar.weekday_tue"),
+            t("plan.calendar.weekday_wed"),
+            t("plan.calendar.weekday_thu"),
+            t("plan.calendar.weekday_fri"),
+            t("plan.calendar.weekday_sat"),
+            t("plan.calendar.weekday_sun"),
+          ].map((w) => (
             <div key={w} className="py-0.5">
               {w}
             </div>
@@ -126,44 +136,43 @@ export default function PlanCalendarSidebar({
         <div className="flex flex-wrap gap-1.5 text-[10px]">
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-sky-50 border border-sky-100 text-sky-700">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-            <span>🚕 Di chuyển</span>
+            <span>🚕 {t("plan.legend.transport")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-700">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-            <span>🥘 Ăn uống</span>
+            <span>🥘 {t("plan.legend.food")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-violet-50 border border-violet-100 text-violet-700">
             <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-            <span>🛏️ Lưu trú</span>
+            <span>🛏️ {t("plan.legend.stay")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-700">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span>🏛️ Tham quan</span>
+            <span>🏛️ {t("plan.legend.sightseeing")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span>🎡 Giải trí</span>
+            <span>🎡 {t("plan.legend.entertainment")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-pink-50 border border-pink-100 text-pink-700">
             <span className="w-1.5 h-1.5 rounded-full bg-pink-400" />
-            <span>🛍️ Mua sắm</span>
+            <span>🛍️ {t("plan.legend.shopping")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-rose-50 border border-rose-100 text-rose-700">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-            <span>🎬 Rạp phim</span>
+            <span>🎬 {t("plan.legend.cinema")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-            <span>🎫 Sự kiện</span>
+            <span>🎫 {t("plan.legend.event")}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-            <span>✏️ Hoạt động khác</span>
+            <span>✏️ {t("plan.legend.other")}</span>
           </span>
         </div>
         <div className="text-[10px] text-slate-400 dark:text-slate-500">
-          • Nhấn vào hoạt động để xem/chỉnh sửa chi tiết. Nhấn nút tạo ở các ô 
-          thuộc lịch trình để thêm hoạt động mới.
+          {t("plan.calendar.hint")}
         </div>
       </div>
     </div>

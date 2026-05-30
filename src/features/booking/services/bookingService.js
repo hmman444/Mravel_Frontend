@@ -1,6 +1,7 @@
 // src/features/booking/services/bookingService.js
 import axios from "axios";
 import api from "../../../utils/axiosInstance";
+import i18n from "../../../i18n";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -10,7 +11,7 @@ const HOTEL_INVENTORY_PREFIX = `${CATALOG_PREFIX}/hotels/inventory`;
 const BOOKING_PREFIX = "/booking";
 const HOTEL_BOOKING_PREFIX = `${BOOKING_PREFIX}/hotels`;
 
-const toError = (error, fallback = "Lỗi kết nối đến server") => {
+const toError = (error, fallback = i18n.t("booking.error_connect_server")) => {
   if (error?.response?.data) {
     const msg = error.response.data.message || error.response.data.error || fallback;
     return { success: false, message: msg };
@@ -36,7 +37,7 @@ export const createHotelBookingAndPay = async (payload) => {
     return { success: true, data: dto };
   } catch (error) {
     console.error("createHotelBookingAndPay error:", error?.response || error);
-    return toError(error, "Không tạo được thanh toán");
+    return toError(error, i18n.t("booking.error_create_payment"));
   }
 };
 
@@ -66,7 +67,7 @@ export const getHotelAvailability = async ({
     return { success: true, data: res.data?.data };
   } catch (error) {
     console.error("getHotelAvailability error:", error?.response || error);
-    return toError(error, "Không kiểm tra được phòng trống");
+    return toError(error, i18n.t("booking.error_check_availability"));
   }
 };
 

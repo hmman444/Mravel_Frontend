@@ -1,4 +1,14 @@
-export const asString = (v) => (v == null ? "" : String(v));
+import i18n from "../../../i18n";
+
+// Nội dung động từ BE có thể là Map<string,string> ({ vi, en }); pick theo ngôn ngữ hiện tại, fallback vi -> giá trị đầu.
+export const asString = (v) => {
+  if (v == null) return "";
+  if (typeof v === "object" && !Array.isArray(v)) {
+    const lang = i18n.language || "vi";
+    return v[lang] || v.vi || Object.values(v).find((x) => typeof x === "string") || "";
+  }
+  return String(v);
+};
 
 const asArray = (v) => (Array.isArray(v) ? v : []);
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);

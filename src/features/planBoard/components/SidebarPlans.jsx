@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function SidebarPlans({
   collapsed,
@@ -21,6 +22,7 @@ export default function SidebarPlans({
   onRemoveRecentPlan,
   onDeletePlan,
 }) {
+  const { t } = useTranslation();
   const [myOpen, setMyOpen] = useState(true);
   const [recentOpen, setRecentOpen] = useState(true);
 
@@ -50,20 +52,20 @@ export default function SidebarPlans({
           <div>
             {!collapsed && (
               <p className="px-1 mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-gray-500">
-                Tổng quan
+                {t("plan.sidebar.overview")}
               </p>
             )}
 
             <SidebarItem
               icon={<FaListUl />}
-              label="Danh sách lịch trình"
+              label={t("plan.sidebar.plan_list")}
               collapsed={collapsed}
               onClick={onOpenPlanList}
             />
 
             <SidebarItem
               icon={<FaCalendarAlt />}
-              label="Lịch tổng quan"
+              label={t("plan.sidebar.calendar_overview")}
               collapsed={collapsed}
               onClick={onOpenCalendar}
             />
@@ -83,7 +85,7 @@ export default function SidebarPlans({
                 <FaFolderOpen />
                 {!collapsed && (
                   <span className="text-sm font-medium">
-                    Lịch trình của bạn
+                    {t("plan.sidebar.my_plans")}
                     {myPlans?.length ? ` (${myPlans.length})` : ""}
                   </span>
                 )}
@@ -102,7 +104,7 @@ export default function SidebarPlans({
               <div className="mt-2 space-y-1">
                 {(myPlans || []).length === 0 && !collapsed && (
                   <p className="px-3 py-2 text-xs text-gray-400">
-                    Chưa có lịch trình nào của bạn.
+                    {t("plan.sidebar.empty_my_plans")}
                   </p>
                 )}
 
@@ -135,7 +137,7 @@ export default function SidebarPlans({
                 <FaFolderOpen />
                 {!collapsed && (
                   <span className="text-sm font-medium">
-                    Xem gần đây
+                    {t("plan.sidebar.recent")}
                     {recentPlans?.length ? ` (${recentPlans.length})` : ""}
                   </span>
                 )}
@@ -154,7 +156,7 @@ export default function SidebarPlans({
               <div className="mt-2 space-y-1">
                 {(recentPlans || []).length === 0 && !collapsed && (
                   <p className="px-3 py-2 text-xs text-gray-400">
-                    Chưa có lịch trình nào trong danh sách xem gần đây.
+                    {t("plan.sidebar.empty_recent")}
                   </p>
                 )}
 
@@ -197,16 +199,17 @@ function SidebarItem({ icon, label, collapsed, onClick }) {
 
 // Row "Lịch trình của bạn" (có menu ...)
 function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan, onAskDeletePlan }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const title = plan.title || plan.name || "Chưa đặt tên";
+  const title = plan.title || plan.name || t("plan.sidebar.untitled");
   const role = plan.myRole || "";
   const canDelete = role === "OWNER";
 
   const roleLabelMap = {
-    OWNER: "Chủ sở hữu",
-    EDITOR: "Chỉnh sửa",
-    VIEWER: "Chỉ xem",
+    OWNER: t("plan.member.role_owner"),
+    EDITOR: t("plan.member.role_editor"),
+    VIEWER: t("plan.member.role_viewer"),
   };
   const roleLabel = roleLabelMap[role] || role;
 
@@ -282,7 +285,7 @@ function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan, onAsk
               hover:bg-slate-200/70 dark:hover:bg-gray-700/70
               transition
             `}
-            aria-label="Mở menu"
+            aria-label={t("plan.sidebar.open_menu")}
           >
             <HiEllipsisVertical size={16} />
           </button>
@@ -302,7 +305,7 @@ function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan, onAsk
                 setMenuOpen(false);
               }}
             >
-              Tạo bản sao
+              {t("plan.sidebar.make_copy")}
             </button>
           )}
           {canDelete && onAskDeletePlan && (
@@ -316,7 +319,7 @@ function PlanRowMy({ plan, active, collapsed, onOpenDashboard, onCopyPlan, onAsk
                 setMenuOpen(false);
               }}
             >
-              Xoá lịch trình
+              {t("plan.sidebar.delete_plan")}
             </button>
           )}
         </PlanRowMenu>
@@ -334,8 +337,9 @@ function PlanRowRecent({
   onCopyPlan,
   onRemoveRecentPlan,
 }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const title = plan.title || plan.name || "Chưa đặt tên";
+  const title = plan.title || plan.name || t("plan.sidebar.untitled");
 
   const handleRowClick = () => {
     if (menuOpen) setMenuOpen(false);
@@ -391,7 +395,7 @@ function PlanRowRecent({
               hover:bg-slate-200/70 dark:hover:bg-gray-700/70
               transition
             `}
-            aria-label="Mở menu"
+            aria-label={t("plan.sidebar.open_menu")}
           >
             <HiEllipsisVertical size={16} />
           </button>
@@ -411,7 +415,7 @@ function PlanRowRecent({
                 setMenuOpen(false);
               }}
             >
-              Tạo bản sao
+              {t("plan.sidebar.make_copy")}
             </button>
           )}
 
@@ -426,7 +430,7 @@ function PlanRowRecent({
                 setMenuOpen(false);
               }}
             >
-              Xoá khỏi danh sách
+              {t("plan.sidebar.remove_from_list")}
             </button>
           )}
         </PlanRowMenu>

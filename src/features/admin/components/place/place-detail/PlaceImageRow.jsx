@@ -1,15 +1,17 @@
 import { PhotoIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import { ui } from "./uiTokens";
 import { Label } from "./pills";
 
 export default function PlaceImageRow({ idx, image, isLockedReadOnly, onChangeField, onRemove, onUpload }) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl border border-slate-200/80 p-4 dark:border-slate-800/80">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="flex-1 space-y-3">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <Label required>URL ảnh</Label>
+              <Label required>{t("admin.place_image_url")}</Label>
               <input
                 className={ui.input}
                 disabled={isLockedReadOnly}
@@ -26,14 +28,14 @@ export default function PlaceImageRow({ idx, image, isLockedReadOnly, onChangeFi
                 disabled={isLockedReadOnly}
                 value={image.caption}
                 onChange={(e) => onChangeField(idx, "caption", e.target.value)}
-                placeholder="Ví dụ: Phố cổ về đêm"
+                placeholder={t("admin.place_image_caption_placeholder")}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
-              <Label>Thứ tự (sortOrder)</Label>
+              <Label>{t("admin.place_image_sort_order")}</Label>
               <input
                 type="number"
                 inputMode="numeric"
@@ -53,7 +55,7 @@ export default function PlaceImageRow({ idx, image, isLockedReadOnly, onChangeFi
                 className={`${ui.btn} ${ui.btnGhost} gap-2 w-full ${isLockedReadOnly ? "pointer-events-none opacity-50" : ""}`}
               >
                 <PhotoIcon className="h-5 w-5" />
-                Tải ảnh lên
+                {t("admin.place_image_upload")}
                 <input
                   type="file"
                   accept="image/*"
@@ -75,7 +77,7 @@ export default function PlaceImageRow({ idx, image, isLockedReadOnly, onChangeFi
                 disabled={isLockedReadOnly}
                 onClick={() => onChangeField(idx, "cover", true)}
               >
-                {image.cover ? "✓ Ảnh bìa" : "Đặt làm bìa"}
+                {image.cover ? `✓ ${t("admin.place_image_cover")}` : t("admin.place_image_set_cover")}
               </button>
             </div>
           </div>
@@ -87,7 +89,7 @@ export default function PlaceImageRow({ idx, image, isLockedReadOnly, onChangeFi
             className={`${ui.btn} ${ui.btnGhost} px-3`}
             disabled={isLockedReadOnly}
             onClick={() => onRemove(idx)}
-            title="Xóa ảnh"
+            title={t("admin.place_image_delete")}
           >
             <TrashIcon className="h-5 w-5" />
           </button>

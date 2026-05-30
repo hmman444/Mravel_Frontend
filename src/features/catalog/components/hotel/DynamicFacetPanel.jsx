@@ -1,27 +1,29 @@
 import { useState } from "react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
 
 const PRICE_RANGE_LABELS = {
-  UNDER_500K: "Dưới 500.000đ",
-  "500K_1M": "500.000đ – dưới 1.000.000đ",
-  "1M_2M": "1.000.000đ – dưới 2.000.000đ",
-  OVER_2M: "Từ 2.000.000đ trở lên",
+  UNDER_500K: i18n.t("hotel.price_under_500k"),
+  "500K_1M": i18n.t("hotel.price_500k_1m"),
+  "1M_2M": i18n.t("hotel.price_1m_2m"),
+  OVER_2M: i18n.t("hotel.price_over_2m"),
 };
 
 const HOTEL_TYPE_LABELS = {
-  HOTEL: "Khách sạn",
+  HOTEL: i18n.t("hotel.type_hotel"),
   RESORT: "Resort",
   HOMESTAY: "Homestay",
   HOSTEL: "Hostel",
   VILLA: "Villa",
-  APARTMENT: "Căn hộ",
+  APARTMENT: i18n.t("hotel.type_apartment"),
 };
 
 const SECTION_CONFIG = {
-  starRatings: { title: "Hạng sao", type: "multi" },
-  hotelTypes: { title: "Loại chỗ ở", type: "multi" },
-  amenities: { title: "Tiện nghi", type: "multi", collapsible: true },
-  priceRanges: { title: "Khoảng giá", type: "single" },
+  starRatings: { title: i18n.t("hotel.section_star_rating"), type: "multi" },
+  hotelTypes: { title: i18n.t("hotel.section_accommodation_type"), type: "multi" },
+  amenities: { title: i18n.t("hotel.section_amenities"), type: "multi", collapsible: true },
+  priceRanges: { title: i18n.t("hotel.section_price_range"), type: "single" },
 };
 
 function getLabel(sectionKey, bucket) {
@@ -31,6 +33,7 @@ function getLabel(sectionKey, bucket) {
 }
 
 function FacetSection({ sectionKey, buckets, selectedValues, isRadio, onChange }) {
+  const { t } = useTranslation();
   const cfg = SECTION_CONFIG[sectionKey] ?? { title: sectionKey };
   const [expanded, setExpanded] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -85,7 +88,7 @@ function FacetSection({ sectionKey, buckets, selectedValues, isRadio, onChange }
               className="text-xs text-blue-600 hover:underline mt-1"
               onClick={() => setShowAll(v => !v)}
             >
-              {showAll ? "Thu gọn" : `Xem thêm (${buckets.length - 5})`}
+              {showAll ? t("common.collapse") : t("hotel.see_more_count", { n: buckets.length - 5 })}
             </button>
           )}
         </div>
@@ -101,6 +104,7 @@ function FacetSection({ sectionKey, buckets, selectedValues, isRadio, onChange }
  *   onChange: (newFilters) => void
  */
 export default function DynamicFacetPanel({ facets, selectedFilters, onChange }) {
+  const { t } = useTranslation();
   if (!facets) return null;
 
   const sections = ["starRatings", "priceRanges", "hotelTypes", "amenities"];
@@ -116,21 +120,21 @@ export default function DynamicFacetPanel({ facets, selectedFilters, onChange })
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">Bộ lọc</h3>
+        <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">{t("hotel.filters")}</h3>
         {hasFilters && (
           <button
             type="button"
             className="text-xs text-blue-600 hover:underline"
             onClick={() => onChange({ starRatings: [], hotelTypes: [], amenities: [], priceRange: null })}
           >
-            Xóa bộ lọc
+            {t("hotel.clear_filters")}
           </button>
         )}
       </div>
 
       {facets.facetErrors && Object.keys(facets.facetErrors).length > 0 && (
         <div className="mb-3 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
-          Một số bộ lọc tạm thời không khả dụng.
+          {t("hotel.some_filters_unavailable")}
         </div>
       )}
 

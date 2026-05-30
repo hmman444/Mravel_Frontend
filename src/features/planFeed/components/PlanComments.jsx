@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { usePlans } from "../hooks/usePlans";
 import CommentItem from "./CommentItem";
 import { showError } from "../../../utils/toastUtils";
@@ -9,6 +10,7 @@ export default function PlanComments({
   comments = [],
   inputRef: externalRef,
 }) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -69,7 +71,7 @@ export default function PlanComments({
       setShowComments(true);
     } catch (err) {
       console.error(err);
-      showError("Gửi bình luận thất bại, vui lòng thử lại.");
+      showError(t("feed.comment.sendFailed"));
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,7 @@ export default function PlanComments({
           ref={inputRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Viết bình luận..."
+          placeholder={t("feed.comment.placeholder")}
           className="
             flex-1 bg-gray-100 dark:bg-gray-800
             rounded-full px-4 py-2 text-sm outline-none
@@ -130,8 +132,8 @@ export default function PlanComments({
             className="text-xs text-sky-600 dark:text-sky-400 hover:underline shrink-0"
           >
             {showComments
-              ? "Ẩn bình luận"
-              : `Xem bình luận (${sortedComments.length})`}
+              ? t("feed.comment.hide")
+              : t("feed.comment.show", { count: sortedComments.length })}
           </button>
 
           {/* Sort combobox — only visible when expanded */}
@@ -141,9 +143,9 @@ export default function PlanComments({
               onChange={(e) => setSortBy(e.target.value)}
               className="ml-auto text-[11px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 cursor-pointer outline-none focus:ring-1 focus:ring-sky-400"
             >
-              <option value="OLDEST">Cũ nhất</option>
-              <option value="NEWEST">Mới nhất</option>
-              <option value="MOST_REACTIONS">Nhiều React nhất</option>
+              <option value="OLDEST">{t("feed.comment.sort.oldest")}</option>
+              <option value="NEWEST">{t("feed.comment.sort.newest")}</option>
+              <option value="MOST_REACTIONS">{t("feed.comment.sort.mostReactions")}</option>
             </select>
           )}
         </div>

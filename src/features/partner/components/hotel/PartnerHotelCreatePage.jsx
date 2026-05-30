@@ -1,4 +1,5 @@
 // src/features/partner/pages/PartnerHotelCreatePage.jsx
+import { useTranslation } from "react-i18next";
 import { usePartnerAmenities } from "../../hooks/usePartnerAmenities";
 import AmenityMultiSelect from "./form/controls/AmenityMultiSelect";
 import RoomTypesEditor from "./form/controls/RoomTypesEditor";
@@ -12,6 +13,7 @@ import ImagesSection from "./form/sections/ImagesSection";
 import PolicySection from "./form/sections/PolicySection";
 
 export default function PartnerHotelCreatePage({ loading, onBack, onCreate }) {
+  const { t } = useTranslation();
   const hotelAmenity = usePartnerAmenities("HOTEL");
   const roomAmenity = usePartnerAmenities("ROOM");
 
@@ -42,8 +44,8 @@ export default function PartnerHotelCreatePage({ loading, onBack, onCreate }) {
         <div>
           {hotelAmenity.error ? <div className="text-sm text-red-600 mb-2">{hotelAmenity.error}</div> : null}
           <AmenityMultiSelect
-            title="Tiện ích khách sạn"
-            hint={hotelAmenity.loading ? "Đang tải tiện ích..." : "Chọn tiện ích thuộc khách sạn."}
+            title={t("partner.hotel.amenities_title")}
+            hint={hotelAmenity.loading ? t("partner.hotel.amenities_loading") : t("partner.hotel.amenities_hint")}
             items={hotelAmenity.flat || []}
             value={fm.form.amenities || []}
             onChange={(next) => fm.setField("amenities", next)}

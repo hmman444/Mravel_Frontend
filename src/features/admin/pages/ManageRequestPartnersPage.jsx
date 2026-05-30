@@ -66,7 +66,7 @@ export default function ManageRequestPartnersPage() {
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
             <input
                 type="text"
-                placeholder={t("search")}
+                placeholder={t("lbl_search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border rounded-md outline-none focus:ring focus:border-blue-500"
@@ -81,8 +81,8 @@ export default function ManageRequestPartnersPage() {
             >
             <option>{t("all")}</option>
             <option>Tour</option>
-            <option>{t("hotel")}</option>
-            <option>{t("food")}</option>
+            <option>{t("cat_hotel")}</option>
+            <option>{t("cat_food")}</option>
             </select>
         </div>
 

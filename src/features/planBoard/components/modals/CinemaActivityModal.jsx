@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FaTimes,
   FaFilm,
@@ -43,12 +44,6 @@ const FORMATS = [
   { value: "4DX", label: "4DX" },
 ];
 
-const EXTRA_TYPES = [
-  { value: "PARKING", label: "Gửi xe" },
-  { value: "FOOD", label: "Đồ ăn / nước" },
-  { value: "OTHER", label: "Khác" },
-];
-
 const safeJsonParse = (str) => {
   try {
     return str ? JSON.parse(str) : {};
@@ -65,6 +60,14 @@ export default function CinemaActivityModal({
   planMembers = [],
   readOnly = false,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = [
+    { value: "PARKING", label: t("plan.cinema.extra_type.parking") },
+    { value: "FOOD", label: t("plan.cinema.extra_type.food") },
+    { value: "OTHER", label: t("plan.cinema.extra_type.other") },
+  ];
+
   const [title, setTitle] = useState("");
   const [cinemaName, setCinemaName] = useState("");
   const [address, setAddress] = useState("");
@@ -283,15 +286,15 @@ export default function CinemaActivityModal({
     const newErrors = {};
 
     if (!cinemaName.trim() && !effectiveCinemaLocation) {
-      newErrors.cinemaName = "Vui lòng nhập hoặc chọn rạp xem phim.";
+      newErrors.cinemaName = t("plan.cinema.error.cinema_required");
     }
 
     if (!movieName.trim()) {
-      newErrors.movieName = "Vui lòng nhập tên phim.";
+      newErrors.movieName = t("plan.cinema.error.movie_required");
     }
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.cinema.error.end_after_start");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -305,8 +308,8 @@ export default function CinemaActivityModal({
 
     onSubmit?.({
       type: "CINEMA",
-      title: title || `Xem phim: ${movieName}`,
-      text: title || `Xem phim: ${movieName}`,
+      title: title || t("plan.cinema.default_title", { name: movieName }),
+      text: title || t("plan.cinema.default_title", { name: movieName }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -345,32 +348,38 @@ export default function CinemaActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Xem phim"
+      labelPrefix={t("plan.cinema.footer.label_prefix")}
       name={movieName}
-      emptyLabelText="Điền tên phim và rạp để lưu hoạt động xem phim."
+      emptyLabelText={t("plan.cinema.footer.empty")}
       locationText={
         effectiveCinemaLocation || cinemaName || address
-          ? `Rạp: ${
-              effectiveCinemaLocation?.label ||
-              effectiveCinemaLocation?.name ||
-              cinemaName ||
-              "Chưa rõ rạp"
-            }${
+          ? `${t("plan.cinema.footer.cinema_label", {
+              name:
+                effectiveCinemaLocation?.label ||
+                effectiveCinemaLocation?.name ||
+                cinemaName ||
+                t("plan.cinema.footer.unknown_cinema"),
+            })}${
               effectiveCinemaLocation?.address ||
               effectiveCinemaLocation?.fullAddress ||
               address
-                ? ` – Địa chỉ: ${
-                    effectiveCinemaLocation?.address ||
-                    effectiveCinemaLocation?.fullAddress ||
-                    address
-                  }`
+                ? t("plan.cinema.footer.address_suffix", {
+                    address:
+                      effectiveCinemaLocation?.address ||
+                      effectiveCinemaLocation?.fullAddress ||
+                      address,
+                  })
                 : ""
             }`
           : ""
       }
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `Suất: ${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.cinema.footer.showtime", {
+              start: startTime,
+              end: endTime,
+              minutes: durationMinutes,
+            })
           : ""
       }
     />
@@ -387,14 +396,18 @@ export default function CinemaActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động xem phim"}
+      submitLabel={
+        editingCard
+          ? t("common.save_changes")
+          : t("plan.cinema.submit_create")
+      }
       submitClassName="bg-gradient-to-r from-rose-500 to-pink-500 shadow-lg shadow-rose-500/30"
     />
   );
@@ -409,9 +422,9 @@ export default function CinemaActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-rose-500 to-pink-500",
         }}
-        title="Hoạt động xem phim"
+        title={t("plan.cinema.modal_title")}
         typeLabel="Cinema"
-        subtitle="Chọn rạp, phim, giờ chiếu và chi phí đi xem phim."
+        subtitle={t("plan.cinema.modal_subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -420,22 +433,22 @@ export default function CinemaActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.cinema.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Rạp + phim + thời gian
+              {t("plan.cinema.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
+                {t("plan.cinema.activity_name")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Xem phim tối tại CGV..."
+                placeholder={t("plan.cinema.activity_name_ph")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
@@ -443,7 +456,7 @@ export default function CinemaActivityModal({
             {/* TÊN PHIM */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên phim
+                {t("plan.cinema.movie_name")}
               </label>
               <input
                 value={movieName}
@@ -451,7 +464,7 @@ export default function CinemaActivityModal({
                   setMovieName(e.target.value);
                   setErrors((prev) => ({ ...prev, movieName: "" }));
                 }}
-                placeholder="Ví dụ: Inside Out 2..."
+                placeholder={t("plan.cinema.movie_name_ph")}
                 className={`${inputBase} w-full mt-1 ${
                   errors.movieName
                     ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/30"
@@ -468,7 +481,7 @@ export default function CinemaActivityModal({
             {/* ĐỊA CHỈ + MAP PICKER */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa chỉ rạp / vị trí trên bản đồ
+                {t("plan.cinema.address_label")}
               </label>
 
               <button
@@ -503,7 +516,7 @@ export default function CinemaActivityModal({
                         {effectiveCinemaLocation?.label ||
                           effectiveCinemaLocation?.name ||
                           cinemaName ||
-                          "Địa điểm đã chọn"}
+                          t("plan.cinema.selected_place")}
                       </p>
 
                       {(effectiveCinemaLocation?.address ||
@@ -518,7 +531,7 @@ export default function CinemaActivityModal({
 
                       <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                         <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                          Đã chọn trên bản đồ
+                          {t("plan.cinema.picked_on_map")}
                         </span>
                         {effectiveCinemaLocation?.lat != null &&
                           effectiveCinemaLocation?.lng != null && (
@@ -532,10 +545,10 @@ export default function CinemaActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn rạp trên bản đồ
+                        {t("plan.cinema.pick_on_map_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, chọn rạp / trung tâm thương mại bạn sẽ xem.
+                        {t("plan.cinema.pick_on_map_desc")}
                       </p>
                     </>
                   )}
@@ -546,7 +559,7 @@ export default function CinemaActivityModal({
                     text-rose-500 group-hover:text-rose-600 dark:text-rose-300
                     dark:group-hover:text-rose-200"
                 >
-                  Mở bản đồ
+                  {t("plan.cinema.open_map")}
                 </span>
               </button>
 
@@ -560,9 +573,9 @@ export default function CinemaActivityModal({
             {/* Thời gian chiếu */}
             <div className="mt-3">
               <ActivityTimeRangeSection
-                sectionLabel="Thời gian chiếu"
-                startLabel="Bắt đầu"
-                endLabel="Kết thúc"
+                sectionLabel={t("plan.cinema.showtime_section")}
+                startLabel={t("plan.cinema.start_label")}
+                endLabel={t("plan.cinema.end_label")}
                 color="rose"
                 iconClassName="text-rose-500"
                 startTime={startTime}
@@ -574,7 +587,7 @@ export default function CinemaActivityModal({
                   setErrors((prev) => ({ ...prev, time: msg }))
                 }
                 onDurationChange={(mins) => setDurationMinutes(mins)}
-                durationHintPrefix="Thời lượng ước tính"
+                durationHintPrefix={t("plan.cinema.duration_hint_prefix")}
               />
             </div>
           </div>
@@ -584,17 +597,17 @@ export default function CinemaActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Định dạng & ghế ngồi
+              {t("plan.cinema.format_seats")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Chọn format phim & ghế (nếu muốn)
+              {t("plan.cinema.format_seats_hint")}
             </span>
           </div>
 
           <div className={sectionCard + " space-y-3"}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                Định dạng phim
+                {t("plan.cinema.movie_format")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {FORMATS.map((f) => {
@@ -619,14 +632,14 @@ export default function CinemaActivityModal({
 
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                Ghế ngồi (tuỳ chọn)
+                {t("plan.cinema.seats")}
               </label>
               <div className="flex items-center gap-2">
                 <FaChair className="text-indigo-500" />
                 <input
                   value={seats}
                   onChange={(e) => setSeats(e.target.value)}
-                  placeholder="VD: H8, H9"
+                  placeholder={t("plan.cinema.seats_ph")}
                   className={`${inputBase} flex-1`}
                 />
               </div>
@@ -638,10 +651,10 @@ export default function CinemaActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí xem phim
+              {t("plan.cinema.cost_section")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Vé + combo + phát sinh + ngân sách
+              {t("plan.cinema.cost_section_hint")}
             </span>
           </div>
 
@@ -649,7 +662,7 @@ export default function CinemaActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Giá vé
+                  {t("plan.cinema.ticket_price")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -658,7 +671,7 @@ export default function CinemaActivityModal({
                     min="0"
                     value={ticketPrice}
                     onChange={(e) => setTicketPrice(e.target.value)}
-                    placeholder="VD: 90.000"
+                    placeholder={t("plan.cinema.ticket_price_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -667,7 +680,7 @@ export default function CinemaActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Giá combo bắp nước (tuỳ chọn)
+                  {t("plan.cinema.combo_price")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -676,7 +689,7 @@ export default function CinemaActivityModal({
                     min="0"
                     value={comboPrice}
                     onChange={(e) => setComboPrice(e.target.value)}
-                    placeholder="VD: 50.000"
+                    placeholder={t("plan.cinema.combo_price_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -690,13 +703,13 @@ export default function CinemaActivityModal({
               updateExtraCost={updateExtraCost}
               removeExtraCost={removeExtraCost}
               extraTypes={EXTRA_TYPES}
-              label="Chi phí phát sinh (gửi xe, đồ ăn thêm...)"
+              label={t("plan.cinema.extra_costs_label")}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho lần xem phim (tuỳ chọn)
+                  {t("plan.cinema.budget")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-rose-500" />
@@ -705,7 +718,7 @@ export default function CinemaActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 300.000"
+                    placeholder={t("plan.cinema.budget_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -714,7 +727,7 @@ export default function CinemaActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho lần xem phim (nếu có)
+                  {t("plan.cinema.actual_cost")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -723,14 +736,17 @@ export default function CinemaActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền sau khi thanh toán hoá đơn"
+                    placeholder={t("plan.cinema.actual_cost_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống <b>chi phí thực tế</b>, hệ thống sẽ dùng{" "}
-                  <b>vé + combo + phát sinh</b> để chia tiền.
+                  {t("plan.cinema.actual_cost_hint_1")}{" "}
+                  <b>{t("plan.cinema.actual_cost_hint_actual")}</b>
+                  {t("plan.cinema.actual_cost_hint_2")}{" "}
+                  <b>{t("plan.cinema.actual_cost_hint_base")}</b>{" "}
+                  {t("plan.cinema.actual_cost_hint_3")}
                 </p>
               </div>
             </div>
@@ -738,26 +754,28 @@ export default function CinemaActivityModal({
             {/* TÓM TẮT */}
             <div className="mt-1 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 px-4 py-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Vé + combo (dự kiến):{" "}
+                {t("plan.cinema.summary.ticket_combo")}{" "}
                 <span className="font-semibold">
                   {baseEstimated.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               <div>
-                Phát sinh:{" "}
+                {t("plan.cinema.summary.extra")}{" "}
                 <span className="font-semibold">
                   {extraTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               <div>
-                Tổng dự kiến (vé + combo + phát sinh):{" "}
+                {t("plan.cinema.summary.estimated_total")}{" "}
                 <span className="font-semibold text-rose-600 dark:text-rose-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
               </div>
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b> để chia tiền:{" "}
+                  {t("plan.cinema.summary.using_actual_1")}{" "}
+                  <b>{t("plan.cinema.summary.using_actual_bold")}</b>
+                  {t("plan.cinema.summary.using_actual_2")}{" "}
                   <span className="font-semibold text-rose-600 dark:text-rose-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -765,7 +783,7 @@ export default function CinemaActivityModal({
               )}
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.cinema.summary.budget")}{" "}
                   <span className="font-semibold">
                     {Number(budgetAmount).toLocaleString("vi-VN")}đ
                   </span>
@@ -807,17 +825,17 @@ export default function CinemaActivityModal({
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Ghi chú
+              {t("plan.cinema.note")}
             </label>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Thêm cảm nhận / lưu ý sau khi xem phim
+              {t("plan.cinema.note_hint")}
             </span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ví dụ: Phim hay, nên đi sớm 10 phút..."
+            placeholder={t("plan.cinema.note_ph")}
             className={`${inputBase} w-full`}
           />
         </section>

@@ -3,6 +3,7 @@
 // src/features/admin/components/user/UserFilters.jsx
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const ui = {
   card:
@@ -43,6 +44,7 @@ export default function UserFilters({
   hasAnyFilter,
   onReset,
 }) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence initial={false}>
       {open && (
@@ -59,8 +61,8 @@ export default function UserFilters({
               {/* Search */}
               <div className="w-full lg:max-w-md">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Tìm kiếm</label>
-                  <span className={ui.help}>Email / Họ tên</span>
+                  <label className={ui.title}>{t("common.search")}</label>
+                  <span className={ui.help}>{t("admin.user_search_hint")}</span>
                 </div>
 
                 <div className="relative mt-1">
@@ -68,7 +70,7 @@ export default function UserFilters({
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Ví dụ: luan@... / Nguyễn Văn A"
+                    placeholder={t("admin.user_search_placeholder")}
                     className={`${ui.input} pl-10`}
                   />
                   {search && (
@@ -87,15 +89,15 @@ export default function UserFilters({
               {/* Status chips */}
               <div className="w-full lg:w-auto">
                 <div className="flex items-center justify-between">
-                  <label className={ui.title}>Trạng thái</label>
+                  <label className={ui.title}>{t("admin.status")}</label>
                   <span className={ui.help}>Active / Locked</span>
                 </div>
 
                 <div className={`mt-1 ${ui.chipWrap}`}>
                   {[
-                    { v: "ALL", label: "Tất cả" },
-                    { v: "ACTIVE", label: "Hoạt động" },
-                    { v: "LOCKED", label: "Bị khóa" },
+                    { v: "ALL", label: t("common.all") },
+                    { v: "ACTIVE", label: t("admin.user_status_active") },
+                    { v: "LOCKED", label: t("admin.user_status_locked") },
                   ].map((x) => {
                     const on = statusFilter === x.v;
                     return (
@@ -120,7 +122,7 @@ export default function UserFilters({
                   onClick={onReset}
                   className={`${ui.btn} ${ui.btnGhost}`}
                   disabled={!hasAnyFilter}
-                  title="Reset bộ lọc"
+                  title={t("admin.reset_filters")}
                 >
                   Reset
                 </button>

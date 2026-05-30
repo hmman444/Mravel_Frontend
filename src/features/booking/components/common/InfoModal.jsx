@@ -1,12 +1,17 @@
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function InfoModal({
   open,
-  title = "Thông báo",
+  title,
   message = "",
   onClose,
-  primaryText = "Đã hiểu",
+  primaryText,
 }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("booking.info_modal_title");
+  const resolvedPrimaryText = primaryText ?? t("booking.info_modal_understood");
+
   if (!open) return null;
 
   return (
@@ -19,7 +24,7 @@ export default function InfoModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-5 py-4">
-          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</div>
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{resolvedTitle}</div>
           <button
             type="button"
             className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
@@ -37,7 +42,7 @@ export default function InfoModal({
             className="mt-4 w-full rounded-2xl bg-[#007bff] py-2.5 text-sm font-semibold text-white hover:bg-[#ff6b1a]"
             onClick={onClose}
           >
-            {primaryText}
+            {resolvedPrimaryText}
           </button>
         </div>
       </div>

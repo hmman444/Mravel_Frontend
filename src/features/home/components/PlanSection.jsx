@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 export default function PlanSection() {
+  const { t } = useTranslation();
   const plans = [
     {
       id: 1,
@@ -31,10 +34,10 @@ export default function PlanSection() {
         <div className="flex items-center justify-between gap-3 mb-8">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-50">
-              Lịch trình gợi ý
+              {t("home.plans_title")}
             </h2>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 max-w-xl">
-              Tham khảo những hành trình mẫu rồi tùy chỉnh theo phong cách của bạn.
+              {t("home.plans_subtitle")}
             </p>
           </div>
 
@@ -46,7 +49,7 @@ export default function PlanSection() {
               hover:text-sky-900 dark:hover:text-sky-200 transition
             "
           >
-            Xem bảng tin → 
+            {t("home.see_feed")} →
           </a>
         </div>
 
@@ -85,7 +88,7 @@ export default function PlanSection() {
                     px-2.5 py-1 rounded-full text-[11px] font-semibold
                     bg-white/85 text-gray-900 dark:text-gray-100 backdrop-blur
                   ">
-                    Gợi ý Mravel
+                    {t("home.mravel_suggest")}
                   </span>
                 </div>
               </div>
@@ -111,7 +114,7 @@ export default function PlanSection() {
                     text-primary hover:text-primaryHover cursor-pointer 
                     font-medium transition
                   ">
-                    Xem chi tiết →
+                    {t("home.see_detail")} →
                   </span>
                 </div>
               </div>
@@ -132,7 +135,7 @@ export default function PlanSection() {
               transition-all duration-200
             "
           >
-            ✨ Tạo lịch trình mới trên Mravel
+            ✨ {t("home.create_plan_cta")}
           </a>
         </div>
 

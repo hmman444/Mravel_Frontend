@@ -1,24 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import PlaceFacetPanel from "../components/place/PlaceFacetPanel";
 import { searchPlacesFaceted } from "../slices/catalogSlice";
+import i18n from "../../../i18n";
 
 const PRICE_LEVEL_LABELS = {
-  FREE: "Miễn phí",
-  CHEAP: "Bình dân",
-  MODERATE: "Tầm trung",
-  EXPENSIVE: "Cao cấp",
-  LUXURY: "Hạng sang",
+  FREE: i18n.t("place.price_level_free"),
+  CHEAP: i18n.t("place.price_level_cheap"),
+  MODERATE: i18n.t("place.price_level_moderate"),
+  EXPENSIVE: i18n.t("place.price_level_expensive"),
+  LUXURY: i18n.t("place.price_level_luxury"),
 };
 
 const EMPTY_FILTERS = { categorySlugs: [], priceLevel: null, venueTypes: [] };
 
 export default function PlaceFacetedSearchPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [sp, setSearchParams] = useSearchParams();
@@ -88,14 +91,14 @@ export default function PlaceFacetedSearchPage() {
           <input
             value={inputQ}
             onChange={(e) => setInputQ(e.target.value)}
-            placeholder="Tìm kiếm địa điểm (Hà Nội, Vịnh Hạ Long...)"
+            placeholder={t("place.search_placeholder")}
             className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-orange-400"
           />
           <button
             type="submit"
             className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition"
           >
-            Tìm kiếm
+            {t("common.search")}
           </button>
         </form>
 
@@ -103,11 +106,11 @@ export default function PlaceFacetedSearchPage() {
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {q ? `Địa điểm: "${q}"` : "Khám phá địa điểm"}
+              {q ? t("place.results_for", { q }) : t("place.explore_places")}
             </h1>
             {!loading && totalHits > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {totalHits.toLocaleString("vi-VN")} kết quả
+                {t("place.results_count", { count: totalHits.toLocaleString("vi-VN") })}
               </p>
             )}
           </div>
@@ -137,7 +140,7 @@ export default function PlaceFacetedSearchPage() {
 
             {!loading && !error && results.length === 0 && (
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Không có kết quả phù hợp. Thử điều chỉnh bộ lọc hoặc từ khóa.
+                {t("place.no_results")}
               </p>
             )}
 
@@ -160,17 +163,17 @@ export default function PlaceFacetedSearchPage() {
                       onClick={() => setPage(page - 1)}
                       disabled={page <= 0}
                     >
-                      Trước
+                      {t("common.prev_page")}
                     </button>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Trang <b>{page + 1}</b> / {totalPages}
+                      {t("place.page_label")} <b>{page + 1}</b> / {totalPages}
                     </span>
                     <button
                       className="px-4 py-2 rounded-full text-sm font-semibold border border-gray-300 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={() => setPage(page + 1)}
                       disabled={page + 1 >= totalPages}
                     >
-                      Sau
+                      {t("common.next_page")}
                     </button>
                   </div>
                 )}

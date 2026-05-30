@@ -1,5 +1,6 @@
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import AmenityMultiSelect from "../../controls/AmenityMultiSelect";
 
 import { TEXT } from "./roomTypes.text";
@@ -9,6 +10,7 @@ import BedsEditor from "./BedsEditor";
 import RatePlansEditor from "./RatePlansEditor";
 
 export default function RoomTypesEditor({ roomAmenities = [], value = [], onChange }) {
+  const { t } = useTranslation();
   const rooms = useMemo(() => asArray(value).map(normalizeRoom), [value]);
 
   const emit = (next) => {
@@ -84,7 +86,7 @@ export default function RoomTypesEditor({ roomAmenities = [], value = [], onChan
       </div>
 
       {rooms.length === 0 ? (
-        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa có loại phòng.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{t('partner.room_types.empty')}</div>
       ) : (
         <div className="space-y-3">
           {rooms.map((r, idx) => (

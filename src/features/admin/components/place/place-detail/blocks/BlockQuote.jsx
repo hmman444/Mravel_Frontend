@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { ui } from "../uiTokens";
 import { Label } from "../pills";
 
 export default function BlockQuote({ idx, block, isLockedReadOnly, onPatch }) {
+  const { t } = useTranslation();
   return (
     <div>
       <Label>Quote</Label>
@@ -10,7 +12,7 @@ export default function BlockQuote({ idx, block, isLockedReadOnly, onPatch }) {
         disabled={isLockedReadOnly}
         value={block.text || ""}
         onChange={(e) => onPatch(idx, { text: e.target.value })}
-        placeholder={`Ví dụ:\nĐêm thắp nghìn hoa lửa,\nsông Hoài soi bóng...`}
+        placeholder={t("admin.block_quote_placeholder")}
       />
     </div>
   );

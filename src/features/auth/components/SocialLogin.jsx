@@ -6,8 +6,10 @@ import FacebookLogin from "@greatsumini/react-facebook-login";
 import { useDispatch } from "react-redux";
 import { socialLoginUser } from "../slices/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function SocialLogin() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation(); // fix
@@ -92,7 +94,7 @@ export default function SocialLogin() {
     <>
       <div className="flex items-center mt-6">
         <hr className="flex-grow border-gray-200 dark:border-gray-700" />
-        <span className="mx-4 text-xs text-gray-400">Hoặc đăng nhập bằng</span>
+        <span className="mx-4 text-xs text-gray-400">{t('auth.social_login_divider')}</span>
         <hr className="flex-grow border-gray-200 dark:border-gray-700" />
       </div>
 

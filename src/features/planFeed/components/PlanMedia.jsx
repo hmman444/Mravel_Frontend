@@ -7,6 +7,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 function gridClass(len) {
   switch (len) {
@@ -19,6 +20,7 @@ function gridClass(len) {
 }
 
 export default function PlanMedia({ images = [], videos = [], full = false, canEdit = false, onRemove = null }) {
+  const { t } = useTranslation();
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -131,7 +133,7 @@ export default function PlanMedia({ images = [], videos = [], full = false, canE
                   {thumbnail}
                   <div className="absolute inset-0 bg-black/55 flex flex-col items-center justify-center text-white text-xl font-semibold">
                     <span>+{remain}</span>
-                    <span className="mt-1 text-xs opacity-80">Xem tất cả</span>
+                    <span className="mt-1 text-xs opacity-80">{t("feed.media.viewAll")}</span>
                   </div>
                 </button>
                 {deleteBtn}

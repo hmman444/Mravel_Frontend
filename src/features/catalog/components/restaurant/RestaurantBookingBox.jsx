@@ -1,5 +1,6 @@
 // src/features/catalog/components/restaurant/RestaurantBookingBox.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaMinus, FaPlus, FaClock, FaCalendarAlt } from "react-icons/fa";
 import MravelDatePicker from "../../../../components/MravelDatePicker";
 import Button from "../../../../components/Button";
@@ -14,6 +15,7 @@ export default function RestaurantBookingBox({
   onSubmit,
   className = "",
 }) {
+  const { t } = useTranslation();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
 
@@ -92,15 +94,15 @@ export default function RestaurantBookingBox({
       {/* Header */}
       <div className="text-center">
         <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-          Đặt chỗ{" "}
-          <span className="font-normal text-gray-600 dark:text-gray-400">(Để có chỗ trước khi đến)</span>
+          {t("restaurant.book_seat")}{" "}
+          <span className="font-normal text-gray-600 dark:text-gray-400">{t("restaurant.book_seat_note")}</span>
         </h3>
-        <div className="mt-1 text-sm font-semibold text-rose-600">Giảm 10%</div>
+        <div className="mt-1 text-sm font-semibold text-rose-600">{t("restaurant.discount_10")}</div>
       </div>
 
       {/* Guests Row */}
       <div className="mt-4">
-        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Số khách</div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t("restaurant.guest_count")}</div>
         <div ref={guestsRef} className="relative">
           <button
             type="button"
@@ -108,7 +110,7 @@ export default function RestaurantBookingBox({
             className="w-full h-11 px-3 rounded-lg border border-gray-300 dark:border-gray-700 text-left flex items-center gap-2"
           >
             <span className="text-gray-800 dark:text-gray-200">
-              {adults} người lớn, {children} trẻ em
+              {t("restaurant.guest_summary", { adults, children })}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
           </button>
@@ -120,7 +122,7 @@ export default function RestaurantBookingBox({
             >
               {/* Adults */}
               <div className="flex items-center justify-between py-2">
-                <span className="font-medium text-gray-800 dark:text-gray-200">Người lớn</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">{t("restaurant.adults")}</span>
                 <div className="flex items-center gap-2">
                   <button
                     className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
@@ -148,7 +150,7 @@ export default function RestaurantBookingBox({
 
               {/* Children */}
               <div className="flex items-center justify-between py-2">
-                <span className="font-medium text-gray-800 dark:text-gray-200">Trẻ em</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">{t("restaurant.children")}</span>
                 <div className="flex items-center gap-2">
                   <button
                     className="w-8 h-8 grid place-items-center rounded border hover:bg-gray-50"
@@ -183,7 +185,7 @@ export default function RestaurantBookingBox({
                     setOpenGuests(false);
                   }}
                 >
-                  Xong
+                  {t("restaurant.done")}
                 </button>
               </div>
             </div>
@@ -193,7 +195,7 @@ export default function RestaurantBookingBox({
 
       {/* Date & Time */}
       <div className="mt-4">
-        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Thời gian đến</div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t("restaurant.arrival_time")}</div>
 
         <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">
           {openingLabel}
@@ -235,7 +237,7 @@ export default function RestaurantBookingBox({
           >
             <FaClock className="text-gray-400 mr-2" />
             <span className={`text-sm ${time ? "text-gray-800 dark:text-gray-200" : "text-gray-400"}`}>
-              {timeOptions.length ? (time || "Chọn giờ") : "Nhà hàng đóng cửa"}
+              {timeOptions.length ? (time || t("restaurant.select_time")) : t("restaurant.restaurant_closed")}
             </span>
             <span className="ml-auto text-gray-400">▾</span>
 
@@ -245,7 +247,7 @@ export default function RestaurantBookingBox({
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 <div className="px-3 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  Giờ (cách nhau 30 phút)
+                  {t("restaurant.time_slot_interval")}
                 </div>
 
                 {timeOptions.map((t) => (
@@ -280,7 +282,7 @@ export default function RestaurantBookingBox({
           onClick={commit}
           disabled={!canSubmit}
         >
-          {isActive ? "Đặt chỗ ngay" : "Nhà hàng đang tạm dừng nhận đặt chỗ"}
+          {isActive ? t("restaurant.book_now") : t("restaurant.booking_paused")}
         </Button>
       </div>
     </div>

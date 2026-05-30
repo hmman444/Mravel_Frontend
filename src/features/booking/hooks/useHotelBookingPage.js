@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchHotelDetail } from "../../catalog/slices/catalogSlice";
@@ -10,6 +11,7 @@ import { fetchCurrentUser } from "../../auth/slices/authSlice";
 import { setDraftPayment } from "../slices/bookingSlice";
 
 export function useHotelBookingPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -87,10 +89,10 @@ export function useHotelBookingPage() {
 
   const remainingRoomsText = useMemo(() => {
     const rem = hotelAvailability?.data?.remainingRooms;
-    if (rem == null) return "Đang kiểm tra phòng trống...";
-    if (rem <= 0) return "Hết phòng";
-    return `Chỉ còn ${rem} phòng`;
-  }, [hotelAvailability?.data]);
+    if (rem == null) return t("booking.checking_availability");
+    if (rem <= 0) return t("booking.sold_out");
+    return t("booking.rooms_remaining", { n: rem });
+  }, [hotelAvailability?.data, t]);
 
   const isEnoughRooms = hotelAvailability?.data?.isEnough ?? true;
 
@@ -135,7 +137,7 @@ export function useHotelBookingPage() {
       type: "HOTEL",
       payload,
       meta: {
-        title: "Thanh toán đặt phòng",
+        title: t("booking.hotel_payment_title"),
         subTitle: hotel.name,
         amount: pricingAllRooms?.finalTotal ?? null,
         nights,
@@ -153,10 +155,11 @@ export function useHotelBookingPage() {
     roomsCount,
     nights,
     pricingAllRooms?.finalTotal,
+    t,
   ]);
 
-  const hotelName = hotel?.name || hotelSlug || "Khách sạn của bạn";
-  const roomName = roomType?.name || roomTypeId || "Loại phòng đã chọn";
+  const hotelName = hotel?.name || hotelSlug || t("booking.your_hotel");
+  const roomName = roomType?.name || roomTypeId || t("booking.selected_room_type");
 
   return {
     loading,

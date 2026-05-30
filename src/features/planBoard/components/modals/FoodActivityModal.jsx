@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes, FaUtensils, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 
 import ActivityModalShell from "./ActivityModalShell";
@@ -25,13 +26,6 @@ import {
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
 
-const EXTRA_TYPES = [
-  { value: "SERVICE_FEE", label: "Phí dịch vụ" },
-  { value: "SURCHARGE", label: "Phụ thu" },
-  { value: "TAX", label: "Thuế" },
-  { value: "OTHER", label: "Khác" },
-];
-
 function safeJsonParse(str) {
   try {
     if (!str) return {};
@@ -49,6 +43,18 @@ export default function FoodActivityModal({
   planMembers = [],
   readOnly,
 }) {
+  const { t } = useTranslation();
+
+  const EXTRA_TYPES = useMemo(
+    () => [
+      { value: "SERVICE_FEE", label: t("plan.extra.type_service_fee") },
+      { value: "SURCHARGE", label: t("plan.extra.type_surcharge") },
+      { value: "TAX", label: t("plan.extra.type_tax") },
+      { value: "OTHER", label: t("plan.extra.type_other") },
+    ],
+    [t]
+  );
+
   const [title, setTitle] = useState("");
   const [restaurantName, setRestaurantName] = useState("");
   // fallback cho data cũ / user gõ tay
@@ -251,10 +257,10 @@ export default function FoodActivityModal({
   const handleSubmit = () => {
     const newErrors = {};
 
-    if (!restaurantName.trim()) newErrors.restaurantName = "Vui lòng nhập hoặc chọn quán ăn.";
+    if (!restaurantName.trim()) newErrors.restaurantName = t("plan.modal.food.err_restaurant_required");
 
     if (startTime && endTime && durationMinutes == null) {
-      newErrors.time = "Giờ kết thúc phải muộn hơn giờ bắt đầu.";
+      newErrors.time = t("plan.modal.food.err_time_order");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -268,8 +274,8 @@ export default function FoodActivityModal({
 
     onSubmit?.({
       type: "FOOD",
-      title: title || `Ăn uống: ${restaurantName}`,
-      text: title || `Ăn uống: ${restaurantName}`,
+      title: title || t("plan.modal.food.default_title", { name: restaurantName }),
+      text: title || t("plan.modal.food.default_title", { name: restaurantName }),
       description: note || "",
       startTime: startTime || null,
       endTime: endTime || null,
@@ -303,13 +309,13 @@ export default function FoodActivityModal({
 
   const footerLeft = (
     <ActivityFooterSummary
-      labelPrefix="Ăn uống"
+      labelPrefix={t("plan.modal.food.label_prefix")}
       name={restaurantName}
-      emptyLabelText="Điền/chọn tên quán để lưu hoạt động ăn uống."
+      emptyLabelText={t("plan.modal.food.empty_summary")}
       locationText={effectiveFoodLocation?.fullAddress || locationText || ""}
       timeText={
         startTime && endTime && durationMinutes != null && !errors.time
-          ? `${startTime} - ${endTime} (${durationMinutes} phút)`
+          ? t("plan.modal.food.time_range", { start: startTime, end: endTime, minutes: durationMinutes })
           : ""
       }
     />
@@ -326,14 +332,14 @@ export default function FoodActivityModal({
           text-slate-700 dark:text-slate-100
           hover:bg-slate-50 dark:hover:bg-slate-800 transition"
       >
-        Đóng
+        {t("common.close")}
       </button>
     </div>
   ) : (
     <ActivityFooterButtons
       onCancel={onClose}
       onSubmit={handleSubmit}
-      submitLabel={editingCard ? "Lưu chỉnh sửa" : "Lưu hoạt động ăn uống"}
+      submitLabel={editingCard ? t("plan.modal.food.submit_edit") : t("plan.modal.food.submit_new")}
       submitClassName="bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30"
     />
   );
@@ -348,9 +354,9 @@ export default function FoodActivityModal({
           close: <FaTimes size={14} />,
           bg: "from-orange-500 to-amber-500",
         }}
-        title="Hoạt động ăn uống"
+        title={t("plan.modal.food.title")}
         typeLabel="Food"
-        subtitle="Lên kế hoạch quán ăn, cafe và chi phí bữa ăn."
+        subtitle={t("plan.modal.food.subtitle")}
         headerRight={headerRight}
         footerLeft={footerLeft}
         footerRight={footerRight}
@@ -359,22 +365,22 @@ export default function FoodActivityModal({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Thông tin chung
+              {t("plan.modal.food.general_info")}
             </label>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              Tên quán + địa chỉ + thời gian
+              {t("plan.modal.food.general_info_hint")}
             </span>
           </div>
 
           <div className={sectionCard}>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Tên hoạt động (tuỳ chọn)
+                {t("plan.modal.food.activity_name_label")}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Ăn tối bún bò, uống cafe..."
+                placeholder={t("plan.modal.food.activity_name_ph")}
                 className={`${inputBase} w-full mt-1`}
               />
             </div>
@@ -382,7 +388,7 @@ export default function FoodActivityModal({
             {/* MAP PICKER */}
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Địa chỉ / vị trí trên bản đồ
+                {t("plan.modal.food.address_label")}
               </label>
 
               <button
@@ -412,7 +418,7 @@ export default function FoodActivityModal({
                   {effectiveFoodLocation || locationText ? (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
-                        {getLocDisplayLabel(effectiveFoodLocation, restaurantName || "Địa điểm đã chọn")}
+                        {getLocDisplayLabel(effectiveFoodLocation, restaurantName || t("plan.modal.food.picked_place"))}
                       </p>
 
                       {(effectiveFoodLocation?.fullAddress || locationText) && (
@@ -424,7 +430,7 @@ export default function FoodActivityModal({
                       {effectiveFoodLocation && (
                         <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
                           <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80">
-                            Đã chọn trên bản đồ
+                            {t("plan.modal.food.picked_on_map")}
                           </span>
                           {effectiveFoodLocation.lat != null && effectiveFoodLocation.lng != null && (
                             <span className="px-1.5 py-0.5 rounded-full bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-200">
@@ -437,10 +443,10 @@ export default function FoodActivityModal({
                   ) : (
                     <>
                       <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-100">
-                        Chọn quán trên bản đồ
+                        {t("plan.modal.food.pick_on_map_title")}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhấn để mở bản đồ, tìm quán ăn/cafe và chọn làm địa điểm.
+                        {t("plan.modal.food.pick_on_map_desc")}
                       </p>
                     </>
                   )}
@@ -451,7 +457,7 @@ export default function FoodActivityModal({
                     text-orange-500 group-hover:text-orange-600 dark:text-orange-300
                     dark:group-hover:text-orange-200"
                 >
-                  Mở bản đồ
+                  {t("plan.modal.food.open_map")}
                 </span>
               </button>
 
@@ -461,9 +467,9 @@ export default function FoodActivityModal({
             </div>
 
             <ActivityTimeRangeSection
-              sectionLabel="Thời gian ăn uống"
-              startLabel="Bắt đầu"
-              endLabel="Kết thúc"
+              sectionLabel={t("plan.modal.food.time_section")}
+              startLabel={t("plan.time.start")}
+              endLabel={t("plan.time.end")}
               color="orange"
               iconClassName="text-orange-500"
               startTime={startTime}
@@ -473,7 +479,7 @@ export default function FoodActivityModal({
               error={errors.time}
               onErrorChange={(msg) => setErrors((prev) => ({ ...prev, time: msg }))}
               onDurationChange={(mins) => setDurationMinutes(mins)}
-              durationHintPrefix="Thời lượng ước tính"
+              durationHintPrefix={t("plan.time.duration_hint")}
             />
           </div>
         </section>
@@ -482,10 +488,10 @@ export default function FoodActivityModal({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Chi phí bữa ăn
+              {t("plan.modal.food.cost_section")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Ước lượng theo đầu người + phát sinh + ngân sách + thực tế
+              {t("plan.modal.food.cost_section_hint")}
             </span>
           </div>
 
@@ -493,7 +499,7 @@ export default function FoodActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Chi phí dự tính / 1 người
+                  {t("plan.modal.food.price_per_person_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -502,7 +508,7 @@ export default function FoodActivityModal({
                     min="0"
                     value={pricePerPerson}
                     onChange={(e) => setPricePerPerson(e.target.value)}
-                    placeholder="VD: 70000"
+                    placeholder={t("plan.modal.food.price_per_person_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -511,7 +517,7 @@ export default function FoodActivityModal({
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Số người (ước tính)
+                  {t("plan.modal.food.people_count_label")}
                 </label>
                 <input
                   type="number"
@@ -534,7 +540,7 @@ export default function FoodActivityModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Tổng chi phí thực tế cho bữa này (nếu có)
+                  {t("plan.modal.food.actual_cost_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -543,20 +549,22 @@ export default function FoodActivityModal({
                     min="0"
                     value={actualCost}
                     onChange={(e) => setActualCost(e.target.value)}
-                    placeholder="Điền lại sau khi thanh toán"
+                    placeholder={t("plan.modal.food.actual_cost_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
                 </div>
 
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Nếu để trống, hệ thống sẽ dùng <b>chi phí dự kiến</b> + <b>phát sinh</b> để chia tiền.
+                  {t("plan.modal.food.actual_cost_hint_1")}{" "}
+                  <b>{t("plan.modal.food.estimated_cost")}</b> +{" "}
+                  <b>{t("plan.modal.food.extra")}</b> {t("plan.modal.food.actual_cost_hint_2")}
                 </p>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1 block">
-                  Ngân sách cho bữa này (tuỳ chọn)
+                  {t("plan.modal.food.budget_label")}
                 </label>
                 <div className="flex items-center gap-2">
                   <FaMoneyBillWave className="text-emerald-500" />
@@ -565,7 +573,7 @@ export default function FoodActivityModal({
                     min="0"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
-                    placeholder="VD: 500000"
+                    placeholder={t("plan.modal.food.budget_ph")}
                     className={`${inputBase} flex-1`}
                   />
                   <span className="text-xs text-slate-500">đ</span>
@@ -575,15 +583,15 @@ export default function FoodActivityModal({
 
             <div className="rounded-xl bg-slate-50/90 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-slate-700 dark:text-slate-200 space-y-0.5">
               <div>
-                Chi phí dự kiến:{" "}
+                {t("plan.modal.food.estimated_cost")}:{" "}
                 <span className="font-semibold">{baseEstimated.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Phát sinh:{" "}
+                {t("plan.modal.food.extra")}:{" "}
                 <span className="font-semibold">{extraTotal.toLocaleString("vi-VN")}đ</span>
               </div>
               <div>
-                Tổng dự kiến:{" "}
+                {t("plan.modal.food.estimated_total")}:{" "}
                 <span className="font-semibold text-orange-600 dark:text-orange-400">
                   {estimatedTotal.toLocaleString("vi-VN")}đ
                 </span>
@@ -591,7 +599,7 @@ export default function FoodActivityModal({
 
               {actualCost && Number(actualCost) > 0 && (
                 <div>
-                  Đang dùng <b>chi phí thực tế</b>:{" "}
+                  {t("plan.modal.food.using_actual_1")} <b>{t("plan.modal.food.actual_cost_word")}</b>:{" "}
                   <span className="font-semibold text-orange-600 dark:text-orange-400">
                     {Number(actualCost).toLocaleString("vi-VN")}đ
                   </span>
@@ -600,7 +608,7 @@ export default function FoodActivityModal({
 
               {budgetAmount && Number(budgetAmount) > 0 && (
                 <div>
-                  Ngân sách:{" "}
+                  {t("plan.modal.food.budget_word")}:{" "}
                   <span className="font-semibold">{Number(budgetAmount).toLocaleString("vi-VN")}đ</span>
                 </div>
               )}
@@ -639,15 +647,15 @@ export default function FoodActivityModal({
         {/* GHI CHÚ */}
         <section>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Ghi chú</label>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Thêm thông tin nhỏ cho cả nhóm</span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t("plan.modal.food.note")}</label>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("plan.modal.food.note_hint")}</span>
           </div>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             className={`${inputBase} w-full`}
-            placeholder="Ví dụ: Nên đặt bàn, thử món đặc sản..."
+            placeholder={t("plan.modal.food.note_ph")}
           />
         </section>
       </ActivityModalShell>

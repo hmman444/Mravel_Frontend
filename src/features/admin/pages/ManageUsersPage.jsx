@@ -3,6 +3,7 @@
 // src/features/admin/pages/ManageUsersPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AdminLayout from "../components/AdminLayout";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -20,9 +21,10 @@ const soft = {
 };
 
 export default function ManageUsersPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const isPartners = location.pathname.startsWith("/admin/partners");
-  const title = isPartners ? "Quản lý đối tác" : "Quản lý khách hàng";
+  const title = isPartners ? t("admin.manage_partners") : t("admin.manage_users");
   const roleParam = isPartners ? "PARTNER" : "USER";
 
   const { items, loading, toggling, error, load, lock, unlock } = useAdminUsers();
@@ -108,15 +110,15 @@ export default function ManageUsersPage() {
     try {
       if (action === "LOCK") {
         await lock(id);
-        showSuccess("Đã khóa tài khoản");
+        showSuccess(t("admin.lock_account_success"));
       } else {
         await unlock(id);
-        showSuccess("Đã mở khóa tài khoản");
+        showSuccess(t("admin.unlock_account_success"));
       }
       // reload để sync đúng DB (tránh lệch nếu BE đổi field)
       await load({ role: roleParam });
     } catch (e) {
-      showError(typeof e === "string" ? e : "Thao tác thất bại");
+      showError(typeof e === "string" ? e : t("admin.action_failed"));
     } finally {
       setRowToggling(id, false);
       closeConfirm();
@@ -131,7 +133,7 @@ export default function ManageUsersPage() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Danh sách tài khoản ({isPartners ? "PARTNER" : "USER"}). Có thể khóa / mở khóa.
+              {t("admin.account_list_desc", { role: isPartners ? "PARTNER" : "USER" })}
             </p>
           </div>
 
@@ -142,7 +144,7 @@ export default function ManageUsersPage() {
               type="button"
             >
               <FunnelIcon className="h-5 w-5" />
-              Bộ lọc
+              {t("admin.filters")}
             </button>
           </div>
         </div>
@@ -176,11 +178,11 @@ export default function ManageUsersPage() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Không có tài khoản phù hợp với bộ lọc hiện tại
+            {t("admin.no_accounts_match_filter")}
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <button type="button" className={`${soft.btn} ${soft.btnGhost}`} onClick={resetFilters}>
-              Reset bộ lọc
+              {t("admin.reset_filters")}
             </button>
           </div>
         </div>
@@ -202,14 +204,14 @@ export default function ManageUsersPage() {
       {/* Confirm */}
       <ConfirmModal
         open={confirmOpen}
-        title={pendingAction?.action === "LOCK" ? "Khóa tài khoản" : "Mở khóa tài khoản"}
+        title={pendingAction?.action === "LOCK" ? t("admin.lock_account") : t("admin.unlock_account")}
         message={
           pendingAction?.action === "LOCK"
-            ? `Bạn có chắc muốn khóa "${pendingAction?.email || ""}" không?`
-            : `Bạn có chắc muốn mở khóa "${pendingAction?.email || ""}" không?`
+            ? t("admin.confirm_lock_account", { email: pendingAction?.email || "" })
+            : t("admin.confirm_unlock_account", { email: pendingAction?.email || "" })
         }
-        confirmText={pendingAction?.action === "LOCK" ? "Khóa" : "Mở khóa"}
-        cancelText="Hủy"
+        confirmText={pendingAction?.action === "LOCK" ? t("admin.lock") : t("admin.unlock")}
+        cancelText={t("common.cancel")}
         onClose={closeConfirm}
         onConfirm={confirmToggle}
       />

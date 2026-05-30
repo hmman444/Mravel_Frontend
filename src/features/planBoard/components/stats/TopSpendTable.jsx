@@ -1,23 +1,26 @@
 // src/features/planBoard/components/stats/components/TopSpendTable.jsx
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 export default function TopSpendTable({
   items,
   fmtMoney,
   labelActivityType,
   typeEmoji,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="w-full overflow-hidden rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
       <div className="grid grid-cols-12">
         <div className="col-span-7 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/40">
-          Hoạt động
+          {t("plan.stats.top_spend.col_activity")}
         </div>
         <div className="col-span-3 px-3 py-2 text-center mr-12 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/40">
-          Ngày
+          {t("plan.stats.top_spend.col_date")}
         </div>
         <div className="col-span-2 px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/40">
-          Thực chi
+          {t("plan.stats.top_spend.col_actual")}
         </div>
       </div>
 
@@ -55,7 +58,7 @@ export default function TopSpendTable({
         ))
       ) : (
         <div className="px-3 py-4 text-sm text-slate-500 dark:text-slate-400">
-          Chưa có hoạt động nào ghi nhận chi phí.
+          {t("plan.stats.top_spend.empty")}
         </div>
       )}
     </div>

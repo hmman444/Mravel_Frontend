@@ -1,22 +1,16 @@
 // src/features/partner/components/hotel/form/sections/DestinationLocationSection.jsx
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import DestinationTypeahead from "../../../../../../components/DestinationTypeahead";
 
 const asString = (v) => (v == null ? "" : String(v));
 
-const TEXT = {
-  SECTION_TITLE: "Điểm đến",
-  DEST_LABEL: "Thuộc địa điểm",
-  CLEAR: "Xóa",
-  DEST_PLACEHOLDER: "Chọn điểm đến (Hội An, Đà Nẵng, Phú Quốc...)",
-  DEST_HINT: "Bắt buộc chọn từ gợi ý để lấy đúng slug (không nhập tay).",
-};
-
 const pickSlug = (p) => p?.slug ?? p?.value ?? p?.id ?? "";
 const pickText = (p) => p?.text ?? p?.label ?? p?.name ?? "";
 
 export default function DestinationLocationSection({ form, setField, disabled }) {
+  const { t } = useTranslation();
   const [, setDestText] = useState(
     asString(form?.destinationName || form?.destinationSlug || "")
   );
@@ -53,7 +47,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
   return (
     <details open className="group">
       <summary className="cursor-pointer select-none font-semibold">
-        {TEXT.SECTION_TITLE}
+        {t("partner.destination.section_title")}
       </summary>
 
       <div className="mt-3 grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -61,7 +55,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold flex items-center gap-2">
               <MapPinIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              {TEXT.DEST_LABEL} <span className="text-red-600">*</span>
+              {t("partner.destination.dest_label")} <span className="text-red-600">*</span>
             </div>
 
             <button
@@ -70,7 +64,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
               onClick={clearDest}
               disabled={disabled}
             >
-              {TEXT.CLEAR}
+              {t("common.delete")}
             </button>
           </div>
 
@@ -80,7 +74,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
             defaultSlug={form.destinationSlug || null}
             onPick={onDestUpdate}
             label={null}
-            placeholder={TEXT.DEST_PLACEHOLDER}
+            placeholder={t("partner.destination.dest_placeholder")}
             className="w-full !max-w-none !mx-0"
             buttonSlot={null}
             mode="place"
@@ -95,7 +89,7 @@ export default function DestinationLocationSection({ form, setField, disabled })
           <div className="text-xs text-gray-500 dark:text-gray-400">
             {!!destSlug && (
               <span className="ml-2 text-green-700">
-                (Đã chọn: <b>{destSlug}</b>)
+                ({t("partner.destination.selected_label")}: <b>{destSlug}</b>)
               </span>
             )}
           </div>

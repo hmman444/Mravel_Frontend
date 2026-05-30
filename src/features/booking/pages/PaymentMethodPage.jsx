@@ -1,5 +1,6 @@
 import Navbar from "../../../components/Navbar";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Footer from "../../../components/Footer";
 import { ArrowLeft, ShieldCheck, Lock } from "lucide-react";
 
@@ -8,6 +9,7 @@ import { usePaymentMethods } from "../hooks/usePaymentMethods";
 import { usePaymentMethodPage } from "../hooks/usePaymentMethodPage";
 
 function MethodCard({ method, disabled, onClick }) {
+  const { t } = useTranslation();
   const Icon = method.icon;
   const [imgOk, setImgOk] = useState(true);
 
@@ -54,14 +56,14 @@ function MethodCard({ method, disabled, onClick }) {
             method.supported ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400",
           ].join(" ")}
         >
-          {method.supported ? (method.badge || "Hỗ trợ") : "Chưa hỗ trợ"}
+          {method.supported ? (method.badge || t("booking.supported")) : t("booking.not_supported")}
         </span>
       </div>
 
       <div className="mt-1">
         <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{method.label}</div>
         <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-          {method.supported ? "Chuyển đến trang QR để thanh toán" : "Chỉ hiển thị icon minh hoạ"}
+          {method.supported ? t("booking.redirect_to_qr_payment") : t("booking.icon_illustration_only")}
         </div>
       </div>
 
@@ -73,6 +75,7 @@ function MethodCard({ method, disabled, onClick }) {
 }
 
 export default function PaymentMethodPage() {
+  const { t } = useTranslation();
   const groups = usePaymentMethods();
   const {
     meta,
@@ -103,7 +106,7 @@ export default function PaymentMethodPage() {
                 className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Quay lại
+                {t("common.back")}
               </button>
 
               <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700">
@@ -111,8 +114,8 @@ export default function PaymentMethodPage() {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="text-right">
-                  <div className="text-gray-500 dark:text-gray-400 font-medium">Bảo mật thanh toán</div>
-                  <div className="text-emerald-700">Cổng thanh toán</div>
+                  <div className="text-gray-500 dark:text-gray-400 font-medium">{t("booking.payment_security")}</div>
+                  <div className="text-emerald-700">{t("booking.payment_gateway")}</div>
                 </div>
               </div>
             </div>
@@ -120,21 +123,21 @@ export default function PaymentMethodPage() {
             <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
                 <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 md:text-2xl">
-                  Chọn phương thức thanh toán
+                  {t("booking.choose_payment_method")}
                 </h1>
                 <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 md:text-sm">
                   {meta?.subTitle ? (
                     <>
-                      Đơn: <span className="font-semibold text-gray-900 dark:text-gray-100">{meta.subTitle}</span>
+                      {t("booking.order_label")} <span className="font-semibold text-gray-900 dark:text-gray-100">{meta.subTitle}</span>
                       {amountText ? (
                         <>
                           {" "}
-                          · Tổng: <span className="font-semibold text-gray-900 dark:text-gray-100">{amountText}</span>
+                          · {t("common.total")}: <span className="font-semibold text-gray-900 dark:text-gray-100">{amountText}</span>
                         </>
                       ) : null}
                     </>
                   ) : (
-                    "Vui lòng chọn 1 phương thức để tiếp tục."
+                    t("booking.please_choose_method_to_continue")
                   )}
                 </p>
               </div>
@@ -142,9 +145,9 @@ export default function PaymentMethodPage() {
               {/* tiny progress */}
               <div className="flex items-center gap-2 rounded-2xl bg-gray-50 dark:bg-gray-900 px-4 py-2 text-xs text-gray-700 dark:text-gray-300">
                 <Lock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <span>1/2 Chọn phương thức</span>
+                <span>{t("booking.step_choose_method")}</span>
                 <span className="text-gray-400">→</span>
-                <span className="text-gray-400">2/2 Quét QR</span>
+                <span className="text-gray-400">{t("booking.step_scan_qr")}</span>
               </div>
             </div>
 
@@ -157,16 +160,16 @@ export default function PaymentMethodPage() {
           {showMissing ? (
             <div className="rounded-3xl border border-yellow-200 bg-yellow-50 p-5">
               <div className="text-sm font-semibold text-yellow-800">
-                Không tìm thấy thông tin đơn để thanh toán.
+                {t("booking.order_info_not_found")}
               </div>
               <p className="mt-1 text-xs text-yellow-700">
-                Bạn hãy quay lại trang đặt phòng và bấm “Thanh toán” lại nhé.
+                {t("booking.please_go_back_and_pay_again")}
               </p>
               <button
                 className="mt-4 rounded-2xl bg-[#007bff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#ff6b1a]"
                 onClick={goHome}
               >
-                Về trang chủ
+                {t("booking.back_to_home")}
               </button>
             </div>
           ) : (
@@ -176,7 +179,7 @@ export default function PaymentMethodPage() {
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">{g.title}</h2>
                     <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                      {payLoading ? "Đang tạo thanh toán..." : "Chọn để tiếp tục"}
+                      {payLoading ? t("booking.creating_payment") : t("booking.choose_to_continue")}
                     </span>
                   </div>
 

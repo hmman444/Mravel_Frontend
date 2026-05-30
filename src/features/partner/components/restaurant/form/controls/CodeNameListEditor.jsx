@@ -1,6 +1,8 @@
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 export default function CodeNameListEditor({ title, hint, value = [], onChange, disabled }) {
+  const { t } = useTranslation();
   const list = Array.isArray(value) ? value : [];
   const emit = (next) => onChange?.(next);
 
@@ -17,12 +19,12 @@ export default function CodeNameListEditor({ title, hint, value = [], onChange, 
         </div>
         <button type="button" onClick={add} disabled={disabled} className="px-3 py-2 rounded-xl border hover:bg-gray-50 flex items-center gap-2 text-sm disabled:opacity-50">
           <PlusIcon className="h-4 w-4" />
-          Thêm
+          {t("common.add")}
         </button>
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-gray-500 dark:text-gray-400">Chưa có.</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{t("partner.code_name_list.empty")}</div>
       ) : (
         <div className="space-y-2">
           {list.map((x, i) => (
@@ -38,7 +40,7 @@ export default function CodeNameListEditor({ title, hint, value = [], onChange, 
                 value={x?.name || ""}
                 onChange={(e) => patch(i, { name: e.target.value })}
                 className="md:col-span-7 border rounded-xl px-3 py-2 text-sm"
-                placeholder="Tên hiển thị"
+                placeholder={t("partner.code_name_list.name_placeholder")}
                 disabled={disabled}
               />
               <button type="button" onClick={() => remove(i)} disabled={disabled} className="md:col-span-1 p-2 rounded-xl hover:bg-red-50 justify-self-end">

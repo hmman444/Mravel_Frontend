@@ -17,9 +17,16 @@ export default function LanguageDropdown() {
   const current = langs.find((l) => i18n.language?.startsWith(l.code)) || langs[0];
 
   const handlePick = (code) => {
-    i18n.changeLanguage(code);
+    if (code === current.code) {
+      setOpen(false);
+      return;
+    }
     localStorage.setItem("language", code);
+    i18n.changeLanguage(code);
     setOpen(false);
+    // Reload để mọi data từ API fetch lại với Accept-Language mới
+    // (dự án không dùng react-query nên không invalidate cache selective được)
+    window.location.reload();
   };
 
   useEffect(() => {

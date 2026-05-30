@@ -1,5 +1,6 @@
 // src/features/catalog/components/restaurant/RestaurantSearchResults.jsx
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ChevronRight } from "lucide-react";
@@ -32,6 +33,7 @@ const SkeletonCard = () => (
 
 /** Ẩn mặc định, chỉ hiện khi URL có query hợp lệ */
 export default function RestaurantSearchResults() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const listRef = useRef(null);
@@ -128,10 +130,10 @@ export default function RestaurantSearchResults() {
     <section ref={listRef} className="max-w-7xl mx-auto px-6 mt-6 md:mt-10">
       <div className="mb-4">
         <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100">
-          Kết quả tìm quán ăn
+          {t('restaurant.search_results_title')}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          {loading ? "Đang tải..." : `${result.total} kết quả phù hợp`}
+          {loading ? t('common.loading') : t('restaurant.matching_results', { count: result.total })}
         </p>
       </div>
 
@@ -175,7 +177,7 @@ export default function RestaurantSearchResults() {
 
       {!loading && result.total === 0 && (
         <div className="mt-6 border border-dashed rounded-xl p-6 text-center text-slate-500 dark:text-slate-400">
-          Không tìm thấy kết quả. Hãy thử đổi khu vực hoặc loại ẩm thực.
+          {t('restaurant.no_results')}
         </div>
       )}
     </section>
@@ -184,6 +186,7 @@ export default function RestaurantSearchResults() {
 
 /*  CARD NHỎ KIỂU PASGO (KHÔNG KM, KHÔNG BUTTON ĐẶT, CHỈ "GIÁ CHỈ TỪ")  */
 function RestaurantMiniCard({ restaurant, onClick }) {
+  const { t } = useTranslation();
   const {
     name,
     slug,
@@ -219,8 +222,8 @@ function RestaurantMiniCard({ restaurant, onClick }) {
   const basePrice = minPricePerPerson ?? avgPricePerPerson ?? null;
   const basePriceText = basePrice ? formatCurrencyVND(basePrice) : null;
   const priceText = basePriceText
-    ? `Giá chỉ từ ${basePriceText} ${currencyCode || "VND"}/người`
-    : "Giá tham khảo tại nhà hàng";
+    ? t('restaurant.price_from', { price: basePriceText, currency: currencyCode || "VND" })
+    : t('restaurant.reference_price');
 
   const score =
     typeof avgRating === "number" ? avgRating.toFixed(1) : null;
@@ -269,7 +272,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
           {/* tên + địa chỉ */}
           <div>
             <h3 className="font-semibold text-[15px] leading-snug line-clamp-2">
-              {name || slug || "Nhà hàng chưa đặt tên"}
+              {name || slug || t('restaurant.unnamed_restaurant')}
             </h3>
 
             {addressText && (
@@ -303,7 +306,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
                   )}
                 </>
               ) : (
-                <span className="text-[11px] text-gray-500 dark:text-gray-400">Mới</span>
+                <span className="text-[11px] text-gray-500 dark:text-gray-400">{t('restaurant.new')}</span>
               )}
 
               {priceLevelText && (

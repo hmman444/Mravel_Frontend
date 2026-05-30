@@ -1,8 +1,9 @@
 import api from "../../../utils/partnerAxiosInstance";
+import i18n from "../../../i18n";
 
 const unwrap = (res) => {
   const body = res?.data;
-  if (body?.success === false) throw new Error(body?.message || "Có lỗi xảy ra");
+  if (body?.success === false) throw new Error(body?.message || i18n.t("common.error_occurred"));
   return body?.data; // ApiResponse của bạn bọc ở data
 };
 

@@ -2,8 +2,10 @@ import { useDispatch } from "react-redux";
 import { registerUser } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const useRegister = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
@@ -11,13 +13,13 @@ export const useRegister = () => {
   const handleRegister = async (fullname, email, password) => {
     const action = await dispatch(registerUser({ fullname, email, password }));
     if (registerUser.fulfilled.match(action)) {
-      setMessage("Đăng ký thành công! Vui lòng kiểm tra email để xác thực OTP.");
+      setMessage(t("auth.register_success_check_email_otp"));
       // Lưu dự phòng
       localStorage.setItem("last_reg_email", email.trim().toLowerCase());
       // Điều hướng kèm query
       navigate(`/verify-otp?email=${encodeURIComponent(email.trim().toLowerCase())}`);
     } else {
-      setMessage(action.payload || "Đăng ký thất bại!");
+      setMessage(action.payload || t("auth.register_failed"));
     }
   };
 

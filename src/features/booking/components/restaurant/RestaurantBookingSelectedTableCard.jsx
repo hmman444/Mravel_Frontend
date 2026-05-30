@@ -1,4 +1,5 @@
 import { CalendarDays, Users, Info, Hash } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const FULL_VN_DATE = (d) =>
   d?.toLocaleDateString("vi-VN", {
@@ -18,11 +19,12 @@ export default function RestaurantBookingSelectedTableCard({
   tableType,
   tablesCount = 1,
 
-  remainingText = "Đang kiểm tra bàn trống...",
+  remainingText,
   isEnough = true,
   isSeatEnough = true,
   seatErrorText = "",
 }) {
+  const { t } = useTranslation();
   const people = Number(adults || 0) + Number(children || 0);
   const dateLabel = date ? FULL_VN_DATE(date) : "--";
   const seats = tableType?.seats ?? null;
@@ -34,10 +36,10 @@ export default function RestaurantBookingSelectedTableCard({
           !
         </span>
         <p>
-          {remainingText}{" "}
+          {remainingText || t("booking.checking_available_tables")}{" "}
           {!isEnough && (
             <span className="ml-1 font-bold text-red-700">
-              (Không đủ số bàn bạn chọn)
+              {t("booking.not_enough_tables_selected")}
             </span>
           )}
         </p>
@@ -46,12 +48,12 @@ export default function RestaurantBookingSelectedTableCard({
       <div className="space-y-4 px-4 pb-4 pt-3 md:px-5 md:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            {restaurantName || "Nhà hàng của bạn"}
+            {restaurantName || t("booking.your_restaurant")}
           </p>
 
           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 md:text-base">
-            ({tablesCount}x) {tableType?.name || "Loại bàn"}{" "}
-            {seats ? <span className="text-xs font-medium text-gray-600 dark:text-gray-400">• {seats} chỗ/bàn</span> : null}
+            ({tablesCount}x) {tableType?.name || t("booking.table_type")}{" "}
+            {seats ? <span className="text-xs font-medium text-gray-600 dark:text-gray-400">• {t("booking.seats_per_table", { count: seats })}</span> : null}
           </p>
 
           {restaurantSlug ? (
@@ -62,7 +64,7 @@ export default function RestaurantBookingSelectedTableCard({
           ) : null}
            {!isSeatEnough ? (
             <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 border border-red-200">
-              {seatErrorText || "Không đủ chỗ ngồi theo số bàn đã chọn."}
+              {seatErrorText || t("booking.not_enough_seats_for_tables")}
             </div>
           ) : null}
         </div>
@@ -78,13 +80,13 @@ export default function RestaurantBookingSelectedTableCard({
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span>
-              {people} khách ({adults} NL, {children} TE) • {tablesCount} bàn
+              {t("booking.guests_adults_children_tables", { people, adults, children, tables: tablesCount })}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span>Đặt cọc để giữ bàn theo khung giờ đã chọn.</span>
+            <span>{t("booking.deposit_to_hold_table")}</span>
           </div>
         </div>
       </div>

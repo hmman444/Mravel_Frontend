@@ -1,8 +1,11 @@
 // src/features/partner/components/restaurant/form/sections/BookingConfigSection.jsx
+import { useTranslation } from "react-i18next";
+
 const asString = (v) => (v == null ? "" : String(v));
 const toIntStr = (v) => asString(v).replace(/[^\d]/g, "");
 
 export default function BookingConfigSection({ form, setField, disabled }) {
+  const { t } = useTranslation();
   const cfg = form.bookingConfig || {};
 
   const setCfg = (patch) => setField("bookingConfig", { ...cfg, ...(patch || {}) });
@@ -10,13 +13,13 @@ export default function BookingConfigSection({ form, setField, disabled }) {
   return (
     <details className="group">
       <summary className="cursor-pointer select-none font-semibold">
-        Cấu hình thông tin đặt bàn
+        {t("partner.booking_config.title_restaurant")}
       </summary>
 
       <div className="mt-3 rounded-2xl border p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Bước thời gian (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.slot_minutes_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.slotMinutes)}
@@ -26,12 +29,12 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               disabled={disabled}
             />
             <div className="text-[11px] text-gray-400 mt-1">
-              Ví dụ: 15 = mỗi 15 phút tạo 1 khung giờ.
+              {t("partner.booking_config.slot_minutes_hint")}
             </div>
           </label>
 
           <label className="md:col-span-8 text-sm">
-            <div className="font-medium mb-1">Thời lượng cho phép (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.allowed_durations_label")}</div>
             <input
               value={Array.isArray(cfg.allowedDurationsMinutes) ? cfg.allowedDurationsMinutes.join(", ") : ""}
               onChange={(e) =>
@@ -47,13 +50,13 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               placeholder="60, 90, 120"
               disabled={disabled}
             />
-            <div className="text-[11px] text-gray-400 mt-1">Nhập dạng: 60, 90, 120 (phút).</div>
+            <div className="text-[11px] text-gray-400 mt-1">{t("partner.booking_config.allowed_durations_hint")}</div>
           </label>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Thời lượng mặc định (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.default_duration_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.defaultDurationMinutes)}
@@ -65,7 +68,7 @@ export default function BookingConfigSection({ form, setField, disabled }) {
           </label>
 
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Đặt trước tối thiểu (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.min_lead_time_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.minBookingLeadTimeMinutes)}
@@ -75,12 +78,12 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               disabled={disabled}
             />
             <div className="text-[11px] text-gray-400 mt-1">
-              Ví dụ: 30 = chỉ cho đặt trước giờ đến ít nhất 30 phút.
+              {t("partner.booking_config.min_lead_time_hint")}
             </div>
           </label>
 
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Cho phép đến trễ (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.grace_arrival_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.graceArrivalMinutes)}
@@ -90,14 +93,14 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               disabled={disabled}
             />
             <div className="text-[11px] text-gray-400 mt-1">
-              Ví dụ: 10 = trễ 10 phút vẫn giữ bàn.
+              {t("partner.booking_config.grace_arrival_hint")}
             </div>
           </label>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Hủy miễn phí trước (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.free_cancel_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.freeCancelMinutes)}
@@ -107,12 +110,12 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               disabled={disabled}
             />
             <div className="text-[11px] text-gray-400 mt-1">
-              Ví dụ: 60 = hủy trước giờ đến 60 phút thì không mất phí.
+              {t("partner.booking_config.free_cancel_hint")}
             </div>
           </label>
 
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Hạn thanh toán (phút)</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.pending_payment_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.pendingPaymentExpireMinutes)}
@@ -122,12 +125,12 @@ export default function BookingConfigSection({ form, setField, disabled }) {
               disabled={disabled}
             />
             <div className="text-[11px] text-gray-400 mt-1">
-              Ví dụ: 15 = quá 15 phút chưa thanh toán thì đơn hết hạn.
+              {t("partner.booking_config.pending_payment_hint")}
             </div>
           </label>
 
           <label className="md:col-span-4 text-sm">
-            <div className="font-medium mb-1">Số bàn tối đa / 1 đơn</div>
+            <div className="font-medium mb-1">{t("partner.booking_config.max_tables_label")}</div>
             <input
               inputMode="numeric"
               value={asString(cfg.maxTablesPerBooking)}

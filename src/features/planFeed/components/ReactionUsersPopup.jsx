@@ -1,6 +1,8 @@
+import { useTranslation } from "react-i18next";
 import { reactionsMeta } from "../utils/reactionsMeta";
 
 export default function ReactionUsersPopup({ reactionUsers = [] }) {
+  const { t } = useTranslation();
   if (!reactionUsers.length) return null;
 
   return (
@@ -11,7 +13,7 @@ export default function ReactionUsersPopup({ reactionUsers = [] }) {
       "
     >
       {reactionUsers.map((u, idx) => {
-        const name = u.userName || "Người dùng";
+        const name = u.userName || t("feed.user.defaultName");
         const avatar = u.userAvatar || "/default-avatar.png";
         const reaction = reactionsMeta[u.type?.toLowerCase()];
 

@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n";
 import {
   fetchPlans,
   sendReaction,
@@ -65,7 +66,7 @@ export const loadPlanFeedDetail = createAsyncThunk(
         e?.response?.data?.message ||
           e?.response?.data?.error ||
           e?.message ||
-          "Không lấy được bài viết"
+          i18n.t("feed.detail.loadError")
       );
     }
   }

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { uploadAvatarOrCover } from "../services/userProfileService";
 import { updateProfileThunk } from "../slices/profileSlice";
 import { showError, showSuccess } from "../../../utils/toastUtils";
 
 export function useEditProfile() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
 
   const uploadImage = async (file) => {
@@ -14,7 +16,7 @@ export function useEditProfile() {
       const url = await uploadAvatarOrCover(file);
       return url;
     } catch {
-      showError("Không thể upload ảnh.");
+      showError(t("user.upload_image_failed"));
       return null;
     } finally {
       setUploading(false);
@@ -24,10 +26,10 @@ export function useEditProfile() {
   const saveProfile = async (payload, onDone) => {
     try {
       await dispatch(updateProfileThunk(payload)).unwrap();
-      showSuccess("Đã cập nhật hồ sơ.");
+      showSuccess(t("user.update_profile_success"));
       onDone?.();
     } catch (err) {
-      showError(err || "Không thể cập nhật hồ sơ.");
+      showError(err || t("user.update_profile_failed"));
     }
   };
 

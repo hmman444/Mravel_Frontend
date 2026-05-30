@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 export default function ReviewSection() {
+  const { t } = useTranslation();
   const reviews = [
     {
       id: 1,
@@ -25,11 +28,10 @@ export default function ReviewSection() {
         <div className="flex items-center justify-between gap-3 mb-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-50">
-              Đánh giá từ khách hàng
+              {t("home.reviews_title")}
             </h2>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 max-w-xl">
-              Những trải nghiệm thực tế từ người dùng đã sử dụng Mravel cho
-              chuyến đi của họ.
+              {t("home.reviews_subtitle")}
             </p>
           </div>
         </div>
@@ -58,7 +60,7 @@ export default function ReviewSection() {
                   </div>
                   {r.trip && (
                     <div className="mt-0.5 text-xs text-sky-600 dark:text-sky-300">
-                      Đã lên kế hoạch: {r.trip}
+                      {t("home.reviewed_trip", { trip: r.trip })}
                     </div>
                   )}
                 </div>
