@@ -24,14 +24,15 @@ export default function ProfileHeader({
   onMessage,
 }) {
   const { t } = useTranslation();
+  const isMe = friendActions.isMe;
   const tabs = [
     { key: "feed", label: t("user.tab_feed") },
     { key: "about", label: t("user.tab_about") },
     { key: "photos", label: t("user.tab_photos") },
     { key: "friends", label: t("user.tab_friends") },
+    // "Yêu thích" chỉ hiển thị trên trang cá nhân của chính mình (endpoint /me theo token).
+    ...(isMe ? [{ key: "favorites", label: t("user.tab_favorites") }] : []),
   ];
-
-  const isMe = friendActions.isMe;
 
   const renderFriendMainButton = () => {
     const { uiState, loadingAction } = friendActions;

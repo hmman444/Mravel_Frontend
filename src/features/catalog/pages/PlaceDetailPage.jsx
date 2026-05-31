@@ -90,7 +90,7 @@ export default function PlaceDetailPage() {
 
         {data.id && (
           <div className="mt-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <ReviewSection targetType="PLACE" targetId={data.id} />
+            <ReviewSection targetType="PLACE" targetId={data.id} targetSlug={data.slug} targetName={data.name} />
           </div>
         )}
       </main>

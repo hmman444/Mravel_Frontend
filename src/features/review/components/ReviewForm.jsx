@@ -5,7 +5,7 @@ import { submitReview, editReview } from "../slices/reviewSlice";
 import StarRating from "./StarRating";
 import { toast } from "react-toastify";
 
-export default function ReviewForm({ targetType, targetId, onSubmitted }) {
+export default function ReviewForm({ targetType, targetId, targetSlug, targetName, onSubmitted }) {
   const { t, i18n } = useTranslation();
   const aspectLabel = (a) =>
     i18n.language === "en" ? a?.labelEn || a?.labelVi : a?.labelVi;
@@ -80,7 +80,7 @@ export default function ReviewForm({ targetType, targetId, onSubmitted }) {
     if (isEditing) {
       result = await dispatch(editReview({ reviewId: myReview.id, payload }));
     } else {
-      result = await dispatch(submitReview({ targetType, targetId, ...payload }));
+      result = await dispatch(submitReview({ targetType, targetId, targetSlug, targetName, ...payload }));
     }
 
     if (!result.error) {

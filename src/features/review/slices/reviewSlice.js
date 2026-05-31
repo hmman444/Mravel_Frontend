@@ -55,6 +55,15 @@ export const removeReview = createAsyncThunk(
   },
 );
 
+export const fetchCanReview = createAsyncThunk(
+  "review/canReview",
+  async ({ targetType, targetId, slug, name }, { rejectWithValue }) => {
+    const res = await reviewService.canReview({ targetType, targetId, slug, name });
+    if (res.success) return res.data;
+    return rejectWithValue(res.message);
+  },
+);
+
 export const fetchAspectDefinitions = createAsyncThunk(
   "review/fetchAspectDefinitions",
   async (category, { rejectWithValue, getState }) => {
@@ -78,6 +87,8 @@ const initialState = {
   summary: null,
   summaryLoading: false,
   myReview: null,
+  // null = chưa biết (đang kiểm tra), true/false = đã có kết quả gate "đã trải nghiệm"
+  canReview: null,
   submitting: false,
   // aspect definitions cached per category key (HOTEL / RESTAURANT / PLACE)
   aspectDefinitions: {},
@@ -98,6 +109,7 @@ const reviewSlice = createSlice({
       state.error = null;
       state.summary = null;
       state.myReview = null;
+      state.canReview = null;
     },
   },
   extraReducers: (builder) => {
@@ -141,6 +153,17 @@ const reviewSlice = createSlice({
       // fetchMyReview
       .addCase(fetchMyReview.fulfilled, (state, action) => {
         state.myReview = action.payload;
+      })
+
+      // fetchCanReview
+      .addCase(fetchCanReview.pending, (state) => {
+        state.canReview = null;
+      })
+      .addCase(fetchCanReview.fulfilled, (state, action) => {
+        state.canReview = !!action.payload?.eligible;
+      })
+      .addCase(fetchCanReview.rejected, (state) => {
+        state.canReview = false;
       })
 
       // submitReview
