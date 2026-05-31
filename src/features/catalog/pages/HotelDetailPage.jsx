@@ -75,7 +75,7 @@ export default function HotelDetailPage() {
               <HotelPolicySection hotel={hotel} />
               <HotelFaqSection hotel={hotel} />
               <HotelSimilarSection hotel={hotel} />
-              <ReviewSection targetType="HOTEL" targetId={hotel.id} />
+              <ReviewSection targetType="HOTEL" targetId={hotel.id} targetSlug={hotel.slug} targetName={hotel.name} />
             </div>
           )}
         </div>

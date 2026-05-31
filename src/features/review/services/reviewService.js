@@ -73,6 +73,17 @@ export const deleteReview = async (reviewId) => {
   }
 };
 
+export const canReview = async ({ targetType, targetId, slug, name }) => {
+  try {
+    const res = await api.get(`${REVIEW_PREFIX}/can-review`, {
+      params: { targetType, targetId, slug, name },
+    });
+    return { success: true, data: res.data?.data };
+  } catch (error) {
+    return toError(error, i18n.t("review.error.connection"));
+  }
+};
+
 export const getAspectDefinitions = async (category) => {
   try {
     const res = await api.get(`${REVIEW_PREFIX}/aspects`, { params: { category } });

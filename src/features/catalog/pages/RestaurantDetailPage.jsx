@@ -104,7 +104,7 @@ export default function RestaurantDetailPage() {
                   </div>
                   <div className="h-3" />
                   <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                    <ReviewSection targetType="RESTAURANT" targetId={restaurant.id} />
+                    <ReviewSection targetType="RESTAURANT" targetId={restaurant.id} targetSlug={restaurant.slug} targetName={restaurant.name} />
                   </div>
                 </div>
                 <aside className="hidden lg:block">

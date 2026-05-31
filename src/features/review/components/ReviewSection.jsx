@@ -5,6 +5,7 @@ import {
   fetchReviewSummary,
   fetchMyReview,
   fetchAspectDefinitions,
+  fetchCanReview,
   removeReview,
   clearReviews,
 } from "../slices/reviewSlice";
@@ -15,7 +16,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import ConfirmModal from "../../../components/ConfirmModal";
 
-export default function ReviewSection({ targetType, targetId }) {
+export default function ReviewSection({ targetType, targetId, targetSlug, targetName }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const {
@@ -25,6 +26,7 @@ export default function ReviewSection({ targetType, targetId }) {
     page,
     summary,
     myReview,
+    canReview,
   } = useSelector((s) => s.review);
   const currentUserId = useSelector((s) => s.auth.user?.id);
   const myReviewFetchedRef = useRef(null);
@@ -39,10 +41,11 @@ export default function ReviewSection({ targetType, targetId }) {
     dispatch(fetchReviews({ targetType, targetId, page: 0, size: 5 }));
     dispatch(fetchReviewSummary({ targetType, targetId }));
     dispatch(fetchAspectDefinitions(targetType));
+    dispatch(fetchCanReview({ targetType, targetId, slug: targetSlug, name: targetName }));
     return () => {
       dispatch(clearReviews());
     };
-  }, [targetType, targetId, dispatch]);
+  }, [targetType, targetId, targetSlug, targetName, dispatch]);
 
   useEffect(() => {
     const key = `${currentUserId}_${targetType}_${targetId}`;
@@ -89,13 +92,21 @@ export default function ReviewSection({ targetType, targetId }) {
       {/* Summary */}
       <ReviewSummary summary={summary} />
 
-      {/* Form */}
+      {/* Form — chỉ hiện khi user đã trải nghiệm dịch vụ (hoặc đã từng đánh giá) */}
       <div className="mt-6">
-        <ReviewForm
-          targetType={targetType}
-          targetId={targetId}
-          onSubmitted={handleSubmitted}
-        />
+        {canReview === false ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+            {t("review.not_experienced")}
+          </div>
+        ) : canReview === true ? (
+          <ReviewForm
+            targetType={targetType}
+            targetId={targetId}
+            targetSlug={targetSlug}
+            targetName={targetName}
+            onSubmitted={handleSubmitted}
+          />
+        ) : null}
       </div>
 
       {/* Danh sách review */}
