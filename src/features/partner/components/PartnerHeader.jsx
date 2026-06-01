@@ -44,8 +44,8 @@ export default function PartnerHeader() {
   const solid = scrolled;
 
   /* == NOTIFICATIONS (UI giống user/admin) == */
-  // const { items, loading, saving, unreadCount, load, markAllRead, markRead } =
-  //   useNotifications(); // sau này có thể đổi sang usePartnerNotifications()
+  const { items, loading, saving, unreadCount, load, markAllRead, markRead } =
+    useNotifications();
 
   const [notiOpen, setNotiOpen] = useState(false);
   const notiWrapRef = useRef(null);
@@ -118,7 +118,7 @@ export default function PartnerHeader() {
           <LanguageDropdown />
 
           {/*  NOTIFICATIONS (giống user/admin) */}
-          {/* {accessToken ? (
+          {accessToken ? (
             <div className="relative" ref={notiWrapRef}>
               <button
                 type="button"
@@ -133,8 +133,8 @@ export default function PartnerHeader() {
                   text-gray-700 dark:text-gray-200
                   hover:bg-gray-100 dark:hover:bg-gray-800 transition
                 "
-                aria-label={t("notifications") || "Thông báo"}
-                title={t("notifications") || "Thông báo"}
+                aria-label={t("notification.title")}
+                title={t("notification.title")}
               >
                 <Bell className="w-6 h-6" />
                 {unreadCount > 0 && (
@@ -164,7 +164,7 @@ export default function PartnerHeader() {
                 </div>
               )}
             </div>
-          ) : null} */}
+          ) : null}
 
           {/* PARTNER MENU (xích sát phải) */}
           {accessToken ? (

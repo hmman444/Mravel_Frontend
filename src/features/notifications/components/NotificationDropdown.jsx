@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CheckCheck, Loader2 } from "lucide-react";
 import NotificationItem from "./NotificationItem";
@@ -15,6 +16,7 @@ export default function NotificationDropdown({
   markRead,
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const topItems = useMemo(() => items.slice(0, 8), [items]);
 
   return (
@@ -95,7 +97,7 @@ export default function NotificationDropdown({
           type="button"
           onClick={() => {
             onClose?.();
-            // TODO: navigate /notifications nếu bạn làm trang đó
+            navigate("/notifications");
           }}
           className="
             w-full text-sm font-semibold

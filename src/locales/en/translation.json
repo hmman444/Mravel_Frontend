@@ -2915,6 +2915,15 @@
         "empty": "No notifications yet",
         "empty_hint": "When there's new activity, Mravel will notify you right here.",
         "see_all": "See all notifications",
+        "load_more": "Load more",
+        "category": {
+            "all": "All",
+            "social": "Social",
+            "booking": "Bookings",
+            "account": "Account",
+            "partner": "Partner",
+            "admin": "Admin"
+        },
         "react": {
             "like": "liked your plan",
             "love": "loved your plan",

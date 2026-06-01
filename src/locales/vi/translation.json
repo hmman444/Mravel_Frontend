@@ -2915,6 +2915,15 @@
         "empty": "Chưa có thông báo",
         "empty_hint": "Khi có hoạt động mới, Mravel sẽ báo ngay tại đây.",
         "see_all": "Xem tất cả thông báo",
+        "load_more": "Xem thêm",
+        "category": {
+            "all": "Tất cả",
+            "social": "Cộng đồng",
+            "booking": "Đặt chỗ",
+            "account": "Tài khoản",
+            "partner": "Đối tác",
+            "admin": "Quản trị"
+        },
         "react": {
             "like": "đã thích kế hoạch của bạn",
             "love": "đã thả tim kế hoạch của bạn",

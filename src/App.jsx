@@ -82,6 +82,7 @@ import RequireRole from "./routes/RequireRole";
 import { useNotificationRealtime } from "./realtime/useNotificationRealtime";
 import ChatPage from "./features/chat/pages/ChatPage";
 import FloatingChatWidget from "./features/chat/components/FloatingChatWidget";
+import NotificationsPage from "./features/notifications/pages/NotificationsPage";
 function App() {
   useLoadUser();
   useAuthSync();
@@ -148,6 +149,7 @@ function App() {
 
           {/* General routes */}
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/" element={<HomePage />} />
 
           {/* Booking routes */}
