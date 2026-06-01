@@ -36,6 +36,8 @@ import RestaurantDetailPage from "./features/catalog/pages/RestaurantDetailPage"
 
 // User
 import AccountProfilePage from "./features/user/pages/AccountProfilePage";
+import BlockedUsersPage from "./features/user/pages/BlockedUsersPage";
+import HiddenPostsPage from "./features/user/pages/HiddenPostsPage";
 import UserPublicProfilePage from "./features/user/pages/UserPublicProfilePage";
 
 // Admin
@@ -51,6 +53,7 @@ import AdminPlaceDetailPage from "./features/admin/pages/AdminPlaceDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
 import AdminHotelReviewPage from "./features/admin/pages/AdminHotelReviewPage";
 import AdminRestaurantReviewPage from "./features/admin/pages/AdminRestaurantReviewPage";
+import PlanAnalyticsPage from "./features/admin/pages/PlanAnalyticsPage";
 import { useMainSocket } from "./realtime/useMainSocket";
 import { useHydrateRole } from "./features/auth/hooks/useHydrateRole";
 
@@ -110,6 +113,7 @@ function App() {
             <Route path="/admin/services" element={<ManageServicesPage />} />
             <Route path="/admin/places" element={<ManagePlacesPage />} />
             <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
+            <Route path="/admin/plans-analytics" element={<PlanAnalyticsPage />} />
             <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
             <Route path="/admin/places/:slug" element={<AdminPlaceDetailPage />} />
             <Route path="/admin/services/restaurants/:id" element={<AdminRestaurantReviewPage />} />
@@ -128,6 +132,8 @@ function App() {
 
             {/* User routes */}
             <Route path="/account/profile" element={<AccountProfilePage />} />
+            <Route path="/account/blocked-users" element={<BlockedUsersPage />} />
+            <Route path="/account/hidden-posts" element={<HiddenPostsPage />} />
             <Route path="/profile/:userId" element={<UserPublicProfilePage />} />
 
             {/* Chat routes */}

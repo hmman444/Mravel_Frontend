@@ -68,6 +68,38 @@ export async function sharePlan(planId, email) {
   return res.data.data;
 }
 
+/** Ẩn riêng bài viết khỏi feed của mình (có thể bỏ ẩn ở trang "Bài đã ẩn"). */
+export async function hidePost(planId) {
+  const res = await api.post(`${BASE}/${planId}/hide`);
+  return res.data?.data;
+}
+
+/** Bỏ ẩn bài viết. */
+export async function unhidePost(planId) {
+  const res = await api.delete(`${BASE}/${planId}/hidden`);
+  return res.data?.data;
+}
+
+/** Danh sách bài đã ẩn. */
+export async function fetchHiddenPosts() {
+  const res = await api.get(`${BASE}/hidden`);
+  return res.data?.data;
+}
+
+/** Báo cáo bài viết. reason: SPAM | INAPPROPRIATE | COPYRIGHT | SCAM | OTHER. */
+export async function reportPost(planId, reason, detail) {
+  const params = new URLSearchParams({ reason });
+  if (detail) params.set("detail", detail);
+  const res = await api.post(`${BASE}/${planId}/report?${params.toString()}`);
+  return res.data?.data;
+}
+
+/** Chặn tác giả (Facebook-style, vô hình hai chiều). */
+export async function blockAuthor(authorId) {
+  const res = await api.post(`/users/friends/block/${authorId}`);
+  return res.data?.data;
+}
+
 export async function fetchMyPlans(page = 1, size = 5) {
   const res = await api.get(`/plans/me?page=${page}&size=${size}`);
   return res.data.data;
