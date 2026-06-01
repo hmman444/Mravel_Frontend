@@ -45,7 +45,8 @@ export const sendTyping = (conversationId) =>
   api.post(`${BASE}/${conversationId}/messages/typing`).then((r) => r.data);
 
 export const searchUsers = (q) =>
-  api.get(`/users/search`, { params: { q, limit: 20 } }).then((r) => r.data.data);
+  // /users/search trả về mảng thô (không bọc ApiResponse) -> fallback r.data nếu không có r.data.data
+  api.get(`/users/search`, { params: { q, limit: 20 } }).then((r) => r.data?.data ?? r.data);
 
 export const fetchFriends = () =>
   api.get(`/users/friends/list`).then((r) => r.data.data);
