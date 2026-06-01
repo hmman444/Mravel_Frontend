@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -33,11 +33,24 @@ export function useMyBookingsPage() {
   const navigate = useNavigate();
 
   const [type, setType] = useState("HOTEL");  // HOTEL | RESTAURANT
-  const [tab, setTab] = useState("DEVICE");   // ACCOUNT | DEVICE | LOOKUP
 
   // AUTH
   const { user, accessToken } = useSelector((s) => s.auth || {});
   const isLoggedIn = !!accessToken && !!user?.id;
+
+  // Tab mặc định theo trạng thái đăng nhập: đã login -> ACCOUNT, chưa -> DEVICE.
+  // tabTouched: một khi user tự bấm tab thì không tự đổi nữa.
+  // useEffect xử lý auth hydrate trễ (accessToken khôi phục từ storage sau mount).
+  const [tab, setTabRaw] = useState(isLoggedIn ? "ACCOUNT" : "DEVICE"); // ACCOUNT | DEVICE | LOOKUP
+  const tabTouched = useRef(false);
+  const setTab = useCallback((v) => {
+    tabTouched.current = true;
+    setTabRaw(v);
+  }, []);
+  useEffect(() => {
+    if (tabTouched.current) return;
+    setTabRaw(isLoggedIn ? "ACCOUNT" : "DEVICE");
+  }, [isLoggedIn]);
 
   // HOTEL selectors
   const hotelMy = useSelector((s) => s.bookingPublic?.my);

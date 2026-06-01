@@ -19,6 +19,7 @@ import EditProfileModal from "../components/EditProfileModal";
 import ProfileHeader from "../components/ProfileHeader";
 import ProfileSidebar from "../components/ProfileSidebar";
 import ProfileFriendsAboutSection from "../components/ProfileFriendsAboutSection";
+import ProfileFavoritesSection from "../components/ProfileFavoritesSection";
 import LoadingOverlay from "../../../components/LoadingOverlay";
 import { createPrivateConversation } from "../../chat/services/chatService";
 import { upsertConversation, setActiveConversation } from "../../chat/slices/chatSlice";
@@ -243,7 +244,13 @@ export default function UserPublicProfilePage() {
             </div>
           )}
 
-          {activeTab !== "feed" && (
+          {activeTab === "favorites" && (
+            <div className="mt-4">
+              <ProfileFavoritesSection />
+            </div>
+          )}
+
+          {activeTab !== "feed" && activeTab !== "favorites" && (
             <div className="mt-4">
               <ProfileFriendsAboutSection
                 activeTab={activeTab}
