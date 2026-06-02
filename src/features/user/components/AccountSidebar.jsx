@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { useLogout } from "../../auth/hooks/useLogout";
 import {
   Ticket,
@@ -8,6 +9,8 @@ import {
   Gift,
   Bell,
   Settings,
+  Ban,
+  EyeOff,
   LogOut,
 } from "lucide-react";
 
@@ -102,6 +105,21 @@ export default function AccountSidebar({ selectedTab, onSelectTab }) {
             <span>{t("user.profile_settings")}</span>
           </button>
 
+          <Link
+            to="/account/blocked-users"
+            className="w-full flex items-center gap-3 px-4 py-2.5 transition text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <Ban className="w-4 h-4 text-rose-500" />
+            <span>{t("user.blocked_users_title", "Người đã chặn")}</span>
+          </Link>
+
+          <Link
+            to="/account/hidden-posts"
+            className="w-full flex items-center gap-3 px-4 py-2.5 transition text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <EyeOff className="w-4 h-4 text-slate-500" />
+            <span>{t("user.hidden_posts_title", "Bài đã ẩn")}</span>
+          </Link>
 
         </div>
 

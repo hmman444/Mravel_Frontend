@@ -15,8 +15,13 @@ export function useMainSocket() {
   const dispatch = useDispatch();
 
   // Keep this in sync with other auth selectors to avoid stale WS token.
+  // Falls back to the partner token so partners also get a live socket.
   const accessToken = useSelector(
-    (s) => s.auth?.accessToken || s.auth?.token || s.auth?.user?.accessToken
+    (s) =>
+      s.auth?.accessToken ||
+      s.auth?.token ||
+      s.auth?.user?.accessToken ||
+      s.partnerAuth?.accessToken
   );
   const isAuthenticated = !!accessToken;
   const refreshInFlightRef = useRef(false);

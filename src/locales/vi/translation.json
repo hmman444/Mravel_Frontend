@@ -1,4 +1,8 @@
 {
+    "manage_plan_analytics": "Thống kê Plan",
+    "errors": {
+        "content_unavailable": "Nội dung không khả dụng"
+    },
     "nav": {
         "hotels": "Khách sạn",
         "restaurants": "Quán ăn",
@@ -10,6 +14,7 @@
         "notifications": "Thông báo"
     },
     "common": {
+        "skip": "Để sau",
         "login": "Đăng nhập",
         "register": "Đăng ký",
         "logout": "Đăng xuất",
@@ -291,6 +296,24 @@
         "page_label": "Trang"
     },
     "enum": {
+        "visibility": {
+            "public": "Công khai",
+            "friends": "Bạn bè",
+            "private": "Riêng tư"
+        },
+        "plan_status": {
+            "draft": "Nháp",
+            "active": "Đang hoạt động",
+            "completed": "Hoàn thành",
+            "cancelled": "Đã hủy"
+        },
+        "report_reason": {
+            "spam": "Spam",
+            "inappropriate": "Không phù hợp",
+            "copyright": "Bản quyền",
+            "scam": "Lừa đảo",
+            "other": "Khác"
+        },
         "placeKind": {
             "DESTINATION": "Điểm đến",
             "POI": "Địa điểm tham quan",
@@ -992,6 +1015,17 @@
     },
     "lbl_user": "Người dùng",
     "user": {
+        "blocked_users_title": "Người đã chặn",
+        "blocked_users_desc": "Quản lý danh sách người bạn đã chặn. Bỏ chặn để họ có thể thấy bạn trở lại.",
+        "blocked_users_empty": "Bạn chưa chặn ai cả.",
+        "unblock": "Bỏ chặn",
+        "unblock_confirm": "Bỏ chặn người này? Họ sẽ có thể tìm thấy và nhắn tin cho bạn trở lại.",
+        "block": "Chặn",
+        "block_confirm": "Chặn người này? Hai bạn sẽ không thấy bài viết, hồ sơ và không nhắn tin được cho nhau.",
+        "hidden_posts_title": "Bài đã ẩn",
+        "hidden_posts_desc": "Những bài bạn đã ẩn khỏi bảng tin. Bỏ ẩn để chúng xuất hiện trở lại.",
+        "hidden_posts_empty": "Bạn chưa ẩn bài viết nào.",
+        "unhide": "Bỏ ẩn",
         "profile_title": "Hồ sơ cá nhân",
         "profile_no_bio": "Người dùng chưa thêm giới thiệu.",
         "profile_not_updated": "Chưa cập nhật",
@@ -1478,6 +1512,40 @@
     },
     "lbl_admin": "Quản trị viên",
     "admin": {
+        "plan_stat": {
+            "title": "Thống kê Plan & Bài viết",
+            "subtitle": "Theo dõi nội dung, tương tác và kiểm duyệt bài viết",
+            "total_plans": "Tổng số plan",
+            "public_n": "{{n}} công khai",
+            "new_30d": "Plan mới (30 ngày)",
+            "new_7d": "{{n}} trong 7 ngày",
+            "total_views": "Tổng lượt xem",
+            "engagement": "Tương tác",
+            "react_comment": "{{r}} reactions • {{c}} bình luận",
+            "taken_down": "Bài đã gỡ",
+            "pending_reports": "Báo cáo chờ xử lý",
+            "new_by_day": "Bài viết mới theo ngày",
+            "new_plans": "Plan mới",
+            "by_visibility": "Theo quyền hiển thị",
+            "by_status": "Theo trạng thái",
+            "top_plans": "Top bài viết theo lượt xem",
+            "col_title": "Tiêu đề",
+            "col_views": "Lượt xem",
+            "takedown": "Gỡ",
+            "takedown_reason": "Lý do gỡ bài:",
+            "empty": "Chưa có dữ liệu",
+            "report_queue": "Hàng đợi báo cáo (chờ xử lý)",
+            "col_reason": "Lý do",
+            "col_detail": "Chi tiết",
+            "col_actions": "Hành động",
+            "dismiss": "Bỏ qua",
+            "no_reports": "Không có báo cáo nào đang chờ",
+            "range_90": "90 ngày",
+            "takedown_done": "Đã gỡ bài viết",
+            "report_dismissed": "Đã bỏ qua báo cáo",
+            "takedown_desc": "Bài sẽ bị ép về PRIVATE và khóa vĩnh viễn (không thể bật lại).",
+            "takedown_reason_ph": "Nhập lý do..."
+        },
         "dashboard": {
             "title": "Dashboard quản trị",
             "subtitle": "Trang theo dõi tổng quan hệ thống: biết tình hình và biết việc cần xử lý.",
@@ -2915,6 +2983,15 @@
         "empty": "Chưa có thông báo",
         "empty_hint": "Khi có hoạt động mới, Mravel sẽ báo ngay tại đây.",
         "see_all": "Xem tất cả thông báo",
+        "load_more": "Xem thêm",
+        "category": {
+            "all": "Tất cả",
+            "social": "Cộng đồng",
+            "booking": "Đặt chỗ",
+            "account": "Tài khoản",
+            "partner": "Đối tác",
+            "admin": "Quản trị"
+        },
         "react": {
             "like": "đã thích kế hoạch của bạn",
             "love": "đã thả tim kế hoạch của bạn",
@@ -4343,6 +4420,19 @@
         "download_on": "Tải trên"
     },
     "feed": {
+        "post": {
+            "options": "Tùy chọn",
+            "hide": "Ẩn bài viết",
+            "block_author": "Chặn người này",
+            "report": "Báo cáo",
+            "hidden": "Đã ẩn bài viết",
+            "blocked": "Đã chặn người dùng",
+            "reported": "Đã gửi báo cáo",
+            "recommend_block": "Bạn có muốn chặn người này để không thấy bài viết của họ nữa?",
+            "report_reason": "Lý do báo cáo (SPAM/INAPPROPRIATE/COPYRIGHT/SCAM/OTHER):",
+            "report_desc": "Chọn lý do báo cáo bài viết này.",
+            "report_detail_ph": "Mô tả thêm (không bắt buộc)"
+        },
         "title": "Bảng tin lịch trình",
         "subtitle": "Khám phá và chia sẻ những lịch trình thú vị từ cộng đồng Mravel.",
         "planCount": "{{count}} lịch trình",

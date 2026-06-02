@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import PostOptionsMenu from "./PostOptionsMenu";
 const visMeta = (v) => {
   const value = (v || "").toLowerCase();
   if (value === "public")
@@ -29,12 +30,22 @@ const visMeta = (v) => {
   };
 };
 
-export default function PlanHeader({ author, createdAt, visibility, views }) {
+export default function PlanHeader({
+  author,
+  createdAt,
+  visibility,
+  views,
+  isOwnPost = false,
+  onHide,
+  onBlock,
+  onReport,
+}) {
   const { t } = useTranslation();
   const meta = visMeta(visibility);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center gap-3 min-w-0">
       <Link
         to={author?.id ? `/profile/${author.id}` : "#"}
         onClick={(e) => {
@@ -79,6 +90,16 @@ export default function PlanHeader({ author, createdAt, visibility, views }) {
           </span>
         </div>
       </div>
+      </div>
+
+      {(onHide || onReport) ? (
+        <PostOptionsMenu
+          isOwnPost={isOwnPost}
+          onHide={onHide}
+          onBlock={onBlock}
+          onReport={onReport}
+        />
+      ) : null}
     </div>
   );
 }

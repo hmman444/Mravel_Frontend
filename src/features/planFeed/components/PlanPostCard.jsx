@@ -9,13 +9,70 @@ import PlanComments from "./PlanComments";
 
 import { usePlans } from "../hooks/usePlans";
 import { truncate } from "../utils/utils";
-import { showSuccess } from "../../../utils/toastUtils";
+import { showSuccess, showError } from "../../../utils/toastUtils";
+import ConfirmModal from "../../../components/ConfirmModal";
+import PromptModal from "../../../components/PromptModal";
+import { hidePost, blockAuthor, reportPost } from "../services/planService";
+
+const REPORT_REASONS = ["SPAM", "INAPPROPRIATE", "COPYRIGHT", "SCAM", "OTHER"];
 
 export default function PlanPostCard({ plan, me, onOpenDetail }) {
   const { t } = useTranslation();
   const { sendReact } = usePlans();
   const commentRef = useRef(null);
   const [showDestPopup, setShowDestPopup] = useState(false);
+  const [removed, setRemoved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [recommendOpen, setRecommendOpen] = useState(false);
+  const [confirmBlockOpen, setConfirmBlockOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+
+  const authorId = plan.author?.id;
+  const isOwnPost =
+    me?.id != null && authorId != null && Number(me.id) === Number(authorId);
+
+  const handleHide = async () => {
+    setBusy(true);
+    try {
+      await hidePost(plan.id);
+      showSuccess(t("feed.post.hidden", "Đã ẩn bài viết"));
+      if (!isOwnPost && authorId) setRecommendOpen(true);
+      else setRemoved(true);
+    } catch (e) {
+      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doBlock = async () => {
+    if (!authorId) return;
+    setBusy(true);
+    try {
+      await blockAuthor(authorId);
+      showSuccess(t("feed.post.blocked", "Đã chặn người dùng"));
+      setConfirmBlockOpen(false);
+      setRecommendOpen(false);
+      setRemoved(true);
+    } catch (e) {
+      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleReport = async ({ select, input }) => {
+    setBusy(true);
+    try {
+      await reportPost(plan.id, select, input);
+      showSuccess(t("feed.post.reported", "Đã gửi báo cáo"));
+      setReportOpen(false);
+    } catch (e) {
+      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const desc = truncate(plan.description || "", 200);
 
@@ -59,6 +116,8 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
 
   const hasDestinations = destinationNames.length > 0;
 
+  if (removed) return null;
+
   return (
     <article
       className="
@@ -75,6 +134,10 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         createdAt={plan.createdAt}
         visibility={plan.visibility}
         views={plan.views || 0}
+        isOwnPost={isOwnPost}
+        onHide={handleHide}
+        onBlock={() => setConfirmBlockOpen(true)}
+        onReport={() => setReportOpen(true)}
       />
 
       <h3
@@ -198,6 +261,49 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
         planId={plan.id}
         comments={plan.comments}
         inputRef={commentRef}
+      />
+
+      {/* Gợi ý chặn sau khi ẩn bài */}
+      <ConfirmModal
+        open={recommendOpen}
+        title={t("feed.post.hidden", "Đã ẩn bài viết")}
+        message={t("feed.post.recommend_block", "Bạn có muốn chặn người này để không thấy bài viết của họ nữa?")}
+        confirmText={t("feed.post.block_author", "Chặn người này")}
+        cancelText={t("common.skip", "Để sau")}
+        onConfirm={doBlock}
+        onClose={() => {
+          setRecommendOpen(false);
+          setRemoved(true);
+        }}
+      />
+
+      {/* Xác nhận chặn (từ menu) */}
+      <ConfirmModal
+        open={confirmBlockOpen}
+        title={t("feed.post.block_author", "Chặn người này")}
+        message={t("user.block_confirm", "Chặn người này? Hai bạn sẽ không thấy bài viết, hồ sơ và không nhắn tin được cho nhau.")}
+        confirmText={t("user.block", "Chặn")}
+        onConfirm={doBlock}
+        onClose={() => setConfirmBlockOpen(false)}
+      />
+
+      {/* Báo cáo bài viết */}
+      <PromptModal
+        open={reportOpen}
+        title={t("feed.post.report", "Báo cáo")}
+        description={t("feed.post.report_desc", "Chọn lý do báo cáo bài viết này.")}
+        selectLabel={t("admin.plan_stat.col_reason", "Lý do")}
+        selectOptions={REPORT_REASONS.map((r) => ({
+          value: r,
+          label: t(`enum.report_reason.${r.toLowerCase()}`, r),
+        }))}
+        inputLabel={t("admin.plan_stat.col_detail", "Chi tiết")}
+        inputPlaceholder={t("feed.post.report_detail_ph", "Mô tả thêm (không bắt buộc)")}
+        multiline
+        confirmText={t("feed.post.report", "Báo cáo")}
+        tone="danger"
+        onConfirm={handleReport}
+        onClose={() => setReportOpen(false)}
       />
     </article>
   );

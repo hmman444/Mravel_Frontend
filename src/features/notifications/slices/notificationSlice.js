@@ -34,9 +34,12 @@ const apiMessage = (err) => {
   return msg || i18n.t("notification.error.generic");
 };
 
-const SOCIAL_TYPES = new Set([
+// Types whose default thumbnail is the actor's avatar (no producer image).
+const ACTOR_AVATAR_TYPES = new Set([
   "FRIEND_REQUEST", "FRIEND_ACCEPTED",
-  "PLAN_INVITE", "COMMENT", "REPLY_COMMENT", "REACT",
+  "PLAN_INVITE", "PLAN_MEMBER_JOINED",
+  "COMMENT", "REPLY_COMMENT", "REACT", "COMMENT_REACT",
+  "ADMIN_NEW_PARTNER", "REVIEW_NEW_FOR_PARTNER", "ADMIN_NEW_REVIEW",
 ]);
 
 const safeDataJson = (raw) => {
@@ -59,6 +62,12 @@ const normalizeNotiItem = (n) => {
     if (data?.deepLink) return data.deepLink;
     if (n.type === "FRIEND_REQUEST" || n.type === "FRIEND_ACCEPTED")
       return actor?.id ? `/profile/${actor.id}` : null;
+    if (["COMMENT","REPLY_COMMENT","COMMENT_REACT"].includes(n.type) && data?.planId)
+      return data?.commentId
+        ? `/plans/${data.planId}?commentId=${data.commentId}`
+        : `/plans/${data.planId}`;
+    if (["REACT","PLAN_MEMBER_JOINED","PLAN_INVITE"].includes(n.type) && data?.planId)
+      return `/plans/${data.planId}`;
     if (["BOOKING_CONFIRMED","BOOKING_CANCELLED","BOOKING_CANCELLED_BY_PARTNER",
          "BOOKING_EXPIRED","PAYMENT_SUCCESS","REFUND_PROCESSED"].includes(n.type))
       return "/my-bookings";
@@ -66,13 +75,19 @@ const normalizeNotiItem = (n) => {
       return "/partner/bookings";
     if (["ACCOUNT_LOCKED","ACCOUNT_UNLOCKED","PASSWORD_CHANGED","LOGIN_ALERT"].includes(n.type))
       return "/account/profile";
-    if (["PARTNER_APPROVED","PARTNER_REJECTED"].includes(n.type))
+    if (["PARTNER_APPROVED","PARTNER_REJECTED","REVIEW_NEW_FOR_PARTNER"].includes(n.type))
       return "/partner/dashboard";
+    if (n.type === "ADMIN_NEW_PARTNER") return "/admin/partners";
+    if (n.type === "ADMIN_NEW_REVIEW") return "/admin/services";
     return null;
   })();
 
-  // image: social notifications use actor avatar; system notifications have no image
-  const image = n.image || (SOCIAL_TYPES.has(n.type) ? actor?.avatar : null);
+  // image priority: backend image → producer thumbnail in data → actor avatar.
+  const image =
+    n.image ||
+    data?.image ||
+    data?.thumbnailUrl ||
+    (ACTOR_AVATAR_TYPES.has(n.type) ? actor?.avatar : null);
 
   return {
     ...n,
