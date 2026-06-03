@@ -6,6 +6,7 @@ import { FunnelIcon } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { usePartnerServices } from "../hooks/usePartnerServices";
+import { getPartnerHotelById, getPartnerRestaurantById } from "../services/partnerService";
 import PartnerServiceTypePickerModal from "./PartnerServiceTypePickerModal";
 import PartnerHotelFormPage from "./hotel/form/PartnerHotelFormPage";
 import PartnerRestaurantFormPage from "./restaurant/form/PartnerRestaurantFormPage";
@@ -179,7 +180,7 @@ export default function PartnerServiceManager() {
     );
   }, [uiItems, search]);
 
-  const totalCount = uiItems.length;
+  const totalCount = sourceList.totalElements ?? uiItems.length;
   const pendingCount = useMemo(
     () => uiItems.filter((x) => x.status === "PENDING").length,
     [uiItems]
@@ -216,6 +217,24 @@ export default function PartnerServiceManager() {
 
     await reload();
     setModal({ open: false, kind: null, service: null, note: "" });
+  };
+
+  // List dùng projection nhẹ (thiếu roomTypes/content...). Mở Sửa phải fetch FULL doc theo id
+  // để form không lưu thiếu dữ liệu. Fallback về doc trong list nếu fetch lỗi.
+  const [editOpening, setEditOpening] = useState(false);
+  const openEdit = async (s) => {
+    if (!s?.id) return;
+    setEditOpening(true);
+    try {
+      const res =
+        s.type === "HOTEL"
+          ? await getPartnerHotelById(s.id)
+          : await getPartnerRestaurantById(s.id);
+      const fullRaw = res?.success && res.data ? res.data : s.raw;
+      setEdit({ open: true, service: { ...s, raw: fullRaw } });
+    } finally {
+      setEditOpening(false);
+    }
   };
 
   if (isEditing && edit.service?.type === "HOTEL") {
@@ -377,8 +396,8 @@ export default function PartnerServiceManager() {
         <>
           <PartnerServiceTable
             items={filtered}
-            acting={action.loading}
-            onEdit={(s) => setEdit({ open: true, service: s })}
+            acting={action.loading || editOpening}
+            onEdit={openEdit}
             onPause={(s) => setModal({ open: true, kind: "PAUSE", service: s, note: "" })}
             onResume={(s) => setModal({ open: true, kind: "RESUME", service: s, note: "" })}
             onRequestUnlock={(s) => setModal({ open: true, kind: "UNLOCK", service: s, note: "" })}
