@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   UserPlus,
   MessageCircle,
@@ -8,10 +9,15 @@ import {
   Check,
   XCircle,
   Lock,
+  Unlock,
+  Ban,
   UserMinus,
   Clock,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { blockUser, unblockUser } from "../services/blockService";
+import ConfirmModal from "../../../components/ConfirmModal";
+import { showError } from "../../../utils/toastUtils";
 
 export default function ProfileHeader({
   userView,
@@ -25,6 +31,22 @@ export default function ProfileHeader({
 }) {
   const { t } = useTranslation();
   const isMe = friendActions.isMe;
+  // getRelationship trả BLOCKED chỉ cho người chặn -> đây là "mình đã chặn họ"
+  const isBlockedByMe = relationship?.type === "BLOCKED";
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const doBlockToggle = async () => {
+    const id = userView?.id;
+    if (!id) return;
+    setConfirmOpen(false);
+    try {
+      if (isBlockedByMe) await unblockUser(id);
+      else await blockUser(id);
+      window.location.reload();
+    } catch (e) {
+      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+    }
+  };
   const tabs = [
     { key: "feed", label: t("user.tab_feed") },
     { key: "about", label: t("user.tab_about") },
@@ -217,12 +239,27 @@ export default function ProfileHeader({
               </>
             )}
 
-            <button
-              type="button"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+            {isMe ? (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(true)}
+                title={isBlockedByMe ? t("user.unblock", "Bỏ chặn") : t("user.block", "Chặn")}
+                className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition ${
+                  isBlockedByMe
+                    ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200"
+                    : "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200"
+                }`}
+              >
+                {isBlockedByMe ? <Unlock className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+              </button>
+            )}
           </div>
         </div>
 
@@ -251,6 +288,19 @@ export default function ProfileHeader({
           </p>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title={isBlockedByMe ? t("user.unblock", "Bỏ chặn") : t("user.block", "Chặn")}
+        message={
+          isBlockedByMe
+            ? t("user.unblock_confirm", "Bỏ chặn người này? Họ sẽ có thể thấy và nhắn tin cho bạn trở lại.")
+            : t("user.block_confirm", "Chặn người này? Hai bạn sẽ không thấy bài viết, hồ sơ và không nhắn tin được cho nhau.")
+        }
+        confirmText={isBlockedByMe ? t("user.unblock", "Bỏ chặn") : t("user.block", "Chặn")}
+        onConfirm={doBlockToggle}
+        onClose={() => setConfirmOpen(false)}
+      />
     </section>
-  );  
+  );
 }

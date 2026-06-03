@@ -141,6 +141,12 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // 403: nội dung không khả dụng (vd do chặn / bị gỡ) — hiển thị thông báo thân thiện
+    if (status === 403) {
+      showError(message || i18n.t("errors.content_unavailable", "Nội dung không khả dụng"));
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );

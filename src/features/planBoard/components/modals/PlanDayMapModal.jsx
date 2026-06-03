@@ -12,6 +12,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import { fetchRoadRoute } from "../../utils/roadRouting";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   FaTimes,
@@ -185,6 +186,8 @@ function extractLocationForMap(card) {
 export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
+  // { [segId]: [[lat,lng], ...] } - đường đi thật lấy từ OSRM, bám theo đường
+  const [routedSegments, setRoutedSegments] = useState({});
 
   const { points, segments, sequentialSegments, center, bounds } = useMemo(() => {
     if (!list) {
@@ -429,6 +432,42 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
     return s.size;
   }, [points]);
 
+  // Lấy ĐƯỜNG ĐI THẬT (bám theo đường) cho các chặng TRANSPORT đang là
+  // đường thẳng (chỉ có 2 điểm đầu/cuối). Nếu OSRM lỗi -> giữ đường thẳng.
+  useEffect(() => {
+    if (!open) return;
+
+    setRoutedSegments({});
+
+    const straightSegs = segments.filter(
+      (seg) => Array.isArray(seg.positions) && seg.positions.length === 2
+    );
+    if (!straightSegs.length) return;
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    (async () => {
+      for (const seg of straightSegs) {
+        const [from, to] = seg.positions;
+        const route = await fetchRoadRoute(
+          { lat: from[0], lng: from[1] },
+          { lat: to[0], lng: to[1] },
+          { signal: controller.signal }
+        );
+        if (cancelled) return;
+        if (route?.path?.length >= 2) {
+          setRoutedSegments((prev) => ({ ...prev, [seg.id]: route.path }));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [open, segments]);
+
   if (!open || !list) return null;
 
   const title = list.title || t("plan.map.day", { n: dayIndex + 1 });
@@ -518,11 +557,11 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
 
                 <AutoFitBounds bounds={bounds} fallbackCenter={center} />
 
-                {/* Đường TRANSPORT (A → B) */}
+                {/* Đường TRANSPORT (A → B) - ưu tiên đường đi thật bám theo đường */}
                 {segments.map((seg) => (
                   <Polyline
                     key={seg.id}
-                    positions={seg.positions}
+                    positions={routedSegments[seg.id] || seg.positions}
                     pathOptions={{
                       color: "#0ea5e9",
                       weight: hoverId && hoverId === seg.id ? 5 : 4,

@@ -1,4 +1,8 @@
 {
+    "manage_plan_analytics": "Plan Statistics",
+    "errors": {
+        "content_unavailable": "This content is not available"
+    },
     "nav": {
         "hotels": "Hotels",
         "restaurants": "Restaurants",
@@ -10,6 +14,7 @@
         "notifications": "Notifications"
     },
     "common": {
+        "skip": "Skip",
         "login": "Sign in",
         "register": "Sign up",
         "logout": "Sign out",
@@ -291,6 +296,24 @@
         "page_label": "Page"
     },
     "enum": {
+        "visibility": {
+            "public": "Public",
+            "friends": "Friends",
+            "private": "Private"
+        },
+        "plan_status": {
+            "draft": "Draft",
+            "active": "Active",
+            "completed": "Completed",
+            "cancelled": "Cancelled"
+        },
+        "report_reason": {
+            "spam": "Spam",
+            "inappropriate": "Inappropriate",
+            "copyright": "Copyright",
+            "scam": "Scam",
+            "other": "Other"
+        },
         "placeKind": {
             "DESTINATION": "Destination",
             "POI": "Point of Interest",
@@ -992,6 +1015,17 @@
     },
     "lbl_user": "User",
     "user": {
+        "blocked_users_title": "Blocked people",
+        "blocked_users_desc": "Manage people you've blocked. Unblock to let them see you again.",
+        "blocked_users_empty": "You haven't blocked anyone.",
+        "unblock": "Unblock",
+        "unblock_confirm": "Unblock this person? They'll be able to find and message you again.",
+        "block": "Block",
+        "block_confirm": "Block this person? You both won't see each other's posts, profile, or be able to message.",
+        "hidden_posts_title": "Hidden posts",
+        "hidden_posts_desc": "Posts you've hidden from your feed. Unhide to show them again.",
+        "hidden_posts_empty": "You haven't hidden any posts.",
+        "unhide": "Unhide",
         "profile_title": "Personal Profile",
         "profile_no_bio": "This user hasn't added a bio yet.",
         "profile_not_updated": "Not updated",
@@ -1478,6 +1512,40 @@
     },
     "lbl_admin": "Admin",
     "admin": {
+        "plan_stat": {
+            "title": "Plan & Post Statistics",
+            "subtitle": "Track content, engagement and moderation of posts",
+            "total_plans": "Total plans",
+            "public_n": "{{n}} public",
+            "new_30d": "New plans (30 days)",
+            "new_7d": "{{n}} in last 7 days",
+            "total_views": "Total views",
+            "engagement": "Engagement",
+            "react_comment": "{{r}} reactions • {{c}} comments",
+            "taken_down": "Taken-down posts",
+            "pending_reports": "Pending reports",
+            "new_by_day": "New posts by day",
+            "new_plans": "New plans",
+            "by_visibility": "By visibility",
+            "by_status": "By status",
+            "top_plans": "Top posts by views",
+            "col_title": "Title",
+            "col_views": "Views",
+            "takedown": "Take down",
+            "takedown_reason": "Takedown reason:",
+            "empty": "No data yet",
+            "report_queue": "Report queue (pending)",
+            "col_reason": "Reason",
+            "col_detail": "Detail",
+            "col_actions": "Actions",
+            "dismiss": "Dismiss",
+            "no_reports": "No pending reports",
+            "range_90": "90 days",
+            "takedown_done": "Post taken down",
+            "report_dismissed": "Report dismissed",
+            "takedown_desc": "The post will be forced to PRIVATE and permanently locked (cannot be re-enabled).",
+            "takedown_reason_ph": "Enter a reason..."
+        },
         "dashboard": {
             "title": "Admin Dashboard",
             "subtitle": "System overview page: know the status and know what needs handling.",
@@ -2915,6 +2983,15 @@
         "empty": "No notifications yet",
         "empty_hint": "When there's new activity, Mravel will notify you right here.",
         "see_all": "See all notifications",
+        "load_more": "Load more",
+        "category": {
+            "all": "All",
+            "social": "Social",
+            "booking": "Bookings",
+            "account": "Account",
+            "partner": "Partner",
+            "admin": "Admin"
+        },
         "react": {
             "like": "liked your plan",
             "love": "loved your plan",
@@ -4343,6 +4420,19 @@
         "download_on": "Download on"
     },
     "feed": {
+        "post": {
+            "options": "Options",
+            "hide": "Hide this post",
+            "block_author": "Block this person",
+            "report": "Report",
+            "hidden": "Post hidden",
+            "blocked": "User blocked",
+            "reported": "Report sent",
+            "recommend_block": "Do you also want to block this person so you don't see their posts anymore?",
+            "report_reason": "Report reason (SPAM/INAPPROPRIATE/COPYRIGHT/SCAM/OTHER):",
+            "report_desc": "Choose a reason to report this post.",
+            "report_detail_ph": "Add more detail (optional)"
+        },
         "title": "Itinerary Feed",
         "subtitle": "Discover and share exciting itineraries from the Mravel community.",
         "planCount": "{{count}} itineraries",

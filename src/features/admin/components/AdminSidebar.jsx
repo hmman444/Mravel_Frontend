@@ -9,6 +9,7 @@ import {
   Cog6ToothIcon,
   SparklesIcon,
   FlagIcon,
+  PresentationChartLineIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
@@ -22,12 +23,13 @@ export default function AdminSidebar() {
 
   const menuItems = useMemo(
     () => [
-      // { to: "/admin", label: t("overview"), icon: HomeIcon },
+      { to: "/admin", label: t("overview"), icon: HomeIcon },
       { to: "/admin/users", label: t("manage_users"), icon: UsersIcon },
       { to: "/admin/partners", label: t("manage_partners"), icon: BuildingOfficeIcon },
       { to: "/admin/services", label: t("manage_services"), icon: Cog6ToothIcon },
       { to: "/admin/places", label: t("manage_locations"), icon: MapIcon },
       { to: "/admin/amenities", label: t("manage_amenities"), icon: SparklesIcon },
+      { to: "/admin/plans-analytics", label: t("manage_plan_analytics", "Thống kê Plan"), icon: PresentationChartLineIcon },
       // { to: "/admin/reports", label: t("reports"), icon: FlagIcon },
     ],
     [t]

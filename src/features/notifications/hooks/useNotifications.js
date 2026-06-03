@@ -1,6 +1,7 @@
 // useNotifications.js
 import { useCallback, useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useIdentity } from "../../../realtime/useIdentity";
 import {
   loadNotifications,
   loadMoreNotifications,
@@ -15,8 +16,8 @@ import {
 export function useNotifications() {
   const dispatch = useDispatch();
   const n = useSelector((s) => s.notifications);
-  const accessToken = useSelector((s) => s.auth.accessToken);
-  const userId = useSelector((s) => s.auth.user?.id);
+  // Works for users AND partners (resolved from the active token).
+  const { accessToken, userId } = useIdentity();
 
   const recipientParams = useMemo(
     () => (userId ? { recipientId: userId } : {}),
