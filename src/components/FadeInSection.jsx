@@ -23,7 +23,11 @@ export default function FadeInSection({
         });
       },
       {
-        threshold: 0.15, // thấy 15% là bắt đầu hiện
+        // Hiện ngay khi BẤT KỲ phần nào lọt viewport. Tránh dùng ngưỡng theo % diện tích
+        // vì khối rất cao (vd hotel nhiều loại phòng) sẽ không bao giờ đạt %, gây "trắng
+        // đầu trang tới khi cuộn". rootMargin kích hoạt sớm hơn chút cho mượt.
+        threshold: 0,
+        rootMargin: "0px 0px -10% 0px",
       }
     );
 

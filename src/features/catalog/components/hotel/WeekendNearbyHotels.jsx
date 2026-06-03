@@ -1,8 +1,8 @@
 // src/features/hotels/components/hotel/WeekendNearbyHotels.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 import { useCatalogHotels } from "../../../catalog/hooks/useCatalogHotels";
@@ -52,10 +52,45 @@ export default function WeekendNearbyHotels() {
     [groups, activeKey]
   );
 
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanLeft(scrollLeft > 4);
+    setCanRight(scrollLeft + clientWidth < scrollWidth - 4);
+  }, []);
+
+  // cập nhật trạng thái nút khi scroll / resize / đổi tab / load xong
+  useEffect(() => {
+    updateArrows();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [updateArrows, activeGroup, loading]);
+
+  // đổi tab thì cuộn về đầu
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTo({ left: 0 });
+  }, [activeKey]);
+
   const handleScrollRight = () => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollBy({ left: 320, behavior: "smooth" });
+  };
+
+  const handleScrollLeft = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: -320, behavior: "smooth" });
   };
 
   if (!loading && (!groups.length || !activeGroup)) {
@@ -125,11 +160,24 @@ export default function WeekendNearbyHotels() {
             ))}
         </div>
 
-        {/* NÚT MŨI TÊN BÊN PHẢI (GIỐNG TRAVELOKA) */}
-        {activeGroup?.hotels?.length > 3 && (
+        {/* NÚT MŨI TÊN TRÁI — chỉ hiện khi còn cuộn được sang trái */}
+        {canLeft && (
+          <button
+            type="button"
+            onClick={handleScrollLeft}
+            aria-label={t("common.back")}
+            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 left-2"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+          </button>
+        )}
+
+        {/* NÚT MŨI TÊN PHẢI — chỉ hiện khi còn cuộn được sang phải */}
+        {canRight && (
           <button
             type="button"
             onClick={handleScrollRight}
+            aria-label={t("hotel.next")}
             className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 right-2"
           >
             <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />

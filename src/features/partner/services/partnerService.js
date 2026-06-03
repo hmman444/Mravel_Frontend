@@ -49,6 +49,25 @@ export const listPartnerHotels = async ({ status, page = 0, size = 10 } = {}) =>
   }
 };
 
+// Lấy FULL document theo id để mở form Sửa (list dùng projection nhẹ, thiếu roomTypes/content...).
+export const getPartnerHotelById = async (id) => {
+  try {
+    const res = await api.get(`${PARTNER_PREFIX}/hotels/${encodeURIComponent(id)}`);
+    return { success: true, data: res.data?.data };
+  } catch (error) {
+    return toError(error, i18n.t("partner.error.list_hotels"));
+  }
+};
+
+export const getPartnerRestaurantById = async (id) => {
+  try {
+    const res = await api.get(`${PARTNER_PREFIX}/restaurants/${encodeURIComponent(id)}`);
+    return { success: true, data: res.data?.data };
+  } catch (error) {
+    return toError(error, i18n.t("partner.error.list_restaurants"));
+  }
+};
+
 export const createPartnerHotel = async (payload) => {
   try {
     const res = await api.post(`${PARTNER_PREFIX}/hotels`, payload, {
