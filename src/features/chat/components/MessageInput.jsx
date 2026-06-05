@@ -6,6 +6,7 @@ import { sendTyping } from "../services/chatService";
 import { uploadToCloudinary } from "../../../utils/cloudinaryUpload";
 import { uploadVideoToCloudinary } from "../../../utils/cloudinaryUpload";
 import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { showError } from "../../../utils/toastUtils";
 
 const MAX_MEDIA_BYTES = 25 * 1024 * 1024; // 25 MB
 
@@ -169,6 +170,7 @@ export default function MessageInput({ conversationId }) {
       })).unwrap();
     } catch {
       setContent(text);
+      showError(t("chat.send_message_failed"));
     } finally {
       if (capturedPreview?.objectUrl) URL.revokeObjectURL(capturedPreview.objectUrl);
       dispatch(removeOptimisticMessage({ conversationId, tempId }));

@@ -3,6 +3,11 @@
     "errors": {
         "content_unavailable": "This content is not available"
     },
+    "notFound": {
+        "title": "Page not found",
+        "desc": "The page you are looking for doesn't exist or has been moved.",
+        "back_home": "Back to home"
+    },
     "nav": {
         "hotels": "Hotels",
         "restaurants": "Restaurants",
@@ -454,6 +459,7 @@
     "manage_services": "Manage Services",
     "manage_locations": "Manage Locations",
     "manage_amenities": "Manage Amenities",
+    "manage_reviews": "Manage Reviews",
     "add_location": "Add Location",
     "statistics": "Statistics",
     "logout": "Logout",
@@ -1689,6 +1695,8 @@
         "reset_filters": "Reset filters",
         "add_amenity": "Add amenity",
         "amenity_delete_title": "Delete amenity",
+        "amenity_delete_success": "Amenity deleted",
+        "amenity_delete_failed": "Failed to delete amenity",
         "amenity_delete_confirm": "Are you sure you want to delete \"{{name}}\"?",
         "error_occurred": "An error occurred",
         "place_kind_destination": "Destination",
@@ -1738,6 +1746,33 @@
         "services_empty": "No data matches the current filters.",
         "services_reject_title": "Reject service",
         "services_block_title": "Block service",
+        "reviews_title": "Review Management",
+        "reviews_subtitle": "Monitor negative reviews of hotels and restaurants so you can act on them in time.",
+        "review_load_failed": "Failed to load reviews",
+        "review_empty": "No negative reviews match the current filters.",
+        "review_delete_success": "Review deleted",
+        "review_delete_failed": "Failed to delete review",
+        "review_delete_title": "Delete review",
+        "review_delete_confirm": "This cannot be undone. Are you sure you want to delete the review for \"{{name}}\"?",
+        "review_stats_negative_total": "Total negative reviews",
+        "review_stats_visible": "Showing",
+        "review_stats_threshold": "Negative threshold",
+        "review_filter_max_rating": "Star threshold",
+        "review_filter_max_rating_hint": "Reviews with a rating at or below the threshold",
+        "review_filter_target_id": "Filter by venue",
+        "review_filter_target_id_hint": "Venue id (targetId) — optional",
+        "review_filter_target_id_placeholder": "Enter a venue id to view only that one...",
+        "review_col_venue": "Venue",
+        "review_col_reviewer": "Reviewer",
+        "review_col_rating": "Rating",
+        "review_col_content": "Content",
+        "review_col_date": "Date",
+        "review_unknown_venue": "(Unknown)",
+        "review_open_public": "Open public page",
+        "review_anonymous": "Anonymous",
+        "review_pagination_info": "Showing {{from}}–{{to}} of {{total}}",
+        "prev": "Prev",
+        "next": "Next",
         "manage_partners": "Partner Management",
         "manage_users": "Customer Management",
         "account_list_desc": "Account list ({{role}}). You can lock / unlock.",
@@ -2849,7 +2884,8 @@
             "heading_line2": "Seize your success"
         },
         "social": {
-            "divider": "Or sign in with"
+            "divider": "Or sign in with",
+            "login_failed": "Social login failed. Please try again."
         },
         "checking_login": "Verifying your login...",
         "verify_otp": {

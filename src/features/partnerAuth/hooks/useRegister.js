@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { partnerRegisterUser } from "../slices/partnerAuthSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -8,6 +8,7 @@ export const useRegister = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { loading, error } = useSelector((state) => state.partnerAuth);
   const [message, setMessage] = useState("");
 
   const handleRegister = async (fullname, email, password) => {
@@ -21,10 +22,9 @@ export const useRegister = () => {
       navigate(
         `/partner/verify-otp?email=${encodeURIComponent(email.trim().toLowerCase())}`
       );
-    } else {
-      setMessage(action.payload || t("partnerAuth.register.failed"));
     }
+    // Lỗi sẽ hiển thị qua redux `error` (màu đỏ) ở trang, không đưa vào `message` (màu xanh)
   };
 
-  return { message, handleRegister };
+  return { loading, error, message, handleRegister };
 };

@@ -22,6 +22,7 @@ import chatReducer from "../features/chat/slices/chatSlice";
 import adminUserReducer from "../features/admin/slices/adminUserSlice";
 import adminPartnerReducer from "../features/admin/slices/adminPartnerSlice";
 import adminServiceReducer from "../features/admin/slices/adminServiceSlice";
+import adminReviewReducer from "../features/admin/slices/adminReviewSlice";
 import reviewReducer from "../features/review/slices/reviewSlice";
 import { injectStore } from "./storeInjector";
 
@@ -50,6 +51,7 @@ export const store = configureStore({
     adminUser: adminUserReducer,
     adminPartners: adminPartnerReducer,
     adminService: adminServiceReducer,
+    adminReview: adminReviewReducer,
     review: reviewReducer,
   },
   middleware: (getDefaultMiddleware) =>

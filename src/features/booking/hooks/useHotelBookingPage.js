@@ -31,9 +31,9 @@ export function useHotelBookingPage() {
     if (isLoggedIn && !user) dispatch(fetchCurrentUser());
   }, [dispatch, isLoggedIn, user]);
 
-  const [contactName, setContactName] = useState("Mẫn Huỳnh Minh");
+  const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("nsndman0404@gmail.com");
+  const [contactEmail, setContactEmail] = useState("");
   const [note, setNote] = useState("");
 
   useEffect(() => {

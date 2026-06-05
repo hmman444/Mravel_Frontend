@@ -28,6 +28,7 @@ export default function ProfileHeader({
   error,
   onOpenEdit,
   onMessage,
+  onRelationshipChange,
 }) {
   const { t } = useTranslation();
   const isMe = friendActions.isMe;
@@ -42,7 +43,8 @@ export default function ProfileHeader({
     try {
       if (isBlockedByMe) await unblockUser(id);
       else await blockUser(id);
-      window.location.reload();
+      // Cập nhật lại quan hệ/profile thay vì reload cả trang (tránh giật, mất scroll)
+      if (onRelationshipChange) await onRelationshipChange();
     } catch (e) {
       showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
     }

@@ -678,6 +678,11 @@ export default function PlanListPage() {
                             }
                             alt={u.fullname || "user"}
                             className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src =
+                                "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small/default-avatar-profile-icon-of-social-media-user-vector.jpg";
+                            }}
                           />
                           <div className="min-w-0">
                             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">

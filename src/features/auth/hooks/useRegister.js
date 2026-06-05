@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -8,6 +8,7 @@ export const useRegister = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
   const [message, setMessage] = useState("");
 
   const handleRegister = async (fullname, email, password) => {
@@ -23,5 +24,5 @@ export const useRegister = () => {
     }
   };
 
-  return { message, handleRegister };
+  return { loading, error, message, handleRegister };
 };

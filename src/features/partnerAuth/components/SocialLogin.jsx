@@ -7,6 +7,7 @@ import FacebookLogin from "@greatsumini/react-facebook-login";
 import { useDispatch } from "react-redux";
 import { partnerSocialLoginUser } from "../slices/partnerAuthSlice";
 import { useLocation, useNavigate } from "react-router-dom";
+import { showError } from "../../../utils/toastUtils";
 
 export default function SocialLogin() {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ export default function SocialLogin() {
         // useGoogleLogin(flow="implicit") returns OAuth access_token for backend verification.
         const googleToken = tokenResponse?.access_token;
         if (!googleToken) {
-          console.error("Google login failed: missing access_token");
+          showError(t("partnerAuth.social.login_failed"));
           return;
         }
 
@@ -42,14 +43,16 @@ export default function SocialLogin() {
           } else {
             navigate("/partner");
           }
+        } else {
+          showError(action.payload || t("partnerAuth.social.login_failed"));
         }
-      } catch (err) {
-        console.error("Google login error:", err);
+      } catch {
+        showError(t("partnerAuth.social.login_failed"));
       } finally {
         setLoading(false);
       }
     },
-    onError: (err) => console.error("Google Login Failed:", err),
+    onError: () => showError(t("partnerAuth.social.login_failed")),
     flow: "implicit",
   });
 
@@ -58,7 +61,7 @@ export default function SocialLogin() {
       setLoading(true);
       const fbToken = response.accessToken;
       if (!fbToken) {
-        console.error("Facebook login failed: missing accessToken");
+        showError(t("partnerAuth.social.login_failed"));
         return;
       }
 
@@ -76,9 +79,11 @@ export default function SocialLogin() {
         } else {
           navigate("/partner");
         }
+      } else {
+        showError(action.payload || t("partnerAuth.social.login_failed"));
       }
-    } catch (err) {
-      console.error("Facebook login error:", err);
+    } catch {
+      showError(t("partnerAuth.social.login_failed"));
     } finally {
       setLoading(false);
     }
@@ -109,7 +114,7 @@ export default function SocialLogin() {
           fields="name,email,picture"
           scope="public_profile,email"
           onSuccess={handleFacebookSuccess}
-          onFail={(err) => console.error("Facebook Login Failed:", err)}
+          onFail={() => showError(t("partnerAuth.social.login_failed"))}
           render={({ onClick }) => (
             <button
               type="button"

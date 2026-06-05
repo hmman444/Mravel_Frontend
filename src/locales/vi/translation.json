@@ -3,6 +3,11 @@
     "errors": {
         "content_unavailable": "Nội dung không khả dụng"
     },
+    "notFound": {
+        "title": "Không tìm thấy trang",
+        "desc": "Trang bạn tìm không tồn tại hoặc đã bị di chuyển.",
+        "back_home": "Về trang chủ"
+    },
     "nav": {
         "hotels": "Khách sạn",
         "restaurants": "Quán ăn",
@@ -454,6 +459,7 @@
     "manage_services": "Quản lý dịch vụ",
     "manage_locations": "Quản lý địa điểm",
     "manage_amenities": "Quản lý tiện ích",
+    "manage_reviews": "Quản lý đánh giá",
     "add_location": "Thêm địa điểm",
     "statistics": "Thống kê",
     "logout": "Đăng xuất",
@@ -1689,6 +1695,8 @@
         "reset_filters": "Reset bộ lọc",
         "add_amenity": "Thêm tiện nghi",
         "amenity_delete_title": "Xóa tiện nghi",
+        "amenity_delete_success": "Đã xóa tiện nghi",
+        "amenity_delete_failed": "Xóa tiện nghi thất bại",
         "amenity_delete_confirm": "Bạn có chắc muốn xóa \"{{name}}\" không?",
         "error_occurred": "Có lỗi xảy ra",
         "place_kind_destination": "Điểm đến",
@@ -1738,6 +1746,33 @@
         "services_empty": "Không có dữ liệu phù hợp với bộ lọc hiện tại.",
         "services_reject_title": "Từ chối dịch vụ",
         "services_block_title": "Chặn dịch vụ",
+        "reviews_title": "Quản lý đánh giá",
+        "reviews_subtitle": "Theo dõi các đánh giá tiêu cực của khách sạn, quán ăn để kịp thời xử lý.",
+        "review_load_failed": "Không tải được danh sách đánh giá",
+        "review_empty": "Không có đánh giá tiêu cực phù hợp với bộ lọc hiện tại.",
+        "review_delete_success": "Đã xóa đánh giá",
+        "review_delete_failed": "Xóa đánh giá thất bại",
+        "review_delete_title": "Xóa đánh giá",
+        "review_delete_confirm": "Xóa sẽ không thể khôi phục. Bạn có chắc muốn xóa đánh giá cho \"{{name}}\" không?",
+        "review_stats_negative_total": "Tổng đánh giá tiêu cực",
+        "review_stats_visible": "Đang hiển thị",
+        "review_stats_threshold": "Ngưỡng tiêu cực",
+        "review_filter_max_rating": "Ngưỡng số sao",
+        "review_filter_max_rating_hint": "Đánh giá có số sao thấp hơn hoặc bằng ngưỡng",
+        "review_filter_target_id": "Lọc theo cơ sở",
+        "review_filter_target_id_hint": "Mã cơ sở (targetId) — tuỳ chọn",
+        "review_filter_target_id_placeholder": "Nhập mã cơ sở để xem riêng...",
+        "review_col_venue": "Cơ sở",
+        "review_col_reviewer": "Người đánh giá",
+        "review_col_rating": "Số sao",
+        "review_col_content": "Nội dung",
+        "review_col_date": "Thời gian",
+        "review_unknown_venue": "(Không xác định)",
+        "review_open_public": "Mở trang công khai",
+        "review_anonymous": "Ẩn danh",
+        "review_pagination_info": "Hiển thị {{from}}–{{to}} trên tổng {{total}}",
+        "prev": "Trước",
+        "next": "Sau",
         "manage_partners": "Quản lý đối tác",
         "manage_users": "Quản lý khách hàng",
         "account_list_desc": "Danh sách tài khoản ({{role}}). Có thể khóa / mở khóa.",
@@ -2849,7 +2884,8 @@
             "heading_line2": "Nắm bắt thành công"
         },
         "social": {
-            "divider": "Hoặc đăng nhập bằng"
+            "divider": "Hoặc đăng nhập bằng",
+            "login_failed": "Đăng nhập mạng xã hội thất bại. Vui lòng thử lại."
         },
         "checking_login": "Đang kiểm tra đăng nhập...",
         "verify_otp": {

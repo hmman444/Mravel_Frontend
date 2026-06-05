@@ -194,6 +194,7 @@ export default function UserPublicProfilePage() {
             error={error}
             onOpenEdit={() => setOpenEdit(true)}
             onMessage={handleMessage}
+            onRelationshipChange={reload}
           />
 
           {/* MAIN AREA */}
