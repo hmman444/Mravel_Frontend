@@ -20,7 +20,6 @@ export const loginUser = createAsyncThunk(
       setTokens(accessToken, refreshToken, rememberMe);
       return result.data;
     } else {
-      console.error("❌ Login failed:", result.message);
       return rejectWithValue(result.message);
     }
   }
@@ -98,7 +97,6 @@ export const fetchCurrentUser = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     const token = getState().auth.accessToken;
     if (!token) {
-      console.warn("⚠️ Không có token trong Redux state");
       return rejectWithValue(i18n.t("auth.no_token"));
     }
 
@@ -107,7 +105,6 @@ export const fetchCurrentUser = createAsyncThunk(
     if (result.success) {
       return result.data; // user info từ backend
     } else {
-      console.error("❌ fetchCurrentUser failed:", result.message);
       return rejectWithValue(result.message);
     }
   }
@@ -247,8 +244,6 @@ const authSlice = createSlice({
         state.user = action.payload?.data ?? action.payload; // user info từ backend
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
-                console.error("❌ [Reducer] fetchCurrentUser.rejected:", action.payload);
-
         state.loading = false;
         state.error = action.payload;
       });

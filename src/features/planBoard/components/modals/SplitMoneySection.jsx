@@ -564,6 +564,15 @@ export default function SplitMoneySection({
                   /{" "}
                   <b>{parsedActual.toLocaleString("vi-VN")}đ</b>
                 </p>
+
+                {parsedActual > 0 && totalExact !== parsedActual && (
+                  <p
+                    role="alert"
+                    className="text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400"
+                  >
+                    {t("plan.split.exact_mismatch_warning")}
+                  </p>
+                )}
               </div>
             )}
           </div>

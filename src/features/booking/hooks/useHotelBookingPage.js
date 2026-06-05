@@ -7,6 +7,7 @@ import { useHotelPricing } from "./useHotelPricing";
 import { fetchHotelAvailability } from "../slices/bookingSlice";
 import { fmt } from "../services/bookingService";
 import { fetchCurrentUser } from "../../auth/slices/authSlice";
+import { showError } from "../../../utils/toastUtils";
 
 import { setDraftPayment } from "../slices/bookingSlice";
 
@@ -99,6 +100,44 @@ export function useHotelBookingPage() {
   //  THAY ĐỔI: onPay giờ chỉ tạo draft + navigate sang PaymentMethodPage
   const onPay = useCallback(async ({ paymentOption }) => {
     if (!hotel || !roomType || !ratePlan) return;
+
+    // Require a logged-in user before creating a payment draft.
+    if (!userId) {
+      showError(t("booking.error_login_required"));
+      return;
+    }
+
+    // Validate contact fields (mirrors HotelBookingForm rules) before navigating.
+    const name = (contactName || "").trim();
+    const phone = (contactPhone || "").trim();
+    const email = (contactEmail || "").trim();
+    const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!name) {
+      showError(t("booking.error_name_required"));
+      return;
+    }
+    if (!nameRegex.test(name)) {
+      showError(t("booking.error_name_letters_only"));
+      return;
+    }
+    if (!phone) {
+      showError(t("booking.error_phone_required"));
+      return;
+    }
+    if (!/^\d+$/.test(phone)) {
+      showError(t("booking.error_phone_digits_only"));
+      return;
+    }
+    if (phone.length !== 10) {
+      showError(t("booking.error_phone_exact_10"));
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      showError(t("booking.error_email_invalid"));
+      return;
+    }
 
     const payOption = paymentOption === "DEPOSIT" ? "DEPOSIT" : "FULL";
 

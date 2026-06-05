@@ -27,12 +27,27 @@ export default function HotelBookingForm({
 }) {
   const { t } = useTranslation();
   const [nameError, setNameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const NOTE_MAX = 200;
 
   const handleNameBlur = () => {
     if (!contactName?.trim()) return setNameError(t("booking.name_required"));
     const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
     setNameError(nameRegex.test(contactName.trim()) ? "" : t("booking.name_letters_only"));
+  };
+
+  const handlePhoneBlur = () => {
+    const phone = (contactPhone || "").trim();
+    if (!phone) return setPhoneError(t("booking.error_phone_required"));
+    if (!/^\d+$/.test(phone)) return setPhoneError(t("booking.error_phone_digits_only"));
+    setPhoneError(phone.length === 10 ? "" : t("booking.error_phone_exact_10"));
+  };
+
+  const handleEmailBlur = () => {
+    const email = (contactEmail || "").trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setEmailError(emailRegex.test(email) ? "" : t("booking.error_email_invalid"));
   };
 
   // Tính số ngày hiển thị từ checkIn/checkOut:
@@ -104,19 +119,29 @@ export default function HotelBookingForm({
             <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
               {t("booking.phone")} <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
+            <div className={[
+              "flex items-center rounded-lg border bg-white dark:bg-gray-800 px-3",
+              phoneError
+                ? "border-red-400 focus-within:border-red-500"
+                : "border-gray-300 dark:border-gray-700 focus-within:border-blue-500",
+            ].join(" ")}>
               <Phone className="mr-2 h-3.5 w-3.5 text-gray-400" />
               <input
                 type="tel"
                 value={contactPhone}
                 onChange={(e) => onContactPhoneChange?.(e.target.value)}
+                onBlur={handlePhoneBlur}
                 className="h-9 w-full border-none bg-transparent text-sm outline-none md:h-10"
                 placeholder={t("booking.phone_placeholder")}
               />
             </div>
-            <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-              {t("booking.phone_hint")}
-            </p>
+            {phoneError ? (
+              <p className="mt-1 text-[11px] text-red-500">{phoneError}</p>
+            ) : (
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                {t("booking.phone_hint")}
+              </p>
+            )}
           </div>
 
           {/* Email */}
@@ -124,16 +149,25 @@ export default function HotelBookingForm({
             <label className="mb-1 block text-xs font-semibold text-gray-800 dark:text-gray-200 md:text-sm">
               Email <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 focus-within:border-blue-500">
+            <div className={[
+              "flex items-center rounded-lg border bg-white dark:bg-gray-800 px-3",
+              emailError
+                ? "border-red-400 focus-within:border-red-500"
+                : "border-gray-300 dark:border-gray-700 focus-within:border-blue-500",
+            ].join(" ")}>
               <Mail className="mr-2 h-3.5 w-3.5 text-gray-400" />
               <input
                 type="email"
                 value={contactEmail}
                 onChange={(e) => onContactEmailChange?.(e.target.value)}
+                onBlur={handleEmailBlur}
                 className="h-9 w-full border-none bg-transparent text-sm outline-none md:h-10"
                 placeholder="email@example.com"
               />
             </div>
+            {emailError && (
+              <p className="mt-1 text-[11px] text-red-500">{emailError}</p>
+            )}
           </div>
         </div>
 

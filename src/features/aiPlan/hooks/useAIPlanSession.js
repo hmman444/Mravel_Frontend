@@ -53,6 +53,16 @@ const persistSessionId = (planId, id) => {
   }
 };
 
+// Stable unique id for chat messages. Used as the React key so optimistic
+// messages keep their identity when the streamed/real message arrives, instead
+// of React reusing DOM nodes by array index (which misaligns bubbles).
+let __msgSeq = 0;
+const newMessageId = () => `m_${Date.now()}_${++__msgSeq}`;
+
+// Ensure a message object has a stable id (backend messages may not carry one).
+const withId = (msg) =>
+  msg && msg.id == null ? { ...msg, id: newMessageId() } : msg;
+
 const TOOL_LABELS = {
   set_constraints: "Ghi nhận thông tin",
   search_hotels: "Tìm khách sạn",
@@ -170,7 +180,7 @@ export function useAIPlanSession(planId = null) {
       try {
         const data = await getSession(stored);
         setSessionId(data.session_id);
-        setMessages(data.messages || []);
+        setMessages((data.messages || []).map(withId));
         setConstraints(data.constraints || null);
         setPendingEdits(data.pending_edits || []);
         if (data.plan_id != null) setBoundPlanId(data.plan_id);
@@ -243,7 +253,7 @@ export function useAIPlanSession(planId = null) {
       // In edit mode, bind the session to the plan being viewed (numeric id).
       const data = await createSession(null, planId != null ? Number(planId) : null);
       setSessionId(data.session_id);
-      setMessages(data.messages || []);
+      setMessages((data.messages || []).map(withId));
       setConstraints(data.constraints || null);
       setPhase(PHASES.CHATTING);
       return data.session_id;
@@ -332,7 +342,7 @@ export function useAIPlanSession(planId = null) {
         if (fallbackFn) {
           try {
             const data = await fallbackFn(fallbackArg);
-            setMessages((prev) => [...prev, data.assistant_message]);
+            setMessages((prev) => [...prev, withId(data.assistant_message)]);
             setConstraints(data.constraints || null);
             if (data.draft) {
               setDraft(data.draft);
@@ -361,11 +371,11 @@ export function useAIPlanSession(planId = null) {
       }
 
       if (assistantMessageObj) {
-        setMessages((prev) => [...prev, assistantMessageObj]);
+        setMessages((prev) => [...prev, withId(assistantMessageObj)]);
       } else if (assistantText) {
         setMessages((prev) => [
           ...prev,
-          { role: "ASSISTANT", content: assistantText, created_at: new Date().toISOString() },
+          { id: newMessageId(), role: "ASSISTANT", content: assistantText, created_at: new Date().toISOString() },
         ]);
       }
       if (nextConstraints) setConstraints(nextConstraints);
@@ -406,6 +416,7 @@ export function useAIPlanSession(planId = null) {
       await runStream({
         streamFn: (onEv, opts) => streamMessage(id, text, onEv, opts),
         optimisticUserMsg: {
+          id: newMessageId(),
           role: "USER",
           content: text,
           created_at: new Date().toISOString(),
@@ -427,6 +438,7 @@ export function useAIPlanSession(planId = null) {
       await runStream({
         streamFn: (onEv, opts) => streamRegenerate(sessionId, instructions, onEv, opts),
         optimisticUserMsg: {
+          id: newMessageId(),
           role: "USER",
           content: label,
           created_at: new Date().toISOString(),
@@ -477,7 +489,7 @@ export function useAIPlanSession(planId = null) {
       setPendingEdits([]);
       setPhase(PHASES.CHATTING);
       if (data?.assistant_message) {
-        setMessages((prev) => [...prev, data.assistant_message]);
+        setMessages((prev) => [...prev, withId(data.assistant_message)]);
       }
       const failed = data?.total ? data.total - data.applied : 0;
       if (failed > 0) {
@@ -510,7 +522,7 @@ export function useAIPlanSession(planId = null) {
       try {
         const data = await getSession(id);
         setSessionId(data.session_id);
-        setMessages(data.messages || []);
+        setMessages((data.messages || []).map(withId));
         setConstraints(data.constraints || null);
         setPendingEdits(data.pending_edits || []);
         setBoundPlanId(data.plan_id != null ? data.plan_id : null);

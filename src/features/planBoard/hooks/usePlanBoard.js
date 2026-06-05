@@ -36,7 +36,6 @@ async function tryCall(promise, fallbackMessage) {
     const res = await promise;
     return res;
   } catch (err) {
-    console.error("❌ API Error:", err);
     const status = err?.response?.status ?? err?.status;
     if (status === 409) {
       // Optimistic lock conflict — a different collaborator edited this item

@@ -60,6 +60,7 @@ import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 import MyBookingsPage from "./features/booking/pages/MyBookingsPage";
 import RestaurantBookingPage from "./features/booking/pages/RestaurantBookingPage";
 import PaymentMethodPage from "./features/booking/pages/PaymentMethodPage";
+import PaymentReturnPage from "./features/booking/pages/PaymentReturnPage";
 
 // Partner
 import PartnerLoginPage from "./features/partnerAuth/pages/LoginPage";
@@ -162,6 +163,7 @@ function App() {
           <Route path="/my-bookings" element={<MyBookingsPage />} />
           <Route path="/booking/restaurant" element={<RestaurantBookingPage />} />
           <Route path="/booking/payment-method" element={<PaymentMethodPage />} />
+          <Route path="/booking/payment-return" element={<PaymentReturnPage />} />
 
           {/* = PARTNER (PUBLIC) = */}
           <Route path="/partner" element={<PartnerLandingPage />} />

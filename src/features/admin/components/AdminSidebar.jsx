@@ -15,7 +15,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 export default function AdminSidebar() {
@@ -30,8 +30,8 @@ export default function AdminSidebar() {
       { to: "/admin/services", label: t("manage_services"), icon: Cog6ToothIcon },
       { to: "/admin/places", label: t("manage_locations"), icon: MapIcon },
       { to: "/admin/amenities", label: t("manage_amenities"), icon: SparklesIcon },
-      { to: "/admin/reviews", label: t("manage_reviews", "Quản lý đánh giá"), icon: StarIcon },
-      { to: "/admin/plans-analytics", label: t("manage_plan_analytics", "Thống kê Plan"), icon: PresentationChartLineIcon },
+      { to: "/admin/reviews", label: t("manage_reviews"), icon: StarIcon },
+      { to: "/admin/plans-analytics", label: t("manage_plan_analytics"), icon: PresentationChartLineIcon },
       // { to: "/admin/reports", label: t("reports"), icon: FlagIcon },
     ],
     [t]
