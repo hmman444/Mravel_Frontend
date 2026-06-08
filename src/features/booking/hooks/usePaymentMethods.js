@@ -41,7 +41,6 @@ export function usePaymentMethods() {
           supported: false,
           iconSrc: "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png",
           icon: FaWallet,
-          badge: t("booking.payment_badge_supported"),
         },
       ],
     },

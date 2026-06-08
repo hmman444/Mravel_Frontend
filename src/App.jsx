@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useLoadUser } from "./features/auth/hooks/useLoadUser";
 import { useAuthSync } from "./features/auth/hooks/useAuthSync";
 import Toast from "./components/Toast";
@@ -13,9 +13,6 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 
 // Home
 import HomePage from "./features/home/pages/HomePage";
-
-// Search
-import SearchPage from "./features/search/pages/SearchPage";
 
 // Plans
 import PlanListPage from "./features/planFeed/pages/PlanListPage";
@@ -48,6 +45,7 @@ import ManageReportsPage from "./features/admin/pages/ManageReportsPage";
 import ManageServicesPage from "./features/admin/pages/ManageServicesPage";
 import ManagePlacesPage from "./features/admin/pages/ManagePlacesPage";
 import ManageAmenitiesPage from "./features/admin/pages/ManageAmenitiesPage";
+import ManageReviewsPage from "./features/admin/pages/ManageReviewsPage";
 import ManageRequestPartnersPage from "./features/admin/pages/ManageRequestPartnersPage";
 import AdminPlaceDetailPage from "./features/admin/pages/AdminPlaceDetailPage";
 import PlaceDetailPageAdmin from "./features/admin/pages/PlaceDetailPage";
@@ -62,6 +60,7 @@ import HotelBookingPage from "./features/booking/pages/HotelBookingPage";
 import MyBookingsPage from "./features/booking/pages/MyBookingsPage";
 import RestaurantBookingPage from "./features/booking/pages/RestaurantBookingPage";
 import PaymentMethodPage from "./features/booking/pages/PaymentMethodPage";
+import PaymentReturnPage from "./features/booking/pages/PaymentReturnPage";
 
 // Partner
 import PartnerLoginPage from "./features/partnerAuth/pages/LoginPage";
@@ -80,7 +79,7 @@ import PartnerUnlockRequestsPage from "./features/partner/pages/PartnerUnlockReq
 import PartnerProtectedRoute from "./features/partnerAuth/components/PartnerProtectedRoute";
 
 // Others
-import FeatureComingSoonPage from "./pages/FeatureComingSoonPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import RequireRole from "./routes/RequireRole";
 import { useNotificationRealtime } from "./realtime/useNotificationRealtime";
 import ChatPage from "./features/chat/pages/ChatPage";
@@ -113,6 +112,7 @@ function App() {
             <Route path="/admin/services" element={<ManageServicesPage />} />
             <Route path="/admin/places" element={<ManagePlacesPage />} />
             <Route path="/admin/amenities" element={<ManageAmenitiesPage />} />
+            <Route path="/admin/reviews" element={<ManageReviewsPage />} />
             <Route path="/admin/plans-analytics" element={<PlanAnalyticsPage />} />
             <Route path="/admin/partners/request" element={<ManageRequestPartnersPage />} />
             <Route path="/admin/places/:slug" element={<AdminPlaceDetailPage />} />
@@ -154,7 +154,7 @@ function App() {
           <Route path="/restaurants/:slug" element={<RestaurantDetailPage />} />
 
           {/* General routes */}
-          <Route path="/search" element={<SearchPage />} />
+          <Route path="/search" element={<Navigate to="/hotels/search" replace />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/" element={<HomePage />} />
 
@@ -163,6 +163,7 @@ function App() {
           <Route path="/my-bookings" element={<MyBookingsPage />} />
           <Route path="/booking/restaurant" element={<RestaurantBookingPage />} />
           <Route path="/booking/payment-method" element={<PaymentMethodPage />} />
+          <Route path="/booking/payment-return" element={<PaymentReturnPage />} />
 
           {/* = PARTNER (PUBLIC) = */}
           <Route path="/partner" element={<PartnerLandingPage />} />
@@ -180,11 +181,8 @@ function App() {
             <Route path="/partner/unlock-requests" element={<PartnerUnlockRequestsPage />} />
           </Route>
 
-          {/* Coming soon routes */}
-          <Route path="/maybe" element={<FeatureComingSoonPage />} />
-
           {/* Fallback */}
-          <Route path="*" element={<HomePage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
 

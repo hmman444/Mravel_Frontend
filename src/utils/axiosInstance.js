@@ -87,7 +87,12 @@ api.interceptors.response.use(
           refreshToken,
         });
 
-        const { accessToken, refreshToken: newRefresh } = res.data.data;
+        // Guard against an unexpected response shape — treat a missing
+        // accessToken as a refresh failure instead of crashing on destructure.
+        const tokens = res?.data?.data;
+        const accessToken = tokens?.accessToken;
+        const newRefresh = tokens?.refreshToken;
+        if (!accessToken) throw new Error("Refresh response missing access token");
 
         const rememberMe = !!localStorage.getItem("accessToken");
 
@@ -95,8 +100,8 @@ api.interceptors.response.use(
         const store = getStore();
         store.dispatch(setTokensRedux({ accessToken, refreshToken: newRefresh }));
 
-        // Release the refresh lock BEFORE any further api calls to prevent deadlock.
-        // Any request that arrived while isRefreshing=true will now proceed.
+        // Refresh the user profile once (awaited) so Redux is up to date before
+        // we replay the original request.
         const me = await api.get("/auth/me");
         const currentUser = me?.data?.data ?? me?.data ?? null;
 
@@ -106,14 +111,8 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         isRefreshing = false;
 
-        // Update user profile non-blocking — must be outside the refresh lock
-        api.get("/auth/me")
-          .then((me) => store.dispatch(setUser(me.data.data)))
-          .catch(() => {});
-
         return api(originalRequest);
       } catch (err) {
-        console.error("❌ Refresh token failed:", err);
         clearTokens();
         const store = getStore();
         store.dispatch(setTokensRedux({ accessToken: null, refreshToken: null }));
@@ -123,21 +122,17 @@ api.interceptors.response.use(
       }
     }
 
-    // access requests
-    if (
-      errorCode === ErrorCodes.ACCESS_REQUEST_ALREADY_SUBMITTED ||
-      message.includes("Bạn đã gửi yêu cầu trước đó")
-    ) {
-      showError("Bạn đã gửi yêu cầu trước đó.");
+    // access requests (dựa trên error code, không so khớp chuỗi)
+    if (errorCode === ErrorCodes.ACCESS_REQUEST_ALREADY_SUBMITTED) {
+      showError(i18n.t("errors.access_request_already_submitted"));
       return Promise.reject(error);
     }
 
     if (
       errorCode === ErrorCodes.ACCESS_ALREADY_GRANTED ||
-      errorCode === ErrorCodes.ACCESS_VIEW_ALREADY_GRANTED ||
-      message.includes("Bạn đã có quyền truy cập")
+      errorCode === ErrorCodes.ACCESS_VIEW_ALREADY_GRANTED
     ) {
-      showError("Bạn đã có quyền truy cập.");
+      showError(i18n.t("errors.access_already_granted"));
       return Promise.reject(error);
     }
 

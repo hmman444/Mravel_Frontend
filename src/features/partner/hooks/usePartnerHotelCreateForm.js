@@ -194,10 +194,9 @@ export function usePartnerHotelCreateForm({
           // optional: để debug/hiển thị
           draft.geoDisplayName = geo.displayName;
         }
-      } catch (err) {
-        console.warn("Geocode failed:", err);
-        // Nếu backend bắt buộc location thì đổi thành:
-        // throw err;
+      } catch {
+        // Geocode lỗi -> bỏ qua, location để trống.
+        // Nếu backend bắt buộc location thì đổi thành: throw err;
       }
     }
 

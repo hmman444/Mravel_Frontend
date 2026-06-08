@@ -140,7 +140,7 @@ export default function FloatingChatWidget() {
           maiUnread && (
             <span
               className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-red-500 ring-2 ring-white"
-              aria-label="MAI có phản hồi mới"
+              aria-label={t("chat.mai_new_reply_aria")}
             />
           )
         )}

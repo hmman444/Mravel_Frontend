@@ -12,6 +12,7 @@ import {
   fetchRestaurantAvailability,
   createRestaurantPayment,
 } from "../slices/bookingRestaurantSlice";
+import { showError } from "../../../utils/toastUtils";
 
 const pickBestTableType = (tableTypes, people) => {
   const list = Array.isArray(tableTypes) ? tableTypes : [];
@@ -216,9 +217,7 @@ export function useRestaurantBookingPage() {
       const url = res?.paymentUrl || res?.payUrl;
       if (url) window.location.href = url;
     } catch (e) {
-      // đừng để “Uncaught (in promise)”
-      console.error("pay failed:", e);
-      // TODO: show toast / setError UI
+      showError(e?.message || t("booking.create_payment_failed"));
     }
   }, [
     dispatch, restaurant, tableTypeId, date, time, people, tablesCount,

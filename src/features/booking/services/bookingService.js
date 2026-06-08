@@ -42,6 +42,29 @@ export const createHotelBookingAndPay = async (payload) => {
 };
 
 /**
+ * Lấy trạng thái 1 booking theo code (để trang payment-return poll xác nhận).
+ * Hotel: GET /api/booking/bookings/{code} · Restaurant: GET /api/booking/restaurants/{code}
+ */
+export const getBookingStatusByCode = async (code) => {
+  const c = (code || "").trim();
+  if (!c) return { success: false, message: i18n.t("booking.error_connect_server") };
+
+  const isRestaurant = c.toUpperCase().startsWith("RB-");
+  const url = isRestaurant
+    ? `${BOOKING_PREFIX}/restaurants/${encodeURIComponent(c)}`
+    : `${BOOKING_PREFIX}/bookings/${encodeURIComponent(c)}`;
+
+  try {
+    const res = await api.get(url);
+    const apiRes = res?.data ?? res;
+    const dto = apiRes?.data ?? apiRes;
+    return { success: true, data: dto };
+  } catch (error) {
+    return toError(error, i18n.t("booking.error_connect_server"));
+  }
+};
+
+/**
  * GET /api/catalog/hotels/inventory/availability
  */
 export const getHotelAvailability = async ({

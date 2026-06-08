@@ -199,7 +199,7 @@ export default function ManageServicesPage() {
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
                     }`}
                 >
-                    Hotels
+                    {t("admin.services_hotels")}
                 </button>
                 <button
                     type="button"
@@ -210,7 +210,7 @@ export default function ManageServicesPage() {
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
                     }`}
                 >
-                    Restaurants
+                    {t("admin.services_restaurants")}
                 </button>
                 </div>
 
@@ -230,7 +230,7 @@ export default function ManageServicesPage() {
                 disabled={loading}
                 title={t("admin.services_reload_hint")}
                 >
-                Reload
+                {t("admin.services_reload")}
                 </button>
             </div>
             </div>

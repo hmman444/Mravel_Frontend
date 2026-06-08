@@ -259,8 +259,9 @@ const notificationsSlice = createSlice({
       if (!key) return;
 
       const idx = state.items.findIndex((x) => getNotiKey(x) === key);
+      const isNew = idx === -1;
 
-      if (idx === -1) {
+      if (isNew) {
         state.items.unshift(noti);
       } else {
         // merge để bổ sung field (actor/deepLink/image) nếu trước đó thiếu
@@ -269,8 +270,10 @@ const notificationsSlice = createSlice({
 
       if (typeof noti?.unreadCount === "number") {
         state.unreadCount = noti.unreadCount;
-      } else {
-        if (!noti.read) state.unreadCount = (state.unreadCount || 0) + 1;
+      } else if (isNew && !noti.read) {
+        // chỉ tăng đúng 1 lần cho mỗi notification mới; duplicate event (cùng key)
+        // chỉ merge field, không tăng unreadCount lần nữa
+        state.unreadCount = (state.unreadCount || 0) + 1;
       }
     },
   },

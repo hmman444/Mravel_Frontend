@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { marked } from "marked";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -23,19 +24,8 @@ function renderAssistantHtml(content) {
   }
 }
 
-const STARTER_PROMPTS = [
-  { emoji: "🌊", text: "Đà Nẵng 3 ngày 2 người, 5 triệu" },
-  { emoji: "🏔️", text: "Cuối tuần đi Đà Lạt chill" },
-  { emoji: "🍜", text: "Đi đâu ăn ngon ở Hội An?" },
-  { emoji: "🏖️", text: "Phú Quốc 4 ngày cho gia đình 4 người" },
-];
-
-const EDIT_STARTER_PROMPTS = [
-  { emoji: "🍜", text: "Thêm một quán ăn sáng ngon vào ngày 1" },
-  { emoji: "💰", text: "Lịch trình này tốn bao nhiêu cho 2 người?" },
-  { emoji: "🔄", text: "Đổi nhà hàng tối ngày 2 sang quán hải sản" },
-  { emoji: "🛏️", text: "Thêm hoạt động nghỉ ngơi buổi chiều" },
-];
+const STARTER_EMOJIS = ["🌊", "🏔️", "🍜", "🏖️"];
+const EDIT_STARTER_EMOJIS = ["🍜", "💰", "🔄", "🛏️"];
 
 /**
  * Thin wrapper: owns the MAI session and renders the chrome-less panel. Used by the
@@ -57,6 +47,7 @@ export default function AIPlanPanel({ planId = null, onClose = null, onApplied =
  * lists past chats to resume, and a "new conversation" button starts a fresh one.
  */
 export function AIPlanPanelView({ session, onClose = null, onApplied = null, autoFocus = true }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [revisionInput, setRevisionInput] = useState("");
@@ -64,6 +55,15 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const editMode = session.isEditMode;
+
+  const starterPrompts = STARTER_EMOJIS.map((emoji, i) => ({
+    emoji,
+    text: t(`aiPlan.starter_${i + 1}`),
+  }));
+  const editStarterPrompts = EDIT_STARTER_EMOJIS.map((emoji, i) => ({
+    emoji,
+    text: t(`aiPlan.edit_starter_${i + 1}`),
+  }));
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -155,7 +155,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
               MAI (Mravel AI)
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400">
-              {editMode ? "AI chỉnh sửa kế hoạch hiện tại" : "Trợ lý du lịch AI của Mravel"}
+              {editMode ? t("aiPlan.subtitle_edit") : t("aiPlan.subtitle_new")}
             </div>
           </div>
         </div>
@@ -163,8 +163,8 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
           <button
             onClick={handleOpenHistory}
             className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-800"
-            aria-label="Lịch sử trò chuyện"
-            title="Lịch sử trò chuyện"
+            aria-label={t("aiPlan.history")}
+            title={t("aiPlan.history")}
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -174,19 +174,19 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
             onClick={handleNewChat}
             disabled={session.isBusy}
             className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-primary disabled:opacity-50 dark:hover:bg-slate-800"
-            aria-label="Tạo hội thoại mới"
-            title="Bắt đầu một hội thoại mới"
+            aria-label={t("aiPlan.new_chat_title")}
+            title={t("aiPlan.new_chat_title")}
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
             </svg>
-            Hội thoại mới
+            {t("aiPlan.new_chat")}
           </button>
           {onClose && (
             <button
               onClick={onClose}
               className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-              aria-label="Đóng"
+              aria-label={t("aiPlan.close")}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -215,16 +215,16 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
             <div className="mb-4">
               <h2 className="font-heading text-[26px] font-bold leading-tight text-slate-800 dark:text-slate-100">
                 {editMode
-                  ? "Mình có thể chỉnh sửa gì cho kế hoạch này?"
-                  : "MAI có thể giúp gì cho chuyến đi của bạn?"}
+                  ? t("aiPlan.empty_title_edit")
+                  : t("aiPlan.empty_title_new")}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                 {editMode
-                  ? "Mình đã đọc kế hoạch hiện tại. Bạn muốn thêm/sửa/xoá hoạt động, đổi quán, dời giờ hay hỏi chi phí — cứ nói nhé."
-                  : "Kể mình nghe điểm đến, ngày đi và số người — mình sẽ dựng nháp với gợi ý từ catalog Mravel."}
+                  ? t("aiPlan.empty_desc_edit")
+                  : t("aiPlan.empty_desc_new")}
               </p>
               <div className="mt-6 grid gap-2 sm:grid-cols-2">
-                {(editMode ? EDIT_STARTER_PROMPTS : STARTER_PROMPTS).map((p) => (
+                {(editMode ? editStarterPrompts : starterPrompts).map((p) => (
                   <button
                     key={p.text}
                     onClick={() => handleSendStarter(p.text)}
@@ -245,7 +245,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
           {/* Messages */}
           <div className="space-y-6">
             {session.messages.map((m, i) => (
-              <MessageBubble key={i} role={m.role} content={m.content} />
+              <MessageBubble key={m.id ?? i} role={m.role} content={m.content} />
             ))}
 
             {session.isBusy && (
@@ -264,7 +264,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
                 <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                 </svg>
-                Bản nháp lịch trình
+                {t("aiPlan.draft_label")}
               </div>
               <DraftPreview draft={session.draft} />
             </div>
@@ -277,7 +277,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
 
           {!editMode && session.missingFields.length > 0 && !session.draft && (
             <div className="mt-4 rounded-lg border border-amber-200/60 bg-amber-50/70 px-4 py-3 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-200">
-              Mình cần thêm: <b>{session.missingFields.join(", ")}</b>
+              {t("aiPlan.need_more")} <b>{session.missingFields.join(", ")}</b>
             </div>
           )}
 
@@ -293,7 +293,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
               <input
                 value={revisionInput}
                 onChange={(e) => setRevisionInput(e.target.value)}
-                placeholder="Yêu cầu chỉnh sửa: rẻ hơn, đổi khách sạn, thêm hoạt động biển…"
+                placeholder={t("aiPlan.revision_placeholder")}
                 className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
                 disabled={session.isBusy}
               />
@@ -302,7 +302,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
                 disabled={session.isBusy}
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
-                Tạo lại nháp
+                {t("aiPlan.regenerate")}
               </button>
               <button
                 type="button"
@@ -310,7 +310,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
                 disabled={session.isBusy}
                 className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-light disabled:opacity-50"
               >
-                Duyệt & tạo plan
+                {t("aiPlan.approve")}
               </button>
             </form>
           </div>
@@ -322,7 +322,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
         <div className="border-t border-slate-200/70 bg-white/80 px-6 py-3 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-2">
             <span className="text-sm text-slate-600 dark:text-slate-300">
-              <b>{session.pendingEdits.length}</b> thay đổi đang chờ áp dụng
+              <b>{session.pendingEdits.length}</b> {t("aiPlan.pending_changes")}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -331,7 +331,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
                 disabled={session.isBusy}
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
-                Bỏ qua
+                {t("aiPlan.discard")}
               </button>
               <button
                 type="button"
@@ -339,7 +339,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
                 disabled={session.isBusy}
                 className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-light disabled:opacity-50"
               >
-                Áp dụng vào kế hoạch
+                {t("aiPlan.apply")}
               </button>
             </div>
           </div>
@@ -358,7 +358,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Hỏi MAI... (Ctrl+Enter để gửi)"
+              placeholder={t("aiPlan.composer_placeholder")}
               rows={2}
               className="w-full resize-none bg-transparent px-4 py-3 pr-14 text-[15px] leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-60 dark:text-slate-100 dark:placeholder:text-slate-500"
               disabled={session.isBusy || session.isApproved}
@@ -368,7 +368,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
               type="submit"
               disabled={session.isBusy || !input.trim() || session.isApproved}
               className="absolute bottom-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white shadow-sm transition hover:bg-primaryHover disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
-              aria-label="Gửi"
+              aria-label={t("aiPlan.send")}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 12l14-7-7 14-2-5-5-2z" />
@@ -376,7 +376,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
             </button>
           </form>
           <div className="mt-2 text-center text-[11px] text-slate-400 dark:text-slate-500">
-            AI có thể nhầm — kiểm tra lại lịch trước khi đặt thật.
+            {t("aiPlan.disclaimer")}
           </div>
         </div>
       </div>
@@ -385,16 +385,17 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
 }
 
 function HistoryOverlay({ sessions, activeId, onPick, onNew, onClose }) {
+  const { t } = useTranslation();
   return (
     <div className="absolute inset-0 z-20 flex flex-col bg-neutral dark:bg-slate-900">
       <div className="flex items-center justify-between border-b border-slate-200/70 bg-white/80 px-6 py-4 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80">
         <div className="font-heading text-[15px] font-bold tracking-tight text-slate-800 dark:text-slate-100">
-          Lịch sử trò chuyện
+          {t("aiPlan.history")}
         </div>
         <button
           onClick={onClose}
           className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-          aria-label="Đóng lịch sử"
+          aria-label={t("aiPlan.close_history")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -409,12 +410,12 @@ function HistoryOverlay({ sessions, activeId, onPick, onNew, onClose }) {
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
           </svg>
-          Bắt đầu hội thoại mới
+          {t("aiPlan.start_new_chat")}
         </button>
 
         {(!sessions || sessions.length === 0) ? (
           <p className="px-2 py-8 text-center text-sm text-slate-400 dark:text-slate-500">
-            Chưa có hội thoại nào. Hãy bắt đầu chat với MAI nhé.
+            {t("aiPlan.no_conversations")}
           </p>
         ) : (
           <ul className="space-y-1">
@@ -430,10 +431,10 @@ function HistoryOverlay({ sessions, activeId, onPick, onNew, onClose }) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
-                      {s.title || "Hội thoại"}
+                      {s.title || t("aiPlan.conversation")}
                       {s.plan_id != null && (
                         <span className="ml-1.5 rounded bg-primary/10 px-1 py-0.5 text-[10px] font-semibold text-primary">
-                          sửa plan #{s.plan_id}
+                          {t("aiPlan.edit_plan_badge", { id: s.plan_id })}
                         </span>
                       )}
                     </span>
@@ -463,35 +464,39 @@ function formatRelative(iso) {
 }
 
 const OP_META = {
-  create_card: { label: "Thêm", color: "text-emerald-700 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40", icon: "＋" },
-  update_card: { label: "Sửa", color: "text-sky-700 bg-sky-100 dark:text-sky-200 dark:bg-sky-900/40", icon: "✎" },
-  delete_card: { label: "Xoá", color: "text-rose-700 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40", icon: "✕" },
-  move_card: { label: "Chuyển", color: "text-violet-700 bg-violet-100 dark:text-violet-200 dark:bg-violet-900/40", icon: "⇄" },
-  rename_list: { label: "Đổi tên ngày", color: "text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40", icon: "✎" },
-  delete_list: { label: "Xoá ngày", color: "text-rose-700 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40", icon: "✕" },
-  add_day: { label: "Thêm ngày", color: "text-emerald-700 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40", icon: "＋" },
-  update_plan: { label: "Sửa plan", color: "text-indigo-700 bg-indigo-100 dark:text-indigo-200 dark:bg-indigo-900/40", icon: "⚙" },
+  create_card: { labelKey: "aiPlan.op_create_card", color: "text-emerald-700 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40", icon: "＋" },
+  update_card: { labelKey: "aiPlan.op_update_card", color: "text-sky-700 bg-sky-100 dark:text-sky-200 dark:bg-sky-900/40", icon: "✎" },
+  delete_card: { labelKey: "aiPlan.op_delete_card", color: "text-rose-700 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40", icon: "✕" },
+  move_card: { labelKey: "aiPlan.op_move_card", color: "text-violet-700 bg-violet-100 dark:text-violet-200 dark:bg-violet-900/40", icon: "⇄" },
+  rename_list: { labelKey: "aiPlan.op_rename_list", color: "text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40", icon: "✎" },
+  delete_list: { labelKey: "aiPlan.op_delete_list", color: "text-rose-700 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40", icon: "✕" },
+  add_day: { labelKey: "aiPlan.op_add_day", color: "text-emerald-700 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40", icon: "＋" },
+  update_plan: { labelKey: "aiPlan.op_update_plan", color: "text-indigo-700 bg-indigo-100 dark:text-indigo-200 dark:bg-indigo-900/40", icon: "⚙" },
 };
 
 function EditProposal({ operations }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-8">
       <div className="mb-3 flex items-center gap-2 font-heading text-[11px] font-semibold uppercase tracking-wider text-accent">
         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.58z" />
         </svg>
-        Thay đổi đề xuất ({operations.length})
+        {t("aiPlan.proposed_changes", { count: operations.length })}
       </div>
       <ul className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800/60">
         {operations.map((op, i) => {
-          const meta = OP_META[op.op] || { label: op.op, color: "text-slate-700 bg-slate-200", icon: "•" };
+          const meta = OP_META[op.op];
+          const label = meta ? t(meta.labelKey) : op.op;
+          const color = meta ? meta.color : "text-slate-700 bg-slate-200";
+          const icon = meta ? meta.icon : "•";
           return (
             <li key={i} className="flex items-start gap-2 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
-              <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${meta.color}`}>
-                <span>{meta.icon}</span>
-                {meta.label}
+              <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${color}`}>
+                <span>{icon}</span>
+                {label}
               </span>
-              <span>{op.summary || meta.label}</span>
+              <span>{op.summary || label}</span>
             </li>
           );
         })}
@@ -533,6 +538,7 @@ function MessageBubble({ role, content }) {
 }
 
 function ThinkingBlock({ activity, canCancel, onCancel }) {
+  const { t } = useTranslation();
   const lastFew = activity.slice(-5);
   return (
     <div className="flex gap-3">
@@ -549,7 +555,7 @@ function ThinkingBlock({ activity, canCancel, onCancel }) {
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" />
             </span>
-            MAI đang nghĩ
+            {t("aiPlan.thinking")}
           </span>
           {canCancel && (
             <button
@@ -557,7 +563,7 @@ function ThinkingBlock({ activity, canCancel, onCancel }) {
               onClick={onCancel}
               className="rounded-md px-2 py-0.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800"
             >
-              Hủy
+              {t("aiPlan.cancel")}
             </button>
           )}
         </div>

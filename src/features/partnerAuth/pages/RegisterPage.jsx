@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
-  const { handleRegister, message } = useRegister();
+  const { handleRegister, message, loading, error } = useRegister();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -99,11 +99,13 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold"
+            disabled={loading}
+            className="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold disabled:opacity-60"
           >
-            {t('common.register')}
+            {loading ? t('common.processing') : t('common.register')}
           </button>
 
+          {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
           {message && <p className="text-green-600 text-sm text-center mt-2">{message}</p>}
         </form>
 

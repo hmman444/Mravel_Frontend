@@ -529,6 +529,10 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
                 src={currentImage}
                 alt={name}
                 className="h-full w-full rounded-xl object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = fallbackImage;
+                }}
               />
 
               {imageUrls.length > 1 && (

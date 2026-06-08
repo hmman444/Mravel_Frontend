@@ -118,8 +118,11 @@ export default function PersonalInfoForm() {
       }
 
       const payload = {
+        fullname: fullname || null,
         gender: gender || null,
         dateOfBirth,
+        city: city || null,
+        country: country || null,
         addressLine: addressLine || null,
       };
 
