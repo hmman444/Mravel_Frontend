@@ -10,12 +10,17 @@ export default function SearchResultCard({ data, onClick }) {
         src={data.img}
         alt={data.name}
         className="h-40 w-full object-cover"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src =
+            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+        }}
       />
       <div className="p-4">
-        <h3 className="font-bold text-lg text-gray-900 dark:text-gray-900">
+        <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
           {data.name}
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-600 mb-2">
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
           {data.location} •{" "}
           {data.type === "hotel"
             ? t("search.type_hotel")

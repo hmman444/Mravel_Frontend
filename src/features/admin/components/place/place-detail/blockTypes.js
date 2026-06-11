@@ -6,14 +6,14 @@ import {
 } from "@heroicons/react/24/outline";
 
 export const BLOCK_TYPES = [
-  { type: "HEADING", label: "Heading", icon: DocumentTextIcon },
-  { type: "PARAGRAPH", label: "Paragraph", icon: DocumentTextIcon },
-  { type: "QUOTE", label: "Quote", icon: DocumentTextIcon },
-  { type: "IMAGE", label: "Image", icon: PhotoIcon },
-  { type: "GALLERY", label: "Gallery", icon: RectangleGroupIcon },
-  { type: "INFO", label: "Info box", icon: DocumentTextIcon },
-  { type: "DIVIDER", label: "Divider", icon: DocumentTextIcon },
-  { type: "MAP", label: "Map", icon: MapPinIcon },
+  { type: "HEADING", labelKey: "admin.block_type_heading", icon: DocumentTextIcon },
+  { type: "PARAGRAPH", labelKey: "admin.block_type_paragraph", icon: DocumentTextIcon },
+  { type: "QUOTE", labelKey: "admin.block_type_quote", icon: DocumentTextIcon },
+  { type: "IMAGE", labelKey: "admin.block_type_image", icon: PhotoIcon },
+  { type: "GALLERY", labelKey: "admin.block_type_gallery", icon: RectangleGroupIcon },
+  { type: "INFO", labelKey: "admin.block_type_info", icon: DocumentTextIcon },
+  { type: "DIVIDER", labelKey: "admin.block_type_divider", icon: DocumentTextIcon },
+  { type: "MAP", labelKey: "admin.block_type_map", icon: MapPinIcon },
 ];
 
 export const emptyBlock = (type) => {

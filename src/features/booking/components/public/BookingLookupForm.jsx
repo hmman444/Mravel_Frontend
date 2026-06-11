@@ -53,14 +53,10 @@ export default function BookingLookupForm({
           className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3"
           onSubmit={async (e) => {
             e.preventDefault();
-
-            console.log("SUBMIT fired", { bookingCode, phoneLast4, email });
-
             try {
               await onSubmit?.(); // await
-              console.log("SUBMIT done");
-            } catch (err) {
-              console.error("SUBMIT error:", err); //thấy lỗi rõ ràng
+            } catch {
+              // lỗi lookup đã được slice xử lý & hiển thị qua `error`
             }
           }}
         >

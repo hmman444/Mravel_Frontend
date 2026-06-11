@@ -53,7 +53,7 @@ export default function ExtraCostsSection({
 
         <div className="space-y-2">
           {extraCosts.map((c, i) => (
-            <div key={i} className="grid grid-cols-12 gap-2 items-center">
+            <div key={c._key ?? c.id ?? `extra-${i}`} className="grid grid-cols-12 gap-2 items-center">
               {/* Lý do */}
               <input
                 className={`${inputBase} col-span-4 text-xs`}

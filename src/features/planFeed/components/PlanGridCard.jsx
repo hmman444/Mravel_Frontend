@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapPin, Calendar, Wallet, Star, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -49,6 +50,7 @@ function formatBudget(amount) {
  */
 export default function PlanGridCard({ plan, searchQuery = "" }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const desc = truncate(plan.description || "", 90);
 
   const coverImage = useMemo(() => {
@@ -84,7 +86,7 @@ export default function PlanGridCard({ plan, searchQuery = "" }) {
       whileHover={{ y: -6, transition: { duration: 0.2, ease: "easeOut" } }}
       className="group rounded-2xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl dark:hover:shadow-black/40 transition-shadow duration-300 cursor-pointer flex flex-col"
       onClick={() => {
-        window.location.href = `/plans/${plan.id}`;
+        navigate(`/plans/${plan.id}`);
       }}
     >
       {/* Cover image — 16:9 */}

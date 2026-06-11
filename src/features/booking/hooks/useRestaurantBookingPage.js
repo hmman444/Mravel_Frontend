@@ -179,6 +179,44 @@ export function useRestaurantBookingPage() {
   const onPay = useCallback(async () => {
     if (!restaurant || !tableTypeId || !date || !time) return;
 
+    // Require a logged-in user before creating a payment (mirrors hotel hook).
+    if (!userId) {
+      showError(t("booking.error_login_required"));
+      return;
+    }
+
+    // Validate contact fields (mirrors hotel hook rules) before paying.
+    const name = (contactName || "").trim();
+    const phone = (contactPhone || "").trim();
+    const email = (contactEmail || "").trim();
+    const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!name) {
+      showError(t("booking.error_name_required"));
+      return;
+    }
+    if (!nameRegex.test(name)) {
+      showError(t("booking.error_name_letters_only"));
+      return;
+    }
+    if (!phone) {
+      showError(t("booking.error_phone_required"));
+      return;
+    }
+    if (!/^\d+$/.test(phone)) {
+      showError(t("booking.error_phone_digits_only"));
+      return;
+    }
+    if (phone.length !== 10) {
+      showError(t("booking.error_phone_exact_10"));
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      showError(t("booking.error_email_invalid"));
+      return;
+    }
+
     // optional: chặn sớm để khỏi “Uncaught”
     if (!tableTypeId) throw new Error(t("booking.no_table_type_selected"));
     if (!tablesCount || tablesCount <= 0) throw new Error(t("booking.invalid_table_count"));

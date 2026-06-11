@@ -293,13 +293,13 @@ export default function EditProfileModal({
               label={t("user.city_label")}
               value={form.city}
               onChange={handleChange("city")}
-              placeholder="TP. Hồ Chí Minh"
+              placeholder={t("user.city_placeholder")}
             />
             <Input
               label={t("user.country")}
               value={form.country}
               onChange={handleChange("country")}
-              placeholder="Việt Nam"
+              placeholder={t("user.country_placeholder")}
             />
           </div>
 

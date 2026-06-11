@@ -159,7 +159,7 @@ export default function AdminDashboard() {
       const d = await fetchDashboard(range);
       setData(d);
     } catch (e) {
-      setError(e?.message || t("admin.error_generic", "Đã có lỗi xảy ra"));
+      setError(e?.message || t("admin.error_generic"));
     } finally {
       setLoading(false);
     }
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
           {loading && !data ? (
             <div className="flex items-center justify-center py-24 text-slate-500 dark:text-slate-300">
               <ArrowPathIcon className="h-6 w-6 animate-spin" />
-              <span className="ml-2 text-sm">{t("common.loading", "Đang tải...")}</span>
+              <span className="ml-2 text-sm">{t("common.loading")}</span>
             </div>
           ) : (
             <>
@@ -416,7 +416,7 @@ export default function AdminDashboard() {
                             {topServices.length === 0 ? (
                               <tr>
                                 <td colSpan={3} className="px-3 py-6 text-center text-slate-400">
-                                  {t("admin.plan_stat.empty", "Chưa có dữ liệu")}
+                                  {t("admin.plan_stat.empty")}
                                 </td>
                               </tr>
                             ) : (
@@ -469,7 +469,7 @@ export default function AdminDashboard() {
                             {topPartners.length === 0 ? (
                               <tr>
                                 <td colSpan={3} className="px-3 py-6 text-center text-slate-400">
-                                  {t("admin.plan_stat.empty", "Chưa có dữ liệu")}
+                                  {t("admin.plan_stat.empty")}
                                 </td>
                               </tr>
                             ) : (
@@ -571,7 +571,7 @@ export default function AdminDashboard() {
                     <div className="space-y-3">
                       {statusRows.length === 0 ? (
                         <div className="py-6 text-center text-sm text-slate-400">
-                          {t("admin.plan_stat.empty", "Chưa có dữ liệu")}
+                          {t("admin.plan_stat.empty")}
                         </div>
                       ) : (
                         statusRows.map((x) => (

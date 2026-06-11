@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector, useDispatch } from "react-redux";
 import { createPrivateConversation, createGroupConversation, searchUsers } from "../services/chatService";
 import { loadFriends } from "../slices/chatSlice";
+import { showError } from "../../../utils/toastUtils";
 import SafeAvatar from "./SafeAvatar";
 import { XMarkIcon, MagnifyingGlassIcon, UserGroupIcon, CheckIcon } from "@heroicons/react/24/outline";
 
@@ -90,7 +91,7 @@ export default function NewChatModal({ onClose, onCreated, initialMode = "privat
       }
       onCreated(conv);
     } catch (e) {
-      console.error(e);
+      showError(e?.response?.data?.message || t("common.error_occurred"));
     } finally {
       setCreating(false);
     }

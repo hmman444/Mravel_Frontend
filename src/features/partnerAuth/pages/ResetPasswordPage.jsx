@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
   const email =
     searchParams.get("email") || localStorage.getItem("partner_last_fp_email") || "";
 
-  const { handleResetPassword, loading, error } = useResetPassword();
+  const { handleResetPassword, loading, error, message } = useResetPassword();
   const { handleForgot, cooldown } = useForgotPassword();
 
   const [otp, setOtp] = useState("");
@@ -115,6 +115,7 @@ export default function ResetPasswordPage() {
           </button>
 
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+          {message && <p className="text-green-600 text-sm text-center mt-2">{message}</p>}
         </form>
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">

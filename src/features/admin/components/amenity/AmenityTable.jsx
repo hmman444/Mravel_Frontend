@@ -41,12 +41,12 @@ export default function AmenityTable({
             <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
               <th className="px-4 py-3 w-[64px] text-center">#</th>
               <th className="px-4 py-3 w-[360px]">{t("admin.amenity")}</th>
-              <th className="px-4 py-3">Code</th>
-              <th className="px-4 py-3">Scope</th>
-              <th className="px-4 py-3">Group</th>
-              <th className="px-4 py-3">Section</th>
-              <th className="px-4 py-3 text-center">Active</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">{t("admin.field_code")}</th>
+              <th className="px-4 py-3">{t("admin.field_scope")}</th>
+              <th className="px-4 py-3">{t("admin.field_group")}</th>
+              <th className="px-4 py-3">{t("admin.field_section")}</th>
+              <th className="px-4 py-3 text-center">{t("admin.field_active")}</th>
+              <th className="px-4 py-3 text-right">{t("admin.field_actions")}</th>
             </tr>
           </thead>
 

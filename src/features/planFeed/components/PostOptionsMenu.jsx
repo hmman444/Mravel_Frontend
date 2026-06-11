@@ -45,8 +45,8 @@ export default function PostOptionsMenu({ isOwnPost, onHide, onBlock, onReport }
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition"
-        title={t("feed.post.options", "Tùy chọn")}
-        aria-label={t("feed.post.options", "Tùy chọn")}
+        title={t("feed.post.options")}
+        aria-label={t("feed.post.options")}
       >
         <EllipsisHorizontalIcon className="w-5 h-5" />
       </button>
@@ -54,7 +54,7 @@ export default function PostOptionsMenu({ isOwnPost, onHide, onBlock, onReport }
       {open && (
         <div className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg py-1 text-sm">
           <button type="button" onClick={run(onHide)} className={`${itemBase} text-gray-700 dark:text-gray-200`}>
-            <EyeSlashIcon className="w-4 h-4" /> {t("feed.post.hide", "Ẩn bài viết")}
+            <EyeSlashIcon className="w-4 h-4" /> {t("feed.post.hide")}
           </button>
           {!isOwnPost && (
             <button
@@ -62,11 +62,11 @@ export default function PostOptionsMenu({ isOwnPost, onHide, onBlock, onReport }
               onClick={run(onBlock)}
               className={`${itemBase} text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30`}
             >
-              <NoSymbolIcon className="w-4 h-4" /> {t("feed.post.block_author", "Chặn người này")}
+              <NoSymbolIcon className="w-4 h-4" /> {t("feed.post.block_author")}
             </button>
           )}
           <button type="button" onClick={run(onReport)} className={`${itemBase} text-gray-700 dark:text-gray-200`}>
-            <FlagIcon className="w-4 h-4" /> {t("feed.post.report", "Báo cáo")}
+            <FlagIcon className="w-4 h-4" /> {t("feed.post.report")}
           </button>
         </div>
       )}

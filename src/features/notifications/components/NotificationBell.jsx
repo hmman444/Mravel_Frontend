@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useNotifications } from "../hooks/useNotifications";
 import NotificationDropdown from "./NotificationDropdown";
+import { showError } from "../../../utils/toastUtils";
 
 export default function NotificationBell({ solid, onOpen }) {
+  const { t } = useTranslation();
   const {
     dropdownOpen,
     toggle,
@@ -36,8 +39,10 @@ export default function NotificationBell({ solid, onOpen }) {
   useEffect(() => {
     if (!dropdownOpen) return;
     if (initialized || items.length > 0 || loading) return;
-    load().catch(() => {});
-  }, [dropdownOpen, initialized, load, loading, items.length]);
+    load().catch((err) => {
+      showError(err?.message || t("common.error_occurred"));
+    });
+  }, [dropdownOpen, initialized, load, loading, items.length, t]);
 
   return (
     <div className="relative" ref={wrapRef}>

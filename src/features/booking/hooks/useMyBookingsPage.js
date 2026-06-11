@@ -114,6 +114,22 @@ export function useMyBookingsPage() {
     dispatch(fetchMyUserRestaurantBookings());
   }, [dispatch, tab, isLoggedIn, user?.id]);
 
+  //  khi tab trình duyệt hiển thị lại (vd: quay về từ PaymentReturnPage)
+  //  => refetch để thấy trạng thái booking mới nhất
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      dispatch(fetchGuestMyBookings());
+      dispatch(fetchGuestMyRestaurantBookings());
+      if (tab === "ACCOUNT" && isLoggedIn) {
+        dispatch(fetchMyUserBookings(user.id));
+        dispatch(fetchMyUserRestaurantBookings());
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [dispatch, tab, isLoggedIn, user?.id]);
+
   //  Actions (DEVICE) 
   const onRefreshDevice = useCallback(() => {
     if (type === "HOTEL") dispatch(fetchGuestMyBookings());
@@ -165,11 +181,9 @@ export function useMyBookingsPage() {
     };
 
     if (type === "RESTAURANT") {
-      const data = await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
-      console.log("LOOKUP REST unwrap:", data);
+      await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
     } else {
-      const data = await dispatch(lookupBookingPublic(payload)).unwrap();
-      console.log("LOOKUP HOTEL unwrap:", data);
+      await dispatch(lookupBookingPublic(payload)).unwrap();
     }
   }, [dispatch, type, form]);
 

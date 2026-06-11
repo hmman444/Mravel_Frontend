@@ -80,7 +80,11 @@ export default function ProfileFriendsAboutSection({
               })}
             </p>
           </div>
-          <button className="text-xs sm:text-sm text-sky-600 dark:text-sky-300 hover:underline">
+          <button
+            disabled
+            title={t("coming_soon.title")}
+            className="text-xs sm:text-sm text-sky-600 dark:text-sky-300 hover:underline cursor-not-allowed opacity-60"
+          >
             {t("user.manage_friends_list")}
           </button>
         </div>

@@ -157,7 +157,7 @@ export default function AmenityFormModal({
                 {/* Code * */}
                 <div>
                   <label className={ui.label}>
-                    Code <Required />
+                    {t("admin.field_code")} <Required />
                   </label>
                   <input
                     name="code"
@@ -171,7 +171,7 @@ export default function AmenityFormModal({
 
                 {/* Icon (optional) */}
                 <div>
-                  <label className={ui.label}>Icon</label>
+                  <label className={ui.label}>{t("admin.field_icon")}</label>
                   <input
                     name="icon"
                     defaultValue={editing?.icon || ""}
@@ -209,7 +209,7 @@ export default function AmenityFormModal({
                 {/* Scope * */}
                 <div>
                   <label className={ui.label}>
-                    Scope <Required />
+                    {t("admin.field_scope")} <Required />
                   </label>
                   <select
                     name="scope"
@@ -228,7 +228,7 @@ export default function AmenityFormModal({
                 {/* Group * */}
                 <div>
                   <label className={ui.label}>
-                    Group <Required />
+                    {t("admin.field_group")} <Required />
                   </label>
                   <select
                     name="group"
@@ -247,7 +247,7 @@ export default function AmenityFormModal({
                 {/* Section * */}
                 <div className="sm:col-span-2">
                   <label className={ui.label}>
-                    Section <Required />
+                    {t("admin.field_section")} <Required />
                   </label>
                   <select
                     name="section"

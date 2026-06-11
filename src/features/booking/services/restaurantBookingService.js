@@ -47,7 +47,6 @@ export const createRestaurantBookingAndPay = async (payload) => {
     const dto = apiRes?.data ?? apiRes;
     return { success: true, data: dto };
   } catch (error) {
-    console.error("createRestaurantBookingAndPay error:", error?.response || error);
     return toError(error, i18n.t("booking.error_create_reservation_payment"));
   }
 };
@@ -76,7 +75,6 @@ export const getRestaurantAvailability = async ({
 
     return { success: true, data: res.data?.data };
   } catch (error) {
-    console.error("getRestaurantAvailability error:", error?.response || error);
     return toError(error, i18n.t("booking.error_check_table_availability"));
   }
 };

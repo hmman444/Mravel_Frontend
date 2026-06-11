@@ -135,8 +135,7 @@ export default function PersonalInfoForm() {
       } else {
         showError(action.payload || t("user.update_profile_failed"));
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       showError(t("user.update_profile_error"));
     } finally {
       setSaving(false);

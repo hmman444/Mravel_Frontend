@@ -198,10 +198,10 @@ export default function PlanAnalyticsPage() {
       } else {
         await resolveReport(target.id, "TAKEDOWN", input);
       }
-      showSuccess(t("admin.plan_stat.takedown_done", "Đã gỡ bài viết"));
+      showSuccess(t("admin.plan_stat.takedown_done"));
       await load();
     } catch (e) {
-      showError(e?.message || t("admin.error_generic", "Đã có lỗi xảy ra"));
+      showError(e?.message || t("admin.error_generic"));
     } finally {
       setBusyId(null);
     }
@@ -211,10 +211,10 @@ export default function PlanAnalyticsPage() {
     setBusyId(`r${reportId}`);
     try {
       await resolveReport(reportId, "NONE", null);
-      showSuccess(t("admin.plan_stat.report_dismissed", "Đã bỏ qua báo cáo"));
+      showSuccess(t("admin.plan_stat.report_dismissed"));
       await load();
     } catch (e) {
-      showError(e?.message || t("admin.error_generic", "Đã có lỗi xảy ra"));
+      showError(e?.message || t("admin.error_generic"));
     } finally {
       setBusyId(null);
     }
@@ -227,9 +227,9 @@ export default function PlanAnalyticsPage() {
           {/* Header */}
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className={ui.h1}>{t("admin.plan_stat.title", "Thống kê Plan & Bài viết")}</h1>
+              <h1 className={ui.h1}>{t("admin.plan_stat.title")}</h1>
               <p className={ui.sub}>
-                {t("admin.plan_stat.subtitle", "Theo dõi nội dung, tương tác và kiểm duyệt bài viết")}
+                {t("admin.plan_stat.subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -238,13 +238,13 @@ export default function PlanAnalyticsPage() {
                 onChange={(e) => setDays(Number(e.target.value))}
                 className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm outline-none dark:bg-slate-900 dark:text-slate-100"
               >
-                <option value={7}>{t("admin.range.weekly", "7 ngày")}</option>
-                <option value={30}>{t("admin.range.monthly", "30 ngày")}</option>
-                <option value={90}>{t("admin.plan_stat.range_90", "90 ngày")}</option>
+                <option value={7}>{t("admin.range.weekly")}</option>
+                <option value={30}>{t("admin.range.monthly")}</option>
+                <option value={90}>{t("admin.plan_stat.range_90")}</option>
               </select>
               <button type="button" className={`${ui.btn} ${ui.btnGhost}`} onClick={load} disabled={loading}>
                 <ArrowPathIcon className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
-                {t("admin.reload", "Tải lại")}
+                {t("admin.reload")}
               </button>
             </div>
           </div>
@@ -257,16 +257,16 @@ export default function PlanAnalyticsPage() {
 
           {/* KPI */}
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard icon={DocumentTextIcon} label={t("admin.plan_stat.total_plans", "Tổng số plan")} value={fmt(ov?.totalPlans)} sub={t("admin.plan_stat.public_n", { defaultValue: "{{n}} công khai", n: fmt(ov?.publicPlans) })} accent="blue" />
-            <StatCard icon={GlobeAltIcon} label={t("admin.plan_stat.new_30d", "Plan mới (30 ngày)")} value={fmt(ov?.newPlans30d)} sub={t("admin.plan_stat.new_7d", { defaultValue: "{{n}} trong 7 ngày", n: fmt(ov?.newPlans7d) })} accent="green" />
-            <StatCard icon={EyeIcon} label={t("admin.plan_stat.total_views", "Tổng lượt xem")} value={fmt(ov?.totalViews)} accent="amber" />
-            <StatCard icon={HeartIcon} label={t("admin.plan_stat.engagement", "Tương tác")} value={fmt((ov?.totalReactions || 0) + (ov?.totalComments || 0))} sub={t("admin.plan_stat.react_comment", { defaultValue: "{{r}} reactions • {{c}} bình luận", r: fmt(ov?.totalReactions), c: fmt(ov?.totalComments) })} accent="violet" />
+            <StatCard icon={DocumentTextIcon} label={t("admin.plan_stat.total_plans")} value={fmt(ov?.totalPlans)} sub={t("admin.plan_stat.public_n", { n: fmt(ov?.publicPlans) })} accent="blue" />
+            <StatCard icon={GlobeAltIcon} label={t("admin.plan_stat.new_30d")} value={fmt(ov?.newPlans30d)} sub={t("admin.plan_stat.new_7d", { n: fmt(ov?.newPlans7d) })} accent="green" />
+            <StatCard icon={EyeIcon} label={t("admin.plan_stat.total_views")} value={fmt(ov?.totalViews)} accent="amber" />
+            <StatCard icon={HeartIcon} label={t("admin.plan_stat.engagement")} value={fmt((ov?.totalReactions || 0) + (ov?.totalComments || 0))} sub={t("admin.plan_stat.react_comment", { r: fmt(ov?.totalReactions), c: fmt(ov?.totalComments) })} accent="violet" />
           </div>
 
           {/* moderation KPI */}
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <StatCard icon={NoSymbolIcon} label={t("admin.plan_stat.taken_down", "Bài đã gỡ")} value={fmt(ov?.takenDownPlans)} accent="rose" />
-            <StatCard icon={FlagIcon} label={t("admin.plan_stat.pending_reports", "Báo cáo chờ xử lý")} value={fmt(ov?.pendingReports)} accent="amber" />
+            <StatCard icon={NoSymbolIcon} label={t("admin.plan_stat.taken_down")} value={fmt(ov?.takenDownPlans)} accent="rose" />
+            <StatCard icon={FlagIcon} label={t("admin.plan_stat.pending_reports")} value={fmt(ov?.pendingReports)} accent="amber" />
           </div>
 
           {/* charts */}
@@ -275,7 +275,7 @@ export default function PlanAnalyticsPage() {
               <div className="mb-3 flex items-center gap-2">
                 <ChartBarIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                  {t("admin.plan_stat.new_by_day", "Bài viết mới theo ngày")}
+                  {t("admin.plan_stat.new_by_day")}
                 </h3>
               </div>
               <div className="h-[300px]">
@@ -291,27 +291,27 @@ export default function PlanAnalyticsPage() {
                     <XAxis dataKey="label" fontSize={11} />
                     <YAxis fontSize={11} allowDecimals={false} />
                     <Tooltip />
-                    <Area type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={2} fill="url(#gPlans)" name={t("admin.plan_stat.new_plans", "Plan mới")} />
+                    <Area type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={2} fill="url(#gPlans)" name={t("admin.plan_stat.new_plans")} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
-            <Donut title={t("admin.plan_stat.by_visibility", "Theo quyền hiển thị")} items={visItems} />
+            <Donut title={t("admin.plan_stat.by_visibility")} items={visItems} />
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Donut title={t("admin.plan_stat.by_status", "Theo trạng thái")} items={statusItems} />
+            <Donut title={t("admin.plan_stat.by_status")} items={statusItems} />
             {/* Top plans */}
             <div className={ui.card}>
               <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
-                {t("admin.plan_stat.top_plans", "Top bài viết theo lượt xem")}
+                {t("admin.plan_stat.top_plans")}
               </h3>
               <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
                 <table className="min-w-full text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300">
                     <tr>
-                      <th className="px-3 py-2 text-left font-semibold">{t("admin.plan_stat.col_title", "Tiêu đề")}</th>
-                      <th className="px-3 py-2 text-right font-semibold">{t("admin.plan_stat.col_views", "Lượt xem")}</th>
+                      <th className="px-3 py-2 text-left font-semibold">{t("admin.plan_stat.col_title")}</th>
+                      <th className="px-3 py-2 text-right font-semibold">{t("admin.plan_stat.col_views")}</th>
                       <th className="px-3 py-2 text-right font-semibold"></th>
                     </tr>
                   </thead>
@@ -327,13 +327,13 @@ export default function PlanAnalyticsPage() {
                             onClick={() => setTakedownModal({ kind: "plan", id: p.id })}
                             className={`${ui.pill} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-200 dark:border-rose-900`}
                           >
-                            {t("admin.plan_stat.takedown", "Gỡ")}
+                            {t("admin.plan_stat.takedown")}
                           </button>
                         </td>
                       </tr>
                     ))}
                     {(stats?.topPlans || []).length === 0 && (
-                      <tr><td colSpan={3} className="px-3 py-6 text-center text-slate-400">{t("admin.plan_stat.empty", "Chưa có dữ liệu")}</td></tr>
+                      <tr><td colSpan={3} className="px-3 py-6 text-center text-slate-400">{t("admin.plan_stat.empty")}</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -346,7 +346,7 @@ export default function PlanAnalyticsPage() {
             <div className="mb-4 flex items-center gap-2">
               <FlagIcon className="h-5 w-5 text-slate-500 dark:text-slate-300" />
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                {t("admin.plan_stat.report_queue", "Hàng đợi báo cáo (chờ xử lý)")}
+                {t("admin.plan_stat.report_queue")}
               </h3>
             </div>
             <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
@@ -354,9 +354,9 @@ export default function PlanAnalyticsPage() {
                 <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-3 py-2 text-left font-semibold">Plan</th>
-                    <th className="px-3 py-2 text-left font-semibold">{t("admin.plan_stat.col_reason", "Lý do")}</th>
-                    <th className="px-3 py-2 text-left font-semibold">{t("admin.plan_stat.col_detail", "Chi tiết")}</th>
-                    <th className="px-3 py-2 text-right font-semibold">{t("admin.plan_stat.col_actions", "Hành động")}</th>
+                    <th className="px-3 py-2 text-left font-semibold">{t("admin.plan_stat.col_reason")}</th>
+                    <th className="px-3 py-2 text-left font-semibold">{t("admin.plan_stat.col_detail")}</th>
+                    <th className="px-3 py-2 text-right font-semibold">{t("admin.plan_stat.col_actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -377,7 +377,7 @@ export default function PlanAnalyticsPage() {
                             onClick={() => setTakedownModal({ kind: "report", id: r.id })}
                             className={`${ui.pill} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-200 dark:border-rose-900`}
                           >
-                            {t("admin.plan_stat.takedown", "Gỡ bài")}
+                            {t("admin.plan_stat.takedown")}
                           </button>
                           <button
                             type="button"
@@ -385,14 +385,14 @@ export default function PlanAnalyticsPage() {
                             onClick={() => onDismiss(r.id)}
                             className={`${ui.pill} border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800`}
                           >
-                            {t("admin.plan_stat.dismiss", "Bỏ qua")}
+                            {t("admin.plan_stat.dismiss")}
                           </button>
                         </div>
                       </td>
                     </tr>
                   ))}
                   {reports.length === 0 && (
-                    <tr><td colSpan={4} className="px-3 py-6 text-center text-slate-400">{t("admin.plan_stat.no_reports", "Không có báo cáo nào đang chờ")}</td></tr>
+                    <tr><td colSpan={4} className="px-3 py-6 text-center text-slate-400">{t("admin.plan_stat.no_reports")}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -402,12 +402,12 @@ export default function PlanAnalyticsPage() {
       </div>
       <PromptModal
         open={!!takedownModal}
-        title={t("admin.plan_stat.takedown", "Gỡ bài")}
-        description={t("admin.plan_stat.takedown_desc", "Bài sẽ bị ép về PRIVATE và khóa vĩnh viễn (không thể bật lại).")}
-        inputLabel={t("admin.plan_stat.takedown_reason", "Lý do gỡ bài:")}
-        inputPlaceholder={t("admin.plan_stat.takedown_reason_ph", "Nhập lý do...")}
+        title={t("admin.plan_stat.takedown")}
+        description={t("admin.plan_stat.takedown_desc")}
+        inputLabel={t("admin.plan_stat.takedown_reason")}
+        inputPlaceholder={t("admin.plan_stat.takedown_reason_ph")}
         multiline
-        confirmText={t("admin.plan_stat.takedown", "Gỡ bài")}
+        confirmText={t("admin.plan_stat.takedown")}
         tone="danger"
         onConfirm={doTakedown}
         onClose={() => setTakedownModal(null)}

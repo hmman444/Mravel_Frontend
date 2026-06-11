@@ -27,7 +27,9 @@ export default function EmailCard() {
         </div>
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800"
+          disabled
+          title={t("coming_soon.title")}
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 cursor-not-allowed opacity-60"
         >
           <Plus className="w-3 h-3" />
           {t("user.add_email")}

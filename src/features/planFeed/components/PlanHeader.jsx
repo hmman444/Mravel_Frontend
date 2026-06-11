@@ -55,8 +55,8 @@ export default function PlanHeader({
         title={author?.id ? t("feed.viewProfileOf", { name: author.name }) : ""}
       >
         <img
-          src={author.avatar}
-          alt={author.name}
+          src={author?.avatar}
+          alt={author?.name || ""}
           className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-90 transition"
         />
       </Link>
@@ -71,7 +71,7 @@ export default function PlanHeader({
             {author.name}
           </Link>
         ) : (
-          author.name
+          author?.name
         )}
       </div>
         <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400">

@@ -71,7 +71,25 @@
         "op_rename_list": "Đổi tên ngày",
         "op_delete_list": "Xoá ngày",
         "op_add_day": "Thêm ngày",
-        "op_update_plan": "Sửa plan"
+        "op_update_plan": "Sửa plan",
+        "draft": {
+            "type_stay": "Lưu trú",
+            "type_food": "Ẩm thực",
+            "type_sightseeing": "Tham quan",
+            "type_transport": "Di chuyển",
+            "type_entertain": "Giải trí",
+            "type_event": "Sự kiện",
+            "type_shopping": "Mua sắm",
+            "type_cinema": "Rạp phim",
+            "type_other": "Khác",
+            "default_summary": "Lịch trình tại {{destination}}",
+            "meta_destination": "Điểm đến",
+            "meta_range": "Khoảng",
+            "meta_travelers": "Người",
+            "meta_total_cost": "Tổng chi phí",
+            "travelers_count": "{{count}} người",
+            "days_activities": "{{days}} ngày · {{activities}} hoạt động"
+        }
     },
     "nav": {
         "hotels": "Khách sạn",
@@ -81,7 +99,10 @@
         "partner": "Hợp tác",
         "language": "Ngôn ngữ",
         "theme_toggle": "Chế độ sáng/tối",
-        "notifications": "Thông báo"
+        "notifications": "Thông báo",
+        "aria_toggle_theme": "Đổi chế độ sáng tối",
+        "aria_select_language": "Ngôn ngữ",
+        "aria_notifications": "Thông báo"
     },
     "common": {
         "skip": "Để sau",
@@ -1197,6 +1218,8 @@
         "secondary_email_placeholder": "Ví dụ: email 2",
         "tertiary_email_label": "Email khác",
         "tertiary_email_placeholder": "Ví dụ: email 3",
+        "city_placeholder": "VD: TP. Hồ Chí Minh",
+        "country_placeholder": "VD: Việt Nam",
         "address_placeholder": "Số nhà, đường, phường/xã...",
         "no_bio_yet": "Người dùng chưa thêm giới thiệu.",
         "living_in": "Sống tại {{city}}",
@@ -2060,7 +2083,22 @@
         "error_unauthorized": "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.",
         "col_partner": "Đối tác",
         "col_active": "Hoạt động",
-        "col_unlock": "Mở khóa?"
+        "col_unlock": "Mở khóa?",
+        "field_code": "Mã",
+        "field_icon": "Biểu tượng",
+        "field_scope": "Phạm vi",
+        "field_group": "Nhóm",
+        "field_section": "Mục",
+        "field_active": "Hoạt động",
+        "field_actions": "Hành động",
+        "block_type_heading": "Tiêu đề",
+        "block_type_paragraph": "Đoạn văn",
+        "block_type_quote": "Trích dẫn",
+        "block_type_image": "Hình ảnh",
+        "block_type_gallery": "Bộ sưu tập",
+        "block_type_info": "Hộp thông tin",
+        "block_type_divider": "Đường phân cách",
+        "block_type_map": "Bản đồ"
     },
     "partner": {
         "booking_status": {
@@ -4420,6 +4458,8 @@
         "see_all_places": "Xem tất cả địa điểm",
         "plans_title": "Lịch trình gợi ý",
         "plans_subtitle": "Tham khảo những hành trình mẫu rồi tùy chỉnh theo phong cách của bạn.",
+        "plans_error": "Không thể tải danh sách lịch trình gợi ý.",
+        "plans_empty": "Hiện chưa có lịch trình gợi ý để hiển thị.",
         "see_feed": "Xem bảng tin",
         "mravel_suggest": "Gợi ý Mravel",
         "see_detail": "Xem chi tiết",

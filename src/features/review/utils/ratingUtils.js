@@ -6,7 +6,7 @@ import i18n from "../../../i18n";
  */
 export function getRatingLabel(score) {
   const n = parseFloat(score);
-  if (!score || isNaN(n)) return null;
+  if (score == null || isNaN(n)) return null;
   if (n >= 4.5) return i18n.t("review.rating_excellent");
   if (n >= 4.0) return i18n.t("review.rating_good");
   if (n >= 3.0) return i18n.t("review.rating_average");

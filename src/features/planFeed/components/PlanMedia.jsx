@@ -84,7 +84,15 @@ export default function PlanMedia({ images = [], videos = [], full = false, canE
 
           const thumbnail =
             item.type === "image" ? (
-              <img src={item.src} className={thumbClass} />
+              <img
+                src={item.src}
+                className={thumbClass}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src =
+                    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+                }}
+              />
             ) : (
               <div className="relative w-full h-40 md:h-48 bg-black flex items-center justify-center cursor-zoom-in">
                 <video
@@ -109,6 +117,11 @@ export default function PlanMedia({ images = [], videos = [], full = false, canE
                     <img
                       src={item.src}
                       className="w-full h-72 md:h-80 object-cover cursor-zoom-in transition-transform duration-200 hover:scale-[1.02]"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src =
+                          "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+                      }}
                     />
                   ) : (
                     <div className="relative w-full h-72 md:h-80 bg-black flex items-center justify-center">
@@ -191,6 +204,11 @@ export default function PlanMedia({ images = [], videos = [], full = false, canE
                   <img
                     src={allItems[currentIndex]?.src}
                     className="max-h-[75vh] w-full object-contain rounded-xl shadow-2xl bg-black/60"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src =
+                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+                    }}
                   />
                 )}
 
@@ -220,7 +238,15 @@ export default function PlanMedia({ images = [], videos = [], full = false, canE
                       }`}
                     >
                       {item.type === "image" ? (
-                        <img src={item.src} className="w-full h-full object-cover" />
+                        <img
+                          src={item.src}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src =
+                              "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+                          }}
+                        />
                       ) : (
                         <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                           <PlayIcon className="w-3 h-3 text-white" />

@@ -69,8 +69,7 @@ export default function PlanComments({
       setText("");
       // gửi comment mới thì tự mở khu bình luận
       setShowComments(true);
-    } catch (err) {
-      console.error(err);
+    } catch {
       showError(t("feed.comment.sendFailed"));
     } finally {
       setLoading(false);
@@ -87,8 +86,12 @@ export default function PlanComments({
       text: replyText,
       parentId,
     };
-    await sendComment(planId, reply);
-    setShowComments(true);
+    try {
+      await sendComment(planId, reply);
+      setShowComments(true);
+    } catch {
+      showError(t("feed.comment.sendFailed"));
+    }
   };
 
   // helper tạo key ổn định, không dùng Math.random nữa

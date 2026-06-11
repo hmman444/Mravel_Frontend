@@ -150,11 +150,13 @@ export default function ManageAmenitiesPage() {
   };
 
   const openCreate = () => {
+    setFormError("");
     setEditing(null);
     setShowModal(true);
   };
 
   const openEdit = (amenity) => {
+    setFormError("");
     setEditing(amenity);
     setShowModal(true);
   };
@@ -381,6 +383,8 @@ export default function ManageAmenitiesPage() {
         open={showModal}
         saving={saving}
         editing={editing}
+        apiError={formError}
+        onClearError={() => setFormError("")}
         onClose={() => setShowModal(false)}
         onSubmit={handleSubmit}
       />

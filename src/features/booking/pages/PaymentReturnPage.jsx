@@ -27,29 +27,38 @@ export default function PaymentReturnPage() {
   const cancelledRef = useRef(false);
 
   const poll = useCallback(async () => {
-    let attempt = 0;
-    while (!cancelledRef.current && attempt < MAX_POLLS) {
-      const res = await getBookingStatusByCode(code);
-      if (cancelledRef.current) return;
+    try {
+      let attempt = 0;
+      while (!cancelledRef.current && attempt < MAX_POLLS) {
+        const res = await getBookingStatusByCode(code);
+        if (cancelledRef.current) return;
 
-      const st = (res?.data?.status || "").toUpperCase();
-      if (res.success && CONFIRMED_STATUSES.includes(st)) {
-        setPhase("success");
-        return;
-      }
+        const st = (res?.data?.status || "").toUpperCase();
+        if (res.success && CONFIRMED_STATUSES.includes(st)) {
+          setPhase("success");
+          return;
+        }
 
-      attempt += 1;
-      if (attempt < MAX_POLLS) {
-        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+        attempt += 1;
+        if (attempt < MAX_POLLS) {
+          await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+        }
       }
+      // Đã thanh toán nhưng backend chưa cập nhật xong (IPN trễ) -> vẫn báo tích cực
+      if (!cancelledRef.current) setPhase("pending");
+    } catch {
+      // Lỗi mạng / server bất thường khi poll -> hiển thị trạng thái lỗi
+      if (!cancelledRef.current) setPhase("error");
     }
-    // Đã thanh toán nhưng backend chưa cập nhật xong (IPN trễ) -> vẫn báo tích cực
-    if (!cancelledRef.current) setPhase("pending");
   }, [code]);
 
   useEffect(() => {
     cancelledRef.current = false;
-    if (phase === "confirming") poll();
+    if (phase === "confirming") {
+      poll().catch(() => {
+        if (!cancelledRef.current) setPhase("error");
+      });
+    }
     return () => {
       cancelledRef.current = true;
     };

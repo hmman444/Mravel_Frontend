@@ -159,7 +159,9 @@ export default function NotificationItem({ n, onRead, onClose }) {
 
         {n?.createdAt && (
           <p className="text-[11px] text-gray-400 mt-1">
-            {new Date(n.createdAt).toLocaleString("vi-VN")}
+            {new Date(n.createdAt).toLocaleString(
+              i18n.language === "en" ? "en-US" : "vi-VN"
+            )}
           </p>
         )}
       </div>

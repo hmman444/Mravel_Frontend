@@ -9,6 +9,7 @@ import {
   upsertConversation,
 } from "../slices/chatSlice";
 import { createPrivateConversation } from "../services/chatService";
+import { showError } from "../../../utils/toastUtils";
 import { PLANNER_CONV_ID } from "../planner";
 import ConversationItem from "./ConversationItem";
 import NewChatModal from "./NewChatModal";
@@ -77,11 +78,11 @@ export default function ConversationList({ activeId, onClose, showPlanner = fals
       dispatch(upsertConversation(conv));
       dispatch(setActiveConversation(conv.id));
     } catch (e) {
-      console.error(e);
+      showError(e?.response?.data?.message || t("common.error_occurred"));
     } finally {
       setStartingChat(null);
     }
-  }, [dispatch, startingChat]);
+  }, [dispatch, startingChat, t]);
 
   // Friends who don't already have a visible private conversation
   const existingPartnerIds = new Set(

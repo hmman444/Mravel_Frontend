@@ -7,8 +7,6 @@ export const getUserProfilePage = async (userId) => {
     const res = await api.get(`/users/${userId}/profile-page`);
     return { success: true, data: res.data };
   } catch (error) {
-    console.error("❌ getUserProfilePage error:", error.response?.data || error.message);
-
     return {
       success: false,
       message:
@@ -24,7 +22,6 @@ export const updateMyProfile = async (payload) => {
     const res = await api.put("/users/me", payload);
     return { success: true, data: res.data };
   } catch (error) {
-    console.error("❌ updateMyProfile error:", error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || i18n.t("user.update_profile_failed"),

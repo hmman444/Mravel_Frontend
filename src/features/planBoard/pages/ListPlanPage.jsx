@@ -107,8 +107,7 @@ export default function ListPlanPage() {
       } else {
         showError(t("plan.toast.copy_error"));
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       showError(t("plan.toast.copy_error"));
     }
   };
@@ -121,8 +120,7 @@ export default function ListPlanPage() {
       await reloadRecent?.();
 
       // nếu đang ở /my-plans thì vẫn ở lại, chỉ refresh danh sách
-    } catch (e) {
-      console.error(e);
+    } catch {
       showError(t("plan.toast.delete_error"));
     }
   };
@@ -130,8 +128,8 @@ export default function ListPlanPage() {
   const handleRemoveRecentFromSidebar = async (plan) => {
     try {
       await removeRecent(plan.id);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // ignore: removing a recent-plan shortcut is non-critical
     }
   };
 

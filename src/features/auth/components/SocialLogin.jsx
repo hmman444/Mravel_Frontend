@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { socialLoginUser } from "../slices/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { showError } from "../../../utils/toastUtils";
 
 export default function SocialLogin() {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ export default function SocialLogin() {
         // useGoogleLogin(flow="implicit") returns OAuth access_token for backend verification.
         const googleToken = tokenResponse?.access_token;
         if (!googleToken) {
-          console.error("Google login failed: missing access_token");
+          showError(t("common.error_occurred"));
           return;
         }
 
@@ -48,15 +49,15 @@ export default function SocialLogin() {
         if (socialLoginUser.fulfilled.match(action)) {
           goAfterLogin(action.payload.role); // lấy role từ payload
         } else {
-          console.error("Google socialLoginUser rejected:", action.payload);
+          showError(action.payload || t("common.error_occurred"));
         }
-      } catch (err) {
-        console.error("Google login error:", err);
+      } catch {
+        showError(t("common.error_occurred"));
       } finally {
         setLoading(false);
       }
     },
-    onError: (err) => console.error("Google Login Failed:", err),
+    onError: () => showError(t("common.error_occurred")),
     flow: "implicit",
   });
 
@@ -66,7 +67,7 @@ export default function SocialLogin() {
 
       const fbToken = response?.accessToken;
       if (!fbToken) {
-        console.error("Facebook login failed: missing accessToken");
+        showError(t("common.error_occurred"));
         return;
       }
 
@@ -81,10 +82,10 @@ export default function SocialLogin() {
       if (socialLoginUser.fulfilled.match(action)) {
         goAfterLogin(action.payload.role); // theo role
       } else {
-        console.error("Facebook socialLoginUser rejected:", action.payload);
+        showError(action.payload || t("common.error_occurred"));
       }
-    } catch (err) {
-      console.error("Facebook login error:", err);
+    } catch {
+      showError(t("common.error_occurred"));
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,7 @@ export default function SocialLogin() {
           fields="name,email,picture"
           scope="public_profile,email"
           onSuccess={handleFacebookSuccess}
-          onFail={(err) => console.error("Facebook Login Failed:", err)}
+          onFail={() => showError(t("common.error_occurred"))}
           render={({ onClick }) => (
             <button
               type="button"

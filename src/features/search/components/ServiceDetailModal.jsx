@@ -1,8 +1,10 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import Button from "../../../components/Button";
 
 export default function ServiceDetailModal({ data, onClose }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full p-6 relative">
@@ -16,6 +18,11 @@ export default function ServiceDetailModal({ data, onClose }) {
           src={data.img}
           alt={data.name}
           className="h-60 w-full object-cover rounded"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src =
+              "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+          }}
         />
         <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-neutral">
           {data.name}
@@ -37,8 +44,26 @@ export default function ServiceDetailModal({ data, onClose }) {
           >
             {t("common.close")}
           </Button>
-          {data.type === "restaurant" && <Button>{t("search.book_table")}</Button>}
-          {data.type === "hotel" && <Button>{t("search.book_room")}</Button>}
+          {data.type === "restaurant" && (
+            <Button
+              onClick={() => {
+                onClose?.();
+                navigate("/restaurants");
+              }}
+            >
+              {t("search.book_table")}
+            </Button>
+          )}
+          {data.type === "hotel" && (
+            <Button
+              onClick={() => {
+                onClose?.();
+                navigate("/hotels");
+              }}
+            >
+              {t("search.book_room")}
+            </Button>
+          )}
         </div>
       </div>
     </div>

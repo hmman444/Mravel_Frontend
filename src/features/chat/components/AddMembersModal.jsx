@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { addMembers } from "../services/chatService";
 import { loadFriends } from "../slices/chatSlice";
+import { showError } from "../../../utils/toastUtils";
 import SafeAvatar from "./SafeAvatar";
 
 export default function AddMembersModal({ conversationId, members, onClose, onAdded }) {
@@ -47,7 +48,7 @@ export default function AddMembersModal({ conversationId, members, onClose, onAd
       onAdded?.();
       onClose();
     } catch (e) {
-      console.error("Add members failed:", e);
+      showError(e?.response?.data?.message || t("common.error_occurred"));
     } finally {
       setLoading(false);
     }
