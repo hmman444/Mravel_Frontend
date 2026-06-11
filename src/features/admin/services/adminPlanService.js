@@ -28,10 +28,36 @@ export async function fetchPlanReports(params = {}) {
   return ensureOk(res);
 }
 
-/** Gỡ bài: ép PRIVATE + khóa vĩnh viễn (không thể bật lại). */
+/**
+ * Tìm kiếm/liệt kê TOÀN BỘ lịch trình cho admin (mọi visibility, kể cả đã gỡ).
+ * params: { q, visibility, status, locked, page, size, sort }
+ */
+export async function fetchAdminPlans(params = {}) {
+  const clean = {};
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") clean[k] = v;
+  });
+  const query = new URLSearchParams(clean).toString();
+  const res = await api.get(`${BASE}/list${query ? `?${query}` : ""}`);
+  return ensureOk(res);
+}
+
+/** Chi tiết một lịch trình + danh sách báo cáo (xem trước khi gỡ/bật lại). */
+export async function fetchAdminPlanDetail(id) {
+  const res = await api.get(`${BASE}/${id}/detail`);
+  return ensureOk(res);
+}
+
+/** Gỡ bài: ép PRIVATE + khóa (có thể bật lại). */
 export async function takedownPlan(id, reason) {
   const q = reason ? `?reason=${encodeURIComponent(reason)}` : "";
   const res = await api.patch(`${BASE}/${id}/takedown${q}`);
+  return ensureOk(res);
+}
+
+/** Bật lại bài đã gỡ: mở khóa (giữ nguyên PRIVATE). */
+export async function restorePlan(id) {
+  const res = await api.patch(`${BASE}/${id}/restore`);
   return ensureOk(res);
 }
 
