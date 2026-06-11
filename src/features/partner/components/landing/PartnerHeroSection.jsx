@@ -7,7 +7,7 @@ export default function PartnerHeroSection() {
   return (
     <section className="relative pt-10 pb-8">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_20px_60px_-25px_rgba(15,23,42,0.35)] overflow-hidden">
+        <div className="rounded-3xl border border-slate-200/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl shadow-[0_20px_60px_-25px_rgba(15,23,42,0.35)] overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 p-7 md:p-10 lg:p-12 items-center">
             {/* LEFT */}
             <div className="text-slate-900 dark:text-slate-100">
@@ -41,7 +41,7 @@ export default function PartnerHeroSection() {
             </div>
 
             {/* RIGHT CARD */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden">
               <div className="px-7 py-6">
                 <p className="text-slate-900 dark:text-slate-100 font-semibold text-lg">{t("partner.hero.signup_title")}</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -68,7 +68,7 @@ export default function PartnerHeroSection() {
                     to="/partner/register"
                     className="w-full inline-flex items-center justify-center gap-2
                                rounded-xl py-4 font-semibold
-                               bg-sky-600 text-white hover:bg-sky-700 transition"
+                               bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-400 transition"
                   >
                     {t("partner.hero.start_now")}
                     <ArrowRight className="w-5 h-5" />
@@ -93,8 +93,8 @@ export default function PartnerHeroSection() {
 
 function Pill({ icon, children }) {
   return (
-    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border border-slate-200 dark:border-slate-700 bg-white/70 text-slate-700 dark:text-slate-300">
-      <span className="text-sky-700">{icon}</span>
+    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300">
+      <span className="text-sky-700 dark:text-sky-400">{icon}</span>
       {children}
     </span>
   );

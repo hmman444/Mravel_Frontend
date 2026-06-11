@@ -4,7 +4,7 @@ export default function PartnerSpotlight() {
   const { t } = useTranslation();
   return (
     <section className="mt-10">
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-8 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-8 shadow-sm">
         <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
           {t("partner.spotlight.heading")}
         </h2>
@@ -33,7 +33,7 @@ export default function PartnerSpotlight() {
 
 function SpotItem({ icon, title, desc }) {
   return (
-    <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm">
+    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
       <div className="h-28 flex items-center justify-center">{icon}</div>
       <h3 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-slate-100 text-center">
         {title}
@@ -78,7 +78,7 @@ function SearchIcon() {
     <svg width="112" height="112" viewBox="0 0 84 84" fill="none">
       <circle cx="38" cy="38" r="18" fill="#EEF2FF" stroke="#C7D2FE" strokeWidth="2" />
       <circle cx="46" cy="34" r="4" fill="#FF8A00" />
-      <path d="M52 52l16 16" stroke="#0F172A" strokeWidth="6" strokeLinecap="round" />
+      <path d="M52 52l16 16" stroke="#334155" strokeWidth="6" strokeLinecap="round" />
       <path d="M29 38h18" stroke="#94A3B8" strokeWidth="4" strokeLinecap="round" />
     </svg>
   );
