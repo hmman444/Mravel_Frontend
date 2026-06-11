@@ -46,7 +46,8 @@ export default function ProfileHeader({
       // Cập nhật lại quan hệ/profile thay vì reload cả trang (tránh giật, mất scroll)
       if (onRelationshipChange) await onRelationshipChange();
     } catch (e) {
-      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+      const msg = e?.response?.data?.message || e?.response?.data?.error;
+      showError(msg || t("user.action_failed"));
     }
   };
   const tabs = [

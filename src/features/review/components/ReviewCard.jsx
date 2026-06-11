@@ -38,7 +38,7 @@ export default function ReviewCard({ review, isOwner, onDelete }) {
             <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {review.userFullname || t("review.anonymous")}
             </span>
-            <span className="ml-2 text-xs text-gray-400">
+            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
               {timeAgo(review.createdAt)}
               {review.updatedAt && ` ${t("review.edited")}`}
             </span>
@@ -46,7 +46,7 @@ export default function ReviewCard({ review, isOwner, onDelete }) {
           {isOwner && onDelete && (
             <button
               onClick={() => onDelete(review.id)}
-              className="text-xs text-red-500 hover:text-red-700 transition-colors"
+              className="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
             >
               {t("review.delete_btn")}
             </button>

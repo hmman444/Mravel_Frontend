@@ -107,8 +107,9 @@ export default function ListPlanPage() {
       } else {
         showError(t("plan.toast.copy_error"));
       }
-    } catch {
-      showError(t("plan.toast.copy_error"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.message);
+      showError(msg || t("plan.toast.copy_error"));
     }
   };
 
@@ -120,8 +121,9 @@ export default function ListPlanPage() {
       await reloadRecent?.();
 
       // nếu đang ở /my-plans thì vẫn ở lại, chỉ refresh danh sách
-    } catch {
-      showError(t("plan.toast.delete_error"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.message);
+      showError(msg || t("plan.toast.delete_error"));
     }
   };
 

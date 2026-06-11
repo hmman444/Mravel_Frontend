@@ -240,7 +240,7 @@ export default function ContentBlocksSection({
       {/*  Modal chọn loại block */}
       {pickerOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) setPickerOpen(false);
           }}

@@ -431,7 +431,7 @@ export default function PlanFilterSidebar({
 
       {/*  Mobile drawer overlay  */}
       {open && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-[200] flex">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"

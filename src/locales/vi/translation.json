@@ -1594,6 +1594,7 @@
         "error_server_connection": "Lỗi kết nối đến server",
         "error_create_reservation_payment": "Không tạo được thanh toán đặt bàn",
         "error_check_table_availability": "Không kiểm tra được bàn trống",
+        "error_reservation_in_past": "Thời gian đặt bàn đã ở quá khứ. Vui lòng chọn lại ngày/giờ.",
         "day_monday": "Thứ hai",
         "day_tuesday": "Thứ ba",
         "day_wednesday": "Thứ tư",
@@ -4731,6 +4732,7 @@
                 "endBeforeStart": "Ngày kết thúc không thể trước ngày bắt đầu!",
                 "loginRequired": "Bạn cần đăng nhập!",
                 "invalidDate": "Vui lòng chọn ngày hợp lệ!",
+                "budgetNegative": "Ngân sách không thể là số âm!",
                 "createFailed": "Không thể tạo lịch trình!"
             },
             "success": "🎉 Tạo lịch trình thành công!",

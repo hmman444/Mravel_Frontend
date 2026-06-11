@@ -105,7 +105,7 @@ const adminAmenitySlice = createSlice({
       })
       .addCase(loadAmenities.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
 
       /*  GROUPED  */
@@ -118,7 +118,7 @@ const adminAmenitySlice = createSlice({
       })
       .addCase(loadGroupedAmenities.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
 
       /*  CREATE  */

@@ -40,7 +40,8 @@ export default function NotificationBell({ solid, onOpen }) {
     if (!dropdownOpen) return;
     if (initialized || items.length > 0 || loading) return;
     load().catch((err) => {
-      showError(err?.message || t("common.error_occurred"));
+      const msg = typeof err === "string" ? err : (err?.message || err?.error);
+      showError(msg || t("notification.error.generic"));
     });
   }, [dropdownOpen, initialized, load, loading, items.length, t]);
 

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import i18n from "../../../i18n";
 import {
   fetchPartnerHotels,
   fetchPartnerRestaurants,
@@ -19,6 +20,15 @@ import {
   partnerCreateRestaurant,
 } from "../slices/partnerSlice";
 
+// .unwrap() trên thunk dùng rejectWithValue(stringMessage) sẽ THROW MỘT CHUỖI,
+// nên e?.message của consumer luôn undefined và mất lý do thật. Chuẩn hoá tại ranh giới
+// hook: rethrow Error thật để downstream (e?.message) lấy được lý do từ backend.
+const rethrowReal = (e, fallbackKey) => {
+  throw new Error(
+    typeof e === "string" ? e : (e?.message || e?.error || i18n.t(fallbackKey))
+  );
+};
+
 export const usePartnerServices = () => {
   const dispatch = useDispatch();
   const hotels = useSelector((s) => s.partner.hotels);
@@ -36,56 +46,108 @@ export const usePartnerServices = () => {
   );
 
   const createRestaurant = useCallback(
-    (payload) => dispatch(partnerCreateRestaurant(payload)).unwrap(),
+    async (payload) => {
+      try {
+        return await dispatch(partnerCreateRestaurant(payload)).unwrap();
+      } catch (e) {
+        rethrowReal(e, "partner.error.create_restaurant");
+      }
+    },
     [dispatch]
   );
 
   const remove = useCallback(
-    ({ type, id }) =>
-      type === "HOTEL"
-        ? dispatch(partnerDeleteHotel(id)).unwrap()
-        : dispatch(partnerDeleteRestaurant(id)).unwrap(),
+    async ({ type, id }) => {
+      try {
+        return type === "HOTEL"
+          ? await dispatch(partnerDeleteHotel(id)).unwrap()
+          : await dispatch(partnerDeleteRestaurant(id)).unwrap();
+      } catch (e) {
+        rethrowReal(
+          e,
+          type === "HOTEL" ? "partner.error.delete_hotel" : "partner.error.delete_restaurant"
+        );
+      }
+    },
     [dispatch]
   );
 
   const pause = useCallback(
-    ({ type, id }) =>
-      type === "HOTEL"
-        ? dispatch(partnerPauseHotel(id)).unwrap()
-        : dispatch(partnerPauseRestaurant(id)).unwrap(),
+    async ({ type, id }) => {
+      try {
+        return type === "HOTEL"
+          ? await dispatch(partnerPauseHotel(id)).unwrap()
+          : await dispatch(partnerPauseRestaurant(id)).unwrap();
+      } catch (e) {
+        rethrowReal(
+          e,
+          type === "HOTEL" ? "partner.error.pause_hotel" : "partner.error.pause_restaurant"
+        );
+      }
+    },
     [dispatch]
   );
 
   const resume = useCallback(
-    ({ type, id }) =>
-      type === "HOTEL"
-        ? dispatch(partnerResumeHotel(id)).unwrap()
-        : dispatch(partnerResumeRestaurant(id)).unwrap(),
+    async ({ type, id }) => {
+      try {
+        return type === "HOTEL"
+          ? await dispatch(partnerResumeHotel(id)).unwrap()
+          : await dispatch(partnerResumeRestaurant(id)).unwrap();
+      } catch (e) {
+        rethrowReal(
+          e,
+          type === "HOTEL" ? "partner.error.resume_hotel" : "partner.error.resume_restaurant"
+        );
+      }
+    },
     [dispatch]
   );
 
   const requestUnlock = useCallback(
-    ({ type, id, reason }) =>
-      type === "HOTEL"
-        ? dispatch(partnerUnlockHotel({ id, reason })).unwrap()
-        : dispatch(partnerUnlockRestaurant({ id, reason })).unwrap(),
+    async ({ type, id, reason }) => {
+      try {
+        return type === "HOTEL"
+          ? await dispatch(partnerUnlockHotel({ id, reason })).unwrap()
+          : await dispatch(partnerUnlockRestaurant({ id, reason })).unwrap();
+      } catch (e) {
+        rethrowReal(e, "partner.error.unlock_request");
+      }
+    },
     [dispatch]
   );
 
   const updateHotel = useCallback(
-    ({ id, payload }) => dispatch(partnerUpdateHotel({ id, payload })).unwrap(),
+    async ({ id, payload }) => {
+      try {
+        return await dispatch(partnerUpdateHotel({ id, payload })).unwrap();
+      } catch (e) {
+        rethrowReal(e, "partner.error.update_hotel");
+      }
+    },
     [dispatch]
   );
 
 
   const createHotel = useCallback(
-    (payload) => dispatch(partnerCreateHotel(payload)).unwrap(),
+    async (payload) => {
+      try {
+        return await dispatch(partnerCreateHotel(payload)).unwrap();
+      } catch (e) {
+        rethrowReal(e, "partner.error.create_hotel");
+      }
+    },
     [dispatch]
   );
 
   const updateRestaurant = useCallback(
-    ({ id, payload }) =>
-      dispatch(partnerUpdateRestaurant({ id, payload })).unwrap(),
+    async ({ id, payload }) => {
+      try {
+        return await dispatch(partnerUpdateRestaurant({ id, payload })).unwrap();
+      } catch (e) {
+        rethrowReal(e, "partner.error.update_restaurant");
+      }
+    },
     [dispatch]
   );
 

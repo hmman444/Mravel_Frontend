@@ -22,11 +22,11 @@ export default function BlockedUsersPage() {
     try {
       setList(await getBlockedUsers());
     } catch (e) {
-      setError(e?.message || "Error");
+      setError(e?.response?.data?.message || e?.response?.data?.error || t("user.action_failed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -43,7 +43,7 @@ export default function BlockedUsersPage() {
       await unblockUser(id);
     } catch (e) {
       setList(prev); // revert
-      setError(e?.message || "Error");
+      setError(e?.response?.data?.message || e?.response?.data?.error || t("user.action_failed"));
     } finally {
       setBusyId(null);
     }

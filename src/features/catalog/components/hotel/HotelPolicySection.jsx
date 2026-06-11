@@ -94,7 +94,7 @@ export default function HotelPolicySection({ hotel }) {
     <section className="mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <div className="grid gap-0 md:grid-cols-[270px,1fr]">
         {/* LEFT PANEL */}
-        <div className="bg-gradient-to-b from-[#dbeeff] to-[#f4f9ff] px-6 py-6 md:py-8">
+        <div className="bg-gradient-to-b from-[#dbeeff] to-[#f4f9ff] dark:from-slate-900 dark:to-slate-800 px-6 py-6 md:py-8">
           <h2 className="text-base font-semibold leading-relaxed text-gray-900 dark:text-gray-100 md:text-lg">
             {t("hotel.policy_section_title")}{" "}
             <span className="block md:inline">{hotel.name}</span>
@@ -106,7 +106,7 @@ export default function HotelPolicySection({ hotel }) {
           {/*  Chính sách lưu trú (thẻ trên cùng)  */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#e6f2ff] text-[#0064d2]">
+              <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#e6f2ff] dark:bg-sky-950/50 text-[#0064d2] dark:text-sky-300">
                 <Clock className="h-5 w-5" />
               </div>
               <div>
@@ -169,7 +169,7 @@ export default function HotelPolicySection({ hotel }) {
             <button
               type="button"
               onClick={() => setShowAll((v) => !v)}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#0064d2] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#0064d2] dark:text-sky-300 hover:underline"
             >
               {showAll ? t("common.collapse") : t("hotel.read_all")}
               <ChevronRight className="h-3 w-3" />
@@ -192,12 +192,12 @@ export default function HotelPolicySection({ hotel }) {
           {/*  Thông tin chung (bảng như Traveloka)  */}
           {generalInfo && (
             <div className="mt-4 border border-gray-200 dark:border-gray-700">
-              <div className="border-b border-gray-200 dark:border-gray-700 bg-[#f4f7ff] px-4 py-3">
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-[#f4f7ff] dark:bg-slate-900 px-4 py-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   {t("hotel.general_info")}
                 </h3>
               </div>
-              <dl className="divide-y divide-gray-100 text-sm bg-white dark:bg-gray-800">
+              <dl className="divide-y divide-gray-100 dark:divide-gray-700 text-sm bg-white dark:bg-slate-800">
                 {generalInfo.mainFacilitiesSummary && (
                   <InfoRow
                     label={t("hotel.main_facilities")}

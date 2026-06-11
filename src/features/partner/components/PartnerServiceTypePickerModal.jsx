@@ -24,7 +24,7 @@ export default function PartnerServiceTypePickerModal({ open, onClose, onPick })
           animate="show"
           exit="exit"
           transition={{ duration: 0.16 }}
-          className="fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center"
+          className="fixed inset-0 z-[200] bg-black/40 p-4 flex items-center justify-center"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) onClose?.();
           }}

@@ -140,8 +140,12 @@ export default function PlanDashboardPage() {
       if (reloadRecent) {
         await reloadRecent();
       }
-    } catch {
-      showError(t("plan.title.update_error"));
+    } catch (e) {
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message || e?.message;
+      showError(msg || t("plan.title.update_error"));
       setTitleInput(board.planTitle || "");
     }
   };

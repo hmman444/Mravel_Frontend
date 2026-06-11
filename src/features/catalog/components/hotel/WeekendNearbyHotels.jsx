@@ -1,8 +1,7 @@
 // src/features/hotels/components/hotel/WeekendNearbyHotels.jsx
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 import { useCatalogHotels } from "../../../catalog/hooks/useCatalogHotels";
@@ -12,7 +11,6 @@ export default function WeekendNearbyHotels() {
   const navigate = useNavigate();
   const { items, loading, error, fetchHotels } = useCatalogHotels();
   const [activeKey, setActiveKey] = useState(null);
-  const scrollRef = useRef(null);
 
   // gọi API lần đầu: lấy 30 khách sạn bất kỳ (backend sẽ sort như bạn cấu hình)
   useEffect(() => {
@@ -52,47 +50,6 @@ export default function WeekendNearbyHotels() {
     [groups, activeKey]
   );
 
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(false);
-
-  const updateArrows = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanLeft(scrollLeft > 4);
-    setCanRight(scrollLeft + clientWidth < scrollWidth - 4);
-  }, []);
-
-  // cập nhật trạng thái nút khi scroll / resize / đổi tab / load xong
-  useEffect(() => {
-    updateArrows();
-    const el = scrollRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", updateArrows, { passive: true });
-    window.addEventListener("resize", updateArrows);
-    return () => {
-      el.removeEventListener("scroll", updateArrows);
-      window.removeEventListener("resize", updateArrows);
-    };
-  }, [updateArrows, activeGroup, loading]);
-
-  // đổi tab thì cuộn về đầu
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTo({ left: 0 });
-  }, [activeKey]);
-
-  const handleScrollRight = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: 320, behavior: "smooth" });
-  };
-
-  const handleScrollLeft = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: -320, behavior: "smooth" });
-  };
-
   if (!loading && (!groups.length || !activeGroup)) {
     // không có data thì ẩn luôn block
     return null;
@@ -125,63 +82,36 @@ export default function WeekendNearbyHotels() {
         ))}
       </div>
 
-      {/* LIST CARD (SCROLL NGANG) */}
+      {/* LIST CARD – dùng scroll chung của trang */}
       <div className="relative mt-4">
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1"
-        >
-          {loading && (
-            // skeleton đơn giản
-            <>
-              {[...Array(4)].map((_, idx) => (
-                <div
-                  key={idx}
-                  className="flex-none w-[280px] rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
-                >
-                  <div className="h-44 bg-gray-200 dark:bg-gray-700 animate-pulse" />
-                  <div className="p-3 space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
-                  </div>
+        {loading && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(4)].map((_, idx) => (
+              <div
+                key={idx}
+                className="w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+              >
+                <div className="h-44 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
                 </div>
-              ))}
-            </>
-          )}
+              </div>
+            ))}
+          </div>
+        )}
 
-          {!loading &&
-            activeGroup?.hotels?.map((hotel) => (
+        {!loading && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {activeGroup?.hotels?.map((hotel) => (
               <HotelMiniCard
                 key={hotel.slug}
                 hotel={hotel}
                 onClick={() => navigate(`/hotels/${hotel.slug}`)}
               />
             ))}
-        </div>
-
-        {/* NÚT MŨI TÊN TRÁI — chỉ hiện khi còn cuộn được sang trái */}
-        {canLeft && (
-          <button
-            type="button"
-            onClick={handleScrollLeft}
-            aria-label={t("common.back")}
-            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 left-2"
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
-        )}
-
-        {/* NÚT MŨI TÊN PHẢI — chỉ hiện khi còn cuộn được sang phải */}
-        {canRight && (
-          <button
-            type="button"
-            onClick={handleScrollRight}
-            aria-label={t("hotel.next")}
-            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 right-2"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
+          </div>
         )}
       </div>
 
@@ -250,7 +180,7 @@ function HotelMiniCard({ hotel, onClick }) {
 
   return (
     <div
-      className="flex-none w-[280px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="w-full rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
     >
       {/* ẢNH + BADGE KHU VỰC + PROMO */}

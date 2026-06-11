@@ -119,11 +119,13 @@ export default function FavoriteButton({
       countStyles += "text-[11px] ";
     } else {
       // Circle style for hotel/restaurant cards
-      containerStyles += "justify-center shadow-lg rounded-full ";
-      buttonStyles += "w-8 h-8 rounded-full bg-white dark:bg-gray-800 ";
-      // Not favorited: text-gray-700 dark:text-gray-300 + border for visibility
-      buttonStyles += favorited ? "bg-red-500 text-white " : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 ";
-      iconStyles += "w-4 h-4 ";
+      containerStyles += "inline-flex items-center justify-center overflow-hidden rounded-full shadow-lg ring-1 ring-black/5 backdrop-blur-sm ";
+      buttonStyles += "flex w-full h-full items-center justify-center p-0 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 ";
+      // Glass circle for better contrast over photos
+      buttonStyles += favorited
+        ? "bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-[0_8px_24px_rgba(244,63,94,0.35)] ring-0 "
+        : "bg-white/85 dark:bg-slate-950/45 text-rose-500 dark:text-rose-200 border border-white/60 dark:border-white/10 hover:bg-white dark:hover:bg-slate-900/65 hover:text-rose-600 dark:hover:text-rose-100 ";
+      iconStyles += "w-[15px] h-[15px] shrink-0 drop-shadow-[0_1px_1px_rgba(0,0,0,0.12)] ";
     }
   } else {
     // Detail style: inline with rating

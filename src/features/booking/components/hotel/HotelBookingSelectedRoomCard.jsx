@@ -33,10 +33,10 @@ export default function HotelBookingSelectedRoomCard({
   }
 
   return (
-    <section className="rounded-2xl border border-blue-200 bg-blue-50/60 shadow-sm">
+    <section className="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {/* Banner cảnh báo */}
-      <div className="flex items-center gap-2 rounded-t-2xl bg-gradient-to-r from-yellow-100 via-yellow-50 to-blue-50 px-4 py-2 text-[11px] font-semibold text-yellow-800">
-        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] text-white">
+      <div className="flex items-center gap-2 rounded-t-2xl border-b border-amber-100 bg-gradient-to-r from-amber-50 via-amber-50 to-blue-50 px-4 py-2 text-[11px] font-semibold text-amber-800 dark:border-amber-900/50 dark:from-amber-950/40 dark:via-gray-900 dark:to-gray-800 dark:text-amber-200">
+        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white dark:bg-amber-400 dark:text-gray-900">
           !
         </span>
         <p>

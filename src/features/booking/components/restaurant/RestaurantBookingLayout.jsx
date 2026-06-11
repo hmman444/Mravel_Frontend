@@ -55,6 +55,7 @@ export default function RestaurantBookingLayout({
   totalSeats = 0,
   isSeatEnough = true,
   seatErrorText = "",
+  isPastDateTime = false,
 }) {
   const { t } = useTranslation();
   return (
@@ -118,13 +119,19 @@ export default function RestaurantBookingLayout({
             seatErrorText={seatErrorText}
           />
 
+          {isPastDateTime && (
+            <p className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-300">
+              {t("booking.error_reservation_in_past")}
+            </p>
+          )}
+
           <RestaurantBookingPriceSummaryCard
             tableTypeName={tableType?.name}
             depositPerTable={depositPerTable}
             tablesCount={tablesCount}
             holdMinutes={holdMinutes}
             onPay={onPay}
-            disabled={!isEnough || !isSeatEnough || !tableTypeId || !time || !date}
+            disabled={!isEnough || !isSeatEnough || !tableTypeId || !time || !date || isPastDateTime}
             loading={!!payLoading}
           />
         </div>

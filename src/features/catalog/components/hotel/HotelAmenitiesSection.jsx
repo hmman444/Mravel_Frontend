@@ -89,7 +89,7 @@ export default function HotelAmenitiesSection({ hotel }) {
   if (!categories.length && !images.length) return null;
 
   return (
-    <section id="hotel-amenities-section" className="mt-6 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <section id="hotel-amenities-section" className="mt-6 border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800">
       {/* HEADER + GALLERY */}
       <div className="px-6 pt-5 pb-4">
         <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -101,7 +101,7 @@ export default function HotelAmenitiesSection({ hotel }) {
             {images.map((img, idx) => (
               <div
                 key={img.url || idx}
-                className="relative h-32 overflow-hidden bg-gray-200 dark:bg-gray-700"
+                className="relative h-32 overflow-hidden bg-gray-200 dark:bg-slate-700"
               >
                 {img.url && (
                   <img
@@ -148,7 +148,7 @@ function AmenityColumn({ title, icon, items }) {
   return (
     <div>
       <div className="mb-2 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e6f2ff] text-[#0064d2] shadow-sm ring-1 ring-[#c6ddff]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e6f2ff] dark:bg-sky-950/50 text-[#0064d2] dark:text-sky-300 shadow-sm ring-1 ring-[#c6ddff] dark:ring-sky-900/70">
           {icon}
         </div>
         <h3 className="text-[14px] font-bold leading-snug text-gray-900 dark:text-gray-100">

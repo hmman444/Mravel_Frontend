@@ -154,7 +154,7 @@ ${shortHtmlEn}
 
         {/* Gradient phủ nhẹ khi thu gọn */}
         {!expanded && (
-          <div className="mt-[-80px] h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+          <div className="mt-[-80px] h-24 bg-gradient-to-t from-white dark:from-gray-800 to-transparent pointer-events-none" />
         )}
 
         {/* Button xem thêm / thu gọn */}

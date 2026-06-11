@@ -45,7 +45,7 @@ export default function RestaurantDetailPage() {
   }, [slug, fromBooking, dispatch]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f5f7fb]">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
       <div data-navbar>
         <Navbar />
       </div>

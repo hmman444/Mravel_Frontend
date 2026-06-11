@@ -6,7 +6,7 @@ export default function ServiceDetailModal({ data, onClose }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200]">
       <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full p-6 relative">
         <button
           onClick={onClose}

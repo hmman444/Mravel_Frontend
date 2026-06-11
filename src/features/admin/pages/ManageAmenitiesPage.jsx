@@ -179,8 +179,8 @@ export default function ManageAmenitiesPage() {
       await remove(pendingDelete.id);
       showSuccess(t("admin.amenity_delete_success"));
       await load({ active: true });
-    } catch {
-      showError(t("admin.amenity_delete_failed"));
+    } catch (err) {
+      showError(extractApiMessage(err) || t("admin.amenity_delete_failed"));
     } finally {
       closeConfirm();
     }
@@ -196,8 +196,8 @@ export default function ManageAmenitiesPage() {
 
       showSuccess(t("admin.amenity_deactivate_success"));
       await load({ active: true });
-    } catch {
-      showError(t("admin.amenity_deactivate_failed"));
+    } catch (err) {
+      showError(extractApiMessage(err) || t("admin.amenity_deactivate_failed"));
     } finally {
       setRowToggling(id, false);
     }
@@ -211,8 +211,8 @@ export default function ManageAmenitiesPage() {
 
       showSuccess(t("admin.amenity_activate_success"));
       await load({ active: true });
-    } catch {
-      showError(t("admin.amenity_activate_failed"));
+    } catch (err) {
+      showError(extractApiMessage(err) || t("admin.amenity_activate_failed"));
     } finally {
       setRowToggling(id, false);
     }

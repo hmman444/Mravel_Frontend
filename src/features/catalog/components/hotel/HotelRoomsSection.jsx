@@ -55,7 +55,7 @@ export default function HotelRoomsSection({ hotel }) {
     <>
       <section
         id="hotel-rooms-section"
-        className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-3xl"
+        className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 rounded-b-3xl"
       >
         {/* HEADER SECTION TITLE */}
         <div className="flex flex-col gap-3 px-6 pt-5 pb-3 md:flex-row md:items-center md:justify-between">
@@ -91,7 +91,7 @@ export default function HotelRoomsSection({ hotel }) {
         </div>
 
         {/* QUICK FILTER CHIPS */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 dark:border-gray-700 bg-[#f8fafc] px-6 py-3 text-xs md:text-sm">
+        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 dark:border-gray-700 bg-[#f8fafc] dark:bg-slate-900 px-6 py-3 text-xs md:text-sm">
           <span className="mr-2 text-gray-700 dark:text-gray-300">
             {t("hotel.quick_filter_hint")}
           </span>
@@ -238,7 +238,7 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
           {/* LEFT: IMAGE SLIDER + META + AMENITIES */}
           <div className="flex flex-col gap-3">
             {/* Ảnh phòng + nút < > + dots */}
-            <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-slate-700">
               <div className="relative aspect-[4/3] w-full">
                 <img
                   src={currentImage}
@@ -268,12 +268,12 @@ function RoomTypeRow({ hotel, roomType, priceMode, activeFilters, onViewDetail }
               </div>
 
               {imageUrls.length > 1 && (
-                <div className="flex items-center justify-center gap-1 bg-white/80 py-1.5 text-[8px]">
+                <div className="flex items-center justify-center gap-1 bg-white/80 dark:bg-slate-900/80 py-1.5 text-[8px]">
                   {imageUrls.map((_, idx) => (
                     <span
                       key={idx}
                       className={`h-1.5 w-1.5 rounded-full ${
-                        idx === currentIdx ? "bg-gray-500" : "bg-gray-300"
+                        idx === currentIdx ? "bg-gray-500 dark:bg-gray-300" : "bg-gray-300 dark:bg-gray-600"
                       }`}
                     />
                   ))}
@@ -492,11 +492,11 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-2 md:px-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 px-2 md:px-4"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
@@ -513,7 +513,7 @@ function RoomDetailModal({ roomType, hotelName, priceMode, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
           >
             <CloseIcon className="h-4 w-4" />
           </button>

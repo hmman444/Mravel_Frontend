@@ -37,7 +37,7 @@ function MenuLightbox({ images, startIndex = 0, onClose }) {
   const go = (i) => setIndex(((i % images.length) + images.length) % images.length);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/70" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[200] bg-black/70" onClick={onClose} role="dialog" aria-modal="true">
       <div className="absolute inset-4 md:inset-8 bg-neutral-900 rounded-xl overflow-hidden flex" onClick={(e) => e.stopPropagation()}>
         {/* Left thumbnails: 2 cột */}
         <aside className="hidden md:block w-72 bg-neutral-950/40 overflow-y-auto">

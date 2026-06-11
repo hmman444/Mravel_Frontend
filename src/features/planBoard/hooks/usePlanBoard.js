@@ -41,7 +41,13 @@ async function tryCall(promise, fallbackMessage) {
       // Optimistic lock conflict — a different collaborator edited this item
       showError(i18n.t("plan.error.conflict_content"));
     } else if (fallbackMessage) {
-      showError(fallbackMessage);
+      // thunks rethrow RAW axios errors → surface the backend reason, fall back otherwise
+      const backendMsg =
+        (typeof err === "string" ? err : null) ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message;
+      showError(backendMsg || fallbackMessage);
     }
     throw err;
   }

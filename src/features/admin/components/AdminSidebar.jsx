@@ -211,7 +211,7 @@ export default function AdminSidebar() {
         {mobileOpen && (
           <>
             <motion.div
-              className="lg:hidden fixed inset-0 z-40 bg-black/40"
+              className="lg:hidden fixed inset-0 z-[200] bg-black/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

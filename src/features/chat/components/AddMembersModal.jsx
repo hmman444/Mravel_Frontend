@@ -55,7 +55,7 @@ export default function AddMembersModal({ conversationId, members, onClose, onAd
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-[200]">
       <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:w-96 max-h-[90vh] flex flex-col shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 flex-shrink-0">

@@ -363,7 +363,7 @@ export default function PartnerUnlockRequests() {
 
       {/* Modal gửi request */}
       {modal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-3">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[200] px-3">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-lg p-6">
             <div className="flex items-start justify-between gap-3">
               <div>

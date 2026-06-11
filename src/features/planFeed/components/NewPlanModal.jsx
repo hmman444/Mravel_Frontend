@@ -80,7 +80,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
       (form.budgetTotal !== "" && Number(form.budgetTotal) < 0) ||
       (form.budgetPerPerson !== "" && Number(form.budgetPerPerson) < 0)
     ) {
-      return showError(t("common.error_occurred"));
+      return showError(t("feed.newPlan.error.budgetNegative"));
     }
 
     setSubmitting(true);
@@ -96,8 +96,12 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
       showSuccess(t("feed.newPlan.success"));
       onCreated?.(res);
       onClose();
-    } catch {
-      showError(t("feed.newPlan.error.createFailed"));
+    } catch (e) {
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message || e?.response?.data?.error || e?.message;
+      showError(msg || t("feed.newPlan.error.createFailed"));
     } finally {
       setSubmitting(false);
     }

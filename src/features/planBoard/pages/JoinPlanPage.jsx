@@ -47,7 +47,8 @@ export default function JoinPlanPage() {
       } catch (err) {
         console.error("Join failed", err);
         setStatus("error");
-        showError(t("plan.join.invalid_invite"));
+        const msg = typeof err === "string" ? err : (err?.response?.data?.message || err?.message);
+        showError(msg || t("plan.join.invalid_invite"));
       }
     };
 

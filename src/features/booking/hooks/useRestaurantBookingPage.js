@@ -175,9 +175,32 @@ export function useRestaurantBookingPage() {
   const isEnough = availability?.data?.isEnough ?? true;
   const DEFAULT_DURATION_MINUTES = 90;
 
-  //  pay 
+  //  thời điểm đặt (date + time) & cờ "đã ở quá khứ"
+  // /availability KHÔNG validate lead-time nên có thể báo "còn bàn" cho 1 URL cũ
+  // (ví dụ link sinh hôm qua) -> chặn sớm ở client để tránh 409 khó hiểu.
+  const reservationAt = useMemo(() => {
+    if (!date || !time) return null;
+    const m = /^(\d{1,2}):(\d{2})$/.exec(time);
+    if (!m) return null;
+    const dt = new Date(date);
+    dt.setHours(parseInt(m[1], 10), parseInt(m[2], 10), 0, 0);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }, [date, time]);
+
+  const isPastDateTime = useMemo(() => {
+    if (!reservationAt) return false;
+    return reservationAt.getTime() <= Date.now();
+  }, [reservationAt]);
+
+  //  pay
   const onPay = useCallback(async () => {
     if (!restaurant || !tableTypeId || !date || !time) return;
+
+    // Chặn sớm thời điểm đặt đã ở quá khứ (thường do mở lại link cũ).
+    if (isPastDateTime) {
+      showError(t("booking.error_reservation_in_past"));
+      return;
+    }
 
     // Require a logged-in user before creating a payment (mirrors hotel hook).
     if (!userId) {
@@ -255,10 +278,14 @@ export function useRestaurantBookingPage() {
       const url = res?.paymentUrl || res?.payUrl;
       if (url) window.location.href = url;
     } catch (e) {
-      showError(e?.message || t("booking.create_payment_failed"));
+      // unwrap() của rejectWithValue(message) ném ra CHUỖI string, không phải Error
+      // -> e?.message luôn undefined. Phải lấy trực tiếp chuỗi để hiện lý do thật
+      // (vd "Phải đặt trước tối thiểu 60 phút", "Hết bàn ...").
+      const msg = typeof e === "string" ? e : (e?.message || e?.error);
+      showError(msg || t("booking.create_payment_failed"));
     }
   }, [
-    dispatch, restaurant, tableTypeId, date, time, people, tablesCount,
+    dispatch, restaurant, tableTypeId, date, time, people, tablesCount, isPastDateTime,
     userId, contactName, contactPhone, contactEmail, note, tableType?.name, tableType?.seats, tableType?.depositPrice, t
   ]);
 
@@ -364,5 +391,6 @@ export function useRestaurantBookingPage() {
     totalSeats,
     isSeatEnough,
     seatErrorText,
+    isPastDateTime,
   };
 }

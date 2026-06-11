@@ -13,7 +13,7 @@ export default function ReasonModal({ open, title, confirmText, loading, onClose
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
+    <Dialog open={open} onClose={onClose} className="relative z-[200]">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-xl dark:bg-slate-900">

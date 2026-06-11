@@ -14,6 +14,7 @@ import PartnerServiceStats from "./services/PartnerServiceStats";
 import PartnerServiceFilters from "./services/PartnerServiceFilters";
 import PartnerServiceTable from "./services/PartnerServiceTable";
 import i18n from "../../../i18n";
+import { showError } from "../../../utils/toastUtils";
 
 // BE trả nội dung động dạng Map<string,string> ({ vi, en }) cho endpoint partner (chưa flatten).
 // Helper lấy chuỗi theo ngôn ngữ hiện tại, fallback vi -> giá trị đầu tiên.
@@ -209,11 +210,17 @@ export default function PartnerServiceManager() {
     if (!service) return;
     if (kind === "UNLOCK" && !note.trim()) return;
 
-    if (kind === "DELETE") await remove({ type: service.type, id: service.id });
-    if (kind === "PAUSE") await pause({ type: service.type, id: service.id });
-    if (kind === "RESUME") await resume({ type: service.type, id: service.id });
-    if (kind === "UNLOCK")
-      await requestUnlock({ type: service.type, id: service.id, reason: note.trim() });
+    try {
+      if (kind === "DELETE") await remove({ type: service.type, id: service.id });
+      if (kind === "PAUSE") await pause({ type: service.type, id: service.id });
+      if (kind === "RESUME") await resume({ type: service.type, id: service.id });
+      if (kind === "UNLOCK")
+        await requestUnlock({ type: service.type, id: service.id, reason: note.trim() });
+    } catch {
+      // Lý do thật đã hiện inline qua action.error (xem render ở trên), không toast lần 2.
+      // Giữ modal mở để người dùng thấy lỗi / thử lại; không reload/reset.
+      return;
+    }
 
     await reload();
     setModal({ open: false, kind: null, service: null, note: "" });
@@ -245,7 +252,13 @@ export default function PartnerServiceManager() {
         loading={action.loading}
         onBack={() => setEdit({ open: false, service: null })}
         onSubmit={async (payload) => {
-          await updateHotel({ id: edit.service.id, payload });
+          try {
+            await updateHotel({ id: edit.service.id, payload });
+          } catch (e) {
+            const msg = typeof e === "string" ? e : (e?.message || e?.error);
+            showError(msg || t("partner.error.update_hotel"));
+            return;
+          }
           await reload();
           setEdit({ open: false, service: null });
         }}
@@ -260,7 +273,13 @@ export default function PartnerServiceManager() {
         loading={action.loading}
         onBack={() => setCreate({ open: false, type: null })}
         onSubmit={async (payload) => {
-          await createHotel(payload);
+          try {
+            await createHotel(payload);
+          } catch (e) {
+            const msg = typeof e === "string" ? e : (e?.message || e?.error);
+            showError(msg || t("partner.error.create_hotel"));
+            return;
+          }
           await reload();
           setCreate({ open: false, type: null });
         }}
@@ -276,7 +295,13 @@ export default function PartnerServiceManager() {
         loading={action.loading}
         onBack={() => setEdit({ open: false, service: null })}
         onSubmit={async (payload) => {
-          await updateRestaurant({ id: edit.service.id, payload });
+          try {
+            await updateRestaurant({ id: edit.service.id, payload });
+          } catch (e) {
+            const msg = typeof e === "string" ? e : (e?.message || e?.error);
+            showError(msg || t("partner.error.update_restaurant"));
+            return;
+          }
           await reload();
           setEdit({ open: false, service: null });
         }}
@@ -291,7 +316,13 @@ export default function PartnerServiceManager() {
         loading={action.loading}
         onBack={() => setCreate({ open: false, type: null })}
         onSubmit={async (payload) => {
-          await createRestaurant(payload);
+          try {
+            await createRestaurant(payload);
+          } catch (e) {
+            const msg = typeof e === "string" ? e : (e?.message || e?.error);
+            showError(msg || t("partner.error.create_restaurant"));
+            return;
+          }
           await reload();
           setCreate({ open: false, type: null });
         }}
@@ -414,7 +445,7 @@ export default function PartnerServiceManager() {
       )}
 
       {modal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[200]">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-md p-6">
             <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">
               {modal.kind === "DELETE" && t("partner.modal.delete_title")}

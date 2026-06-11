@@ -1594,6 +1594,7 @@
         "error_server_connection": "Server connection error",
         "error_create_reservation_payment": "Failed to create table reservation payment",
         "error_check_table_availability": "Failed to check table availability",
+        "error_reservation_in_past": "The reservation time is in the past. Please pick another date/time.",
         "day_monday": "Monday",
         "day_tuesday": "Tuesday",
         "day_wednesday": "Wednesday",
@@ -4731,6 +4732,7 @@
                 "endBeforeStart": "End date cannot be before the start date!",
                 "loginRequired": "You need to sign in!",
                 "invalidDate": "Please select a valid date!",
+                "budgetNegative": "Budget cannot be a negative number!",
                 "createFailed": "Could not create the plan!"
             },
             "success": "🎉 Plan created successfully!",

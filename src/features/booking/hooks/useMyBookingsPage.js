@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { showError } from "../../../utils/toastUtils";
 
 //  HOTEL (cũ) 
 import {
@@ -29,6 +31,7 @@ import {
 } from "../slices/bookingRestaurantPrivateSlice";
 
 export function useMyBookingsPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -137,14 +140,19 @@ export function useMyBookingsPage() {
   }, [dispatch, type]);
 
   const onClearDevice = useCallback(async () => {
-    if (type === "HOTEL") {
-      await dispatch(clearGuestDevice()).unwrap();
-      dispatch(fetchGuestMyBookings());
-    } else {
-      await dispatch(clearRestaurantGuestDevice()).unwrap();
-      dispatch(fetchGuestMyRestaurantBookings());
+    try {
+      if (type === "HOTEL") {
+        await dispatch(clearGuestDevice()).unwrap();
+        dispatch(fetchGuestMyBookings());
+      } else {
+        await dispatch(clearRestaurantGuestDevice()).unwrap();
+        dispatch(fetchGuestMyRestaurantBookings());
+      }
+    } catch (e) {
+      // slice không có .rejected reducer cho clear => surface trực tiếp
+      showError(typeof e === "string" ? e : (e?.message || e?.error) || t("booking.clear_failed"));
     }
-  }, [dispatch, type]);
+  }, [dispatch, type, t]);
 
   //  Actions (ACCOUNT) 
   const onRefreshAccount = useCallback(() => {
@@ -161,14 +169,18 @@ export function useMyBookingsPage() {
       return;
     }
 
-    if (type === "HOTEL") {
-      await dispatch(claimMyGuestBookings(user.id)).unwrap();
-      dispatch(fetchMyUserBookings(user.id));
-      dispatch(fetchGuestMyBookings());
-    } else {
-      await dispatch(claimMyGuestRestaurantBookings()).unwrap();
-      dispatch(fetchMyUserRestaurantBookings());
-      dispatch(fetchGuestMyRestaurantBookings());
+    try {
+      if (type === "HOTEL") {
+        await dispatch(claimMyGuestBookings(user.id)).unwrap();
+        dispatch(fetchMyUserBookings(user.id));
+        dispatch(fetchGuestMyBookings());
+      } else {
+        await dispatch(claimMyGuestRestaurantBookings()).unwrap();
+        dispatch(fetchMyUserRestaurantBookings());
+        dispatch(fetchGuestMyRestaurantBookings());
+      }
+    } catch {
+      /* đã surface qua claimError (slice state) hiển thị trong MyBookingsPage */
     }
   }, [dispatch, type, isLoggedIn, user?.id, navigate]);
 
@@ -180,10 +192,14 @@ export function useMyBookingsPage() {
       email: form.email?.trim() || null,
     };
 
-    if (type === "RESTAURANT") {
-      await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
-    } else {
-      await dispatch(lookupBookingPublic(payload)).unwrap();
+    try {
+      if (type === "RESTAURANT") {
+        await dispatch(lookupRestaurantBookingPublic(payload)).unwrap();
+      } else {
+        await dispatch(lookupBookingPublic(payload)).unwrap();
+      }
+    } catch {
+      /* đã surface qua lookupError (slice state) hiển thị trong MyBookingsPage */
     }
   }, [dispatch, type, form]);
 

@@ -96,7 +96,7 @@ export default function AmenityFormModal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4"
           variants={modalBackdrop}
           initial="hidden"
           animate="show"

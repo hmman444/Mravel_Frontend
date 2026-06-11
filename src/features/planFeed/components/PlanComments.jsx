@@ -69,8 +69,10 @@ export default function PlanComments({
       setText("");
       // gửi comment mới thì tự mở khu bình luận
       setShowComments(true);
-    } catch {
-      showError(t("feed.comment.sendFailed"));
+    } catch (e) {
+      const msg =
+        typeof e === "string" ? e : e?.response?.data?.message || e?.message;
+      showError(msg || t("feed.comment.sendFailed"));
     } finally {
       setLoading(false);
     }
@@ -89,8 +91,10 @@ export default function PlanComments({
     try {
       await sendComment(planId, reply);
       setShowComments(true);
-    } catch {
-      showError(t("feed.comment.sendFailed"));
+    } catch (e) {
+      const msg =
+        typeof e === "string" ? e : e?.response?.data?.message || e?.message;
+      showError(msg || t("feed.comment.sendFailed"));
     }
   };
 

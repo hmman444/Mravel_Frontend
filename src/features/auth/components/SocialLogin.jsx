@@ -51,13 +51,17 @@ export default function SocialLogin() {
         } else {
           showError(action.payload || t("common.error_occurred"));
         }
-      } catch {
-        showError(t("common.error_occurred"));
+      } catch (e) {
+        const msg = typeof e === "string" ? e : (e?.message || e?.error);
+        showError(msg || t("common.error_occurred"));
       } finally {
         setLoading(false);
       }
     },
-    onError: () => showError(t("common.error_occurred")),
+    onError: (err) => {
+      console.error("Google login error:", err);
+      showError(t("common.error_occurred"));
+    },
     flow: "implicit",
   });
 
@@ -84,8 +88,9 @@ export default function SocialLogin() {
       } else {
         showError(action.payload || t("common.error_occurred"));
       }
-    } catch {
-      showError(t("common.error_occurred"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.message || e?.error);
+      showError(msg || t("common.error_occurred"));
     } finally {
       setLoading(false);
     }
@@ -116,7 +121,10 @@ export default function SocialLogin() {
           fields="name,email,picture"
           scope="public_profile,email"
           onSuccess={handleFacebookSuccess}
-          onFail={() => showError(t("common.error_occurred"))}
+          onFail={(err) => {
+            console.error("Facebook login error:", err);
+            showError(t("common.error_occurred"));
+          }}
           render={({ onClick }) => (
             <button
               type="button"
