@@ -27,6 +27,7 @@ import {
   getLocDisplayLabel,
   slimLocationForStorage,
   normalizeLocationFromStored,
+  locationFromRecommendation,
 } from "../../utils/locationUtils";
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
@@ -174,9 +175,16 @@ export default function StayActivityModal({
 
       setNote(editingCard.description || "");
 
-      // 4) location normalize
+      // 4) location normalize — fall back to the AI recommendation so older
+      // AI-created cards (recommendation only, no hotelLocation) still pre-select
+      // and auto-focus the catalog hotel in the picker.
       setInternalStayLocation(
-        normalizeLocationFromStored(data.hotelLocation) || null
+        normalizeLocationFromStored(data.hotelLocation) ||
+          locationFromRecommendation(data.recommendation, {
+            fallbackType: "HOTEL",
+            address: data.address,
+          }) ||
+          null
       );
     } else {
       // NEW

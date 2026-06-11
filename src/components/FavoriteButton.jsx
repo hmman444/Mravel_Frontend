@@ -125,7 +125,7 @@ export default function FavoriteButton({
       buttonStyles += favorited
         ? "bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-[0_8px_24px_rgba(244,63,94,0.35)] ring-0 "
         : "bg-white/85 dark:bg-slate-950/45 text-rose-500 dark:text-rose-200 border border-white/60 dark:border-white/10 hover:bg-white dark:hover:bg-slate-900/65 hover:text-rose-600 dark:hover:text-rose-100 ";
-      iconStyles += "w-[15px] h-[15px] shrink-0 drop-shadow-[0_1px_1px_rgba(0,0,0,0.12)] ";
+      iconStyles += "w-[13px] h-[13px] shrink-0 drop-shadow-[0_1px_1px_rgba(0,0,0,0.12)] ";
     }
   } else {
     // Detail style: inline with rating
@@ -148,7 +148,7 @@ export default function FavoriteButton({
         {favorited ? (
           <FaHeart className={`${iconStyles} drop-shadow-sm animate-heart-beat`} />
         ) : (
-          <FiHeart className={iconStyles} strokeWidth={variant === "detail" ? 2.8 : 2.5} />
+          <FiHeart className={iconStyles} strokeWidth={variant === "detail" ? 2.8 : 2.0} />
         )}
       </button>
 

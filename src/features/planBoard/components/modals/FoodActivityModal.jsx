@@ -22,6 +22,7 @@ import {
   slimLocationForStorage,
   normalizeLocationFromStored,
   getLocDisplayLabel,
+  locationFromRecommendation,
 } from "../../utils/locationUtils";
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
@@ -139,7 +140,14 @@ export default function FoodActivityModal({
       setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
       setNote(editingCard.description || "");
 
-      const normalizedLoc = normalizeLocationFromStored(data.restaurantLocation);
+      // Fall back to the AI recommendation so older AI-created cards (recommendation
+      // only, no restaurantLocation) still pre-select + auto-focus the catalog restaurant.
+      const normalizedLoc =
+        normalizeLocationFromStored(data.restaurantLocation) ||
+        locationFromRecommendation(data.recommendation, {
+          fallbackType: "RESTAURANT",
+          address: data.address,
+        });
       setInternalFoodLocation(normalizedLoc || null);
       if (normalizedLoc?.fullAddress) setLocationText(normalizedLoc.fullAddress);
     } else {

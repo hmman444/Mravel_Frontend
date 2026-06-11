@@ -38,7 +38,7 @@ export default function HotelFaqSection({ hotel }) {
   return (
     <>
       {/* SECTION CHÍNH */}
-      <section className="relative z-[110] mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800">
+      <section className="relative z-[10] mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800">
         <div className="grid gap-0 md:grid-cols-[270px,1fr]">
           {/* LEFT PANEL */}
           <div className="flex flex-col gap-4 bg-gradient-to-b from-[#dbeeff] to-[#f4f9ff] dark:from-slate-900 dark:to-slate-800 px-6 py-6 md:py-8">
