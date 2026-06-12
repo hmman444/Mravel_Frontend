@@ -712,7 +712,7 @@ export default function FoodActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="FOOD"
+        initialTab="RESTAURANT"
         activityType="FOOD"
         field="food"
         initialLocation={effectiveFoodLocation}

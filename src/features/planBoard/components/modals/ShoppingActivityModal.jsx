@@ -717,7 +717,7 @@ export default function ShoppingActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="SHOPPING"
+        initialTab="PLACE"
         activityType="SHOPPING"
         field="shopping"
         initialLocation={effectiveShoppingLocation}

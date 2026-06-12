@@ -706,7 +706,7 @@ export default function SightseeingActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="SIGHTSEEING"
+        initialTab="PLACE"
         activityType="SIGHTSEEING"
         field="sight"
         initialLocation={effectiveSightLocation}

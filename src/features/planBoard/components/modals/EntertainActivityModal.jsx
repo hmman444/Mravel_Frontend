@@ -691,7 +691,7 @@ export default function EntertainActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="ENTERTAIN"
+        initialTab="PLACE"
         activityType="ENTERTAIN"
         field="entertain"
         initialLocation={effectiveEntertainLocation}
