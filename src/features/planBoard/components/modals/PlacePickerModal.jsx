@@ -43,9 +43,15 @@ const getItemKey = (item) =>
   item?.name ??
   null;
 
-// chuẩn hoá tên để so khớp (bỏ hoa/thường + khoảng trắng thừa)
+// đưa mọi biến thể gạch ngang unicode (‐ ‑ ‒ – — ― −) về gạch nối ASCII "-"
+const normalizeDashes = (s) =>
+  (s ?? "")
+    .toString()
+    .replace(/[‐‑‒–—―−]/g, "-");
+
+// chuẩn hoá tên để so khớp (gạch ngang + bỏ hoa/thường + khoảng trắng thừa)
 const normalizeName = (s) =>
-  (s ?? "").toString().trim().toLowerCase().replace(/\s+/g, " ");
+  normalizeDashes(s).trim().toLowerCase().replace(/\s+/g, " ");
 
 // item trong list có khớp với location đã chọn trước đó không (theo id/slug HOẶC tên).
 // AI lưu id dạng slug còn list lại key theo id số → phải khớp cả hai, kèm fallback theo tên.
@@ -328,17 +334,14 @@ export default function PlacePickerModal({
   // filter FE
   const effectiveItems = useMemo(() => {
     if (!debouncedQuery) return baseItems;
-    const q = debouncedQuery.toLowerCase();
+    // so khớp bỏ qua biến thể gạch ngang (– vs -) để không lọc nhầm địa điểm như "Văn Miếu – Quốc Tử Giám"
+    const norm = (v) => normalizeDashes(v || "").toLowerCase();
+    const q = norm(debouncedQuery);
     return baseItems.filter((x) => {
-      const name = (x.name || "").toLowerCase();
-      const addr = (
-        x.addressLine ||
-        x.fullAddress ||
-        x.address ||
-        ""
-      ).toLowerCase();
-      const city = (x.cityName || "").toLowerCase();
-      const prov = (x.provinceName || "").toLowerCase();
+      const name = norm(x.name);
+      const addr = norm(x.addressLine || x.fullAddress || x.address);
+      const city = norm(x.cityName);
+      const prov = norm(x.provinceName);
       return (
         name.includes(q) || addr.includes(q) || city.includes(q) || prov.includes(q)
       );
@@ -393,8 +396,10 @@ export default function PlacePickerModal({
     );
     if (present) return; // đã nằm trong list mặc định → reconcile sẽ cuộn tới, khỏi search
 
-    setQuery(initialFocus.name);
-    setDebouncedQuery(initialFocus.name);
+    // đổi gạch ngang "–" → "-" cho từ khoá tự tìm (catalog khớp tốt hơn với gạch nối ASCII)
+    const term = normalizeDashes(initialFocus.name);
+    setQuery(term);
+    setDebouncedQuery(term);
     setSeededInitialQuery(true);
   }, [
     open,

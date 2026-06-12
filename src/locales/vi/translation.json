@@ -4457,7 +4457,7 @@
             "day": "Ngày {{n}}",
             "activity_count": "{{count}} hoạt động",
             "activity_count_suffix": "có vị trí trên bản đồ.",
-            "legend_hint": "Chạm vào từng hoạt động để làm nổi bật trên bản đồ. Đường xanh: chặng di chuyển, đường xám nét đứt: nối tuần tự giữa các hoạt động.",
+            "legend_hint": "Chạm vào từng hoạt động để làm nổi bật trên bản đồ. Đường xanh: chặng di chuyển; đường xám: lộ trình theo đường bộ giữa các hoạt động (nét đứt khi chưa định tuyến được).",
             "no_coordinates": "Hoạt động này chưa có toạ độ — sẽ không hiển thị trên bản đồ.",
             "origin_label": "Điểm đi: {{name}}",
             "destination_label": "Điểm đến: {{name}}",

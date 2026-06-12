@@ -4457,7 +4457,7 @@
             "day": "Day {{n}}",
             "activity_count": "{{count}} activities",
             "activity_count_suffix": "have a location on the map.",
-            "legend_hint": "Tap each activity to highlight it on the map. Blue line: travel leg, dashed gray line: sequential link between activities.",
+            "legend_hint": "Tap each activity to highlight it on the map. Blue line: travel leg; gray line: road route between activities (dashed when routing is unavailable).",
             "no_coordinates": "This activity has no coordinates yet — it will not appear on the map.",
             "origin_label": "From: {{name}}",
             "destination_label": "To: {{name}}",

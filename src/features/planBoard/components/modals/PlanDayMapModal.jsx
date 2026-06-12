@@ -60,23 +60,45 @@ const TYPE_STYLES = {
   },
 };
 
-const addressIcon = L.divIcon({
-  className: "mravel-map-pin",
-  html: `
-    <div class="mravel-map-pin-inner">
-      <svg viewBox="0 0 24 24" class="mravel-map-pin-svg">
-        <path
-          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5
-             c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5
-             s2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5z"
-          fill="currentColor"
-        />
+// Chấm SỐ THỨ TỰ — TÂM chấm đặt ĐÚNG toạ độ (iconAnchor = giữa) nên không lệch điểm
+// như pin nhọn cũ (mũi pin lệch khỏi toạ độ). Số = thứ tự đi để thấy rõ chiều lộ trình.
+function makeOrderIcon(order, { active = false, color = "#0284c7" } = {}) {
+  const size = active ? 32 : 26;
+  const font = active ? 15 : 12;
+  return L.divIcon({
+    className: "mravel-order-pin",
+    html: `<div style="
+      width:${size}px;height:${size}px;border-radius:9999px;
+      background:${color};border:2.5px solid #fff;
+      box-shadow:0 1px 5px rgba(2,8,23,.45);
+      color:#fff;font-weight:700;font-size:${font}px;line-height:1;
+      display:flex;align-items:center;justify-content:center;
+    ">${order ?? ""}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2], // tâm chấm trùng toạ độ thật
+  });
+}
+
+// Mũi tên chỉ CHIỀU đi, xoay theo hướng cung đường (SVG mặc định chỉ lên = hướng Bắc).
+function makeArrowIcon(deg, color = "#0284c7") {
+  return L.divIcon({
+    className: "mravel-route-arrow",
+    html: `<div style="transform:rotate(${deg}deg);width:18px;height:18px;display:flex;align-items:center;justify-content:center;">
+      <svg width="15" height="15" viewBox="0 0 24 24" style="filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff);">
+        <path d="M12 2 L20 21 L12 16 L4 21 Z" fill="${color}"/>
       </svg>
-    </div>
-  `,
-  iconSize: [30, 42],
-  iconAnchor: [15, 30],
-});
+    </div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  });
+}
+
+// Góc la bàn (độ, thuận chiều kim đồng hồ từ hướng Bắc) giữa 2 điểm [lat,lng].
+function bearingDeg(a, b) {
+  const dNorth = b[0] - a[0];
+  const dEast = (b[1] - a[1]) * Math.cos(((a[0] + b[0]) / 2) * (Math.PI / 180));
+  return (Math.atan2(dEast, dNorth) * 180) / Math.PI;
+}
 
 function AutoFitBounds({ bounds, fallbackCenter }) {
   const map = useMap();
@@ -366,7 +388,12 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
       }
     });
 
-    // nét đứt giữa các activity 
+    // số thứ tự theo đúng trình tự đi (gồm cả điểm đi/đến của TRANSPORT)
+    pts.forEach((p, i) => {
+      p.order = i + 1;
+    });
+
+    // nét đứt giữa các activity
     const seqSegs = [];
     if (pts.length > 1) {
       for (let i = 0; i < pts.length - 1; i++) {
@@ -432,23 +459,30 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
     return s.size;
   }, [points]);
 
-  // Lấy ĐƯỜNG ĐI THẬT (bám theo đường) cho các chặng TRANSPORT đang là
-  // đường thẳng (chỉ có 2 điểm đầu/cuối). Nếu OSRM lỗi -> giữ đường thẳng.
+  // Bám ĐƯỜNG ĐI THẬT (OSRM) cho CẢ hai loại đường: chặng TRANSPORT (xanh) và
+  // đường nối tuần tự giữa các hoạt động (xám). Mỗi chặng đang là đường thẳng 2 điểm
+  // sẽ được thay bằng lộ trình gấp khúc bám theo đường bộ. OSRM lỗi -> giữ đường thẳng.
   useEffect(() => {
     if (!open) return;
 
     setRoutedSegments({});
 
-    const straightSegs = segments.filter(
-      (seg) => Array.isArray(seg.positions) && seg.positions.length === 2
-    );
-    if (!straightSegs.length) return;
+    // namespace key cho đường tuần tự (seq:) để không đụng id của chặng TRANSPORT
+    const toRoute = [
+      ...segments.map((s) => ({ key: s.id, positions: s.positions })),
+      ...sequentialSegments.map((s) => ({
+        key: `seq:${s.id}`,
+        positions: s.positions,
+      })),
+    ].filter((s) => Array.isArray(s.positions) && s.positions.length === 2);
+
+    if (!toRoute.length) return;
 
     const controller = new AbortController();
     let cancelled = false;
 
     (async () => {
-      for (const seg of straightSegs) {
+      for (const seg of toRoute) {
         const [from, to] = seg.positions;
         const route = await fetchRoadRoute(
           { lat: from[0], lng: from[1] },
@@ -457,7 +491,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
         );
         if (cancelled) return;
         if (route?.path?.length >= 2) {
-          setRoutedSegments((prev) => ({ ...prev, [seg.id]: route.path }));
+          setRoutedSegments((prev) => ({ ...prev, [seg.key]: route.path }));
         }
       }
     })();
@@ -466,7 +500,7 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
       cancelled = true;
       controller.abort();
     };
-  }, [open, segments]);
+  }, [open, segments, sequentialSegments]);
 
   if (!open || !list) return null;
 
@@ -479,6 +513,28 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
     if (type.startsWith("TRANSPORT")) return "TRANSPORT";
     return TYPE_STYLES[type] ? type : "OTHER";
   };
+
+  // Mũi tên chỉ chiều cho từng cung đường (đặt ở giữa mỗi chặng theo lộ trình thật).
+  const routeArrows = [];
+  const addArrow = (id, positions, color) => {
+    if (!Array.isArray(positions) || positions.length < 2) return;
+    const mid = Math.floor((positions.length - 1) / 2);
+    const a = positions[mid];
+    const b = positions[mid + 1] || positions[positions.length - 1];
+    if (!a || !b) return;
+    routeArrows.push({
+      id,
+      pos: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2],
+      deg: bearingDeg(a, b),
+      color,
+    });
+  };
+  segments.forEach((s) =>
+    addArrow(`ta-${s.id}`, routedSegments[s.id] || s.positions, "#0284c7")
+  );
+  sequentialSegments.forEach((s) =>
+    addArrow(`sa-${s.id}`, routedSegments[`seq:${s.id}`] || s.positions, "#475569")
+  );
 
   return (
     <AnimatePresence>
@@ -557,6 +613,30 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
 
                 <AutoFitBounds bounds={bounds} fallbackCenter={center} />
 
+                {/* Viền trắng (casing) dưới mọi cung đường để nổi rõ trên nền bản đồ */}
+                {segments.map((seg) => (
+                  <Polyline
+                    key={`case-${seg.id}`}
+                    positions={routedSegments[seg.id] || seg.positions}
+                    pathOptions={{
+                      color: "#ffffff",
+                      weight: (hoverId === seg.id ? 5 : 4) + 4,
+                      opacity: 0.9,
+                    }}
+                  />
+                ))}
+                {sequentialSegments.map((seg) => {
+                  const routed = routedSegments[`seq:${seg.id}`];
+                  if (!routed) return null; // chỉ casing cho lộ trình thật (nét liền)
+                  return (
+                    <Polyline
+                      key={`seqcase-${seg.id}`}
+                      positions={routed}
+                      pathOptions={{ color: "#ffffff", weight: 6.5, opacity: 0.85 }}
+                    />
+                  );
+                })}
+
                 {/* Đường TRANSPORT (A → B) - ưu tiên đường đi thật bám theo đường */}
                 {segments.map((seg) => (
                   <Polyline
@@ -565,22 +645,37 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                     pathOptions={{
                       color: "#0ea5e9",
                       weight: hoverId && hoverId === seg.id ? 5 : 4,
-                      opacity: hoverId && hoverId !== seg.id ? 0.3 : 0.9,
+                      opacity: hoverId && hoverId !== seg.id ? 0.3 : 0.95,
                     }}
                   />
                 ))}
 
-                {/* Đường tuần tự giữa các node */}
-                {sequentialSegments.map((seg) => (
-                  <Polyline
-                    key={`seq-${seg.id}`}
-                    positions={seg.positions}
-                    pathOptions={{
-                      color: "#64748b",
-                      weight: 2.5,
-                      opacity: 0.7,
-                      dashArray: "6 8",
-                    }}
+                {/* Đường tuần tự giữa các node — bám đường thật (nét liền) khi định
+                    tuyến được; chưa được thì giữ nét đứt (đường chim bay) */}
+                {sequentialSegments.map((seg) => {
+                  const routed = routedSegments[`seq:${seg.id}`];
+                  return (
+                    <Polyline
+                      key={`seq-${seg.id}`}
+                      positions={routed || seg.positions}
+                      pathOptions={{
+                        color: "#475569",
+                        weight: routed ? 3.5 : 2.5,
+                        opacity: 0.9,
+                        dashArray: routed ? null : "6 8",
+                      }}
+                    />
+                  );
+                })}
+
+                {/* Mũi tên chỉ chiều đi trên từng cung đường */}
+                {routeArrows.map((ar) => (
+                  <Marker
+                    key={ar.id}
+                    position={ar.pos}
+                    icon={makeArrowIcon(ar.deg, ar.color)}
+                    interactive={false}
+                    zIndexOffset={400}
                   />
                 ))}
 
@@ -607,13 +702,18 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                     <Marker
                       key={p.id}
                       position={[p.lat, p.lng]}
-                      icon={addressIcon}
-                      opacity={hoverId && hoverId !== p.parentId ? 0.7 : 1}
-                      zIndexOffset={hoverId === p.parentId ? 500 : 0}
+                      icon={makeOrderIcon(p.order, {
+                        active: hoverId === p.parentId,
+                      })}
+                      opacity={hoverId && hoverId !== p.parentId ? 0.55 : 1}
+                      zIndexOffset={hoverId === p.parentId ? 600 : 0}
                     >
-                      <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
+                      <Tooltip direction="top" offset={[0, -14]} opacity={0.95}>
                         <div className="text-[11px]">
                           <div className="flex items-center gap-1 font-semibold">
+                            <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-600 px-1 text-[10px] text-white">
+                              {p.order}
+                            </span>
                             <span>{typeStyle.icon}</span>
                             <span>
                               {displayPoint.routeTitle || displayPoint.title}
@@ -682,7 +782,14 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                       ? !!(data.fromLocation || data.toLocation)
                       : !!loc;
 
-                  const p = points.find((pt) => pt.parentId === card.id);
+                  const cardPoints = points.filter(
+                    (pt) => pt.parentId === card.id
+                  );
+                  const p = cardPoints[0];
+                  // số thứ tự trùng với chấm trên bản đồ (transport: "đi→đến")
+                  const orderLabel = cardPoints.length
+                    ? cardPoints.map((pt) => pt.order).join("→")
+                    : null;
 
                   // Tiêu đề card: nếu là TRANSPORT thì A → B
                   let mainTitle =
@@ -721,8 +828,15 @@ export default function PlanDayMapModal({ open, onClose, list, dayIndex }) {
                           : "border-slate-200 dark:border-slate-700"
                       }`}
                     >
-                      <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-[13px]">
-                        {typeStyle.icon}
+                      <div className="mt-0.5 flex items-center gap-1.5">
+                        {orderLabel && (
+                          <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-sky-600 px-1.5 text-[11px] font-bold text-white shadow-sm">
+                            {orderLabel}
+                          </span>
+                        )}
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-[13px]">
+                          {typeStyle.icon}
+                        </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[13px] font-medium text-slate-900 dark:text-slate-50 truncate">
