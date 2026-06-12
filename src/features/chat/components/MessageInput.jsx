@@ -168,9 +168,10 @@ export default function MessageInput({ conversationId }) {
         messageType,
         mediaUrl,
       })).unwrap();
-    } catch {
+    } catch (e) {
       setContent(text);
-      showError(t("chat.send_message_failed"));
+      const msg = typeof e === "string" ? e : (e?.message || e?.response?.data?.message);
+      showError(msg || t("chat.send_message_failed"));
     } finally {
       if (capturedPreview?.objectUrl) URL.revokeObjectURL(capturedPreview.objectUrl);
       dispatch(removeOptimisticMessage({ conversationId, tempId }));

@@ -32,7 +32,11 @@ export default function LinkedAccountsCard() {
               </div>
               <span>{provider}</span>
             </div>
-            <button className="text-xs font-medium text-sky-600 hover:underline">
+            <button
+              disabled
+              title={t("coming_soon.title")}
+              className="text-xs font-medium text-sky-600 hover:underline cursor-not-allowed opacity-60"
+            >
               {t("user.link_account")}
             </button>
           </div>

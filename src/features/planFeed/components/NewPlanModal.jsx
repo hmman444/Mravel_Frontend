@@ -75,6 +75,14 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
     if (!form.startDate || !form.endDate)
       return showError(t("feed.newPlan.error.invalidDate"));
 
+    // Budget fields must not be negative.
+    if (
+      (form.budgetTotal !== "" && Number(form.budgetTotal) < 0) ||
+      (form.budgetPerPerson !== "" && Number(form.budgetPerPerson) < 0)
+    ) {
+      return showError(t("feed.newPlan.error.budgetNegative"));
+    }
+
     setSubmitting(true);
 
     try {
@@ -88,8 +96,12 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
       showSuccess(t("feed.newPlan.success"));
       onCreated?.(res);
       onClose();
-    } catch {
-      showError(t("feed.newPlan.error.createFailed"));
+    } catch (e) {
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message || e?.response?.data?.error || e?.message;
+      showError(msg || t("feed.newPlan.error.createFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -284,6 +296,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                       <div className={inputBox}>
                         <input
                           type="number"
+                          min={0}
                           placeholder={t("feed.newPlan.field.budgetTotalPlaceholder")}
                           value={form.budgetTotal}
                           onChange={(e) =>
@@ -306,6 +319,7 @@ export default function NewPlanModal({ open, onClose, onCreated }) {
                     <div className={inputBox}>
                       <input
                         type="number"
+                        min={0}
                         placeholder={t("feed.newPlan.field.budgetPerPersonPlaceholder")}
                         value={form.budgetPerPerson}
                         onChange={(e) =>

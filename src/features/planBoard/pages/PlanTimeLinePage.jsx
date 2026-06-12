@@ -192,7 +192,7 @@ export default function PlanTimeLinePage() {
       }
     } catch (e) {
       console.error(e);
-      showError(t("plan.toast.copy_error"));
+      showError(e?.response?.data?.message || e?.message || t("plan.toast.copy_error"));
     }
   };
 
@@ -204,7 +204,7 @@ export default function PlanTimeLinePage() {
       await reloadRecent?.();
     } catch (e) {
       console.error(e);
-      showError(t("plan.toast.delete_error"));
+      showError(e?.response?.data?.message || e?.message || t("plan.toast.delete_error"));
     }
   };
 

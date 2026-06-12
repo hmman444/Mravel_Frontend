@@ -79,13 +79,13 @@ export default function RestaurantBookingPolicyCard() {
         </div>
 
         {/* Lưu ý quan trọng */}
-        <div className="overflow-hidden rounded-2xl bg-blue-50">
+        <div className="overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 dark:border-sky-900/40 dark:bg-sky-950/30">
           <div className="flex items-start gap-2 px-4 py-3 md:px-5">
             <div className="mt-0.5">
-              <Info className="h-4 w-4 text-blue-600" />
+              <Info className="h-4 w-4 text-sky-600 dark:text-sky-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-blue-700 md:text-sm">
+              <p className="text-xs font-semibold text-sky-700 dark:text-sky-300 md:text-sm">
                 {importantNote.title}
               </p>
               <p className="mt-0.5 text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">
@@ -130,7 +130,7 @@ export default function RestaurantBookingPolicyCard() {
       {open &&
         createPortal(
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-2 md:px-4"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-2 md:px-4"
             onClick={() => setOpen(false)}
           >
             <div
@@ -154,8 +154,8 @@ export default function RestaurantBookingPolicyCard() {
               {/* Body */}
               <div className="flex-1 overflow-y-auto px-5 pb-5 pt-4 space-y-5">
                 {/* Block note trong modal */}
-                <div className="rounded-2xl bg-blue-50 px-4 py-3">
-                  <p className="text-xs font-semibold text-blue-700 md:text-sm">
+                <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 dark:border-sky-900/40 dark:bg-sky-950/30">
+                  <p className="text-xs font-semibold text-sky-700 dark:text-sky-300 md:text-sm">
                     {importantNote.title}
                   </p>
                   <p className="mt-0.5 text-xs font-semibold text-gray-900 dark:text-gray-100 md:text-sm">

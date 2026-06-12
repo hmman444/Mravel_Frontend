@@ -108,8 +108,8 @@ export default function ListPlanPage() {
         showError(t("plan.toast.copy_error"));
       }
     } catch (e) {
-      console.error(e);
-      showError(t("plan.toast.copy_error"));
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.message);
+      showError(msg || t("plan.toast.copy_error"));
     }
   };
 
@@ -122,16 +122,16 @@ export default function ListPlanPage() {
 
       // nếu đang ở /my-plans thì vẫn ở lại, chỉ refresh danh sách
     } catch (e) {
-      console.error(e);
-      showError(t("plan.toast.delete_error"));
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.message);
+      showError(msg || t("plan.toast.delete_error"));
     }
   };
 
   const handleRemoveRecentFromSidebar = async (plan) => {
     try {
       await removeRecent(plan.id);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // ignore: removing a recent-plan shortcut is non-critical
     }
   };
 

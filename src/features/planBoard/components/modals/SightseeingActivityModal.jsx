@@ -23,6 +23,7 @@ import {
   getLocDisplayLabel,
   slimLocationForStorage,
   normalizeLocationFromStored,
+  locationFromRecommendation,
 } from "../../utils/locationUtils";
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
@@ -139,7 +140,16 @@ export default function SightseeingActivityModal({
       setBudgetAmount(cost.budgetAmount != null ? String(cost.budgetAmount) : "");
       setNote(editingCard.description || "");
 
-      setInternalSightLocation(normalizeLocationFromStored(data.sightLocation) || null);
+      // Fall back to the AI recommendation so older AI-created cards (recommendation
+      // only, no sightLocation) still pre-select + auto-focus the catalog place.
+      setInternalSightLocation(
+        normalizeLocationFromStored(data.sightLocation) ||
+          locationFromRecommendation(data.recommendation, {
+            fallbackType: "PLACE",
+            address: data.address,
+          }) ||
+          null
+      );
     } else {
       // NEW
       setTitle("");
@@ -696,7 +706,7 @@ export default function SightseeingActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="SIGHTSEEING"
+        initialTab="PLACE"
         activityType="SIGHTSEEING"
         field="sight"
         initialLocation={effectiveSightLocation}

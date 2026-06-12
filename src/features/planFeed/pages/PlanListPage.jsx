@@ -384,6 +384,7 @@ export default function PlanListPage() {
               doSearch((keyword || "").trim(), DEFAULT_FILTERS);
             }}
             activeCount={activeFilterCount}
+            loading={searchLoading}
           />
 
           {/*  Content column (Search + Feed)  */}

@@ -46,7 +46,7 @@ export default function ReviewForm({ targetType, targetId, targetSlug, targetNam
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
         <Trans
           i18nKey="review.login_to_review"
-          components={{ a: <a href="/login" className="text-blue-600 hover:underline font-medium" /> }}
+          components={{ a: <a href="/login" className="text-blue-600 dark:text-sky-300 hover:underline font-medium" /> }}
         />
 
       </div>
@@ -94,7 +94,7 @@ export default function ReviewForm({ targetType, targetId, targetSlug, targetNam
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
           {isEditing ? t("review.edit_your_review_label") : t("review.your_review_label")}
         </span>
         <StarRating value={rating} onChange={setRating} size={28} />

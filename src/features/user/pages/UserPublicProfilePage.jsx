@@ -126,8 +126,8 @@ export default function UserPublicProfilePage() {
       dispatch(upsertConversation(conv));
       dispatch(setActiveConversation(conv.id));
       navigate(`/chat/${conv.id}`);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // ignore: keep user on page if conversation creation fails
     }
   }, [userView?.id, dispatch, navigate]);
 

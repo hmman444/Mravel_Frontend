@@ -865,7 +865,7 @@ export default function CinemaActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="CINEMA"
+        initialTab="PLACE"
         activityType="CINEMA"
         field="cinema"
         initialLocation={effectiveCinemaLocation}

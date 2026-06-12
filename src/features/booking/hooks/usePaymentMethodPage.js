@@ -70,7 +70,8 @@ export function usePaymentMethodPage() {
         dispatch(clearDraftPayment());
         window.location.href = url;
       } catch (e) {
-        openModal(typeof e === "string" ? e : t("booking.create_payment_failed"), t("booking.error"));
+        const msg = typeof e === "string" ? e : (e?.message || e?.error);
+        openModal(msg || t("booking.create_payment_failed"), t("booking.error"));
       }
     },
     [dispatch, draft, openModal, typeParam, t]

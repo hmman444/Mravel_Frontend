@@ -7,7 +7,7 @@ export default function RestaurantHero() {
     "https://ik.imagekit.io/tvlk/image/imageResource/2025/05/22/1747889814840-c3994b87577ea07541413dace0a20193.jpeg?tr=h-329,q-75,w-1305";
 
   return (
-    <section className="bg-[#f5f7fb]">
+    <section className="bg-[#f5f7fb] dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-6 pt-4 pb-8">
         <div className="relative h-[220px] md:h-[280px] rounded-3xl overflow-hidden shadow-lg">
           {/* Ảnh nền full width, KHÔNG làm tối nữa */}

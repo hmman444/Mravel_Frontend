@@ -70,6 +70,8 @@ export default function ReviewSection({ targetType, targetId, targetSlug, target
     if (!result.error) {
       toast.success(t("review.delete_success"));
       dispatch(fetchReviewSummary({ targetType, targetId }));
+    } else {
+      toast.error(result.payload || t("common.error_occurred"));
     }
     handleCloseConfirm();
   };

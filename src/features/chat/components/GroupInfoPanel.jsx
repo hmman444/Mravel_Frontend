@@ -13,6 +13,7 @@ import {
   transferOwnership,
   renameGroup,
 } from "../services/chatService";
+import { showError } from "../../../utils/toastUtils";
 import AddMembersModal from "./AddMembersModal";
 import SafeAvatar from "./SafeAvatar";
 import {
@@ -41,20 +42,36 @@ function MemberItem({ member, myRole, myUserId, conversationId, onRefresh, isOnl
   const canDemote = myRole === "OWNER" && member.role === "ADMIN";
 
   const doRemove = async () => {
-    await removeMember(conversationId, member.userId);
-    onRefresh();
+    try {
+      await removeMember(conversationId, member.userId);
+      onRefresh();
+    } catch (e) {
+      showError(e?.response?.data?.message || t("common.error_occurred"));
+    }
   };
   const doPromote = async () => {
-    await changeMemberRole(conversationId, member.userId, "ADMIN");
-    onRefresh();
+    try {
+      await changeMemberRole(conversationId, member.userId, "ADMIN");
+      onRefresh();
+    } catch (e) {
+      showError(e?.response?.data?.message || t("common.error_occurred"));
+    }
   };
   const doDemote = async () => {
-    await changeMemberRole(conversationId, member.userId, "MEMBER");
-    onRefresh();
+    try {
+      await changeMemberRole(conversationId, member.userId, "MEMBER");
+      onRefresh();
+    } catch (e) {
+      showError(e?.response?.data?.message || t("common.error_occurred"));
+    }
   };
   const doTransfer = async () => {
-    await transferOwnership(conversationId, member.userId);
-    onRefresh();
+    try {
+      await transferOwnership(conversationId, member.userId);
+      onRefresh();
+    } catch (e) {
+      showError(e?.response?.data?.message || t("common.error_occurred"));
+    }
   };
 
   return (
@@ -116,6 +133,7 @@ export default function GroupInfoPanel({ conversationId, onClose, compact = fals
   const detail = useSelector((s) => s.chat.conversationDetails[conversationId]);
   const [editName, setEditName] = useState(false);
   const [newName, setNewName] = useState(detail?.name || "");
+  const [loading, setLoading] = useState(false);
   const [showAddMembersModal, setShowAddMembersModal] = useState(false);
   const memberUserIds = (detail?.members || []).map((m) => m.userId);
   const onlineIds = useChatPresence(memberUserIds);
@@ -148,16 +166,28 @@ export default function GroupInfoPanel({ conversationId, onClose, compact = fals
 
   const handleRename = async () => {
     if (newName.trim() && newName.trim() !== detail.name) {
-      await renameGroup(conversationId, newName.trim());
-      refresh();
+      try {
+        setLoading(true);
+        await renameGroup(conversationId, newName.trim());
+        refresh();
+      } catch (e) {
+        showError(e?.response?.data?.message || t("common.error_occurred"));
+        return;
+      } finally {
+        setLoading(false);
+      }
     }
     setEditName(false);
   };
 
   const handleLeave = async () => {
-    await leaveConversation(conversationId);
-    dispatch(removeConversationFromList(conversationId));
-    onClose();
+    try {
+      await leaveConversation(conversationId);
+      dispatch(removeConversationFromList(conversationId));
+      onClose();
+    } catch (e) {
+      showError(e?.response?.data?.message || t("common.error_occurred"));
+    }
   };
 
   return (
@@ -194,8 +224,12 @@ export default function GroupInfoPanel({ conversationId, onClose, compact = fals
                 autoFocus
                 onKeyDown={(e) => e.key === "Enter" && handleRename()}
               />
-              <button onClick={handleRename} className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm">
-                {t("common.save")}
+              <button
+                onClick={handleRename}
+                disabled={loading}
+                className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? t("common.processing") : t("common.save")}
               </button>
               <button onClick={() => setEditName(false)} className="px-2 py-1.5 text-gray-500">
                 <XMarkIcon className="w-4 h-4" />

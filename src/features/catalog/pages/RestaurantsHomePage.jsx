@@ -43,7 +43,7 @@ export default function RestaurantsHomePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-950">
       <Navbar />
       {/* chừa chỗ cho navbar fixed */}
       <div className="h-[50px] md:h-[60px]" aria-hidden />

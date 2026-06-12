@@ -65,7 +65,6 @@ export const getHotels = async (params = {}) => {
     const pageData = res.data?.data;
     return { success: true, data: normalizePage(pageData) };
   } catch (error) {
-    console.error("getHotels error:", error?.response || error);
     return toError(error, "Lỗi tìm kiếm khách sạn");
   }
 };
@@ -120,7 +119,6 @@ export const getRestaurants = async (params = {}) => {
     const pageData = res.data?.data ?? res.data;
     return { success: true, data: normalizePage(pageData) };
   } catch (error) {
-    console.error("getRestaurants error:", error?.response || error);
     return toError(error, "Lỗi tìm kiếm quán ăn");
   }
 };
@@ -175,7 +173,6 @@ export async function searchRestaurants({
     // Giữ nguyên format cũ: res.data (ApiResponse)
     return res.data;
   } catch (error) {
-    console.error("searchRestaurants error:", error?.response || error);
     // Trả về format giống các hàm khác để slice xử lý
     return toError(error, "Lỗi tìm kiếm quán ăn");
   }
@@ -296,7 +293,6 @@ export const getHotelsFaceted = async (params = {}) => {
 
     return { success: true, data: res.data?.data };
   } catch (error) {
-    console.error("getHotelsFaceted error:", error?.response || error);
     return toError(error, "Lỗi tìm kiếm khách sạn");
   }
 };
@@ -339,7 +335,6 @@ export const getPlacesFaceted = async (params = {}) => {
 
     return { success: true, data: res.data?.data };
   } catch (error) {
-    console.error("getPlacesFaceted error:", error?.response || error);
     return toError(error, "Lỗi tìm kiếm địa điểm");
   }
 };

@@ -466,7 +466,7 @@ Mravel is not just a booking app but an ideal travel companion, bringing a conve
 
       {/* GRADIENT OVERLAY KHI THU GỌN */}
       {!expanded && (
-        <div className="mt-[-80px] h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+        <div className="mt-[-80px] h-24 bg-gradient-to-t from-white dark:from-gray-950 to-transparent pointer-events-none" />
       )}
 
       {/* BUTTON */}

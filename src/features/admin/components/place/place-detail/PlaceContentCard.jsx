@@ -28,13 +28,13 @@ export default function PlaceContentCard({
 
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className={`${ui.btn} ${ui.btnGhost}`} onClick={() => onAddBlock("HEADING")} disabled={isLockedReadOnly}>
-            + Heading
+            + {t("admin.block_type_heading")}
           </button>
           <button type="button" className={`${ui.btn} ${ui.btnGhost}`} onClick={() => onAddBlock("PARAGRAPH")} disabled={isLockedReadOnly}>
-            + Paragraph
+            + {t("admin.block_type_paragraph")}
           </button>
           <button type="button" className={`${ui.btn} ${ui.btnGhost}`} onClick={() => onAddBlock("IMAGE")} disabled={isLockedReadOnly}>
-            + Image
+            + {t("admin.block_type_image")}
           </button>
 
           <div className="relative">
@@ -55,7 +55,7 @@ export default function PlaceContentCard({
                     onClick={() => onAddBlock(b.type)}
                   >
                     <b.icon className="h-5 w-5 text-slate-500" />
-                    {b.label}
+                    {t(b.labelKey)}
                   </button>
                 ))}
               </div>

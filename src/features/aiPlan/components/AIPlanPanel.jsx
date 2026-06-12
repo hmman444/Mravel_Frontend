@@ -491,7 +491,7 @@ function EditProposal({ operations }) {
           const color = meta ? meta.color : "text-slate-700 bg-slate-200";
           const icon = meta ? meta.icon : "•";
           return (
-            <li key={i} className="flex items-start gap-2 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
+            <li key={op.id ?? `${op.op}-${i}`} className="flex items-start gap-2 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
               <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${color}`}>
                 <span>{icon}</span>
                 {label}
@@ -570,7 +570,7 @@ function ThinkingBlock({ activity, canCancel, onCancel }) {
         {lastFew.length > 0 && (
           <ul className="mt-2 space-y-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
             {lastFew.map((a, idx) => (
-              <li key={idx} className="font-mono">
+              <li key={a.id ?? `${activity.length - lastFew.length + idx}-${a.kind ?? ""}`} className="font-mono">
                 {a.text}
               </li>
             ))}

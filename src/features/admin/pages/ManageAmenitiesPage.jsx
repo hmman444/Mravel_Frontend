@@ -150,11 +150,13 @@ export default function ManageAmenitiesPage() {
   };
 
   const openCreate = () => {
+    setFormError("");
     setEditing(null);
     setShowModal(true);
   };
 
   const openEdit = (amenity) => {
+    setFormError("");
     setEditing(amenity);
     setShowModal(true);
   };
@@ -177,8 +179,8 @@ export default function ManageAmenitiesPage() {
       await remove(pendingDelete.id);
       showSuccess(t("admin.amenity_delete_success"));
       await load({ active: true });
-    } catch {
-      showError(t("admin.amenity_delete_failed"));
+    } catch (err) {
+      showError(extractApiMessage(err) || t("admin.amenity_delete_failed"));
     } finally {
       closeConfirm();
     }
@@ -194,8 +196,8 @@ export default function ManageAmenitiesPage() {
 
       showSuccess(t("admin.amenity_deactivate_success"));
       await load({ active: true });
-    } catch {
-      showError(t("admin.amenity_deactivate_failed"));
+    } catch (err) {
+      showError(extractApiMessage(err) || t("admin.amenity_deactivate_failed"));
     } finally {
       setRowToggling(id, false);
     }
@@ -209,8 +211,8 @@ export default function ManageAmenitiesPage() {
 
       showSuccess(t("admin.amenity_activate_success"));
       await load({ active: true });
-    } catch {
-      showError(t("admin.amenity_activate_failed"));
+    } catch (err) {
+      showError(extractApiMessage(err) || t("admin.amenity_activate_failed"));
     } finally {
       setRowToggling(id, false);
     }
@@ -381,6 +383,8 @@ export default function ManageAmenitiesPage() {
         open={showModal}
         saving={saving}
         editing={editing}
+        apiError={formError}
+        onClearError={() => setFormError("")}
         onClose={() => setShowModal(false)}
         onSubmit={handleSubmit}
       />

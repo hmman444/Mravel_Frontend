@@ -17,12 +17,6 @@ export default function PartnerHotelCreatePage({ loading, onBack, onCreate }) {
   const hotelAmenity = usePartnerAmenities("HOTEL");
   const roomAmenity = usePartnerAmenities("ROOM");
 
-  console.log(
-    "HOTEL flat length:",
-    hotelAmenity.flat?.length,
-    hotelAmenity.flat?.[0]
-  );
-
   const fm = usePartnerHotelCreateForm({ onCreate });
 
   return (

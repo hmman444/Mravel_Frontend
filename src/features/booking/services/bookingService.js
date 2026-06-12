@@ -36,7 +36,6 @@ export const createHotelBookingAndPay = async (payload) => {
 
     return { success: true, data: dto };
   } catch (error) {
-    console.error("createHotelBookingAndPay error:", error?.response || error);
     return toError(error, i18n.t("booking.error_create_payment"));
   }
 };
@@ -60,6 +59,13 @@ export const getBookingStatusByCode = async (code) => {
     const dto = apiRes?.data ?? apiRes;
     return { success: true, data: dto };
   } catch (error) {
+    const status = error?.response?.status;
+    // Lỗi mạng (không có response) hoặc lỗi server (5xx) -> ném ra để
+    // PaymentReturnPage phân biệt được với "chưa tìm thấy" và hiển thị trạng thái lỗi.
+    if (!error?.response || status >= 500) {
+      throw error;
+    }
+    // 4xx (vd not-found / chưa khớp): trả về kết quả "không thành công" như cũ.
     return toError(error, i18n.t("booking.error_connect_server"));
   }
 };
@@ -89,7 +95,6 @@ export const getHotelAvailability = async ({
 
     return { success: true, data: res.data?.data };
   } catch (error) {
-    console.error("getHotelAvailability error:", error?.response || error);
     return toError(error, i18n.t("booking.error_check_availability"));
   }
 };

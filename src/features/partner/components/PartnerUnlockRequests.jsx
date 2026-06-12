@@ -9,7 +9,7 @@ import {
   MagnifyingGlassIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import Toast from "../../../components/Toast";
+import { showError, showInfo, showSuccess } from "../../../utils/toastUtils";
 
 // Mock data (demo UI) — sau này bạn thay bằng API
 const MOCK_BLOCKED_SERVICES = [
@@ -119,7 +119,7 @@ export default function PartnerUnlockRequests() {
   const openRequestModal = (service) => {
     // rule: chỉ được gửi khi ADMIN_BLOCKED
     if (service.status !== "ADMIN_BLOCKED") {
-      Toast.error(t("partner.unlock.toast.only_admin_blocked"));
+      showError(t("partner.unlock.toast.only_admin_blocked"));
       return;
     }
     setModal({ open: true, service, reason: "" });
@@ -128,7 +128,7 @@ export default function PartnerUnlockRequests() {
   const submitUnlockRequest = () => {
     const reason = modal.reason.trim();
     if (!reason) {
-      Toast.error(t("partner.unlock.toast.reason_required"));
+      showError(t("partner.unlock.toast.reason_required"));
       return;
     }
 
@@ -147,7 +147,7 @@ export default function PartnerUnlockRequests() {
 
     setRequests((prev) => [newReq, ...prev]);
     setModal({ open: false, service: null, reason: "" });
-    Toast.success(t("partner.unlock.toast.submitted"));
+    showSuccess(t("partner.unlock.toast.submitted"));
 
     // UX: tự chuyển qua history để partner thấy request vừa gửi
     setTab("HISTORY");
@@ -260,7 +260,7 @@ export default function PartnerUnlockRequests() {
                     </button>
 
                     <button
-                      onClick={() => Toast.info(t("partner.unlock.toast.service_detail_demo"))}
+                      onClick={() => showInfo(t("partner.unlock.toast.service_detail_demo"))}
                       className="p-2 rounded-lg border hover:bg-gray-50"
                       title={t("partner.unlock.info")}
                     >
@@ -328,7 +328,7 @@ export default function PartnerUnlockRequests() {
 
                   <div className="md:w-56 flex flex-col gap-2">
                     <button
-                      onClick={() => Toast.info(t("partner.unlock.toast.no_edit_demo"))}
+                      onClick={() => showInfo(t("partner.unlock.toast.no_edit_demo"))}
                       className="w-full px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm"
                     >
                       {t("partner.unlock.view_rules")}
@@ -339,7 +339,7 @@ export default function PartnerUnlockRequests() {
                           // demo: mở modal gửi lại dựa trên serviceId nếu còn blocked
                           const svc = blockedServices.find((s) => s.id === r.serviceId);
                           if (!svc) {
-                            Toast.error(t("partner.unlock.toast.no_longer_blocked"));
+                            showError(t("partner.unlock.toast.no_longer_blocked"));
                             return;
                           }
                           openRequestModal(svc);
@@ -363,7 +363,7 @@ export default function PartnerUnlockRequests() {
 
       {/* Modal gửi request */}
       {modal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-3">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[200] px-3">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-lg p-6">
             <div className="flex items-start justify-between gap-3">
               <div>

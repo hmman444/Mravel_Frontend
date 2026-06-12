@@ -23,7 +23,7 @@ export default function ReviewSummary({ summary }) {
             <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               {averageRating.toFixed(1)}
             </span>
-            <span className="text-sm text-gray-400">/ 5</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">/ 5</span>
           </div>
           <StarRating value={averageRating} readonly size={20} />
           <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -38,14 +38,14 @@ export default function ReviewSummary({ summary }) {
             const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
             return (
               <div key={star} className="flex items-center gap-2 text-sm">
-                <span className="w-3 text-gray-600 dark:text-gray-400">{star}</span>
+                <span className="w-3 text-gray-700 dark:text-gray-300">{star}</span>
                 <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-yellow-400 rounded-full transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="w-8 text-right text-gray-500 dark:text-gray-400">{count}</span>
+                <span className="w-8 text-right text-gray-600 dark:text-gray-400">{count}</span>
               </div>
             );
           })}

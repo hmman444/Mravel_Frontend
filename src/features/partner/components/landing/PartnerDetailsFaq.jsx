@@ -72,7 +72,7 @@ export default function PartnerDetailsFaq() {
         </div>
 
         {/* RIGHT: FAQ accordion */}
-        <div id="faq" className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
+        <div id="faq" className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 shadow-sm">
           <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">{t("partner.faq.title")}</h3>
 
           <div className="mt-5 space-y-3">
@@ -89,13 +89,13 @@ export default function PartnerDetailsFaq() {
 function InfoBlock({ id, icon, title, subtitle, bullets, desc }) {
   return (
     <section id={id} className="scroll-mt-28">
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 backdrop-blur-xl p-6 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 border border-sky-100 text-sky-700">
+          <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800/60 text-sky-700 dark:text-sky-400">
             {icon}
           </div>
           <div className="flex-1">
-            <div className="text-sm font-semibold text-sky-700">{title}</div>
+            <div className="text-sm font-semibold text-sky-700 dark:text-sky-400">{title}</div>
             <h2 className="mt-1 text-xl font-extrabold text-slate-900 dark:text-slate-100">{subtitle}</h2>
 
             <div className="mt-4 space-y-2">
@@ -120,7 +120,7 @@ function FaqItem({ q, a }) {
 
   return (
     <div
-      className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 overflow-hidden cursor-pointer"
+      className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden cursor-pointer"
       onClick={() => setOpen((v) => !v)}
     >
       <div className="flex items-center justify-between gap-3 p-4">

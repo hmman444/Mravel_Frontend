@@ -22,6 +22,7 @@ import {
   slimLocationForStorage,
   normalizeLocationFromStored,
   getLocDisplayLabel,
+  locationFromRecommendation,
 } from "../../utils/locationUtils";
 
 import { pickStartEndFromCard } from "../../utils/activityTimeUtils";
@@ -33,6 +34,12 @@ function safeJsonParse(str) {
   } catch {
     return {};
   }
+}
+
+// Reject negative values from numeric cost inputs (keeps empty string as-is).
+function clampNonNegative(value) {
+  if (value === "" || value == null) return "";
+  return Number(value) < 0 ? "0" : value;
 }
 
 export default function FoodActivityModal({
@@ -133,7 +140,14 @@ export default function FoodActivityModal({
       setActualCost(cost.actualCost != null ? String(cost.actualCost) : "");
       setNote(editingCard.description || "");
 
-      const normalizedLoc = normalizeLocationFromStored(data.restaurantLocation);
+      // Fall back to the AI recommendation so older AI-created cards (recommendation
+      // only, no restaurantLocation) still pre-select + auto-focus the catalog restaurant.
+      const normalizedLoc =
+        normalizeLocationFromStored(data.restaurantLocation) ||
+        locationFromRecommendation(data.recommendation, {
+          fallbackType: "RESTAURANT",
+          address: data.address,
+        });
       setInternalFoodLocation(normalizedLoc || null);
       if (normalizedLoc?.fullAddress) setLocationText(normalizedLoc.fullAddress);
     } else {
@@ -219,7 +233,13 @@ export default function FoodActivityModal({
   const addExtraCost = () =>
     setExtraCosts((prev) => [
       ...prev,
-      { reason: "", type: "OTHER", estimatedAmount: null, actualAmount: "" },
+      {
+        _key: `extra-${Date.now()}-${prev.length}`,
+        reason: "",
+        type: "OTHER",
+        estimatedAmount: null,
+        actualAmount: "",
+      },
     ]);
 
   const updateExtraCost = (idx, key, value) => {
@@ -261,6 +281,16 @@ export default function FoodActivityModal({
 
     if (startTime && endTime && durationMinutes == null) {
       newErrors.time = t("plan.modal.food.err_time_order");
+    }
+
+    // EXACT split: the sum of per-person amounts must equal the total to split.
+    if (
+      splitEnabled &&
+      splitType === "EXACT" &&
+      parsedActual > 0 &&
+      totalExact !== parsedActual
+    ) {
+      newErrors.split = t("plan.split.exact_mismatch_warning");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -507,7 +537,7 @@ export default function FoodActivityModal({
                     type="number"
                     min="0"
                     value={pricePerPerson}
-                    onChange={(e) => setPricePerPerson(e.target.value)}
+                    onChange={(e) => setPricePerPerson(clampNonNegative(e.target.value))}
                     placeholder={t("plan.modal.food.price_per_person_ph")}
                     className={`${inputBase} flex-1`}
                   />
@@ -548,7 +578,7 @@ export default function FoodActivityModal({
                     type="number"
                     min="0"
                     value={actualCost}
-                    onChange={(e) => setActualCost(e.target.value)}
+                    onChange={(e) => setActualCost(clampNonNegative(e.target.value))}
                     placeholder={t("plan.modal.food.actual_cost_ph")}
                     className={`${inputBase} flex-1`}
                   />
@@ -572,7 +602,7 @@ export default function FoodActivityModal({
                     type="number"
                     min="0"
                     value={budgetAmount}
-                    onChange={(e) => setBudgetAmount(e.target.value)}
+                    onChange={(e) => setBudgetAmount(clampNonNegative(e.target.value))}
                     placeholder={t("plan.modal.food.budget_ph")}
                     className={`${inputBase} flex-1`}
                   />
@@ -682,7 +712,7 @@ export default function FoodActivityModal({
 
           setPlacePickerOpen(false);
         }}
-        initialTab="FOOD"
+        initialTab="RESTAURANT"
         activityType="FOOD"
         field="food"
         initialLocation={effectiveFoodLocation}

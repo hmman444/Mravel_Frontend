@@ -156,7 +156,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       setPhase("default");
       loadShare();
     } catch {
-      showError(t("plan.share.invite_failed"));
+      /* surfaced by usePlanBoard tryCall */
     }
   };
 
@@ -183,7 +183,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       );
       showSuccess(t("plan.share.role_updated"));
     } catch {
-      showError(t("plan.share.role_update_failed"));
+      /* surfaced by usePlanBoard tryCall */
     }
   };
 
@@ -200,7 +200,7 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
       showSuccess(t("plan.share.member_removed"));
       setConfirmRemoveOpen(false);
     } catch {
-      showError(t("plan.share.member_remove_failed"));
+      /* surfaced by usePlanBoard tryCall */
     }
   };
 
@@ -210,8 +210,8 @@ export default function ShareModal({ isOpen, onClose, planName, planId }) {
     try {
       await updateVisibility(v);
     } catch {
+      // revert optimistic UI; error already surfaced by usePlanBoard tryCall
       setVisibility(share?.visibility || "PRIVATE");
-      showError(t("plan.share.visibility_update_failed"));
     }
   };
 
@@ -877,7 +877,7 @@ function RequestAction({
               showSuccess(t("plan.share.request_approved"));
               loadRequests();
             } catch {
-              showError(t("plan.share.request_approve_failed"));
+              /* surfaced by usePlanBoard tryCall */
             }
           }}
           className="

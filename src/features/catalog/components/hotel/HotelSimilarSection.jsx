@@ -77,7 +77,7 @@ export default function HotelSimilarSection({ hotel }) {
     !loading && !error && (!similarHotels || similarHotels.length === 0);
 
   return (
-    <section className="mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <section className="mt-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800">
       {/* HEADER */}
       <div className="flex items-baseline justify-between px-6 pt-5 pb-3">
         <div>
@@ -115,17 +115,17 @@ export default function HotelSimilarSection({ hotel }) {
               <button
                 type="button"
                 onClick={() => scroll(-1)}
-                className="pointer-events-auto absolute left-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 p-2 shadow-sm hover:bg-gray-50 md:inline-flex"
+                className="pointer-events-auto absolute left-0 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-900/80 dark:hover:bg-slate-800 md:inline-flex"
               >
-                <ChevronLeft className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                <ChevronLeft className="h-4 w-4 text-gray-700 dark:text-slate-100" />
               </button>
 
               <button
                 type="button"
                 onClick={() => scroll(1)}
-                className="pointer-events-auto absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 p-2 shadow-sm hover:bg-gray-50 md:inline-flex"
+                className="pointer-events-auto absolute right-0 top-1/2 hidden translate-x-1/2 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-900/80 dark:hover:bg-slate-800 md:inline-flex"
               >
-                <ChevronRight className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                <ChevronRight className="h-4 w-4 text-gray-700 dark:text-slate-100" />
               </button>
             </div>
 
@@ -196,7 +196,7 @@ function SimilarHotelCard({ hotel, onClick }) {
 
   return (
     <div
-      className="w-[280px] flex-shrink-0 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="w-[280px] flex-shrink-0 rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -236,7 +236,7 @@ function SimilarHotelCard({ hotel, onClick }) {
       </div>
 
       <div className="p-3">
-        <h3 className="font-semibold text-[15px] leading-snug line-clamp-2">
+        <h3 className="font-semibold text-[15px] leading-snug line-clamp-2 text-gray-900 dark:text-gray-100">
           {name || slug}
         </h3>
 
@@ -248,7 +248,7 @@ function SimilarHotelCard({ hotel, onClick }) {
           </div>
 
           {ratingLabel && (
-            <span className="ml-1 text-[11px] text-blue-600 font-semibold">
+            <span className="ml-1 text-[11px] text-blue-600 dark:text-sky-300 font-semibold">
               {ratingLabel}
             </span>
           )}
@@ -257,7 +257,7 @@ function SimilarHotelCard({ hotel, onClick }) {
         </div>
 
         {oldPriceText && (
-          <div className="mt-2 text-xs text-gray-400 line-through">
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-500 line-through">
             {oldPriceText}
           </div>
         )}

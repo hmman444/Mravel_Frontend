@@ -40,7 +40,6 @@ export default function RestaurantBookingBox({
   );
 
   const isActive = restaurant?.active !== false;
-  console.log("restaurant.active =", restaurant?.active, typeof restaurant?.active);
 
   //  nếu user đổi ngày mà time hiện tại không còn hợp lệ -> auto chọn slot đầu
   useEffect(() => {

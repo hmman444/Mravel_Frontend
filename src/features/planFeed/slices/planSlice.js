@@ -146,8 +146,14 @@ const planSlice = createSlice({
         const { data, page } = action.payload;
         state.loading = false;
         state.page = page;
-        if (page === 1) state.items = data.items;
-        else state.items.push(...data.items);
+        if (page === 1) {
+          state.items = data.items;
+        } else {
+          // Dedupe by id when appending pages to guard against React Strict Mode
+          // double-firing the IntersectionObserver and duplicate-page responses.
+          const existingIds = new Set(state.items.map((p) => p.id));
+          state.items.push(...data.items.filter((p) => !existingIds.has(p.id)));
+        }
         state.hasMore = data.hasMore;
       })
       .addCase(loadPlans.rejected, (state, action) => {
@@ -240,8 +246,13 @@ const planSlice = createSlice({
         state.myLoading = false;
         state.myPage = page;
 
-        if (page === 1) state.myItems = data.items;
-        else state.myItems.push(...data.items);
+        if (page === 1) {
+          state.myItems = data.items;
+        } else {
+          // Dedupe by id when appending pages (guards against double-fired loads).
+          const existingIds = new Set(state.myItems.map((p) => p.id));
+          state.myItems.push(...data.items.filter((p) => !existingIds.has(p.id)));
+        }
 
         state.myHasMore = data.hasMore;
       })

@@ -123,8 +123,10 @@ export default function PlanFilterSidebar({
   onApply,
   onReset,
   activeCount = 0,
+  loading = false,
 }) {
   const { t } = useTranslation();
+  const [dateError, setDateError] = useState("");
   const set = useCallback(
     (key, val) => onChange({ ...filters, [key]: val }),
     [filters, onChange]
@@ -141,6 +143,16 @@ export default function PlanFilterSidebar({
   );
 
   const handleApply = () => {
+    // Guard: start date must not be after end date.
+    if (
+      filters.startDateFrom &&
+      filters.startDateTo &&
+      filters.startDateFrom > filters.startDateTo
+    ) {
+      setDateError(t("feed.newPlan.error.endBeforeStart"));
+      return;
+    }
+    setDateError("");
     onApply(filters);
     onClose();
   };
@@ -294,7 +306,7 @@ export default function PlanFilterSidebar({
               <input
                 type="date"
                 value={filters.startDateFrom}
-                onChange={(e) => set("startDateFrom", e.target.value)}
+                onChange={(e) => { setDateError(""); set("startDateFrom", e.target.value); }}
                 className="
                   w-full h-9 px-3 rounded-lg text-sm
                   bg-white dark:bg-gray-900
@@ -310,7 +322,7 @@ export default function PlanFilterSidebar({
               <input
                 type="date"
                 value={filters.startDateTo}
-                onChange={(e) => set("startDateTo", e.target.value)}
+                onChange={(e) => { setDateError(""); set("startDateTo", e.target.value); }}
                 className="
                   w-full h-9 px-3 rounded-lg text-sm
                   bg-white dark:bg-gray-900
@@ -321,6 +333,11 @@ export default function PlanFilterSidebar({
                 "
               />
             </div>
+            {dateError && (
+              <p role="alert" className="text-[11px] font-medium text-rose-500">
+                {dateError}
+              </p>
+            )}
           </div>
         </Section>
 
@@ -378,12 +395,14 @@ export default function PlanFilterSidebar({
         <button
           type="button"
           onClick={handleApply}
+          disabled={loading}
           className="
             flex-1 h-10 px-3 rounded-lg
             bg-gradient-to-r from-sky-500 to-blue-600
             text-white text-sm font-semibold
             shadow-md hover:shadow-lg hover:from-sky-600 hover:to-blue-700
             hover:-translate-y-0.5 transition-all duration-150
+            disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0
           "
         >
           {t("feed.filter.apply")}
@@ -412,7 +431,7 @@ export default function PlanFilterSidebar({
 
       {/*  Mobile drawer overlay  */}
       {open && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-[200] flex">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"

@@ -354,8 +354,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     try {
       await updateDescription(planId, description.trim()).unwrap();
       showSuccess(t("plan.toast.description_updated"));
-    } catch {
-      showError(t("plan.toast.description_update_failed"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.response?.data?.error || e?.message);
+      showError(msg || t("plan.toast.description_update_failed"));
     } finally {
       setDescSaving(false);
     }
@@ -376,8 +377,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       
       originalStartRef.current = s;
       originalEndRef.current = e;
-    } catch {
-      showError(t("plan.toast.dates_update_failed"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.response?.data?.error || e?.message);
+      showError(msg || t("plan.toast.dates_update_failed"));
     } finally {
       setDatesSaving(false);
     }
@@ -390,8 +392,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
     try {
       await updateStatus(planId, value).unwrap();
       showSuccess(t("plan.toast.status_updated"));
-    } catch {
-      showError(t("plan.toast.status_update_failed"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.response?.data?.error || e?.message);
+      showError(msg || t("plan.toast.status_update_failed"));
     } finally {
       setStatusSaving(false);
     }
@@ -414,7 +417,8 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       }
     } catch (err) {
       console.error(err);
-      showError(t("plan.toast.cover_upload_failed"));
+      const msg = typeof err === "string" ? err : (err?.response?.data?.message || err?.response?.data?.error || err?.message);
+      showError(msg || t("plan.toast.cover_upload_failed"));
     } finally {
       setThumbSaving(false);
       e.target.value = "";
@@ -447,7 +451,8 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       showSuccess(t("plan.toast.images_added"));
     } catch (err) {
       console.error(err);
-      showError(t("plan.toast.images_upload_failed"));
+      const msg = typeof err === "string" ? err : (err?.response?.data?.message || err?.response?.data?.error || err?.message);
+      showError(msg || t("plan.toast.images_upload_failed"));
     } finally {
       setImagesSaving(false);
       e.target.value = "";
@@ -462,8 +467,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       await removeImage(planId, url).unwrap();
       setImages((prev) => prev.filter((x) => x !== url));
       showSuccess(t("plan.toast.image_removed"));
-    } catch {
-      showError(t("plan.toast.image_remove_failed"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.response?.data?.error || e?.message);
+      showError(msg || t("plan.toast.image_remove_failed"));
     } finally {
       setImagesSaving(false);
     }
@@ -482,8 +488,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
         if (url) setVideos((prev) => (prev.includes(url) ? prev : [...prev, url]));
       }
       showSuccess(t("plan.toast.video_added"));
-    } catch {
-      showError(t("plan.toast.video_upload_failed"));
+    } catch (err) {
+      const msg = typeof err === "string" ? err : (err?.response?.data?.message || err?.response?.data?.error || err?.message);
+      showError(msg || t("plan.toast.video_upload_failed"));
     } finally {
       setVideosSaving(false);
       e.target.value = "";
@@ -497,8 +504,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       await removeVideo(planId, url).unwrap();
       setVideos((prev) => prev.filter((x) => x !== url));
       showSuccess(t("plan.toast.video_removed"));
-    } catch {
-      showError(t("plan.toast.video_remove_failed"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.response?.data?.error || e?.message);
+      showError(msg || t("plan.toast.video_remove_failed"));
     } finally {
       setVideosSaving(false);
     }
@@ -522,8 +530,9 @@ export default function PlanSummary({ plan, planId, canEdit, reloadBoard }) {
       setBudgetPerPersonInput(nextPerPerson ? String(nextPerPerson) : "");
 
       showSuccess(t("plan.toast.budget_updated"));
-    } catch {
-      showError(t("plan.toast.budget_update_failed"));
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.response?.data?.error || e?.message);
+      showError(msg || t("plan.toast.budget_update_failed"));
       setBudgetInput(budgetTotalLocal ? String(budgetTotalLocal) : "");
       setBudgetPerPersonInput(
         budgetPerPersonLocal ? String(budgetPerPersonLocal) : ""

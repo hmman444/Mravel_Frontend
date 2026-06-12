@@ -39,7 +39,11 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
       if (!isOwnPost && authorId) setRecommendOpen(true);
       else setRemoved(true);
     } catch (e) {
-      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message || e?.response?.data?.error;
+      showError(msg || t("errors.content_unavailable", "Nội dung không khả dụng"));
     } finally {
       setBusy(false);
     }
@@ -55,7 +59,11 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
       setRecommendOpen(false);
       setRemoved(true);
     } catch (e) {
-      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message || e?.response?.data?.error;
+      showError(msg || t("errors.content_unavailable", "Nội dung không khả dụng"));
     } finally {
       setBusy(false);
     }
@@ -68,7 +76,11 @@ export default function PlanPostCard({ plan, me, onOpenDetail }) {
       showSuccess(t("feed.post.reported", "Đã gửi báo cáo"));
       setReportOpen(false);
     } catch (e) {
-      showError(e?.message || t("errors.content_unavailable", "Nội dung không khả dụng"));
+      const msg =
+        typeof e === "string"
+          ? e
+          : e?.response?.data?.message || e?.response?.data?.error;
+      showError(msg || t("errors.content_unavailable", "Nội dung không khả dụng"));
     } finally {
       setBusy(false);
     }

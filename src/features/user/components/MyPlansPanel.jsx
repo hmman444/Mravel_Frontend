@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useMyPlans } from "../hooks/useMyPlans";
@@ -7,6 +8,7 @@ import PostSkeleton from "../../planFeed/components/PostSkeleton"
 
 export default function MyPlansPanel() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useSelector((s) => s.auth);
   const { items, loading, hasMore, fetchNext, reload } = useMyPlans();
 
@@ -40,7 +42,7 @@ export default function MyPlansPanel() {
     <div className="space-y-5">
       {items.map((p) => (
         <PlanPostCard key={p.id} plan={p} me={user}
-          onOpenDetail={() => (window.location.href = `/plans/${p.id}`)}
+          onOpenDetail={() => navigate(`/plans/${p.id}`)}
         />
       ))}
 

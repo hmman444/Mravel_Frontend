@@ -16,7 +16,7 @@ export const useLogout = () => {
       showSuccess(t("auth.logout_success"));
       navigate("/login");
     } else {
-      showError(t("auth.logout_error"));
+      showError(result.payload || t("auth.logout_error"));
     }
   };
 

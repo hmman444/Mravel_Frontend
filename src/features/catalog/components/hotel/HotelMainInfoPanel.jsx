@@ -335,7 +335,7 @@ export default function HotelMainInfoPanel({ hotel }) {
 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
             {typeLabel && (
-              <span className="inline-flex items-center rounded-full bg-[#f0f7ff] text-[#0064d2] px-2 py-0.5 text-xs font-semibold">
+              <span className="inline-flex items-center rounded-full bg-[#f0f7ff] dark:bg-sky-950/40 text-[#0064d2] dark:text-sky-300 px-2 py-0.5 text-xs font-semibold">
                 {typeLabel}
               </span>
             )}
@@ -412,8 +412,8 @@ export default function HotelMainInfoPanel({ hotel }) {
 
       {/* DẢI THÔNG BÁO XANH DƯƠNG */}
       {hasLowAvailability && (
-        <div className="border-t border-sky-100 bg-[#e6f5ff] px-6 py-3 flex items-center gap-3 text-sm text-[#00529b]">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm">
+        <div className="border-t border-sky-100 dark:border-sky-900/50 bg-[#e6f5ff] dark:bg-sky-950/35 px-6 py-3 flex items-center gap-3 text-sm text-[#00529b] dark:text-sky-200">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-slate-800 shadow-sm">
             <FiClock className="w-4 h-4" />
           </div>
           <p>
@@ -428,7 +428,7 @@ export default function HotelMainInfoPanel({ hotel }) {
       {/* GRID 3 CỘT */}
       <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,1fr)] gap-4 md:gap-6">
         {/* Cột 1: đánh giá */}
-        <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
+        <div className="bg-white dark:bg-slate-800 border border-sky-100 dark:border-slate-700 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-baseline gap-1">
@@ -511,7 +511,7 @@ export default function HotelMainInfoPanel({ hotel }) {
         </div>
 
         {/* Cột 2: trong khu vực */}
-        <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
+        <div className="bg-white dark:bg-slate-800 border border-sky-100 dark:border-slate-700 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-gray-800 dark:text-gray-200">
               {t("hotel.in_the_area")}
@@ -578,7 +578,7 @@ export default function HotelMainInfoPanel({ hotel }) {
         </div>
 
         {/* Cột 3: tiện ích chính */}
-        <div className="bg-[#f5fbff] border border-sky-100 rounded-2xl p-4 flex flex-col gap-3">
+        <div className="bg-white dark:bg-slate-800 border border-sky-100 dark:border-slate-700 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-gray-800 dark:text-gray-200">
               {t("hotel.main_amenities")}
@@ -706,7 +706,7 @@ export default function HotelMainInfoPanel({ hotel }) {
         totalImages > 0 &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[200] bg-black/80 flex flex-col items-center justify-center"
             onClick={() => setIsGalleryOpen(false)}
           >
             <div

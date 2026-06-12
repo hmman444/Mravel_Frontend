@@ -40,7 +40,7 @@ export default function HotelNearbySection({ hotel }) {
 
       {/* MAP */}
       <div className="px-6">
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-[#f3f4f6]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-[#f3f4f6] dark:bg-slate-800">
           {lat != null && lng != null ? (
             <iframe
               title={t("hotel.map_title", { name: hotel.name })}
@@ -57,7 +57,7 @@ export default function HotelNearbySection({ hotel }) {
 
           <button
             type="button"
-            className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white dark:bg-gray-800 px-4 py-1.5 text-xs md:text-sm font-semibold text-[#0064d2] shadow-sm hover:bg-[#f3f4ff]"
+            className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white dark:bg-slate-900 px-4 py-1.5 text-xs md:text-sm font-semibold text-[#0064d2] dark:text-sky-300 shadow-sm hover:bg-[#f3f4ff] dark:hover:bg-slate-800"
           >
             {t("hotel.explore_more_places")}
             <Navigation className="h-3.5 w-3.5" />
@@ -65,7 +65,7 @@ export default function HotelNearbySection({ hotel }) {
         </div>
 
         {/* Tag nhỏ bên dưới map */}
-        <div className="mt-3 inline-flex items-center rounded-full bg-[#e6f4ea] px-3 py-1 text-[11px] font-medium text-[#137333]">
+        <div className="mt-3 inline-flex items-center rounded-full bg-[#e6f4ea] dark:bg-emerald-950/40 px-3 py-1 text-[11px] font-medium text-[#137333] dark:text-emerald-300">
           <span className="mr-1 inline-block h-2 w-2 rounded-full bg-[#34a853]" />
           {t("hotel.near_entertainment_area")}
         </div>
@@ -122,7 +122,7 @@ function NearbyColumn({ icon, title, places }) {
     <div>
       {/* Header + icon */}
       <div className="mb-2 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e6f2ff] text-[#0064d2]">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e6f2ff] dark:bg-sky-950/50 text-[#0064d2] dark:text-sky-300">
           {icon}
         </div>
         <h3 className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{title}</h3>

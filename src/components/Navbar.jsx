@@ -159,8 +159,8 @@ export default function Navbar() {
               hover:bg-gray-200 dark:hover:bg-gray-800 transition
               ${solid ? "" : "bg-white/10 hover:bg-white/15"}
             `}
-            aria-label="Đổi chế độ sáng tối"
-            title="Chế độ sáng/tối"
+            aria-label={t("nav.aria_toggle_theme")}
+            title={t("nav.theme_toggle")}
           >
             {dark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
           </button>
@@ -179,8 +179,8 @@ export default function Navbar() {
                 hover:bg-gray-100 dark:hover:bg-gray-800 transition
                 ${solid ? "" : "bg-white/10 hover:bg-white/15"}
               `}
-              aria-label="Ngôn ngữ"
-              title="Ngôn ngữ"
+              aria-label={t("nav.aria_select_language")}
+              title={t("nav.language")}
             >
               <Globe className="w-5 h-5" />
               <span className="hidden md:inline text-sm font-medium">
@@ -266,7 +266,7 @@ export default function Navbar() {
                     hover:bg-gray-100 dark:hover:bg-gray-800 transition
                     ${solid ? "" : "bg-white/10 hover:bg-white/15"}
                   `}
-                  aria-label="Thông báo"
+                  aria-label={t("nav.aria_notifications")}
                 >
                   <Bell className="w-6 h-6" />
                   {unreadCount > 0 && (

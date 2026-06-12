@@ -20,11 +20,11 @@ export default function HiddenPostsPage() {
     try {
       setList((await fetchHiddenPosts()) || []);
     } catch (e) {
-      setError(e?.message || "Error");
+      setError(e?.response?.data?.message || e?.response?.data?.error || t("user.action_failed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -38,7 +38,7 @@ export default function HiddenPostsPage() {
       await unhidePost(planId);
     } catch (e) {
       setList(prev);
-      setError(e?.message || "Error");
+      setError(e?.response?.data?.message || e?.response?.data?.error || t("user.action_failed"));
     } finally {
       setBusyId(null);
     }

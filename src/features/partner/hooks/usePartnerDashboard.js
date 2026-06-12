@@ -124,6 +124,17 @@ export function usePartnerDashboard(filter) {
         getPartnerStatsByStatus({ from: range.prevFrom, to: range.prevTo }),
       ]);
 
+      // Service trả envelope {success,message,data}: nếu fail thì data undefined ->
+      // dashboard hiện rỗng/0 mà không báo lý do. Phát hiện và surface lỗi thật.
+      const firstFail = [series, curRev, prevRev, curStatus, prevStatus].find(
+        (r) => r && r.success === false
+      );
+      if (firstFail) {
+        setError(firstFail.message || i18n.t("partner.error.load_data"));
+        setData(null);
+        return;
+      }
+
       const revenueSeries = Array.isArray(series?.data)
         ? series.data.map((p) => ({
             label: String(p.label ?? "--"),

@@ -60,6 +60,11 @@ export default function ServiceList() {
                 src={cover}
                 alt={poi.name}
                 className="w-full h-44 md:h-52 object-cover transform group-hover:scale-105 transition duration-700"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src =
+                    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent group-hover:from-black/80 group-hover:via-black/40 transition duration-500" />
 

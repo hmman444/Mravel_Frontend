@@ -52,6 +52,7 @@ export default function RestaurantBookingPage() {
     totalSeats,
     isSeatEnough,
     seatErrorText,
+    isPastDateTime,
   } = useRestaurantBookingPage();
 
   return (
@@ -97,6 +98,7 @@ export default function RestaurantBookingPage() {
           totalSeats={totalSeats}
           isSeatEnough={isSeatEnough}
           seatErrorText={seatErrorText}
+          isPastDateTime={isPastDateTime}
         />
       </main>
 

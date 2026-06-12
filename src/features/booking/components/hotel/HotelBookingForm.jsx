@@ -99,7 +99,7 @@ export default function HotelBookingForm({
             onChange={(e) => onContactNameChange?.(e.target.value)}
             onBlur={handleNameBlur}
             className={[
-              "w-full rounded-lg border px-3 py-2 text-sm md:text-base outline-none",
+              "w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 md:text-base outline-none dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500",
               nameError
                 ? "border-red-400 focus:border-red-500"
                 : "border-gray-300 dark:border-gray-700 focus:border-blue-500",
@@ -205,7 +205,7 @@ export default function HotelBookingForm({
                     if (v > 20) v = 20;
                     onRoomsChange(v);
                   }}
-                  className="w-full text-center border-x border-gray-200 dark:border-gray-700 h-10 outline-none text-sm"
+                  className="h-10 w-full border-x border-gray-200 bg-transparent text-center text-sm text-gray-900 outline-none [color-scheme:light] dark:border-gray-700 dark:text-gray-100 dark:[color-scheme:dark]"
                 />
               </div>
             </div>

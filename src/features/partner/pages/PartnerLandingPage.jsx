@@ -14,19 +14,18 @@ export default function PartnerLandingPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7FAFF]">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
       <Navbar />
       <div className="h-[50px] md:h-[60px]" aria-hidden />
 
       <div className="relative flex-1">
-        {/* LIGHT BACKDROP */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-sky-50 via-white to-white" />
-          <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-sky-200/40 blur-3xl" />
-          <div className="absolute top-20 -right-40 h-[520px] w-[520px] rounded-full bg-indigo-200/40 blur-3xl" />
-          <div className="absolute -bottom-48 -left-40 h-[520px] w-[520px] rounded-full bg-cyan-200/30 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-b from-sky-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-gray-950" />
+          <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-sky-200/40 dark:bg-sky-950/40 blur-3xl" />
+          <div className="absolute top-20 -right-40 h-[520px] w-[520px] rounded-full bg-indigo-200/40 dark:bg-indigo-950/30 blur-3xl" />
+          <div className="absolute -bottom-48 -left-40 h-[520px] w-[520px] rounded-full bg-cyan-200/30 dark:bg-cyan-950/25 blur-3xl" />
           <div
-            className="absolute inset-0 opacity-[0.18]"
+            className="absolute inset-0 opacity-[0.18] dark:opacity-[0.10]"
             style={{
               backgroundImage:
                 "radial-gradient(circle at 1px 1px, rgba(15,23,42,0.10) 1px, transparent 0)",

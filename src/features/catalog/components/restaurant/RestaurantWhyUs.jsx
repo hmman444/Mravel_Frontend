@@ -50,7 +50,7 @@ export default function RestaurantWhyUs() {
               }`}
             >
               {/* Icon */}
-              <div className="flex-shrink-0 w-28 h-28 md:w-32 md:h-32 rounded-3xl bg-[#e6f1ff] flex items-center justify-center shadow-sm">
+              <div className="flex-shrink-0 w-28 h-28 md:w-32 md:h-32 rounded-3xl bg-[#e6f1ff] dark:bg-sky-950/40 flex items-center justify-center shadow-sm">
                 <img
                   src={item.icon}
                   alt={item.title}

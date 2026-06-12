@@ -43,6 +43,37 @@ const getItemKey = (item) =>
   item?.name ??
   null;
 
+// đưa mọi biến thể gạch ngang unicode (‐ ‑ ‒ – — ― −) về gạch nối ASCII "-"
+const normalizeDashes = (s) =>
+  (s ?? "")
+    .toString()
+    .replace(/[‐‑‒–—―−]/g, "-");
+
+// chuẩn hoá tên để so khớp (gạch ngang + bỏ hoa/thường + khoảng trắng thừa)
+const normalizeName = (s) =>
+  normalizeDashes(s).trim().toLowerCase().replace(/\s+/g, " ");
+
+// item trong list có khớp với location đã chọn trước đó không (theo id/slug HOẶC tên).
+// AI lưu id dạng slug còn list lại key theo id số → phải khớp cả hai, kèm fallback theo tên.
+const matchesInitialFocus = (item, focus) => {
+  if (!item || !focus) return false;
+  const ids = [
+    item.id,
+    item.slug,
+    item.code,
+    item.placeId,
+    item.hotelId,
+    item.restaurantId,
+  ]
+    .filter((v) => v != null)
+    .map(String);
+  if (focus.id != null && ids.includes(String(focus.id))) return true;
+  if (focus.name && normalizeName(item.name) === normalizeName(focus.name)) {
+    return true;
+  }
+  return false;
+};
+
 export default function PlacePickerModal({
   open,
   onClose,
@@ -66,6 +97,10 @@ export default function PlacePickerModal({
   const [initializedFromInitial, setInitializedFromInitial] = useState(false);
   const [hasSelectionSource, setHasSelectionSource] = useState(false);
   const [initialLatLon, setInitialLatLon] = useState(null);
+  // chỉ đồng bộ selectedId về dòng khớp initialLocation MỘT LẦN lúc mở; sau đó để user tự chọn
+  const [reconciledInitial, setReconciledInitial] = useState(false);
+  // chỉ tự seed ô tìm kiếm theo tên địa điểm đã chọn MỘT LẦN (khi list mặc định không có nó)
+  const [seededInitialQuery, setSeededInitialQuery] = useState(false);
 
   const [customMode, setCustomMode] = useState(false);
   const [customLabel, setCustomLabel] = useState("");
@@ -131,6 +166,8 @@ export default function PlacePickerModal({
     setQuery("");
     setDebouncedQuery("");
     setSelectedId(null);
+    setReconciledInitial(false);
+    setSeededInitialQuery(false);
 
     setCustomMode(false);
     setCustomLabel("");
@@ -246,13 +283,17 @@ export default function PlacePickerModal({
 
     const idFromInitial =
       initialLocation.id ??
+      initialLocation.placeId ??
       initialLocation.raw?.id ??
       initialLocation.raw?.slug ??
       null;
-    if (idFromInitial) {
-      setSelectedId(idFromInitial);
-      setHasSelectionSource(true);
-    }
+    const nameFromInitial =
+      initialLocation.name || initialLocation.label || "";
+
+    if (idFromInitial) setSelectedId(idFromInitial);
+    // có id HAY chỉ có tên đều coi là đã có nguồn chọn → không để auto-chọn item đầu đè lên
+    if (idFromInitial || nameFromInitial) setHasSelectionSource(true);
+
     setInitializedFromInitial(true);
   }, [open, initialLocation, initializedFromInitial, initialTab]);
 
@@ -293,17 +334,14 @@ export default function PlacePickerModal({
   // filter FE
   const effectiveItems = useMemo(() => {
     if (!debouncedQuery) return baseItems;
-    const q = debouncedQuery.toLowerCase();
+    // so khớp bỏ qua biến thể gạch ngang (– vs -) để không lọc nhầm địa điểm như "Văn Miếu – Quốc Tử Giám"
+    const norm = (v) => normalizeDashes(v || "").toLowerCase();
+    const q = norm(debouncedQuery);
     return baseItems.filter((x) => {
-      const name = (x.name || "").toLowerCase();
-      const addr = (
-        x.addressLine ||
-        x.fullAddress ||
-        x.address ||
-        ""
-      ).toLowerCase();
-      const city = (x.cityName || "").toLowerCase();
-      const prov = (x.provinceName || "").toLowerCase();
+      const name = norm(x.name);
+      const addr = norm(x.addressLine || x.fullAddress || x.address);
+      const city = norm(x.cityName);
+      const prov = norm(x.provinceName);
       return (
         name.includes(q) || addr.includes(q) || city.includes(q) || prov.includes(q)
       );
@@ -329,6 +367,74 @@ export default function PlacePickerModal({
       setSelectedId(getItemKey(effectiveItems[0]));
     }
   }, [open, effectiveItems, selectedId, customMode, hasSelectionSource]);
+
+  // location catalog đã chọn trước đó (id/slug + tên) — để pre-select + cuộn tới đúng dòng
+  const initialFocus = useMemo(() => {
+    if (!initialLocation || initialLocation.type === "CUSTOM") return null;
+    const id =
+      initialLocation.id ??
+      initialLocation.placeId ??
+      initialLocation.raw?.id ??
+      initialLocation.raw?.slug ??
+      null;
+    const name = initialLocation.name || initialLocation.label || "";
+    if (id == null && !name) return null;
+    return { id, name };
+  }, [initialLocation]);
+
+  // Nếu list MẶC ĐỊNH (chưa gõ từ khoá) KHÔNG chứa địa điểm đã chọn → tự seed ô tìm kiếm
+  // bằng tên để catalog trả về nó (địa điểm AI gợi ý thường không nằm trong top mặc định).
+  // Chỉ seed khi cần: card tự bấm có sẵn trong list thì giữ nguyên list đầy đủ như cũ.
+  useEffect(() => {
+    if (!open || customMode || !initialFocus) return;
+    if (seededInitialQuery || reconciledInitial) return;
+    if (isLoading || debouncedQuery) return; // đã có từ khoá hoặc đang tải → bỏ qua
+    if (!initialFocus.name) return; // không có tên để search
+
+    const present = effectiveItems.some((x) =>
+      matchesInitialFocus(x, initialFocus)
+    );
+    if (present) return; // đã nằm trong list mặc định → reconcile sẽ cuộn tới, khỏi search
+
+    // đổi gạch ngang "–" → "-" cho từ khoá tự tìm (catalog khớp tốt hơn với gạch nối ASCII)
+    const term = normalizeDashes(initialFocus.name);
+    setQuery(term);
+    setDebouncedQuery(term);
+    setSeededInitialQuery(true);
+  }, [
+    open,
+    customMode,
+    initialFocus,
+    seededInitialQuery,
+    reconciledInitial,
+    isLoading,
+    debouncedQuery,
+    effectiveItems,
+  ]);
+
+  // Khi mở lại với location đã chọn: sau khi list load xong, đồng bộ selectedId về ĐÚNG
+  // key của item trong list (khớp id/slug HOẶC tên). Cần thiết vì AI lưu id dạng slug và
+  // địa điểm thường không nằm trong list mặc định → nếu không reconcile sẽ không cuộn được
+  // và preview/map hiển thị sai (rơi về item đầu danh sách).
+  useEffect(() => {
+    if (!open || customMode || !initialFocus || reconciledInitial) return;
+    if (isLoading || !effectiveItems.length) return;
+
+    const match = effectiveItems.find((x) => matchesInitialFocus(x, initialFocus));
+    if (!match) return;
+
+    const key = getItemKey(match);
+    if (key && key !== selectedId) setSelectedId(key);
+    setReconciledInitial(true); // chốt 1 lần — không đè lên lựa chọn người dùng bấm sau đó
+  }, [
+    open,
+    customMode,
+    initialFocus,
+    effectiveItems,
+    isLoading,
+    selectedId,
+    reconciledInitial,
+  ]);
 
   const selectedItem = useMemo(() => {
     if (customMode) return null;

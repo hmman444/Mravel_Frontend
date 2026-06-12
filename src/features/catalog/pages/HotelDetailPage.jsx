@@ -42,7 +42,7 @@ export default function HotelDetailPage() {
   }, [slug, fromBooking, dispatch]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f5f7fb]">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
       <Navbar />
       <div className="h-[64px] md:h-[72px]" aria-hidden />
 

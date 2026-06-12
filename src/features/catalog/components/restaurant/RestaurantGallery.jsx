@@ -121,7 +121,7 @@ export default function RestaurantGallery({ restaurant }) {
         totalImages > 0 &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[200] bg-black/80 flex flex-col items-center justify-center"
             onClick={() => setIsGalleryOpen(false)}
           >
             <div
