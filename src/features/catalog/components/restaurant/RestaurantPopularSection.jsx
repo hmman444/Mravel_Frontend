@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 import { useCatalogRestaurants } from "../../../catalog/hooks/useCatalogRestaurants";
@@ -17,7 +16,7 @@ const formatCurrencyVND = (value) => {
 
 // Skeleton khi loading – layout ngang giống card thật
 const SkeletonCard = () => (
-  <div className="flex-none w-[360px] md:w-[400px] rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+  <div className="w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
     <div className="flex h-[140px]">
       <div className="w-[130px] md:w-[140px] h-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
       <div className="flex-1 p-3 space-y-2">
@@ -30,18 +29,101 @@ const SkeletonCard = () => (
   </div>
 );
 
+const PAGE_SIZE = 9;
+
+const TYPE_LABELS = {
+  BUFFET: { vi: "Buffet", en: "Buffet" },
+  GOI_MON: { vi: "Gọi món", en: "À la carte" },
+  BUFFET_VA_GOI_MON: { vi: "Buffet & Gọi món", en: "Buffet & à la carte" },
+  BBQ: { vi: "Nướng (BBQ)", en: "BBQ" },
+  CAFE: { vi: "Cafe", en: "Café" },
+  BAR: { vi: "Bar", en: "Bar" },
+  LOUNGE: { vi: "Lounge", en: "Lounge" },
+  OTHER: { vi: "Khác", en: "Other" },
+};
+const typeLabel = (code, lang) => TYPE_LABELS[code]?.[lang === "en" ? "en" : "vi"] || code;
+
+function TypeChip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition",
+        active
+          ? "bg-[#ff5a00] border-[#ff5a00] text-white"
+          : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Pagination({ page, totalPages, onChange }) {
+  const pages = Array.from({ length: totalPages }, (_, i) => i);
+  return (
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+      <button
+        type="button"
+        disabled={page <= 0}
+        onClick={() => onChange(page - 1)}
+        className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 dark:border-gray-700 disabled:opacity-40"
+      >
+        ‹
+      </button>
+      {pages.map((p) => (
+        <button
+          key={p}
+          type="button"
+          onClick={() => onChange(p)}
+          className={[
+            "w-9 h-9 rounded-lg text-sm font-semibold border",
+            p === page
+              ? "bg-[#0064d2] border-[#0064d2] text-white"
+              : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50",
+          ].join(" ")}
+        >
+          {p + 1}
+        </button>
+      ))}
+      <button
+        type="button"
+        disabled={page >= totalPages - 1}
+        onClick={() => onChange(page + 1)}
+        className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 dark:border-gray-700 disabled:opacity-40"
+      >
+        ›
+      </button>
+    </div>
+  );
+}
+
 export default function RestaurantPopularSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { items, loading, error, fetchRestaurants } = useCatalogRestaurants();
   const [activeKey, setActiveKey] = useState(null);
-  const scrollRef = useRef(null);
+  const [activeType, setActiveType] = useState("ALL");
+  const [page, setPage] = useState(0);
+  const sectionRef = useRef(null);
 
-  // gọi API lần đầu: lấy ~30 quán (backend sort theo avgRating,…)
+  // Đổi trang → cuộn lên đầu section (khỏi phải scroll tay)
+  const goToPage = (p) => {
+    setPage(p);
+    requestAnimationFrame(() => {
+      if (sectionRef.current) {
+        const top = sectionRef.current.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    });
+  };
+
+  // gọi API lần đầu (lấy nhiều để phân trang client-side)
   useEffect(() => {
     fetchRestaurants({
       page: 0,
-      size: 30,
+      size: 60,
       sort: "avgRating,DESC",
     });
   }, [fetchRestaurants]);
@@ -80,11 +162,26 @@ export default function RestaurantPopularSection() {
     [groups, activeKey]
   );
 
-  const handleScrollRight = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: 320, behavior: "smooth" });
-  };
+  // Lọc theo loại (restaurantType) trong tab điểm đến đang chọn
+  const typesPresent = useMemo(() => {
+    const set = new Set();
+    (activeGroup?.restaurants || []).forEach((r) => r.restaurantType && set.add(r.restaurantType));
+    return Array.from(set);
+  }, [activeGroup]);
+
+  const filtered = useMemo(() => {
+    const list = activeGroup?.restaurants || [];
+    return activeType === "ALL" ? list : list.filter((r) => r.restaurantType === activeType);
+  }, [activeGroup, activeType]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages - 1);
+  const pageItems = filtered.slice(pageSafe * PAGE_SIZE, pageSafe * PAGE_SIZE + PAGE_SIZE);
+
+  // đổi điểm đến hoặc loại → về trang đầu
+  useEffect(() => {
+    setPage(0);
+  }, [activeKey, activeType]);
 
   // Không có data & không lỗi → ẩn block
   if (!loading && !error && (!groups.length || !activeGroup)) {
@@ -92,7 +189,7 @@ export default function RestaurantPopularSection() {
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-6 pt-10 pb-10">
+    <section ref={sectionRef} className="max-w-7xl mx-auto px-6 pt-10 pb-10 scroll-mt-20">
       {/* TITLE */}
       <div className="flex items-center gap-2 mb-4">
         <span className="text-2xl">🍽️</span>
@@ -120,44 +217,54 @@ export default function RestaurantPopularSection() {
         </div>
       )}
 
-      {/* LIST CARD (SCROLL NGANG) */}
-      <div className="relative mt-4">
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1"
-        >
-          {loading && (!activeGroup || !activeGroup.restaurants?.length) && (
-            <>
-              {[...Array(4)].map((_, idx) => (
-                <SkeletonCard key={idx} />
-              ))}
-            </>
-          )}
-
-          {!loading &&
-            activeGroup?.restaurants?.map((restaurant) => (
-              <RestaurantMiniCard
-                key={restaurant.slug || restaurant.id}
-                restaurant={restaurant}
-                onClick={() =>
-                  restaurant.slug &&
-                  navigate(`/restaurants/${restaurant.slug}`)
-                }
-              />
-            ))}
+      {/* LỌC THEO LOẠI (restaurantType) */}
+      {typesPresent.length > 0 && (
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          <TypeChip active={activeType === "ALL"} onClick={() => setActiveType("ALL")}>
+            {t("restaurant.type_all")} ({activeGroup?.restaurants?.length || 0})
+          </TypeChip>
+          {typesPresent.map((code) => {
+            const count = (activeGroup?.restaurants || []).filter((r) => r.restaurantType === code).length;
+            return (
+              <TypeChip key={code} active={activeType === code} onClick={() => setActiveType(code)}>
+                {typeLabel(code, i18n.language)} ({count})
+              </TypeChip>
+            );
+          })}
         </div>
+      )}
 
-        {/* NÚT MŨI TÊN BÊN PHẢI */}
-        {activeGroup?.restaurants?.length > 3 && (
-          <button
-            type="button"
-            onClick={handleScrollRight}
-            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 right-2"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
+      {/* LIST CARD – grid wrap thành hàng (9/trang) */}
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {loading && (!activeGroup || !activeGroup.restaurants?.length) && (
+          <>
+            {[...Array(6)].map((_, idx) => (
+              <SkeletonCard key={idx} />
+            ))}
+          </>
         )}
+
+        {!loading &&
+          pageItems.map((restaurant) => (
+            <RestaurantMiniCard
+              key={restaurant.slug || restaurant.id}
+              restaurant={restaurant}
+              onClick={() =>
+                restaurant.slug && navigate(`/restaurants/${restaurant.slug}`)
+              }
+            />
+          ))}
       </div>
+
+      {/* rỗng sau khi lọc */}
+      {!loading && filtered.length === 0 && (
+        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">{t("restaurant.no_results")}</p>
+      )}
+
+      {/* PHÂN TRANG */}
+      {!loading && totalPages > 1 && (
+        <Pagination page={pageSafe} totalPages={totalPages} onChange={goToPage} />
+      )}
 
       {/* lỗi */}
       {error && (
@@ -241,7 +348,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
 
   return (
     <div
-      className="flex-none w-[360px] md:w-[400px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="w-full rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
     >
       <div className="flex h-[140px]">

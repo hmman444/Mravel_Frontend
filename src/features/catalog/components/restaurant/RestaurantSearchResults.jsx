@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -18,7 +17,7 @@ const formatCurrencyVND = (value) => {
 
 // Skeleton ngang giống mini-card
 const SkeletonCard = () => (
-  <div className="flex-none w-[360px] md:w-[400px] rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+  <div className="w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
     <div className="flex h-[140px]">
       <div className="w-[130px] md:w-[140px] h-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
       <div className="flex-1 p-3 space-y-2">
@@ -37,7 +36,6 @@ export default function RestaurantSearchResults() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const listRef = useRef(null);
-  const scrollRef = useRef(null);
 
   // Có query -> bật mode hiển thị kết quả
   const isSearchMode = useMemo(() => {
@@ -120,12 +118,6 @@ export default function RestaurantSearchResults() {
 
   if (!isSearchMode) return null; // ⬅ ẨN khi chưa có query
 
-  const handleScrollRight = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: 320, behavior: "smooth" });
-  };
-
   return (
     <section ref={listRef} className="max-w-7xl mx-auto px-6 mt-6 md:mt-10">
       <div className="mb-4">
@@ -137,42 +129,26 @@ export default function RestaurantSearchResults() {
         </p>
       </div>
 
-      {/* LIST CARD (SCROLL NGANG) – giống RestaurantPopularSection */}
-      <div className="relative mt-2">
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1"
-        >
-          {loading && (
-            <>
-              {[...Array(3)].map((_, idx) => (
-                <SkeletonCard key={idx} />
-              ))}
-            </>
-          )}
-
-          {!loading &&
-            result.content.map((item, idx) => (
-              <RestaurantMiniCard
-                key={item.slug || item.id || idx}
-                restaurant={item}
-                onClick={() =>
-                  item.slug && navigate(`/restaurants/${encodeURIComponent(item.slug)}`)
-                }
-              />
+      {/* LIST CARD – grid wrap thành hàng (giống HotelSearchResultsSection) */}
+      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {loading && (
+          <>
+            {[...Array(6)].map((_, idx) => (
+              <SkeletonCard key={idx} />
             ))}
-        </div>
-
-        {/* NÚT MŨI TÊN BÊN PHẢI (hiện khi có >3 item để gợi ý cuộn) */}
-        {result.content.length > 3 && (
-          <button
-            type="button"
-            onClick={handleScrollRight}
-            className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 absolute top-1/2 -translate-y-1/2 right-2"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
+          </>
         )}
+
+        {!loading &&
+          result.content.map((item, idx) => (
+            <RestaurantMiniCard
+              key={item.slug || item.id || idx}
+              restaurant={item}
+              onClick={() =>
+                item.slug && navigate(`/restaurants/${encodeURIComponent(item.slug)}`)
+              }
+            />
+          ))}
       </div>
 
       {!loading && result.total === 0 && (
@@ -246,7 +222,7 @@ function RestaurantMiniCard({ restaurant, onClick }) {
 
   return (
     <div
-      className="flex-none w-[360px] md:w-[400px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
+      className="w-full rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md transition"
       onClick={onClick}
     >
       <div className="flex h-[140px]">

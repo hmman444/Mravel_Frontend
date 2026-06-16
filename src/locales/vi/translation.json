@@ -954,6 +954,7 @@
         "highlights": "Điểm đặc trưng:",
         "other_destination": "Khác",
         "popular_restaurants": "Quán ăn phổ biến",
+        "type_all": "Tất cả",
         "load_restaurants_failed": "Không tải được danh sách quán ăn:",
         "price_from_per_person": "Giá chỉ từ {{price}} {{currency}}/người",
         "reference_price_at_restaurant": "Giá tham khảo tại nhà hàng",
