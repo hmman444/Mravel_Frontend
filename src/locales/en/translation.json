@@ -954,6 +954,7 @@
         "highlights": "Highlights:",
         "other_destination": "Other",
         "popular_restaurants": "Popular Restaurants",
+        "type_all": "All",
         "load_restaurants_failed": "Failed to load restaurants:",
         "price_from_per_person": "From {{price}} {{currency}}/person",
         "reference_price_at_restaurant": "Reference price at the restaurant",
