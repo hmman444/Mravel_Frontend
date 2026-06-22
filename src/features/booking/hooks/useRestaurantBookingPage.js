@@ -202,12 +202,6 @@ export function useRestaurantBookingPage() {
       return;
     }
 
-    // Require a logged-in user before creating a payment (mirrors hotel hook).
-    if (!userId) {
-      showError(t("booking.error_login_required"));
-      return;
-    }
-
     // Validate contact fields (mirrors hotel hook rules) before paying.
     const name = (contactName || "").trim();
     const phone = (contactPhone || "").trim();

@@ -101,12 +101,6 @@ export function useHotelBookingPage() {
   const onPay = useCallback(async ({ paymentOption }) => {
     if (!hotel || !roomType || !ratePlan) return;
 
-    // Require a logged-in user before creating a payment draft.
-    if (!userId) {
-      showError(t("booking.error_login_required"));
-      return;
-    }
-
     // Validate contact fields (mirrors HotelBookingForm rules) before navigating.
     const name = (contactName || "").trim();
     const phone = (contactPhone || "").trim();

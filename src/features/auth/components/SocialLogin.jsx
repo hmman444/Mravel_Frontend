@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
-import FacebookLogin from "@greatsumini/react-facebook-login";
 import { useDispatch } from "react-redux";
 import { socialLoginUser } from "../slices/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -13,7 +11,7 @@ export default function SocialLogin() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // fix
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
 
   const redirectParam = new URLSearchParams(location.search).get("redirect");
@@ -23,7 +21,7 @@ export default function SocialLogin() {
       navigate(decodeURIComponent(redirectParam));
       return;
     }
-    navigate(role === "ADMIN" ? "/admin" : "/"); // theo role
+    navigate(role === "ADMIN" ? "/admin" : "/");
   };
 
   const loginWithGoogle = useGoogleLogin({
@@ -31,7 +29,6 @@ export default function SocialLogin() {
       try {
         setLoading(true);
 
-        // useGoogleLogin(flow="implicit") returns OAuth access_token for backend verification.
         const googleToken = tokenResponse?.access_token;
         if (!googleToken) {
           showError(t("common.error_occurred"));
@@ -47,7 +44,7 @@ export default function SocialLogin() {
         );
 
         if (socialLoginUser.fulfilled.match(action)) {
-          goAfterLogin(action.payload.role); // lấy role từ payload
+          goAfterLogin(action.payload.role);
         } else {
           showError(action.payload || t("common.error_occurred"));
         }
@@ -64,37 +61,6 @@ export default function SocialLogin() {
     },
     flow: "implicit",
   });
-
-  const handleFacebookSuccess = async (response) => {
-    try {
-      setLoading(true);
-
-      const fbToken = response?.accessToken;
-      if (!fbToken) {
-        showError(t("common.error_occurred"));
-        return;
-      }
-
-      const action = await dispatch(
-        socialLoginUser({
-          provider: "facebook",
-          token: fbToken,
-          rememberMe: true,
-        })
-      );
-
-      if (socialLoginUser.fulfilled.match(action)) {
-        goAfterLogin(action.payload.role); // theo role
-      } else {
-        showError(action.payload || t("common.error_occurred"));
-      }
-    } catch (e) {
-      const msg = typeof e === "string" ? e : (e?.message || e?.error);
-      showError(msg || t("common.error_occurred"));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <>
@@ -115,29 +81,6 @@ export default function SocialLogin() {
           <span className="w-px h-5 bg-gray-200 dark:bg-gray-700"></span>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Google</span>
         </button>
-
-        <FacebookLogin
-          appId={import.meta.env.VITE_FACEBOOK_APP_ID}
-          fields="name,email,picture"
-          scope="public_profile,email"
-          onSuccess={handleFacebookSuccess}
-          onFail={(err) => {
-            console.error("Facebook login error:", err);
-            showError(t("common.error_occurred"));
-          }}
-          render={({ onClick }) => (
-            <button
-              type="button"
-              onClick={onClick}
-              disabled={loading}
-              className="flex items-center border rounded-full px-4 py-2 gap-3 hover:bg-gray-50 disabled:opacity-60 transition-colors"
-            >
-              <FaFacebook className="text-blue-600 text-xl" />
-              <span className="w-px h-5 bg-gray-200 dark:bg-gray-700"></span>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Facebook</span>
-            </button>
-          )}
-        />
       </div>
     </>
   );

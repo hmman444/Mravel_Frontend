@@ -148,7 +148,7 @@ export default function EditProfileModal({
     }
 
     setSaving(true);
-    const payload = { ...form };
+    const payload = { ...form, dateOfBirth: form.dateOfBirth || null };
 
     await saveProfile(payload, () => {
       onUpdated?.();
@@ -159,8 +159,8 @@ export default function EditProfileModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm px-3">
-      <div className="w-full max-w-4xl max-h-[calc(100vh-64px)] rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm px-3" onClick={onClose}>
+      <div className="w-full max-w-4xl max-h-[calc(100vh-64px)] rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* COVER + AVATAR */}
         <div className="relative h-32 sm:h-40 bg-slate-200 dark:bg-slate-800 shrink-0">
           {form.coverImage ? (

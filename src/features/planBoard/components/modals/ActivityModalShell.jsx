@@ -23,9 +23,11 @@ export default function ActivityModalShell({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onClick={onClose}
         >
           <motion.div
             className="relative w-full max-w-4xl max-h-[calc(100vh-72px)] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/70 dark:border-slate-800 bg-gradient-to-br from-slate-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
