@@ -2,7 +2,7 @@
 import api from "../../../utils/axiosInstance";
 import i18n from "../../../i18n";
 
-const BASE = "/admin/auth/users";
+const BASE = "/auth/users";
 
 const ensureOk = (res) => {
   const body = res?.data;
