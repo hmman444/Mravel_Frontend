@@ -41,11 +41,15 @@ export default function ReviewSection({ targetType, targetId, targetSlug, target
     dispatch(fetchReviews({ targetType, targetId, page: 0, size: 5 }));
     dispatch(fetchReviewSummary({ targetType, targetId }));
     dispatch(fetchAspectDefinitions(targetType));
-    dispatch(fetchCanReview({ targetType, targetId, slug: targetSlug, name: targetName }));
     return () => {
       dispatch(clearReviews());
     };
-  }, [targetType, targetId, targetSlug, targetName, dispatch]);
+  }, [targetType, targetId, dispatch]);
+
+  useEffect(() => {
+    if (!currentUserId || !targetType || !targetId) return;
+    dispatch(fetchCanReview({ targetType, targetId, slug: targetSlug, name: targetName }));
+  }, [currentUserId, targetType, targetId, targetSlug, targetName, dispatch]);
 
   useEffect(() => {
     const key = `${currentUserId}_${targetType}_${targetId}`;
