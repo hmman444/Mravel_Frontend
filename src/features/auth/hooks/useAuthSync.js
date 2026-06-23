@@ -4,11 +4,13 @@ import { fetchCurrentUser } from "../slices/authSlice";
 
 export function useAuthSync() {
   const dispatch = useDispatch();
-  const { accessToken } = useSelector((state) => state.auth);
+  const { accessToken, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (accessToken) {
+    // Only fetch if we have a token but no user yet.
+    // useLoadUser handles the initial load; this hook re-syncs after token refresh.
+    if (accessToken && !user) {
       dispatch(fetchCurrentUser());
     }
-  }, [accessToken, dispatch]);
+  }, [accessToken, user, dispatch]);
 }

@@ -17,7 +17,7 @@ export default function ProfileSidebar({
   const { t } = useTranslation();
   const previewPhotos = photosFromPlans.slice(0, 9);
   return (
-    <div className="space-y-4 md:sticky md:top-24 self-start">
+    <div className="space-y-4 md:sticky md:top-24 self-start md:max-h-[calc(100vh-6.5rem)] md:overflow-y-auto md:pb-4 md:pr-1">
       {/* About */}
       <section className="bg-white/80 dark:bg-slate-900/80 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 p-4 sm:p-5 shadow-sm">
         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50 mb-3">
