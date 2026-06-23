@@ -76,7 +76,7 @@ export default function ProfileFriendsAboutSection({
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               {t("user.friends_count", { count: userView?.totalFriends ?? 0 })} ·{" "}
               {t("user.mutual_friends_count", {
-                count: userView?.mutualFriends ?? 0,
+                n: userView?.mutualFriends ?? 0,
               })}
             </p>
           </div>
@@ -120,7 +120,7 @@ export default function ProfileFriendsAboutSection({
                     {name}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("user.mutual_friends_count", { count: mutual })}
+                    {t("user.mutual_friends_count", { n: mutual })}
                   </p>
                 </div>
               </div>
