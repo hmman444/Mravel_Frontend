@@ -44,7 +44,12 @@ export default function ReviewSection({ targetType, targetId, targetSlug, target
     return () => {
       dispatch(clearReviews());
     };
-  }, [targetType, targetId, targetSlug, targetName, dispatch]);
+  }, [targetType, targetId, dispatch]);
+
+  useEffect(() => {
+    if (!currentUserId || !targetType || !targetId) return;
+    dispatch(fetchCanReview({ targetType, targetId, slug: targetSlug, name: targetName }));
+  }, [currentUserId, targetType, targetId, targetSlug, targetName, dispatch]);
 
   useEffect(() => {
     if (!currentUserId || !targetType || !targetId) return;
