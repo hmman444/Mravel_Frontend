@@ -52,6 +52,11 @@ export default function ReviewSection({ targetType, targetId, targetSlug, target
   }, [currentUserId, targetType, targetId, targetSlug, targetName, dispatch]);
 
   useEffect(() => {
+    if (!currentUserId || !targetType || !targetId) return;
+    dispatch(fetchCanReview({ targetType, targetId, slug: targetSlug, name: targetName }));
+  }, [currentUserId, targetType, targetId, targetSlug, targetName, dispatch]);
+
+  useEffect(() => {
     const key = `${currentUserId}_${targetType}_${targetId}`;
     if (currentUserId && targetType && targetId && myReviewFetchedRef.current !== key) {
       myReviewFetchedRef.current = key;
@@ -100,7 +105,15 @@ export default function ReviewSection({ targetType, targetId, targetSlug, target
 
       {/* Form — chỉ hiện khi user đã trải nghiệm dịch vụ (hoặc đã từng đánh giá) */}
       <div className="mt-6">
-        {canReview === false ? (
+        {!currentUserId ? (
+          <ReviewForm
+            targetType={targetType}
+            targetId={targetId}
+            targetSlug={targetSlug}
+            targetName={targetName}
+            onSubmitted={handleSubmitted}
+          />
+        ) : canReview === false ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
             {t("review.not_experienced")}
           </div>
