@@ -62,6 +62,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          command_timeout: 20m
           script: |
             cd ${{ secrets.DEPLOY_DIR }}
             ./scripts/deploy.sh
