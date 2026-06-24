@@ -100,12 +100,18 @@ api.interceptors.response.use(
         const store = getStore();
         store.dispatch(setTokensRedux({ accessToken, refreshToken: newRefresh }));
 
-        // Refresh the user profile once (awaited) so Redux is up to date before
-        // we replay the original request.
-        const me = await api.get("/auth/me");
-        const currentUser = me?.data?.data ?? me?.data ?? null;
-
-        store.dispatch(setUser(currentUser));
+        // Use plain axios (not the intercepted `api`) to fetch the current user
+        // so this call does NOT re-enter the refresh interceptor if it fails.
+        try {
+          const me = await axios.get(`${BASE_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          const currentUser = me?.data?.data ?? me?.data ?? null;
+          store.dispatch(setUser(currentUser));
+        } catch (_) {
+          // Non-fatal: user profile fetch failed after refresh, state stays stale.
+          // useAuthSync will re-fetch once accessToken is updated in Redux.
+        }
 
         onRefreshed(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
