@@ -47,12 +47,6 @@ export default function PartnerSection() {
             >
               {t("home.partner_register")}
             </a>
-            <a
-              href="/co-op"
-              className="px-5 py-2.5 rounded-full border border-emerald-500/60 text-emerald-700 dark:text-emerald-300 bg-white/70 dark:bg-gray-900/70 text-sm font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition"
-            >
-              {t("home.learn_more")}
-            </a>
           </div>
         </div>
 
