@@ -55,5 +55,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # NOTE: no SSH deploy here — the VPS pulls new images itself via a cron
-      # running scripts/deploy.sh. CI only builds & pushes to GHCR.
+      # CI chỉ build và push image lên GHCR. Trên VPS chạy scripts/deploy.sh (pull + up) để cập nhật.
