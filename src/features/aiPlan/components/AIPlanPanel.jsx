@@ -46,15 +46,26 @@ export default function AIPlanPanel({ planId = null, onClose = null, onApplied =
  * pinned virtual assistant. Supports multiple saved conversations: a history overlay
  * lists past chats to resume, and a "new conversation" button starts a fresh one.
  */
-export function AIPlanPanelView({ session, onClose = null, onApplied = null, autoFocus = true }) {
+export function AIPlanPanelView({ session, onClose = null, onApplied = null, autoFocus = true, expanded = null, onToggleExpand = null, draftInput = null, onDraftInputChange = null }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [input, setInput] = useState("");
+  // Composer text: controlled by the parent when it wants the draft to survive the
+  // panel unmounting (floating widget close/reopen); otherwise kept locally.
+  const [internalInput, setInternalInput] = useState("");
+  const input = onDraftInputChange ? draftInput ?? "" : internalInput;
+  const setInput = onDraftInputChange || setInternalInput;
   const [revisionInput, setRevisionInput] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const editMode = session.isEditMode;
+  // When the window is enlarged, widen the centered content column so it doesn't leave
+  // a narrow strip of text with huge empty margins.
+  const contentCls = expanded ? "max-w-4xl" : "max-w-2xl";
+  // Empty conversation (intro + starter prompts) — center it vertically instead of
+  // pinning to the top of a tall/enlarged window.
+  const isEmpty =
+    session.messages.length === 0 && !session.isBusy && !session.draft && session.pendingEdits.length === 0;
 
   const starterPrompts = STARTER_EMOJIS.map((emoji, i) => ({
     emoji,
@@ -182,6 +193,24 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
             </svg>
             {t("aiPlan.new_chat")}
           </button>
+          {onToggleExpand && (
+            <button
+              onClick={onToggleExpand}
+              className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-800"
+              aria-label={expanded ? t("aiPlan.shrink") : t("aiPlan.expand")}
+              title={expanded ? t("aiPlan.shrink") : t("aiPlan.expand")}
+            >
+              {expanded ? (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 9L4 4m0 0v4m0-4h4m6 6l5 5m0 0v-4m0 4h-4M9 15l-5 5m0 0v-4m0 4h4m6-6l5-5m0 0v4m0-4h-4" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+              )}
+            </button>
+          )}
           {onClose && (
             <button
               onClick={onClose}
@@ -207,9 +236,14 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
         />
       )}
 
-      {/* Conversation area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl px-6 py-6">
+      {/* Conversation area — vertically centered while empty so the intro + starter
+          prompts don't sit at the top of a tall window with a big blank gap below. */}
+      <div
+        className={`flex-1 overflow-y-auto ${
+          isEmpty ? "flex flex-col justify-center" : ""
+        }`}
+      >
+        <div className={`mx-auto w-full ${contentCls} px-6 py-6`}>
           {/* Empty state */}
           {session.messages.length === 0 && (
             <div className="mb-4">
@@ -288,7 +322,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
       {/* Revision / approve toolbar (new-plan mode) */}
       {!editMode && session.draft && !session.isApproved && (
         <div className="border-t border-slate-200/70 bg-white/80 px-6 py-3 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80">
-          <div className="mx-auto max-w-2xl">
+          <div className={`mx-auto ${contentCls}`}>
             <form onSubmit={handleRegenerate} className="flex items-center gap-2">
               <input
                 value={revisionInput}
@@ -320,7 +354,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
       {/* Apply-edits toolbar (edit mode) */}
       {editMode && session.pendingEdits.length > 0 && (
         <div className="border-t border-slate-200/70 bg-white/80 px-6 py-3 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80">
-          <div className="mx-auto flex max-w-2xl items-center justify-between gap-2">
+          <div className={`mx-auto flex ${contentCls} items-center justify-between gap-2`}>
             <span className="text-sm text-slate-600 dark:text-slate-300">
               <b>{session.pendingEdits.length}</b> {t("aiPlan.pending_changes")}
             </span>
@@ -348,7 +382,7 @@ export function AIPlanPanelView({ session, onClose = null, onApplied = null, aut
 
       {/* Composer */}
       <div className="border-t border-slate-200/70 bg-neutral px-6 py-4 dark:border-slate-800/70 dark:bg-slate-900">
-        <div className="mx-auto max-w-2xl">
+        <div className={`mx-auto ${contentCls}`}>
           <form
             onSubmit={handleSend}
             className="relative rounded-2xl border border-slate-300 bg-white shadow-sm transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 dark:border-slate-700 dark:bg-slate-800"
