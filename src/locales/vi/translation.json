@@ -34,6 +34,8 @@
         "new_chat_title": "Bắt đầu một hội thoại mới",
         "close": "Đóng",
         "close_history": "Đóng lịch sử",
+        "expand": "Phóng to cửa sổ",
+        "shrink": "Thu nhỏ cửa sổ",
         "empty_title_edit": "Mình có thể chỉnh sửa gì cho kế hoạch này?",
         "empty_title_new": "MAI có thể giúp gì cho chuyến đi của bạn?",
         "empty_desc_edit": "Mình đã đọc kế hoạch hiện tại. Bạn muốn thêm/sửa/xoá hoạt động, đổi quán, dời giờ hay hỏi chi phí — cứ nói nhé.",

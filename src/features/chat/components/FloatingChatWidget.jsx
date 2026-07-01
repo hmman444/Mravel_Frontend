@@ -19,6 +19,11 @@ export default function FloatingChatWidget() {
   const conversations = useSelector((s) => s.chat.conversations);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  // Enlarge the popup in-place (no navigation) — the MAI chat window gets wider/taller.
+  const [expanded, setExpanded] = useState(false);
+  // The composer text lives HERE (not in the panel, which unmounts when the popup
+  // closes) so a half-typed message survives closing/reopening the chat.
+  const [maiDraft, setMaiDraft] = useState("");
   const panelRef = useRef(null);
   const launcherRef = useRef(null);
 
@@ -89,16 +94,22 @@ export default function FloatingChatWidget() {
           ref={panelRef}
           className={
             "fixed right-6 bottom-[5.5rem] z-[9000] " +
-            "w-[calc(100vw-3rem)] sm:w-[360px] " +
-            "h-[520px] max-h-[calc(100vh-6rem)] min-h-[300px] " +
+            (expanded
+              ? "w-[calc(100vw-3rem)] sm:w-[80vw] sm:max-w-[1200px] h-[85vh] max-h-[calc(100vh-6rem)] "
+              : "w-[calc(100vw-3rem)] sm:w-[400px] h-[560px] max-h-[calc(100vh-6rem)] ") +
+            "min-h-[300px] " +
             "rounded-2xl shadow-2xl border border-gray-200 bg-white " +
-            "overflow-hidden flex flex-col"
+            "overflow-hidden flex flex-col transition-all duration-200"
           }
         >
           {isPlanner ? (
             <AIPlanPanelView
               session={maiSession}
               autoFocus={false}
+              expanded={expanded}
+              onToggleExpand={() => setExpanded((v) => !v)}
+              draftInput={maiDraft}
+              onDraftInputChange={setMaiDraft}
               onClose={() => dispatch(setActiveConversation(null))}
             />
           ) : chatActiveId ? (
