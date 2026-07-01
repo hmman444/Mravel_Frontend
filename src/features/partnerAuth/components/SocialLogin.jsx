@@ -38,7 +38,9 @@ export default function SocialLogin() {
           if (redirectParam) {
             navigate(decodeURIComponent(redirectParam));
           } else {
-            navigate("/partner");
+            // Sau khi đăng nhập partner bằng Google phải vào dashboard, KHÔNG về trang
+            // landing "Trở thành đối tác" (bug cũ khiến partner tưởng đăng nhập thất bại).
+            navigate("/partner/dashboard");
           }
         } else {
           showError(action.payload || t("partnerAuth.social.login_failed"));
