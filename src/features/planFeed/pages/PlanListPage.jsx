@@ -169,6 +169,8 @@ export default function PlanListPage() {
     (q, filters) => {
       const resolvedFilters = filters || activeFilters;
       if (!q && activeFilterCount === 0 && !filters) return;
+      // Bỏ qua lần URL-sync kế tiếp (xem giải thích ở handleApplyFilters).
+      ignoreNextUrlSyncRef.current = true;
       setSearchParams({ mode: "search", query: q });
       doSearch(q, resolvedFilters);
       setShowSuggestions(false);
@@ -209,6 +211,9 @@ export default function PlanListPage() {
         resetSearch();
         return;
       }
+      // Bỏ qua lần URL-sync ngay sau đây: search đã được dispatch ở trên, tránh việc
+      // effect thấy urlMode chưa kịp cập nhật "search" mà gọi resetSearch() xoá kết quả.
+      ignoreNextUrlSyncRef.current = true;
       setSearchParams({ mode: "search", query: q });
       doSearch(q, newFilters);
     },
