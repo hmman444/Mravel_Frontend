@@ -134,6 +134,9 @@ export default function PlanListPage() {
 
   const urlMode = searchParams.get("mode") || "";
   const urlQuery = (searchParams.get("query") || "").trim();
+  // Giá trị URL ở render trước — để effect chỉ phản ứng khi URL THỰC SỰ đổi,
+  // không chạy trên các render do Redux đổi state (nguồn gốc lỗi reset nhầm khi lọc).
+  const prevUrlRef = useRef({ mode: urlMode, query: urlQuery });
 
 
   //  Search history helpers 
@@ -169,8 +172,6 @@ export default function PlanListPage() {
     (q, filters) => {
       const resolvedFilters = filters || activeFilters;
       if (!q && activeFilterCount === 0 && !filters) return;
-      // Bỏ qua lần URL-sync kế tiếp (xem giải thích ở handleApplyFilters).
-      ignoreNextUrlSyncRef.current = true;
       setSearchParams({ mode: "search", query: q });
       doSearch(q, resolvedFilters);
       setShowSuggestions(false);
@@ -211,9 +212,6 @@ export default function PlanListPage() {
         resetSearch();
         return;
       }
-      // Bỏ qua lần URL-sync ngay sau đây: search đã được dispatch ở trên, tránh việc
-      // effect thấy urlMode chưa kịp cập nhật "search" mà gọi resetSearch() xoá kết quả.
-      ignoreNextUrlSyncRef.current = true;
       setSearchParams({ mode: "search", query: q });
       doSearch(q, newFilters);
     },
@@ -258,16 +256,25 @@ export default function PlanListPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  //  URL sync 
+  //  URL sync — CHỈ xử lý khi URL thực sự đổi (điều hướng ngoài: back/forward, mở link,
+  //  hoặc handler chủ động đổi URL). Nhờ vậy effect KHÔNG chạy trên các render do Redux đổi
+  //  state → hết cảnh "urlMode chưa kịp = search mà đã resetSearch()" xoá mất kết quả lọc.
   useEffect(() => {
+    const prev = prevUrlRef.current;
+    const urlChanged = prev.mode !== urlMode || prev.query !== urlQuery;
+    prevUrlRef.current = { mode: urlMode, query: urlQuery };
+    if (!urlChanged) return;
+
     if (ignoreNextUrlSyncRef.current) {
       ignoreNextUrlSyncRef.current = false;
       return;
     }
+
     if (urlMode !== "search") {
       if (isSearching) resetSearch();
       return;
     }
+    // mode = search
     if (urlQuery) {
       if (!userTypingRef.current && (keyword || "").trim() !== urlQuery) {
         setKeyword(urlQuery);
@@ -275,12 +282,9 @@ export default function PlanListPage() {
       if (((searchQuery || "").trim() || "") !== urlQuery) {
         doSearch(urlQuery, activeFilters);
       }
-    } else {
-      // Empty query but still in search mode: keep it if filters are active
-      // (filter-only search), otherwise exit search mode.
-      if (isSearching && activeFilterCount === 0) resetSearch();
     }
-  }, [urlMode, urlQuery, isSearching, searchQuery, doSearch, resetSearch, keyword, activeFilters, activeFilterCount]);
+    // urlQuery rỗng + mode=search: search do handler (lọc) tự dispatch, effect không đụng vào.
+  }, [urlMode, urlQuery, isSearching, searchQuery, doSearch, resetSearch, keyword, activeFilters]);
 
   // Reload feed when leaving search mode
   useEffect(() => {
