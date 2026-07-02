@@ -3580,6 +3580,8 @@
             "subtitle": "Kéo thả để sắp xếp, thêm ngày và thẻ cho từng hoạt động",
             "trash": "Thùng rác",
             "add_day": "Thêm ngày",
+            "export": "Xuất Excel",
+            "export_error": "Không thể xuất file Excel",
             "clear_trash": "Xóa tất cả",
             "clear_trash_confirm_title": "Xóa toàn bộ thẻ trong thùng rác",
             "clear_trash_confirm_message": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa tất cả thẻ trong thùng rác?",
@@ -4692,6 +4694,7 @@
                 "relevance": "Liên quan",
                 "newest": "Mới nhất",
                 "mostViewed": "Xem nhiều",
+                "mostReacted": "Nhiều lượt thích",
                 "budgetAsc": "Ngân sách ↑",
                 "budgetDesc": "Ngân sách ↓",
                 "label": "Sắp xếp"

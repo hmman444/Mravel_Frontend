@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -119,8 +119,12 @@ export default function UserPublicProfilePage() {
 
   const friendActions = useFriendActions(userView?.id, relationship, reload);
 
+  const messagingRef = useRef(false);
   const handleMessage = useCallback(async () => {
     if (!userView?.id) return;
+    // Chống double-click: chỉ cho 1 request tạo/mở hội thoại chạy tại một thời điểm.
+    if (messagingRef.current) return;
+    messagingRef.current = true;
     try {
       const conv = await createPrivateConversation(userView.id);
       dispatch(upsertConversation(conv));
@@ -128,6 +132,8 @@ export default function UserPublicProfilePage() {
       navigate(`/chat/${conv.id}`);
     } catch {
       // ignore: keep user on page if conversation creation fails
+    } finally {
+      messagingRef.current = false;
     }
   }, [userView?.id, dispatch, navigate]);
 

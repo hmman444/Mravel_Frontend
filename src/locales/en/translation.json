@@ -3580,6 +3580,8 @@
             "subtitle": "Drag and drop to arrange, add days and cards for each activity",
             "trash": "Trash",
             "add_day": "Add day",
+            "export": "Export Excel",
+            "export_error": "Could not export the Excel file",
             "clear_trash": "Clear all",
             "clear_trash_confirm_title": "Delete all cards in the trash",
             "clear_trash_confirm_message": "This action cannot be undone. Are you sure you want to delete all cards in the trash?",
@@ -4692,6 +4694,7 @@
                 "relevance": "Relevant",
                 "newest": "Newest",
                 "mostViewed": "Most viewed",
+                "mostReacted": "Most reactions",
                 "budgetAsc": "Budget ↑",
                 "budgetDesc": "Budget ↓",
                 "label": "Sort"

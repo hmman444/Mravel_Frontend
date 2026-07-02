@@ -40,6 +40,19 @@ const TRENDING_KEYWORDS = [
   "Đà Nẵng biển Mỹ Khê",
 ];
 
+// Counts how many non-default filter groups are set in a filter object.
+// Mirrors the logic in usePlans() so callers can check an arbitrary draft.
+function countActiveFilters(f) {
+  if (!f) return 0;
+  let c = 0;
+  if (f.budgetMin || f.budgetMax) c++;
+  if (f.daysMin || f.daysMax) c++;
+  if (f.startDateFrom || f.startDateTo) c++;
+  if (f.destinations?.length > 0) c++;
+  if (f.sortBy && f.sortBy !== "RELEVANCE") c++;
+  return c;
+}
+
 // Inline highlight component for suggestion dropdown
 function HighlightText({ text, query }) {
   if (!query || !text) return <>{text}</>;
@@ -183,16 +196,23 @@ export default function PlanListPage() {
     setShowSuggestions(false);
   }, [setSearchParams, resetSearch, clearFilters]);
 
-  //  Apply filters from sidebar 
+  //  Apply filters from sidebar
   const handleApplyFilters = useCallback(
     (newFilters) => {
       updateFilters(newFilters);
       setDraftFilters(newFilters);
       const q = (keyword || "").trim();
+      // Nothing to search for (no keyword and no active filters) → leave search mode.
+      if (!q && countActiveFilters(newFilters) === 0) {
+        ignoreNextUrlSyncRef.current = true;
+        setSearchParams({});
+        resetSearch();
+        return;
+      }
       setSearchParams({ mode: "search", query: q });
       doSearch(q, newFilters);
     },
-    [keyword, updateFilters, setSearchParams, doSearch]
+    [keyword, updateFilters, setSearchParams, doSearch, resetSearch]
   );
 
   //  Remove single filter chip ─
@@ -251,9 +271,11 @@ export default function PlanListPage() {
         doSearch(urlQuery, activeFilters);
       }
     } else {
-      if (isSearching) resetSearch();
+      // Empty query but still in search mode: keep it if filters are active
+      // (filter-only search), otherwise exit search mode.
+      if (isSearching && activeFilterCount === 0) resetSearch();
     }
-  }, [urlMode, urlQuery, isSearching, searchQuery, doSearch, resetSearch, keyword, activeFilters]);
+  }, [urlMode, urlQuery, isSearching, searchQuery, doSearch, resetSearch, keyword, activeFilters, activeFilterCount]);
 
   // Reload feed when leaving search mode
   useEffect(() => {
@@ -381,7 +403,10 @@ export default function PlanListPage() {
               clearFilters();
               setDraftFilters(DEFAULT_FILTERS);
               closeFilterSidebar();
-              doSearch((keyword || "").trim(), DEFAULT_FILTERS);
+              const q = (keyword || "").trim();
+              // With a keyword, re-run a plain text search; otherwise leave search mode.
+              if (q) doSearch(q, DEFAULT_FILTERS);
+              else clear();
             }}
             activeCount={activeFilterCount}
             loading={searchLoading}
@@ -627,7 +652,7 @@ export default function PlanListPage() {
                 )}
               </button>
 
-              {isSearching && (
+              {isSearching && searchQuery && (
                 <>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {t('feed.search.resultsLabel')}{" "}

@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
-import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaPlus, FaTrashAlt, FaFileExcel } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import PlanList from "./PlanList";
 import ConfirmModal from "../../../../components/ConfirmModal";
+import { exportPlanToExcel } from "../../utils/planExcelExport";
+import { showError } from "../../../../utils/toastUtils";
 
 // 9 activity modals
 import ActivityModals from "../modals/ActivityModals";
@@ -212,6 +214,26 @@ export default function PlanBoard({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                exportPlanToExcel(board);
+              } catch (e) {
+                console.error(e);
+                showError(t("plan.board.export_error"));
+              }
+            }}
+            className="
+              inline-flex items-center gap-2 rounded-full px-3 py-2
+              text-xs font-semibold shadow-sm transition-all
+              bg-emerald-50 text-emerald-700 hover:bg-emerald-100
+            "
+          >
+            <FaFileExcel className="text-[11px]" />
+            <span>{t("plan.board.export")}</span>
+          </button>
+
           {trashList && (
             <button
               ref={trashButtonRef}
