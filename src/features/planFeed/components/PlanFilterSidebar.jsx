@@ -13,11 +13,12 @@ import {
 } from "lucide-react";
 
 const SORT_OPTIONS = [
-  { value: "RELEVANCE",   labelKey: "feed.filter.sort.relevance" },
-  { value: "NEWEST",      labelKey: "feed.filter.sort.newest" },
-  { value: "MOST_VIEWED", labelKey: "feed.filter.sort.mostViewed" },
-  { value: "BUDGET_ASC",  labelKey: "feed.filter.sort.budgetAsc" },
-  { value: "BUDGET_DESC", labelKey: "feed.filter.sort.budgetDesc" },
+  { value: "RELEVANCE",    labelKey: "feed.filter.sort.relevance" },
+  { value: "NEWEST",       labelKey: "feed.filter.sort.newest" },
+  { value: "MOST_VIEWED",  labelKey: "feed.filter.sort.mostViewed" },
+  { value: "MOST_REACTED", labelKey: "feed.filter.sort.mostReacted" },
+  { value: "BUDGET_ASC",   labelKey: "feed.filter.sort.budgetAsc" },
+  { value: "BUDGET_DESC",  labelKey: "feed.filter.sort.budgetDesc" },
 ];
 
 const POPULAR_DESTINATIONS = [

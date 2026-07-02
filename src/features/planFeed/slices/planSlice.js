@@ -39,6 +39,9 @@ const initialState = {
 
   searchQuery: "",
   searchLoading: false,
+  // True whenever a search/filter is active — decoupled from searchQuery so that
+  // filter-only searches (empty keyword + active filters) still render results.
+  searchActive: false,
   searchPlans: [],
   searchUsers: [],
   searchMeta: { nextCursor: null, size: 10, total: 0, hasMore: false },
@@ -123,6 +126,7 @@ const planSlice = createSlice({
     clearSearch(state) {
       state.searchQuery = "";
       state.searchLoading = false;
+      state.searchActive = false;
       state.searchPlans = [];
       state.searchUsers = [];
       state.searchMeta = { nextCursor: null, size: 10, total: 0, hasMore: false };
@@ -262,6 +266,7 @@ const planSlice = createSlice({
       })
       .addCase(searchAll.pending, (state, action) => {
         state.searchLoading = true;
+        state.searchActive = true;
         // Always update the visible query label immediately
         state.searchQuery = action.meta.arg.q;
       })

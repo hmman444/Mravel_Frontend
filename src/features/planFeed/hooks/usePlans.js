@@ -22,6 +22,7 @@ export function usePlans() {
 
     searchQuery,
     searchLoading,
+    searchActive,
     searchPlans,
     searchUsers,
     searchMeta,
@@ -59,7 +60,9 @@ export function usePlans() {
 
   const resetSearch = () => dispatch(clearSearch());
 
-  const isSearching = !!searchQuery;
+  // "Searching" mode is driven by an explicit flag, not the keyword text, so a
+  // filter-only search (empty keyword + active filters) still shows results.
+  const isSearching = searchActive;
 
   const loadFeedDetail = (id) => dispatch(loadPlanFeedDetail({ id }));
 
