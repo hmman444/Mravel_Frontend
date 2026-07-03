@@ -102,11 +102,12 @@ function Pagination({ page, totalPages, onChange }) {
 export default function RestaurantPopularSection() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { items, loading, error, fetchRestaurants } = useCatalogRestaurants();
+  const { items, loading, error, fetchRestaurants, totalElements } = useCatalogRestaurants();
   const [activeKey, setActiveKey] = useState(null);
   const [activeType, setActiveType] = useState("ALL");
   const [page, setPage] = useState(0);
   const sectionRef = useRef(null);
+  const fetchedAllRef = useRef(false);
 
   // Đổi trang → cuộn lên đầu section (khỏi phải scroll tay)
   const goToPage = (p) => {
@@ -119,14 +120,18 @@ export default function RestaurantPopularSection() {
     });
   };
 
-  // gọi API lần đầu (lấy nhiều để phân trang client-side)
+  // Lần 1: fetch nhanh để hiển thị sớm + lấy totalElements
   useEffect(() => {
-    fetchRestaurants({
-      page: 0,
-      size: 60,
-      sort: "avgRating,DESC",
-    });
+    fetchRestaurants({ page: 0, size: 60, sort: "avgRating,DESC" });
   }, [fetchRestaurants]);
+
+  // Lần 2: nếu còn thiếu, fetch đủ toàn bộ (chỉ 1 lần)
+  useEffect(() => {
+    if (!loading && !fetchedAllRef.current && totalElements > 0 && totalElements > items.length) {
+      fetchedAllRef.current = true;
+      fetchRestaurants({ page: 0, size: totalElements, sort: "avgRating,DESC" });
+    }
+  }, [loading, totalElements, items.length, fetchRestaurants]);
 
   // group theo điểm đến / thành phố (destinationSlug / cityName)
   const groups = useMemo(() => {
