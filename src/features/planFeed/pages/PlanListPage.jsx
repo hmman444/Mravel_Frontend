@@ -40,6 +40,19 @@ const TRENDING_KEYWORDS = [
   "Đà Nẵng biển Mỹ Khê",
 ];
 
+// Counts how many non-default filter groups are set in a filter object.
+// Mirrors the logic in usePlans() so callers can check an arbitrary draft.
+function countActiveFilters(f) {
+  if (!f) return 0;
+  let c = 0;
+  if (f.budgetMin || f.budgetMax) c++;
+  if (f.daysMin || f.daysMax) c++;
+  if (f.startDateFrom || f.startDateTo) c++;
+  if (f.destinations?.length > 0) c++;
+  if (f.sortBy && f.sortBy !== "RELEVANCE") c++;
+  return c;
+}
+
 // Inline highlight component for suggestion dropdown
 function HighlightText({ text, query }) {
   if (!query || !text) return <>{text}</>;
@@ -121,6 +134,9 @@ export default function PlanListPage() {
 
   const urlMode = searchParams.get("mode") || "";
   const urlQuery = (searchParams.get("query") || "").trim();
+  // Giá trị URL ở render trước — để effect chỉ phản ứng khi URL THỰC SỰ đổi,
+  // không chạy trên các render do Redux đổi state (nguồn gốc lỗi reset nhầm khi lọc).
+  const prevUrlRef = useRef({ mode: urlMode, query: urlQuery });
 
 
   //  Search history helpers 
@@ -183,16 +199,23 @@ export default function PlanListPage() {
     setShowSuggestions(false);
   }, [setSearchParams, resetSearch, clearFilters]);
 
-  //  Apply filters from sidebar 
+  //  Apply filters from sidebar
   const handleApplyFilters = useCallback(
     (newFilters) => {
       updateFilters(newFilters);
       setDraftFilters(newFilters);
       const q = (keyword || "").trim();
+      // Nothing to search for (no keyword and no active filters) → leave search mode.
+      if (!q && countActiveFilters(newFilters) === 0) {
+        ignoreNextUrlSyncRef.current = true;
+        setSearchParams({});
+        resetSearch();
+        return;
+      }
       setSearchParams({ mode: "search", query: q });
       doSearch(q, newFilters);
     },
-    [keyword, updateFilters, setSearchParams, doSearch]
+    [keyword, updateFilters, setSearchParams, doSearch, resetSearch]
   );
 
   //  Remove single filter chip ─
@@ -233,16 +256,25 @@ export default function PlanListPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  //  URL sync 
+  //  URL sync — CHỈ xử lý khi URL thực sự đổi (điều hướng ngoài: back/forward, mở link,
+  //  hoặc handler chủ động đổi URL). Nhờ vậy effect KHÔNG chạy trên các render do Redux đổi
+  //  state → hết cảnh "urlMode chưa kịp = search mà đã resetSearch()" xoá mất kết quả lọc.
   useEffect(() => {
+    const prev = prevUrlRef.current;
+    const urlChanged = prev.mode !== urlMode || prev.query !== urlQuery;
+    prevUrlRef.current = { mode: urlMode, query: urlQuery };
+    if (!urlChanged) return;
+
     if (ignoreNextUrlSyncRef.current) {
       ignoreNextUrlSyncRef.current = false;
       return;
     }
+
     if (urlMode !== "search") {
       if (isSearching) resetSearch();
       return;
     }
+    // mode = search
     if (urlQuery) {
       if (!userTypingRef.current && (keyword || "").trim() !== urlQuery) {
         setKeyword(urlQuery);
@@ -250,9 +282,8 @@ export default function PlanListPage() {
       if (((searchQuery || "").trim() || "") !== urlQuery) {
         doSearch(urlQuery, activeFilters);
       }
-    } else {
-      if (isSearching) resetSearch();
     }
+    // urlQuery rỗng + mode=search: search do handler (lọc) tự dispatch, effect không đụng vào.
   }, [urlMode, urlQuery, isSearching, searchQuery, doSearch, resetSearch, keyword, activeFilters]);
 
   // Reload feed when leaving search mode
@@ -381,7 +412,10 @@ export default function PlanListPage() {
               clearFilters();
               setDraftFilters(DEFAULT_FILTERS);
               closeFilterSidebar();
-              doSearch((keyword || "").trim(), DEFAULT_FILTERS);
+              const q = (keyword || "").trim();
+              // With a keyword, re-run a plain text search; otherwise leave search mode.
+              if (q) doSearch(q, DEFAULT_FILTERS);
+              else clear();
             }}
             activeCount={activeFilterCount}
             loading={searchLoading}
@@ -627,7 +661,7 @@ export default function PlanListPage() {
                 )}
               </button>
 
-              {isSearching && (
+              {isSearching && searchQuery && (
                 <>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {t('feed.search.resultsLabel')}{" "}

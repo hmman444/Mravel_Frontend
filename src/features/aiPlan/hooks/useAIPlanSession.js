@@ -189,7 +189,15 @@ export function useAIPlanSession(planId = null) {
           prevDraftRef.current = data.draft;
         }
         if (data.approved_plan_id) setApprovedPlanId(data.approved_plan_id);
-        setPhase(data.status === "APPROVED" ? PHASES.APPROVED : PHASES.CHATTING);
+        // An approved create-session can't be drafted again, but the user can keep
+        // chatting to EDIT the plan they just made. Resume in edit mode (composer
+        // enabled) bound to that plan instead of a locked "approved" state.
+        if (data.status === "APPROVED" && data.plan_id == null && data.approved_plan_id != null) {
+          setBoundPlanId(data.approved_plan_id);
+          setPhase(PHASES.CHATTING);
+        } else {
+          setPhase(data.status === "APPROVED" ? PHASES.APPROVED : PHASES.CHATTING);
+        }
       } catch {
         // Session expired / not found — drop the stale id and start clean.
         persistSessionId(planId, null);
@@ -463,7 +471,10 @@ export function useAIPlanSession(planId = null) {
     try {
       const data = await approveSession(sessionId);
       setApprovedPlanId(data.plan_id);
-      setPhase(PHASES.APPROVED);
+      // Bind to the new plan so continuing the chat edits it (composer stays usable)
+      // rather than locking the session.
+      setBoundPlanId(data.plan_id);
+      setPhase(PHASES.CHATTING);
       showSuccess(`Đã tạo plan #${data.plan_id} từ bản nháp.`);
       return data.plan_id;
     } catch (err) {
@@ -525,13 +536,20 @@ export function useAIPlanSession(planId = null) {
         setMessages((data.messages || []).map(withId));
         setConstraints(data.constraints || null);
         setPendingEdits(data.pending_edits || []);
-        setBoundPlanId(data.plan_id != null ? data.plan_id : null);
         setDraft(data.draft || null);
         prevDraftRef.current = data.draft || null;
         setApprovedPlanId(data.approved_plan_id || null);
         setMissingFields([]);
         persistSessionId(planId, data.session_id);
-        setPhase(data.status === "APPROVED" ? PHASES.APPROVED : PHASES.CHATTING);
+        // Resume an approved create-session in edit mode (see rehydrate above) so the
+        // user can keep editing the plan they made; otherwise honour the raw status.
+        if (data.status === "APPROVED" && data.plan_id == null && data.approved_plan_id != null) {
+          setBoundPlanId(data.approved_plan_id);
+          setPhase(PHASES.CHATTING);
+        } else {
+          setBoundPlanId(data.plan_id != null ? data.plan_id : null);
+          setPhase(data.status === "APPROVED" ? PHASES.APPROVED : PHASES.CHATTING);
+        }
       } catch (err) {
         const msg = messageFromError(err, "Không mở được hội thoại này.");
         setPhase(PHASES.ERROR);

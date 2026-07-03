@@ -2,11 +2,12 @@ import { X, SlidersHorizontal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const SORT_LABEL_KEYS = {
-  RELEVANCE:   "feed.filter.sort.relevance",
-  NEWEST:      "feed.filter.sort.newest",
-  MOST_VIEWED: "feed.filter.sort.mostViewed",
-  BUDGET_ASC:  "feed.filter.sort.budgetAsc",
-  BUDGET_DESC: "feed.filter.sort.budgetDesc",
+  RELEVANCE:    "feed.filter.sort.relevance",
+  NEWEST:       "feed.filter.sort.newest",
+  MOST_VIEWED:  "feed.filter.sort.mostViewed",
+  MOST_REACTED: "feed.filter.sort.mostReacted",
+  BUDGET_ASC:   "feed.filter.sort.budgetAsc",
+  BUDGET_DESC:  "feed.filter.sort.budgetDesc",
 };
 
 function formatBudget(val) {

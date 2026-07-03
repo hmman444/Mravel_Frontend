@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 
@@ -9,9 +11,18 @@ import PartnerDetailsFaq from "../components/landing/PartnerDetailsFaq";
 import FadeInSection from "../../../components/FadeInSection";
 
 export default function PartnerLandingPage() {
+  // Đã đăng nhập cổng partner → vào thẳng dashboard, không hiển thị lại trang
+  // "Trở thành đối tác". Token hỏng sẽ được PartnerProtectedRoute tự logout (xoá token)
+  // rồi quay lại đây hiển thị landing bình thường (không lặp vô hạn).
+  const partnerToken = useSelector((s) => s.partnerAuth?.accessToken);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  if (partnerToken) {
+    return <Navigate to="/partner/dashboard" replace />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
