@@ -1,9 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { reactionsMeta } from "../utils/reactionsMeta";
 
+const MAX_SHOWN = 3;
+
 export default function ReactionUsersPopup({ reactionUsers = [] }) {
   const { t } = useTranslation();
   if (!reactionUsers.length) return null;
+
+  const shown = reactionUsers.slice(0, MAX_SHOWN);
+  const remaining = reactionUsers.length - shown.length;
 
   return (
     <div
@@ -12,7 +17,7 @@ export default function ReactionUsersPopup({ reactionUsers = [] }) {
         shadow-xl p-3 border border-gray-200 dark:border-gray-700 w-64
       "
     >
-      {reactionUsers.map((u, idx) => {
+      {shown.map((u, idx) => {
         const name = u.userName || t("feed.user.defaultName");
         const avatar = u.userAvatar || "/default-avatar.png";
         const reaction = reactionsMeta[u.type?.toLowerCase()];
@@ -48,6 +53,11 @@ export default function ReactionUsersPopup({ reactionUsers = [] }) {
           </div>
         );
       })}
+      {remaining > 0 && (
+        <div className="pt-1 px-2 text-xs text-gray-500 dark:text-gray-400">
+          {t("feed.reaction.and_others", { n: remaining })}
+        </div>
+      )}
     </div>
   );
 }

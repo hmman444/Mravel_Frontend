@@ -4797,7 +4797,8 @@
             "haha": "Haha",
             "wow": "Wow",
             "sad": "Sad",
-            "angry": "Angry"
+            "angry": "Angry",
+            "and_others": "and {{n}} others"
         },
         "user": {
             "default": "user",
