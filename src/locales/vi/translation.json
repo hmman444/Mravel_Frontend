@@ -4797,7 +4797,8 @@
             "haha": "Haha",
             "wow": "Wow",
             "sad": "Buồn",
-            "angry": "Phẫn nộ"
+            "angry": "Phẫn nộ",
+            "and_others": "và {{n}} người khác"
         },
         "user": {
             "default": "người dùng",
