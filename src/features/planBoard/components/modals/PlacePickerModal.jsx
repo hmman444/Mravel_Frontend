@@ -53,6 +53,15 @@ const normalizeDashes = (s) =>
 const normalizeName = (s) =>
   normalizeDashes(s).trim().toLowerCase().replace(/\s+/g, " ");
 
+// nén tên về dạng chỉ còn chữ/số (bỏ dấu tiếng Việt, khoảng trắng, ký hiệu) để so khớp TÊN
+// khoan dung với biến thể gõ: "wu long" ~ "wulong", "phố cổ" ~ "pho co".
+const compactName = (s) =>
+  normalizeDashes(s ?? "")
+    .toLowerCase()
+    .replace(/đ/g, "d")
+    .normalize("NFD") // tách dấu; ký tự tổ hợp sẽ bị loại ở bước dưới
+    .replace(/[^a-z0-9]/g, "");
+
 // item trong list có khớp với location đã chọn trước đó không (theo id/slug HOẶC tên).
 // AI lưu id dạng slug còn list lại key theo id số → phải khớp cả hai, kèm fallback theo tên.
 const matchesInitialFocus = (item, focus) => {
@@ -211,6 +220,9 @@ export default function PlacePickerModal({
         q: debouncedQuery || undefined,
       });
     } else if (activeTab === "RESTAURANT") {
+      // Backend RestaurantSearchRequest dùng field "location" (multiMatch theo
+      // tên/thành phố/địa chỉ) — GIỐNG trang /restaurants. Trước đây gửi "q" nên
+      // bị bỏ qua -> luôn trả list mặc định -> lọc theo tên không ra kết quả.
       fetchRestaurants({
         page: 0,
         size: 10,
@@ -334,7 +346,16 @@ export default function PlacePickerModal({
   // filter FE
   const effectiveItems = useMemo(() => {
     if (!debouncedQuery) return baseItems;
-    // so khớp bỏ qua biến thể gạch ngang (– vs -) để không lọc nhầm địa điểm như "Văn Miếu – Quốc Tử Giám"
+
+    // Quán ăn: CHỈ tìm theo TÊN (đồng bộ với trang /restaurants, nhưng bỏ khớp
+    // theo thành phố/địa chỉ). So khớp khoan dung dấu & khoảng trắng.
+    if (activeTab === "RESTAURANT") {
+      const q = compactName(debouncedQuery);
+      if (!q) return baseItems;
+      return baseItems.filter((x) => compactName(x.name).includes(q));
+    }
+
+    // Khách sạn / Địa điểm: giữ như cũ (khớp tên + địa chỉ + tỉnh/thành).
     const norm = (v) => normalizeDashes(v || "").toLowerCase();
     const q = norm(debouncedQuery);
     return baseItems.filter((x) => {
@@ -346,7 +367,7 @@ export default function PlacePickerModal({
         name.includes(q) || addr.includes(q) || city.includes(q) || prov.includes(q)
       );
     });
-  }, [baseItems, debouncedQuery]);
+  }, [baseItems, debouncedQuery, activeTab]);
 
   // auto chọn item đầu (khi không ở customMode và chưa có nguồn selection)
   useEffect(() => {
