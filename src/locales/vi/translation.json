@@ -1736,8 +1736,7 @@
         },
         "dashboard": {
             "title": "Dashboard quản trị",
-            "subtitle": "Trang theo dõi tổng quan hệ thống: biết tình hình và biết việc cần xử lý.",
-            "footer_note": "Dashboard này chỉ hiển thị thống kê và hàng chờ. Các trang quản lý chi tiết (users/partners/services/bookings) nằm ở mục riêng."
+            "subtitle": "Trang theo dõi tổng quan hệ thống: biết tình hình và biết việc cần xử lý."
         },
         "reload": "Tải lại",
         "range": {

@@ -358,9 +358,9 @@ export default function AdminDashboard() {
                           <YAxis tickFormatter={(v) => `${formatMoneyM(v)}tr`} />
                           <Tooltip formatter={(v) => [t("admin.revenue.million", { n: formatMoneyM(v) }), ""]} />
                           <Legend />
-                          <Line type="monotone" dataKey="total" name={t("admin.revenue.series_total")} strokeWidth={2} dot={{ r: 3 }} />
-                          <Line type="monotone" dataKey="hotel" name={t("admin.revenue.series_hotel")} strokeWidth={2} dot={{ r: 3 }} />
-                          <Line type="monotone" dataKey="restaurant" name={t("admin.revenue.series_restaurant")} strokeWidth={2} dot={{ r: 3 }} />
+                          <Line type="monotone" dataKey="total" name={t("admin.revenue.series_total")} stroke="#2a78d6" strokeWidth={2} dot={{ r: 3 }} />
+                          <Line type="monotone" dataKey="hotel" name={t("admin.revenue.series_hotel")} stroke="#1baf7a" strokeWidth={2} dot={{ r: 3 }} />
+                          <Line type="monotone" dataKey="restaurant" name={t("admin.revenue.series_restaurant")} stroke="#eda100" strokeWidth={2} dot={{ r: 3 }} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -591,11 +591,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Footer note */}
-              <div className="mt-6 text-xs text-slate-400">
-                {t("admin.dashboard.footer_note")}
               </div>
             </>
           )}

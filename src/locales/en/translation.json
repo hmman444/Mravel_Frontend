@@ -1736,8 +1736,7 @@
         },
         "dashboard": {
             "title": "Admin Dashboard",
-            "subtitle": "System overview page: know the status and know what needs handling.",
-            "footer_note": "This dashboard only shows statistics and queues. Detailed management pages (users/partners/services/bookings) are in their own sections."
+            "subtitle": "System overview page: know the status and know what needs handling."
         },
         "reload": "Reload",
         "range": {
