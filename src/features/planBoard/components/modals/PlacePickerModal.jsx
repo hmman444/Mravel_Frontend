@@ -214,7 +214,7 @@ export default function PlacePickerModal({
       fetchRestaurants({
         page: 0,
         size: 10,
-        q: debouncedQuery || undefined,
+        location: debouncedQuery || undefined,
       });
     }
   }, [
