@@ -30,6 +30,12 @@ const initialState = {
   items: [],
   loading: false,
 
+  // pagination meta (từ Spring Page)
+  page: 0,
+  size: 20,
+  totalPages: 0,
+  totalElements: 0,
+
   selected: null,
   detailLoading: false,
 
@@ -124,7 +130,20 @@ const adminServiceSlice = createSlice({
       })
       .addCase(loadAdminServices.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload?.content ?? action.payload ?? [];
+        const p = action.payload;
+        state.items = p?.content ?? p ?? [];
+        // nếu BE trả Spring Page thì lấy meta phân trang, ngược lại (mảng thô) fallback 1 trang
+        if (p && Array.isArray(p.content)) {
+          state.page = p.number ?? 0;
+          state.size = p.size ?? state.size;
+          state.totalPages = p.totalPages ?? 0;
+          state.totalElements = p.totalElements ?? p.content.length;
+        } else {
+          const arr = Array.isArray(p) ? p : [];
+          state.page = 0;
+          state.totalPages = arr.length ? 1 : 0;
+          state.totalElements = arr.length;
+        }
       })
       .addCase(loadAdminServices.rejected, (state, action) => {
         state.loading = false;

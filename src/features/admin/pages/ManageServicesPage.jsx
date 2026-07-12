@@ -31,9 +31,11 @@ function useDebounced(value, delay = 350) {
   return v;
 }
 
+const PAGE_SIZE = 20;
+
 export default function ManageServicesPage() {
     const { t } = useTranslation();
-    const { mode, setMode, items, loading, acting, load, act } = useAdminServices();
+    const { mode, setMode, items, loading, acting, load, act, totalPages, totalElements } = useAdminServices();
 
     /** == FILTER UI STATE == */
     const [filtersOpen, setFiltersOpen] = useState(true);
@@ -41,6 +43,9 @@ export default function ManageServicesPage() {
     const [status, setStatus] = useState("ALL");
     const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | ACTIVE | INACTIVE
     const [unlockFilter, setUnlockFilter] = useState("ALL"); // ALL | YES | NO
+
+    /** == PAGINATION STATE == */
+    const [page, setPage] = useState(0); // 0-based, là source of truth cho request
 
     /** == MODAL STATE == */
     const [reasonOpen, setReasonOpen] = useState(false);
@@ -82,7 +87,10 @@ export default function ManageServicesPage() {
     }, [debouncedSearch, status, activeFilter, unlockFilter]);
 
     /** == RELOAD (stable) == */
-    const reload = async (nextMode = mode, nextParams = queryParams) => {
+    const reload = async (
+        nextMode = mode,
+        nextParams = { ...queryParams, page, size: PAGE_SIZE }
+    ) => {
         // seq tăng mỗi lần gọi -> nếu response về trễ mà seq không còn là latest thì bỏ
         const mySeq = ++reqSeqRef.current;
 
@@ -101,18 +109,35 @@ export default function ManageServicesPage() {
         }
     };
 
+    /** == KEY của bộ lọc (đổi filter/mode -> reset về trang 0) == */
+    const filterKey = useMemo(
+        () => JSON.stringify({ mode, ...queryParams }),
+        [mode, queryParams]
+    );
+    const lastFilterKeyRef = useRef(filterKey);
+
     useEffect(() => {
         if (!strictModeRef.current) {
         strictModeRef.current = true;
         }
-        reload(mode, queryParams);
+        // nếu bộ lọc/mode vừa đổi và đang không ở trang 0 -> nhảy về 0,
+        // effect sẽ chạy lại với page=0 rồi mới load (tránh gọi API 2 lần).
+        if (lastFilterKeyRef.current !== filterKey) {
+        lastFilterKeyRef.current = filterKey;
+        if (page !== 0) {
+            setPage(0);
+            return;
+        }
+        }
+        reload(mode, { ...queryParams, page, size: PAGE_SIZE });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mode, queryParams]);
+    }, [filterKey, page]);
 
     /** == DERIVED == */
     const list = useMemo(() => items || [], [items]);
 
-    const totalCount = list.length;
+    // tổng số dịch vụ (toàn bộ, không chỉ trang hiện tại) lấy từ Spring Page
+    const totalCount = totalElements ?? list.length;
 
     const pendingCount = useMemo(
         () => list.filter((x) => x.moderationStatus === "PENDING_REVIEW").length,
@@ -138,7 +163,7 @@ export default function ManageServicesPage() {
         try {
         await act({ mode, action: "APPROVE", id: x.id });
         showSuccess(t("admin.services_approve_success"));
-        await reload(mode, queryParams);
+        await reload();
         } catch (e) {
         showError(typeof e === "string" ? e : t("admin.services_approve_failed"));
         }
@@ -157,7 +182,7 @@ export default function ManageServicesPage() {
         showSuccess(reasonMode === "REJECT" ? t("admin.services_reject_success") : t("admin.services_block_success"));
         setReasonOpen(false);
         setTarget(null);
-        await reload(mode, queryParams);
+        await reload();
         } catch (e) {
         showError(typeof e === "string" ? e : t("admin.services_action_failed"));
         }
@@ -167,7 +192,7 @@ export default function ManageServicesPage() {
         try {
         await act({ mode, action: "UNBLOCK", id: x.id });
         showSuccess(t("admin.services_unblock_success"));
-        await reload(mode, queryParams);
+        await reload();
         } catch (e) {
         showError(typeof e === "string" ? e : t("admin.services_unblock_failed"));
         }
@@ -224,7 +249,7 @@ export default function ManageServicesPage() {
                 </button>
 
                 <button
-                onClick={() => reload(mode, queryParams)}
+                onClick={() => reload()}
                 className={`${soft.btn} ${soft.btnPrimary}`}
                 type="button"
                 disabled={loading}
@@ -282,6 +307,37 @@ export default function ManageServicesPage() {
             onBlock={(x) => openReason("BLOCK", x)}
             onUnblock={onUnblock}
             />
+        )}
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+            <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <div className="text-sm text-slate-500">
+                {t("admin.services_page_info", {
+                page: page + 1,
+                totalPages,
+                total: totalElements,
+                })}
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={loading || page <= 0}
+                className={`${soft.btn} ${soft.btnGhost} disabled:opacity-40 disabled:cursor-not-allowed`}
+                >
+                {t("admin.services_prev")}
+                </button>
+                <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={loading || page >= totalPages - 1}
+                className={`${soft.btn} ${soft.btnGhost} disabled:opacity-40 disabled:cursor-not-allowed`}
+                >
+                {t("admin.services_next")}
+                </button>
+            </div>
+            </div>
         )}
 
         {/* Reason modal */}

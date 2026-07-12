@@ -14,6 +14,10 @@ export function useAdminServices() {
     mode,
     items,
     loading,
+    page,
+    size,
+    totalPages,
+    totalElements,
     selected,
     detailLoading,
     acting,
@@ -26,6 +30,11 @@ export function useAdminServices() {
     mode,
     items,
     loading,
+
+    page,
+    size,
+    totalPages,
+    totalElements,
 
     selected,
     detailLoading,
